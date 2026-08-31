@@ -1257,6 +1257,12 @@
                         // Optionally, change button styles to indicate disabled state
                         btnTelegram.classList.add('disabled');
                         btnOnly.classList.add('disabled');
+                        
+                        if (this === btnTelegram) {
+                            btnTelegram.innerHTML = 'Placing BUY Order... <i class="fa fa-spinner fa-spin"></i>';
+                        } else if (this === btnOnly) {
+                            btnOnly.innerHTML = 'Placing BUY Order... <i class="fa fa-spinner fa-spin"></i>';
+                        }
                     }
 
                     // Attach click event listeners
