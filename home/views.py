@@ -6900,6 +6900,280 @@ def GroupWiseDashboard(request):
     entry_sorted = sorted(all_grpname,  key=lambda x: x.GroupName.lower())
     return render(request, 'GroupWiseDashboard.html', {'entry_sorted':entry_sorted,'entry': grpname, 'lenofipo': l,"ipos": ipos, "groups": groups, 'IPOName': IPOName, 'html_table': html_table,'IPOAmount':IPOAmount,'Total':Total,'SumCollection':SumCollection,'DueAmountSum':DueAmountSum,'page_obj': page_obj,'GWD_page_size':page_size})
 
+def group_billing_details(request, group_id=None):
+    if not request.user.is_authenticated:
+        return redirect('login')
+        
+    groups = GroupDetail.objects.filter(user=request.user).order_by('GroupName')
+    
+    selected_group = None
+    if group_id:
+        selected_group = get_object_or_404(GroupDetail, id=group_id, user=request.user)
+    elif groups.exists():
+        selected_group = groups.first()
+        
+    sme_html_table = ""
+    mainboard_html_table = ""
+    
+    if selected_group:
+        ipos = CurrentIpoName.objects.filter(user=request.user).order_by('-id')
+        
+        # 1. Process SME IPOs
+        sme_ipos = ipos.filter(IPOType="SME")
+        sme_data = []
+        for ipo in sme_ipos:
+            orders = Order.objects.filter(user=request.user, OrderIPOName=ipo, OrderGroup=selected_group)
+            if not orders.exists():
+                continue
+                
+            orderdetails = OrderDetail.objects.filter(user=request.user, Order__OrderIPOName=ipo, Order__OrderGroup=selected_group)
+            
+            # Kostak
+            kostak_orders = orders.filter(OrderCategory="Kostak")
+            kostak_buy_qty = kostak_orders.filter(OrderType="BUY").aggregate(Sum('Quantity'))['Quantity__sum'] or 0
+            kostak_sell_qty = kostak_orders.filter(OrderType="SELL").aggregate(Sum('Quantity'))['Quantity__sum'] or 0
+            kostak_count = kostak_buy_qty - kostak_sell_qty
+            
+            kostak_buy_alloted = orderdetails.filter(~Q(AllotedQty=None), ~Q(AllotedQty=0), Order__OrderCategory="Kostak", Order__OrderType="BUY").count()
+            kostak_sell_alloted = orderdetails.filter(~Q(AllotedQty=None), ~Q(AllotedQty=0), Order__OrderCategory="Kostak", Order__OrderType="SELL").count()
+            kostak_alloted = kostak_buy_alloted - kostak_sell_alloted
+            
+            kostak_buy_amt = kostak_orders.filter(OrderType="BUY").aggregate(Sum('Amount'))['Amount__sum'] or 0
+            kostak_sell_amt = kostak_orders.filter(OrderType="SELL").aggregate(Sum('Amount'))['Amount__sum'] or 0
+            kostak_billing = kostak_buy_amt + kostak_sell_amt
+            
+            # Subject To
+            st_orders = orders.filter(OrderCategory="Subject To")
+            st_buy_qty = st_orders.filter(OrderType="BUY").aggregate(Sum('Quantity'))['Quantity__sum'] or 0
+            st_sell_qty = st_orders.filter(OrderType="SELL").aggregate(Sum('Quantity'))['Quantity__sum'] or 0
+            st_count = st_buy_qty - st_sell_qty
+            
+            st_buy_alloted = orderdetails.filter(~Q(AllotedQty=None), ~Q(AllotedQty=0), Order__OrderCategory="Subject To", Order__OrderType="BUY").count()
+            st_sell_alloted = orderdetails.filter(~Q(AllotedQty=None), ~Q(AllotedQty=0), Order__OrderCategory="Subject To", Order__OrderType="SELL").count()
+            st_alloted = st_buy_alloted - st_sell_alloted
+            
+            st_buy_amt = st_orders.filter(OrderType="BUY").aggregate(Sum('Amount'))['Amount__sum'] or 0
+            st_sell_amt = st_orders.filter(OrderType="SELL").aggregate(Sum('Amount'))['Amount__sum'] or 0
+            st_billing = st_buy_amt + st_sell_amt
+            
+            # Premium
+            premium_orders = orders.filter(OrderCategory="Premium")
+            premium_buy_qty = premium_orders.filter(OrderType="BUY").aggregate(Sum('Quantity'))['Quantity__sum'] or 0
+            premium_sell_qty = premium_orders.filter(OrderType="SELL").aggregate(Sum('Quantity'))['Quantity__sum'] or 0
+            premium_count = premium_buy_qty - premium_sell_qty
+            
+            premium_buy_amt = premium_orders.filter(OrderType="BUY").aggregate(Sum('Amount'))['Amount__sum'] or 0
+            premium_sell_amt = premium_orders.filter(OrderType="SELL").aggregate(Sum('Amount'))['Amount__sum'] or 0
+            premium_billing = premium_buy_amt + premium_sell_amt
+            
+            # Totals
+            kostak_buy_alloted_qty = orderdetails.filter(~Q(AllotedQty=None), ~Q(AllotedQty=0), Order__OrderCategory="Kostak", Order__OrderType="BUY").aggregate(Sum('AllotedQty'))['AllotedQty__sum'] or 0
+            kostak_sell_alloted_qty = orderdetails.filter(~Q(AllotedQty=None), ~Q(AllotedQty=0), Order__OrderCategory="Kostak", Order__OrderType="SELL").aggregate(Sum('AllotedQty'))['AllotedQty__sum'] or 0
+            total_kostak_alloted_shares = kostak_buy_alloted_qty - kostak_sell_alloted_qty
+            
+            st_buy_alloted_qty = orderdetails.filter(~Q(AllotedQty=None), ~Q(AllotedQty=0), Order__OrderCategory="Subject To", Order__OrderType="BUY").aggregate(Sum('AllotedQty'))['AllotedQty__sum'] or 0
+            st_sell_alloted_qty = orderdetails.filter(~Q(AllotedQty=None), ~Q(AllotedQty=0), Order__OrderCategory="Subject To", Order__OrderType="SELL").aggregate(Sum('AllotedQty'))['AllotedQty__sum'] or 0
+            total_st_alloted_shares = st_buy_alloted_qty - st_sell_alloted_qty
+            
+            total_share = premium_count + total_kostak_alloted_shares + total_st_alloted_shares
+            total_amount = kostak_billing + st_billing + premium_billing
+            
+            sme_data.append({
+                'ipo_name': ipo.IPOName,
+                'ipo_id': ipo.id,
+                'kostak_count': kostak_count,
+                'kostak_alloted': kostak_alloted,
+                'kostak_billing': kostak_billing,
+                'st_count': st_count,
+                'st_alloted': st_alloted,
+                'st_billing': st_billing,
+                'premium_count': premium_count,
+                'premium_billing': premium_billing,
+                'total_share': total_share,
+                'total_amount': total_amount,
+                'buy_kostak_qty': kostak_buy_qty,
+                'sell_kostak_qty': kostak_sell_qty,
+                'buy_kostak_alloted': kostak_buy_alloted,
+                'sell_kostak_alloted': kostak_sell_alloted,
+                'buy_kostak_amt': kostak_buy_amt,
+                'sell_kostak_amt': kostak_sell_amt,
+                'buy_st_qty': st_buy_qty,
+                'sell_st_qty': st_sell_qty,
+                'buy_st_alloted': st_buy_alloted,
+                'sell_st_alloted': st_sell_alloted,
+                'buy_st_amt': st_buy_amt,
+                'sell_st_amt': st_sell_amt,
+                'buy_premium_qty': premium_buy_qty,
+                'sell_premium_qty': premium_sell_qty,
+                'buy_premium_amt': premium_buy_amt,
+                'sell_premium_amt': premium_sell_amt,
+            })
+            
+        # Build SME HTML Table
+        if sme_data:
+            sme_html_table = "<table class='table table-bordered table-hover table-striped'><thead><tr>"
+            sme_html_table += "<th rowspan='2'>IPO Name</th>"
+            sme_html_table += "<th colspan='3'>Kostak</th>"
+            sme_html_table += "<th colspan='3'>Subject To</th>"
+            sme_html_table += "<th colspan='2'>Premium</th>"
+            sme_html_table += "<th rowspan='2'>Total Share</th>"
+            sme_html_table += "<th rowspan='2'>Total Amount</th>"
+            sme_html_table += "</tr><tr>"
+            sme_html_table += "<th>Count</th><th>Alloted</th><th>Billing</th>"
+            sme_html_table += "<th>Count</th><th>Alloted</th><th>Billing</th>"
+            sme_html_table += "<th>Count</th><th>Billing</th>"
+            sme_html_table += "</tr></thead><tbody>"
+            for row in sme_data:
+                sme_html_table += "<tr>"
+                sme_html_table += f"<th><a href='/{row['ipo_id']}/Status' style='color:blue; text-decoration: underline;'>{row['ipo_name']}</a></th>"
+                sme_html_table += f"<td><a style='color:blue; text-decoration: underline;' href='/{row['ipo_id']}/Order/{selected_group.GroupName}/Kostak/All' title='BUY:{int(row['buy_kostak_qty'])} SELL:{int(row['sell_kostak_qty'])}'>{int(row['kostak_count'])}</a></td>"
+                sme_html_table += f"<td title='BUY:{row['buy_kostak_alloted']} SELL:{row['sell_kostak_alloted']}'>{int(row['kostak_alloted'])}</td>"
+                sme_html_table += f"<td title='BUY:{row['buy_kostak_amt']:.1f} SELL:{row['sell_kostak_amt']:.1f}'>{row['kostak_billing']:.1f}</td>"
+                sme_html_table += f"<td><a style='color:blue; text-decoration: underline;' href='/{row['ipo_id']}/Order/{selected_group.GroupName}/Subject To/All' title='BUY:{int(row['buy_st_qty'])} SELL:{int(row['sell_st_qty'])}'>{int(row['st_count'])}</a></td>"
+                sme_html_table += f"<td title='BUY:{row['buy_st_alloted']} SELL:{row['sell_st_alloted']}'>{int(row['st_alloted'])}</td>"
+                sme_html_table += f"<td title='BUY:{row['buy_st_amt']:.1f} SELL:{row['sell_st_amt']:.1f}'>{row['st_billing']:.1f}</td>"
+                sme_html_table += f"<td><a style='color:blue; text-decoration: underline;' href='/{row['ipo_id']}/Order/{selected_group.GroupName}/Premium/All' title='BUY:{int(row['buy_premium_qty'])} SELL:{int(row['sell_premium_qty'])}'>{int(row['premium_count'])}</a></td>"
+                sme_html_table += f"<td title='BUY:{row['buy_premium_amt']:.1f} SELL:{row['sell_premium_amt']:.1f}'>{row['premium_billing']:.1f}</td>"
+                sme_html_table += f"<td>{int(row['total_share'])}</td>"
+                sme_html_table += f"<td>{row['total_amount']:.1f}</td>"
+                sme_html_table += "</tr>"
+            sme_html_table += "</tbody></table>"
+
+        # 2. Process Mainboard IPOs
+        mainboard_ipos = ipos.filter(IPOType="MAINBOARD")
+        mainboard_data = []
+        for ipo in mainboard_ipos:
+            orders = Order.objects.filter(user=request.user, OrderIPOName=ipo, OrderGroup=selected_group)
+            if not orders.exists():
+                continue
+                
+            orderdetails = OrderDetail.objects.filter(user=request.user, Order__OrderIPOName=ipo, Order__OrderGroup=selected_group)
+            
+            def get_cat_stats(category, inv_type):
+                cat_orders = orders.filter(OrderCategory=category, InvestorType=inv_type)
+                buy_qty = cat_orders.filter(OrderType="BUY").aggregate(Sum('Quantity'))['Quantity__sum'] or 0
+                sell_qty = cat_orders.filter(OrderType="SELL").aggregate(Sum('Quantity'))['Quantity__sum'] or 0
+                count = buy_qty - sell_qty
+                
+                buy_alloted = orderdetails.filter(~Q(AllotedQty=None), ~Q(AllotedQty=0), Order__OrderCategory=category, Order__OrderType="BUY", Order__InvestorType=inv_type).count()
+                sell_alloted = orderdetails.filter(~Q(AllotedQty=None), ~Q(AllotedQty=0), Order__OrderCategory=category, Order__OrderType="SELL", Order__InvestorType=inv_type).count()
+                alloted = buy_alloted - sell_alloted
+                
+                buy_amt = cat_orders.filter(OrderType="BUY").aggregate(Sum('Amount'))['Amount__sum'] or 0
+                sell_amt = cat_orders.filter(OrderType="SELL").aggregate(Sum('Amount'))['Amount__sum'] or 0
+                billing = buy_amt + sell_amt
+                
+                return {
+                    'count': count, 'alloted': alloted, 'billing': billing,
+                    'buy_qty': buy_qty, 'sell_qty': sell_qty,
+                    'buy_alloted': buy_alloted, 'sell_alloted': sell_alloted,
+                    'buy_amt': buy_amt, 'sell_amt': sell_amt
+                }
+
+            k_retail = get_cat_stats("Kostak", "RETAIL")
+            k_shni = get_cat_stats("Kostak", "SHNI")
+            k_bhni = get_cat_stats("Kostak", "BHNI")
+            
+            st_retail = get_cat_stats("Subject To", "RETAIL")
+            st_shni = get_cat_stats("Subject To", "SHNI")
+            st_bhni = get_cat_stats("Subject To", "BHNI")
+            
+            p_orders = orders.filter(OrderCategory="Premium")
+            p_buy_qty = p_orders.filter(OrderType="BUY").aggregate(Sum('Quantity'))['Quantity__sum'] or 0
+            p_sell_qty = p_orders.filter(OrderType="SELL").aggregate(Sum('Quantity'))['Quantity__sum'] or 0
+            p_shares = p_buy_qty - p_sell_qty
+            
+            p_buy_amt = p_orders.filter(OrderType="BUY").aggregate(Sum('Amount'))['Amount__sum'] or 0
+            p_sell_amt = p_orders.filter(OrderType="SELL").aggregate(Sum('Amount'))['Amount__sum'] or 0
+            p_billing = p_buy_amt + p_sell_amt
+            
+            c_orders = orders.filter(OrderCategory="CALL")
+            c_buy_amt = c_orders.filter(OrderType="BUY").aggregate(Sum('Amount'))['Amount__sum'] or 0
+            c_sell_amt = c_orders.filter(OrderType="SELL").aggregate(Sum('Amount'))['Amount__sum'] or 0
+            call_billing = c_buy_amt + c_sell_amt
+            
+            put_orders = orders.filter(OrderCategory="PUT")
+            put_buy_amt = put_orders.filter(OrderType="BUY").aggregate(Sum('Amount'))['Amount__sum'] or 0
+            put_sell_amt = put_orders.filter(OrderType="SELL").aggregate(Sum('Amount'))['Amount__sum'] or 0
+            put_billing = put_buy_amt + put_sell_amt
+            
+            total_buy_shares = orders.filter(OrderCategory__in=["Kostak", "Subject To"], OrderType="BUY").aggregate(Sum('Quantity'))['Quantity__sum'] or 0
+            total_sell_shares = orders.filter(OrderCategory__in=["Kostak", "Subject To"], OrderType="SELL").aggregate(Sum('Quantity'))['Quantity__sum'] or 0
+            total_shares = total_buy_shares - total_sell_shares + p_shares
+            
+            total_amount = p_billing + k_retail['billing'] + k_shni['billing'] + k_bhni['billing'] + st_retail['billing'] + st_shni['billing'] + st_bhni['billing'] + call_billing + put_billing
+            
+            mainboard_data.append({
+                'ipo_name': ipo.IPOName,
+                'ipo_id': ipo.id,
+                'k_retail': k_retail,
+                'k_shni': k_shni,
+                'k_bhni': k_bhni,
+                'st_retail': st_retail,
+                'st_shni': st_shni,
+                'st_bhni': st_bhni,
+                'p_shares': p_shares,
+                'p_billing': p_billing,
+                'call_billing': call_billing,
+                'put_billing': put_billing,
+                'total_shares': total_shares,
+                'total_amount': total_amount,
+                'p_buy_qty': p_buy_qty,
+                'p_sell_qty': p_sell_qty,
+                'p_buy_amt': p_buy_amt,
+                'p_sell_amt': p_sell_amt,
+            })
+            
+        # Build Mainboard HTML Table
+        if mainboard_data:
+            mainboard_html_table = "<table class='table table-bordered table-hover table-striped'><thead><tr>"
+            mainboard_html_table += "<th rowspan='3'>IPO Name</th>"
+            mainboard_html_table += "<th colspan='9'>Kostak</th>"
+            mainboard_html_table += "<th colspan='9'>Subject To</th>"
+            mainboard_html_table += "<th colspan='2' rowspan='2'>Premium</th>"
+            mainboard_html_table += "<th colspan='2' rowspan='2'>OPTIONS</th>"
+            mainboard_html_table += "<th colspan='2' rowspan='2'>Total</th>"
+            mainboard_html_table += "</tr><tr>"
+            mainboard_html_table += "<th colspan='3'>Retail</th><th colspan='3'>SHNI</th><th colspan='3'>BHNI</th>"
+            mainboard_html_table += "<th colspan='3'>Retail</th><th colspan='3'>SHNI</th><th colspan='3'>BHNI</th>"
+            mainboard_html_table += "</tr><tr>"
+            mainboard_html_table += "<th>Count</th><th>Alloted</th><th>Billing</th>" * 3
+            mainboard_html_table += "<th>Count</th><th>Alloted</th><th>Billing</th>" * 3
+            mainboard_html_table += "<th>Shares</th><th>Billing</th>"
+            mainboard_html_table += "<th>Call Amt</th><th>Put Amt</th>"
+            mainboard_html_table += "<th>Shares</th><th>Amount</th>"
+            mainboard_html_table += "</tr></thead><tbody>"
+            for row in mainboard_data:
+                mainboard_html_table += "<tr>"
+                mainboard_html_table += f"<th><a href='/{row['ipo_id']}/Status' style='color:blue; text-decoration: underline;'>{row['ipo_name']}</a></th>"
+                for k_type in ['k_retail', 'k_shni', 'k_bhni']:
+                    k = row[k_type]
+                    inv = k_type.split('_')[1].upper()
+                    mainboard_html_table += f"<td><a style='color:blue; text-decoration: underline;' href='/{row['ipo_id']}/Order/{selected_group.GroupName}/Kostak/{inv}' title='BUY:{int(k['buy_qty'])} SELL:{int(k['sell_qty'])}'>{int(k['count'])}</a></td>"
+                    mainboard_html_table += f"<td title='BUY:{k['buy_alloted']} SELL:{k['sell_alloted']}'>{int(k['alloted'])}</td>"
+                    mainboard_html_table += f"<td title='BUY:{k['buy_amt']:.1f} SELL:{k['sell_amt']:.1f}'>{k['billing']:.1f}</td>"
+                for st_type in ['st_retail', 'st_shni', 'st_bhni']:
+                    st = row[st_type]
+                    inv = st_type.split('_')[1].upper()
+                    mainboard_html_table += f"<td><a style='color:blue; text-decoration: underline;' href='/{row['ipo_id']}/Order/{selected_group.GroupName}/Subject To/{inv}' title='BUY:{int(st['buy_qty'])} SELL:{int(st['sell_qty'])}'>{int(st['count'])}</a></td>"
+                    mainboard_html_table += f"<td title='BUY:{st['buy_alloted']} SELL:{st['sell_alloted']}'>{int(st['alloted'])}</td>"
+                    mainboard_html_table += f"<td title='BUY:{st['buy_amt']:.1f} SELL:{st['sell_amt']:.1f}'>{st['billing']:.1f}</td>"
+                mainboard_html_table += f"<td><a style='color:blue; text-decoration: underline;' href='/{row['ipo_id']}/Order/{selected_group.GroupName}/Premium/All' title='BUY:{int(row['p_buy_qty'])} SELL:{int(row['p_sell_qty'])}'>{int(row['p_shares'])}</a></td>"
+                mainboard_html_table += f"<td title='BUY:{row['p_buy_amt']:.1f} SELL:{row['p_sell_amt']:.1f}'>{row['p_billing']:.1f}</td>"
+                mainboard_html_table += f"<td>{row['call_billing']:.1f}</td>"
+                mainboard_html_table += f"<td>{row['put_billing']:.1f}</td>"
+                mainboard_html_table += f"<td>{int(row['total_shares'])}</td>"
+                mainboard_html_table += f"<td>{row['total_amount']:.1f}</td>"
+                mainboard_html_table += "</tr>"
+            mainboard_html_table += "</tbody></table>"
+
+    return render(request, 'group_billing_details.html', {
+        'groups': groups,
+        'selected_group': selected_group,
+        'sme_html_table': sme_html_table,
+        'mainboard_html_table': mainboard_html_table,
+    })
+
 def BackUp(request):
     user = request.user
     entry = CurrentIpoName.objects.filter(user=request.user)

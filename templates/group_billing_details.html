@@ -1,0 +1,121 @@
+{% extends 'basic.html' %}
+{% load static %}
+
+{% block title %}Positions{% endblock %}
+
+{% block css %}
+<style>
+    .container-fluid {
+        margin-top: -31px;
+        width: 100%;
+        padding-right: 30px;
+        padding-left: 30px;
+        margin-right: auto;
+        margin-left: auto;
+    }
+    .fm {
+        margin-top: 15px;
+        margin-bottom: 15px;
+    }
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+        width: 100%;
+        border: 1px solid #ddd;
+        margin-bottom: 1%;  
+        font-size: 0.75rem; /* Shrink font to fit more columns */
+    }
+    th, td {
+        text-align: center;
+        padding: 2px 4px; /* Minimize padding */
+        white-space: nowrap; /* Keep data on single lines to save vertical space, or use normal if it's too wide. Actually, nowrap for data, normal for headers is best, but let's just make it compact */
+    }
+    thead th {
+        background-color: #f1f1f1;
+        position: sticky !important;
+        top: 0;
+        z-index: 11;
+    }
+    tr:nth-child(even) {
+        background-color: #f2f2f2
+    }
+    .table-wrapper-scroll-x {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -ms-overflow-style: -ms-autohiding-scrollbar;
+    }
+    .btn-secondary {
+        margin-bottom: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid fc" style="margin-top: 50px;">
+    <div class="row align-items-center mt-3">
+        <div class="col-md-6">
+            <h3>Positions</h3>
+        </div>
+        <div class="col-md-6" style="text-align: right;">
+            <div class="fm d-inline-block">
+                <label for="groupSelect" style="font-weight: bold; margin-right: 10px;">Active Group:</label>
+                <select id="groupSelect" class="form-control-sm custom-select" style="width: 250px;">
+                    <option value="" disabled {% if not selected_group %}selected{% endif %}>-- Choose a Group --</option>
+                    {% for grp in groups %}
+                    <option value="{{ grp.id }}" {% if selected_group and selected_group.id == grp.id %}selected{% endif %}>{{ grp.GroupName }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <a href="/" class="btn btn-secondary btn-sm" style="margin-left: 15px;">Back to Dashboard</a>
+        </div>
+    </div>
+    
+    <hr>
+    
+    {% if selected_group %}
+        <div class="text-center mb-4" style="margin-top: 20px;">
+            <h4>Showing billing records for <b>{{ selected_group.GroupName }}</b></h4>
+        </div>
+
+        {% if sme_html_table %}
+        <div class="mt-4" style="margin-top: 30px;">
+            <h4>SME IPOs</h4>
+            <div class="table-wrapper-scroll-x my-custom-scrollbar"> 
+                {{ sme_html_table | safe }}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if mainboard_html_table %}
+        <div class="mt-4" style="margin-top: 30px;">
+            <h4>Mainboard IPOs</h4>
+            <div class="table-wrapper-scroll-x my-custom-scrollbar"> 
+                {{ mainboard_html_table | safe }}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if not sme_html_table and not mainboard_html_table %}
+        <div class="alert alert-info text-center mt-4" style="margin-top: 30px;">
+            No billing records found for this group.
+        </div>
+        {% endif %}
+        
+    {% else %}
+        <div class="alert alert-warning text-center mt-4" style="margin-top: 30px;">
+            Please select a group from the dropdown to view positions.
+        </div>
+    {% endif %}
+</div>
+
+<script src="{% static 'JS/jquery.min.js' %}"></script>
+<script>
+    document.getElementById('groupSelect').addEventListener('change', function() {
+        var groupId = this.value;
+        if (groupId) {
+            window.location.href = '/group-billing-details/' + groupId + '/';
+        }
+    });
+</script>
+{% endblock %}
