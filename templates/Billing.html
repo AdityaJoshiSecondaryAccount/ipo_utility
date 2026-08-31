@@ -1,0 +1,2065 @@
+{% extends 'basic.html' %}
+{% block title%} {{IPOName}}-Client Wise Billing{% endblock %}
+{% block css %}
+{% load static %}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="{% static  'DataTables/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static  'DataTables/css/buttons.bootstrap5.min.css' %}">
+    <link rel="stylesheet" href="{% static  'DataTables/css/dataTables.bootstrap5.min.css' %}">
+
+    <style>
+        .fm{
+            margin-bottom: -26px;
+        }
+        #example th{
+            width: 10% !important;
+            text-align: center;
+        }
+        #example th:first-child {
+            width: 1% !important;
+        }
+        #example_filter{
+            float: right;
+            width: 50% !important;
+        }
+        #example_length{
+            margin-top:1% !important;
+        }
+        #example_filter{
+            position: absolute;
+            top: 15% !important;
+            left: 50% ;
+        }
+        .row.dt-row {
+            top: -23px; 
+        }
+        .flex-wrap {
+            position: relative !important;
+            margin-top: -71px !important; 
+            left: 70% ;
+        }
+        .buttons-colvis{
+            width: 95px;
+            left:-11px;
+        }
+        .form-control-sm {
+            border: 0.3px solid black;
+            height:30px !important;
+        }
+        .custom-select {
+            border: 0.3px solid black;
+            height:37px !important;
+        }
+        .buttons-collection{
+            height: 35px;
+        }
+        .dropdown-menu {
+            min-width: 7rem !important;
+            margin-top: 0 !important;
+            background-color: #6c757d;
+        }
+        .tb{
+            position: absolute !important;
+            top: -0.5rem !important;
+            left: 59% !important;
+        }
+        .tb{
+            width: 41.2% !important;
+        }
+        .tbl{
+            width: 100% !important;
+        }
+        .tld{
+            margin-left: 0.5px;
+            width: 100% !important;
+        }
+        .cw {
+            margin-left: 0px;
+            width: 554px ; 
+        }
+        .custom-width {
+            margin-left: 0px !important;
+            right : 0px !important;
+            width: 1206px !important; 
+        }
+        table.dataTable {
+            margin-bottom: 0px !important;
+        }
+        
+        .h3,
+        h3 {
+            margin: 0px 0px;
+            margin-top: 85px;
+            font-size: 1.75rem;
+            border-block-end: 3px solid #e9ecef;
+        }
+
+
+        .iponame {
+            background-color: white;
+            height: 45px;
+            margin-top: 35px;
+            width: 100%;
+            text-align: center;
+            position: absolute;
+        }
+
+        .container{
+            max-width: 100%;
+            padding-right: 25px;
+            padding-left: 25px;
+            margin-right: auto!important;
+            margin-left: auto!important;
+        }
+
+        .containerhight {
+            margin-bottom: 10%;
+        }
+
+
+        .col-md-3 {
+            display: contents;
+        }
+
+        .editable-cell {
+            transition: 0.3s all linear;
+        }
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+            width: 100%;
+            border: 1px solid #ddd;
+        }
+
+        th,
+        td {
+            text-align: center;
+            padding: 5px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2
+        }
+
+
+        .editable-input:focus {
+            outline: none;
+            background: white;
+            color: #545454;
+        }
+
+        .editable-input {
+            border: none;
+            font-size: 15px;
+            transition: 0.3s all linear;
+            margin-right: -95px;
+            width: 95px;
+        }
+
+        .fa {
+            display: inline-block;
+            font: normal normal normal 14px/1 FontAwesome;
+            font-size: 14px;
+            font-size: inherit;
+            text-rendering: auto;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .edit-button {
+            cursor: pointer;
+            margin-top: -13px;
+        }
+
+        .footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+        }
+
+        .button {
+            margin: 0px 10px;
+            color: black;
+            background-color: antiquewhite;
+            width: auto;
+        }
+
+        .btn-dark.disabled,
+        .btn-dark:disabled {
+            color: #000;
+            background-color: #ffddaf;
+            border-color: #040404;
+        }
+
+        {% comment %} @media screen and (min-width: 1903px)  {
+            .flex-wrap {
+                left: 69.5% !important;
+            }
+            #example_filter {
+                margin-top: -1%;
+                left: 23rem !important;
+            }
+        } {% endcomment %}
+        @media screen and (min-width: 7601px) and (max-width: 8000px) {
+            .flex-wrap {
+                left: 230.5rem !important;
+            }
+            #example_filter {
+                margin-top: 0%;
+                left: 379rem !important;
+            }
+        }
+        @media screen and (min-width: 5701px) and (max-width: 7600px) {
+            .flex-wrap {
+                left: 171rem !important;
+            }
+            #example_filter {
+                margin-top: 0%;
+                left: 260rem !important;
+            }
+        }
+        @media screen and (min-width: 3901px) and (max-width: 5700px) {
+            .flex-wrap {
+                left: 111.5rem !important;
+            }
+            #example_filter {
+                margin-top: 0%;
+                left: 148rem !important;
+            }
+        }
+        @media screen and (min-width: 3701px) and (max-width: 3900px) {
+            .flex-wrap {
+                left: 111.5rem !important;
+            }
+            #example_filter {
+                margin-top: 0%;
+                left: 135rem !important;
+            }
+        }
+        @media screen and (min-width: 2801px) and (max-width: 3700px) {
+            .flex-wrap {
+                left: 109.3% !important;
+            }
+            #example_filter {
+                margin-top: 0%;
+                left: 78.5rem !important;
+            }
+        }
+        @media screen and (min-width: 2501px) and (max-width: 2800px) {
+            .flex-wrap {
+                left: 96.3% !important;
+            }
+            #example_filter {
+                margin-top: 0%;
+                left: 59.75rem !important;
+            }
+        }
+        @media screen and (min-width: 2370px) and (max-width: 2500px) {
+            .flex-wrap {
+                left: 89.7% !important;
+            }
+            #example_filter {
+                margin-top: 0%;
+                left: 52.4rem !important;
+            }
+            .container {
+                padding-left: 20px;
+            }
+        }
+        @media screen and (min-width: 2301px) and (max-width: 2369px) {
+            .flex-wrap {
+                left: 89.7% !important;
+            }
+            #example_filter {
+                margin-top: 0%;
+                left: 52.89rem !important;
+            }
+        }
+        @media screen and (min-width: 2111px) and (max-width: 2300px) {
+            .flex-wrap {
+                left: 78.7% !important;
+            }
+            #example_filter {
+                margin-top: 0%;
+                left: 36.35rem !important;
+            }
+        }
+        @media screen and (min-width: 1883px) and (max-width: 2110px) {
+            .flex-wrap {
+                left: 69.5% !important;
+            }
+            #example_filter {
+                margin-top: 0%;
+                left: 23rem !important;
+            }
+        }
+        @media screen and (min-width: 1810px) and (max-width: 1882px) {
+            .flex-wrap {
+                left: 66% !important;
+            }
+            #example_filter {
+                margin-top: 0%;
+                left: 17rem !important;
+            }
+        }
+        @media screen and (min-width: 1800px) and (max-width: 1809px) {
+            .flex-wrap {
+                left: 65.5% !important;
+            }
+            #example_filter {
+                margin-top: -10%;
+                left: 92rem !important;
+            }
+        }
+        @media screen and (min-width: 1721px) and (max-width: 1799px) {
+            .flex-wrap {
+                left: 62% !important;
+            }
+            #example_filter {
+                margin-top: -10%;
+                left: 89.5rem !important;
+            }
+        }
+        @media screen and (min-width: 1650px) and (max-width: 1720px) {
+            .flex-wrap {
+                left: 59% ;
+            }
+            #example_filter {
+                margin-top: -11%;
+                left: 82.5rem !important;
+            }
+        }
+        @media screen and (min-width: 1594px) and (max-width: 1649px) {
+            .flex-wrap {
+                left: 57% ;
+            }
+            #example_filter {
+                margin-top: -11%;
+                left: 78.5rem !important;
+            }
+        }
+        @media screen and (min-width: 1531px) and (max-width: 1593px) {
+            .flex-wrap {
+                left: 54%;
+            }
+            #example_filter {
+                margin-top: -11% ;
+                margin-left: 167%;
+            }
+        }
+        @media screen and (min-width: 1470px) and (max-width: 1530px) {
+            .flex-wrap {
+                left: 52%;
+            }
+            #example_filter {
+                margin-top: -11% ;
+                margin-left: 156%;
+            }
+        }
+        @media screen and (min-width: 1411px) and (max-width: 1469px) {
+            .flex-wrap {
+                left: 49.3%;
+            }
+            .tb {
+                width: 39.2% !important;
+                left: 61% !important;
+                top: -0.8rem !important;
+            }
+            #example_filter {
+                margin-top: -11% ;
+                margin-left: 52.2rem;
+            }
+        }
+        @media screen and (min-width: 1350px) and (max-width: 1410px) {
+            .flex-wrap {
+                left: 46.3%;
+            }
+            .tb {
+                width: 39.2% !important;
+                left: 61% !important;
+                top: -0.8rem !important;
+            }
+            #example_filter {
+                margin-top: -11% ;
+                margin-left: 46.5rem;
+            }
+        }
+        @media screen and (min-width: 1305px) and (max-width: 1349px) {
+            #example_filter {
+                margin-top: -11% ;
+                margin-left: 126%;
+            }
+            .flex-wrap {
+                left: 44.8% ;
+            }
+            .tb {
+                width: 39.2% !important;
+                left: 61% !important;
+                top: -0.8rem !important;
+            }
+        }
+        @media screen and (min-width: 1248px) and (max-width: 1304px) {
+            #example_filter {
+                margin-top: -11% ;
+                margin-left: 116%;
+            }
+            .flex-wrap {
+                left: 42.3% ;
+            }
+            .tb {
+                width: 39.2% !important;
+                left: 61% !important;
+                top: -0.8rem !important;
+            }
+        }
+        @media screen and (min-width: 1200px) and (max-width: 1247px) {
+            .flex-wrap {
+                left: 42.3% ;
+            }
+            .tb {
+                width: 39.2% !important;
+                left: 61% !important;
+                top: -0.8rem !important;
+            }
+            #example_filter {
+                margin-top: -11% ;
+                margin-left: 107%;
+            }
+        }
+        @media screen and (min-width: 1150px) and (max-width: 1199px) {
+            .sec{
+                margin-left: 77%;
+                margin-top: -5.5%!important;
+            }
+            .fm {
+                margin-bottom: 7%;
+            }
+            .ft{
+                margin-top: 5% !important;
+            } 
+            .ff{
+                margin-left: 98%;
+                margin-top: -6% !important;
+            } 
+            .flex-wrap{
+                margin-left: -33%;
+                margin-top: 5% !important;
+            } 
+            .row.dt-row{
+                margin-top: 2.5%!important;
+            }
+            .tb{
+                margin-top: 9.5% !important;
+                margin-left: -58.5%;
+                width: 99% !important;
+            } 
+            #example_wrapper {
+                margin-bottom: 5%;
+            }
+            .slr{
+                position: absolute;
+                top: 71%;
+                left: 1%;
+            }
+        }
+        @media screen and (min-width: 1100px) and (max-width: 1149px) {
+            .sec{
+                margin-left: 77%;
+                margin-top: -5.5%!important;
+            }
+            .fm {
+                margin-bottom: 11%;
+            }
+            .ft{
+                margin-top: 5% !important;
+            } 
+            .ff{
+                margin-left: 89%;
+                margin-top: -6% !important;
+            } 
+            .flex-wrap{
+                margin-left: -33%;
+                margin-top: 5% !important;
+            } 
+            .row.dt-row{
+                margin-top: 2.5%!important;
+            }
+            .tb{
+                margin-top: 9.5% !important;
+                margin-left: -58.5%;
+                width: 99% !important;
+            } 
+            #example_wrapper {
+                margin-bottom: 5%;
+            }
+            .slr{
+                position: absolute;
+                top: 71%;
+                left: 1%;
+            }
+        }
+
+        @media screen and (min-width: 992px) and (max-width: 1099px) {
+            .sec{
+                margin-left: 77%;
+                margin-top: -5.5%!important;
+            }
+            .fm {
+                margin-bottom: 11%;
+            }
+            .ft{
+                margin-top: 5% !important;
+            } 
+            .ff{
+                margin-left: 70%;
+                margin-top: -6% !important;
+            } 
+            .flex-wrap{
+                margin-left: -34%;
+                margin-top: 5% !important;
+            } 
+            .row.dt-row{
+                margin-top: 2.5%!important;
+            }
+            .tb{
+                margin-top: 9.5% !important;
+                margin-left: -58.5%;
+                width: 99% !important;
+            } 
+            #example_wrapper {
+                margin-bottom: 5%;
+            }
+            .slr{
+                position: absolute;
+                top: 61%;
+                left: 1%;
+            }
+        }
+
+        @media screen and (min-width: 880px) and (max-width: 991px) {
+            .sec{
+                margin-left: 0%;
+                margin-top: 0px!important;
+            }  
+            .fm {
+                margin-bottom: 6%;
+            }
+            .ff{
+                margin-left: 49.9%;
+                margin-top: -6% !important;
+            } 
+            .flex-wrap{
+                margin-left: -37%;
+                margin-top: 4% !important;
+            } 
+            .row.dt-row{
+                margin-top: 2.5%!important;
+            }
+            .tb{
+                margin-top: 10.3% !important;
+                margin-left: -38.5% !important;
+            }
+            .tb{
+                width: 79.1% !important;
+            }
+            #example_wrapper {
+                margin-bottom: 6%;
+            }
+            .slr{
+                position: absolute;
+                top: 61%;
+                left: 1%;
+            }
+        }
+
+        @media screen and (min-width: 768px) and (max-width: 879px) {
+            .sec{
+                margin-left: 0%;
+                margin-top: 0px!important;
+            }  
+            .ff{
+                margin-left: 29.5%;
+                margin-top: -6% !important;
+            } 
+            .fm {
+                margin-bottom: 8%;
+            }
+            .flex-wrap{
+                margin-left: -38%;
+                margin-top: 6% !important;
+            } 
+            .row.dt-row{
+                margin-top: 3.5%!important;
+            }
+            .tb{
+                margin-top: 12.5% !important;
+                margin-left: -37% !important;
+            }
+            .tb{
+                width : 77% !important;
+            }
+            .pagination {
+                margin-bottom: 17% !important;
+            }
+            .slr{
+                position: absolute;
+                top: 61%;
+                left: 1%;
+            }
+        }
+
+        @media screen and (min-width: 576px) and (max-width: 767px) {
+            .iponame {
+                margin-top: 54px;         
+            } 
+            .fc{
+                margin-top: 19%!important;
+            }
+            .footer{
+                margin-top: 7%;
+                position: sticky;
+                top: 100vh;
+                left: 0;
+                bottom: 0;
+                width: 100%;
+                background-color: #686868;
+                color: white;
+                text-align: center;
+                padding: 5px 0px;
+                display: grid;
+            }
+            .sec{
+                margin-left: 0% !important;
+                margin-top: 0px!important;
+            }  
+            #example_length{
+                margin-right:72% !important;
+            }
+            .ff{
+                margin-left: -17%;
+                margin-top: -8% !important;
+            } 
+            .flex-wrap{
+                margin-left: -42%;
+                margin-top: 7% !important;
+            } 
+            .row.dt-row{
+                margin-top: 2.5%!important;
+            }
+            .tb{
+                margin-top: 16% !important;
+                margin-left: -27% !important;
+            }
+            .tb{
+                width: 67% !important;
+            }
+        }
+        @media screen and (min-width: 671px) and (max-width: 767px) {
+            .sec{
+                margin-left: 40%;
+                margin-top: 0px!important;
+            } 
+            .ff{
+                margin-left: -2%;
+                margin-top: -7% !important;
+            } 
+            .tb {
+                margin-top: 14% !important;
+            } 
+            .fc{
+                margin-top: 15%!important;
+            }
+            #example_filter {
+                left: 79%;
+                width: auto !important;
+            }
+            .row.dt-row {
+                top: -20px;
+            }
+            .flex-wrap {
+                margin-left: -39.5%;
+                margin-top: 7% !important;
+                width: auto !important;
+            }
+            .slr{
+                position: absolute;
+                top: 61%;
+                left: 1%;
+            }
+            #example_filter input {
+                width:107% !important;
+            }
+        }
+
+        @media screen and (min-width: 576px) and (max-width: 670px) {
+            .sec{
+                margin-left: 33%;
+                margin-top: 0px!important;
+            }  
+            .form-group {
+                margin-bottom: 2rem;
+            }
+            .dwc{
+                margin-left: 12%;
+                margin-top: 0px!important;
+            }
+            .fc{
+                margin-top: 17%!important;
+            }
+            .bkp{
+                margin-left: 17%;
+                margin-top: 0px!important;
+            } 
+            #example_filter {
+                left: 68%;
+                margin-top: 1.5% !important;
+            }
+            .row.dt-row {
+                top: 27px;
+            }
+            .slr{
+                position: absolute;
+                top: 114%;
+                left: 1%;
+            }
+            div.dataTables_wrapper div.dataTables_info {
+                padding-top: 1.85em;
+            }
+        }
+
+        @media screen and (min-width: 467px) and (max-width: 575px) {
+            .iponame {
+                margin-top: 54px;         
+            } 
+            .fc{
+                margin-top: 21%!important;
+            }
+            .footer{
+                margin-top: 8%;
+                position: sticky;
+                top: 100vh;
+                left: 0;
+                bottom: 0;
+                width: 100%;
+                background-color: #686868;
+                color: white;
+                text-align: center;
+                padding: 5px 0px;
+                display: grid;
+            }
+            .dwc{
+                margin-left: -11%;
+                margin-top: -11px!important;
+            }
+            .bkp{
+                margin-left: 22%;
+            } 
+            #example_length{
+                margin-right:72% !important;
+            }
+            .row.dt-row{
+                margin-top: 9.5%!important;
+            }
+            .ft{
+                margin-top: 12.5%!important;
+            }
+            .flex-wrap{
+                margin-left: -43%;
+                margin-top: -11% !important;
+                width: 51% !important;
+            } 
+            .tb{
+                margin-top: 40% !important;
+                margin-left: -59% !important;
+            }
+            .tb{
+                width: 100% !important;
+            }
+            .ff{
+                margin-left: -54%;
+                margin-top: -4% !important;
+            }  
+            #example_wrapper {
+                margin-top: 15%;
+            }
+            .dwo{
+                margin-left: 505%;
+            }
+            #example_filter {
+                left: 97% !important;
+                margin-top: -3% !important;
+            }
+            .slr{
+                position: absolute;
+                top: 64%;
+                left: 1%;
+            }
+        }
+        @media screen and (min-width: 400px) and (max-width: 466px) {
+            .iponame {
+                margin-top: 54px;         
+            } 
+            .fc{
+                margin-top: 28%!important;
+            }
+            .footer{
+                margin-top: 27%;
+                position: sticky;
+                top: 100vh;
+                left: 0;
+                bottom: 0;
+                width: 100%;
+                background-color: #686868;
+                color: white;
+                text-align: center;
+                padding: 5px 0px;
+                display: grid;
+            }
+            #example_length{
+                margin-top: 1% !important;
+                margin-right: 50% !important;
+            }
+            #example_wrapper {
+                margin-top: 20%;
+            }
+            .row.dt-row{
+                margin-top: 18.5%!important;
+            }
+            .ft{
+                margin-top: 18.5%!important;
+            }
+            .tb{
+                margin-top: 57% !important;
+                margin-left: -58% !important;
+            }
+            .tb{
+                width: 99% !important;
+            }
+            .flex-wrap{
+                margin-left: -42%;
+                margin-top: -1% !important;
+                width: auto !important;
+            } 
+            .pagination {
+                width: 136% !important;
+            }
+            .ff{
+                margin-left: -73%;
+                margin-top: -1% !important;
+            } 
+            #example_filter {
+                left: 104% !important;
+            }
+            #example_filter input {
+                position: absolute;
+                top: 86% !important;
+                margin-left: -50px;
+            }
+            .slr{
+                position: absolute;
+                top: 165%;
+                left: 1%;
+            }
+            .row.dt-row {
+                top: -9px;
+            }
+        }
+
+        @media screen and (min-width: 335px) and (max-width: 399px) {
+            .iponame {
+                margin-top: 54px;         
+            } 
+            .fc{
+                margin-top: 28%!important;
+            }
+            .footer{
+                margin-top: 27%;
+                position: sticky;
+                top: 100vh;
+                left: 0;
+                bottom: 0;
+                width: 100%;
+                background-color: #686868;
+                color: white;
+                text-align: center;
+                padding: 5px 0px;
+                display: grid;
+            }
+            #example_length{
+                margin-top: 1% !important;
+                margin-right: 50% !important;
+            }
+            #example_wrapper {
+                margin-top: 20%;
+            }
+            .row.dt-row{
+                margin-top: 18.5%!important;
+            }
+            .ft{
+                margin-top: 18.5%!important;
+            }
+            .tb{
+                margin-top: 57% !important;
+                margin-left: -58% !important;
+            }
+            .tb{
+                width: 99% !important;
+            }
+            .flex-wrap{
+                margin-left: -60%;
+                margin-top: -1% !important;
+            } 
+            .pagination {
+                width: 136% !important;
+            }
+            .ff{
+                margin-left: -73%;
+                margin-top: -1% !important;
+            } 
+            #example_filter {
+                left: 85% !important;
+            }
+            .flex-wrap {
+                margin-left: -42%;
+              }
+        }
+
+        @media screen and (min-width: 308px) and (max-width: 334px) {
+            .iponame {
+                margin-top: 54px;   
+                font-size: 7vw !important;       
+            } 
+            .fc{
+                margin-top: 35%!important;
+            }
+            .footer{
+                margin-top: 27%;    
+                position: sticky;
+                top: 100vh;
+                left: 0;
+                bottom: 0;
+                width: 100%;
+                background-color: #686868;
+                color: white;
+                text-align: center;
+                padding: 5px 0px;
+                display: grid;
+            }
+            .dwc{
+                margin-top: 77px!important;
+                margin-left: -9%;
+            }
+            .sec{
+                margin-left: 5%;
+                margin-top: 31px!important;
+            }
+            .bkp{
+                margin-left: -54%;
+                margin-top: 0px!important;
+            } 
+            .bkpc{
+                margin-top: 77px;
+            }
+            .buttons-collection{
+                width: 100px ;
+            } 
+            .buttons-colvis{
+                width: 95px !important;
+            } 
+            .flex-wrap{
+                width: 100% !important;
+                margin-left: -45%;
+                margin-top: -1% !important;
+            } 
+            .ff{
+                margin-left: -82%;
+                margin-top: -1% !important;
+            } 
+            .row.dt-row{
+                margin-top: 19.5%!important;
+            }
+            .ft{
+                margin-top: 19.5%!important;
+            }
+            .tb{
+                margin-top: 64% !important;
+                margin-left: -58% !important;
+            }
+            .tb{
+                width: 99% !important;
+            }
+            #example_wrapper {
+                margin-top: 27%;
+            }
+            #example_length {
+                margin-right: 43%;
+            }
+            #example_filter {
+                left: 86%;
+            }
+            #example_paginate {
+                margin-left: 46%;
+            }
+        }   
+
+        @media screen and (min-width: 280px) and (max-width: 307px) {
+            .iponame {
+                margin-top: 54px;  
+                font-size: 7vw !important;       
+            } 
+            .fc{
+                margin-top: 35%!important;
+            }
+            .footer{
+                margin-top: 27%;
+                position: sticky;
+                top: 100vh;
+                left: 0;
+                bottom: 0;
+                width: 100%;
+                background-color: #686868;
+                color: white;
+                text-align: center;
+                padding: 5px 0px;
+                display: grid;
+            }
+            .dwc{
+                margin-top: 106px!important;
+                margin-left: -9%;
+            }
+            .sec{
+                margin-left: 5%;
+                margin-top: 56px!important;
+            }
+            .bkp{
+                margin-left: 13%;
+                margin-top: 0px!important;
+            } 
+            .bkpc{
+                margin-left: -51px;
+            }
+            .buttons-collection{
+                top: 0%;
+                width: 100px ;
+            } 
+            .buttons-colvis{
+                top: 0% !important;
+                width: 95px !important;
+            } 
+            .flex-wrap{
+                width: 100% !important;
+                margin-left: -62%;
+                margin-top: -1% !important;
+            } 
+            .form-control-sm {
+                width:151px !important;
+            } 
+            .ff{
+                margin-left: -89%;
+                margin-top: -2% !important;
+            } 
+            .row.dt-row{
+                margin-top: 22.5%!important;
+            }
+            .ft{
+                margin-top: 22.5%!important;
+            }
+            .tb{
+                margin-top: 80% !important;
+                margin-left: -60% !important;
+            }
+            .tb{
+                width: 103% !important;
+            }
+            #example_wrapper {
+                margin-top: 27%;
+            }
+            #example_length {
+                margin-right: 43%;
+            }
+            #example_filter {
+                left: 89%;
+            }
+            #example_paginate {
+                margin-left: 65%;
+            }
+        }
+    </style>
+</head>
+{% endblock %}
+
+{% block body %}
+
+
+{% csrf_token %}
+
+{% comment %} <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+
+<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script> {% endcomment %}
+
+
+
+
+
+
+
+<div class="container containerhight fc" style="margin: 2px; margin-bottom: 5%; max-width: 100vw;">
+    <h3 class="fixed-top iponame" style="z-index: 9; position: absolute;">{{IPOName}}</h3>
+
+    <h3>Client Wise Billing</h3> <br>
+
+    <div class="form-row fm">
+        <div class="form-group col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                <form method="POST" action="/{{IPOid}}/Billing" name="BillingFilter">
+                    {% csrf_token %}
+                    <div class="form-row">
+                        <div class="form-group col-xl-2 col-lg-3 col-md-4 col-sm-4 col-5">
+                            <label for="category"><b>Group</b></label>
+                            <select  class="form-control custom-select" name="Groupfilter" autofocus="autofocus"
+                                >
+                                <option {% if Groupfilter == 'All' or Groupfilter == 'None' %} selected {% endif %} value="All">All</option>
+                                {% for i in Group %}
+                                <option {% if Groupfilter == i.GroupName %} selected {%else%} {% endif %} value="{{ i.GroupName }}">
+                                    {{i.GroupName }}
+                                </option>
+                                {% endfor %}
+
+                            </select>
+                        </div>
+                        
+                        <div class="form-group col-xl-2 col-lg-3 col-md-4 col-sm-4 col-7">
+                            <label for="category"><b>Order Category</b></label>
+                            <select  class="form-control custom-select" name="IPOTypefilter">
+                                <option {% if IPOTypefilter == 'All' or IPOTypefilter == 'None' %} selected {% endif %} value="All">All</option>
+                                {% for i in select %}
+                                <option {% if IPOTypefilter in i %} selected {% endif %} value="{{i}}">{{i}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        
+                        {% if IPOName.IPOType == "MAINBOARD" %}   
+                        <div class="form-group col-xl-2 col-lg-3 col-md-4 col-sm-4 col-5">
+                            <label for="category"><b>Investor Type</b></label>
+                            <select class="form-control custom-select " name="InvestorTypeFilter">
+                                <option {% if InvestorTypeFilter == 'All' or InvestorTypeFilter == 'None' %} selected {% endif %} value="All">All</option>
+                                {% for i in select2 %}
+                                <option {% if InvestorTypeFilter in i %} selected {% endif %} value="{{i}}">{{i}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {%else%}
+                            <div class="form-group col-xl-2 col-lg-3 col-md-4 col-sm-4 col-5">
+                            </div>
+                        {%endif%}
+                        
+                        <div class="form-group col-xl-2 col-lg-1 col-md-1 col-sm-1 col-1 sec" style="margin-top: 32px;">
+                            <button id="searchButton" type="submit" class="btn btn-secondary">Search &nbsp; <i class="fa fa-search"
+                                    aria-hidden="true" style='font-size:18px;'></i></button>
+                        </div>
+                        </form>
+
+                        {% comment %} <div class="form-group col-xl-2 col-lg-1 col-md-1 col-sm-1 col-1 dwc" style="margin-top: 32px;"> 
+                            <button type="button" class="btn btn-secondary dwo" data-toggle="modal"
+                                data-target="#exampleModals">Download &nbsp; <i class="fa fa-download" aria-hidden="true"
+                                    style='font-size:18px;'></i>
+                            </button>
+                                                      
+                            <!-- NEW  Modal FOR Download BUTTON -->
+                            <div class="modal fade" id="exampleModals" tabindex="-1" role="dialog"
+                                aria-labelledby="exampleModalLabels" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header" style="border-bottom: 1px solid black;">
+                                            <h5 class="modal-title" id="exampleModalLabels">Download File &nbsp; <i
+                                                    class="fa fa-download" aria-hidden="true" style='font-size:18px;'></i></h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            {{prompt}}
+                                            <form method="POST"     {% if IPOName.IPOType == "MAINBOARD" %} action="download-Billing/{{Groupfilter}}/{{IPOTypefilter}}/{{InvestorTypeFilter}}" 
+                                            {%else%}  action="download-Billing/{{Groupfilter}}/{{IPOTypefilter}}/All" {%endif%} >
+                                                {% csrf_token %}
+                                                <label><b style="margin: 0 12px;"> Download File :</b></label>
+                                                <button type="submit" class="btn btn-primary"> Download &nbsp;<i
+                                                        class="fa fa-file-excel-o" aria-hidden="true"
+                                                        style='font-size:18px;'></i></button>
+                                            </form>
+                                            {% for profile in entry%}
+                                            {{profile.name}}
+                                            {% endfor %}
+                                        </div>
+                                        <div class="modal-body">
+                                            {{prompt}}
+                                            <form method="POST" {% if IPOName.IPOType == "MAINBOARD" %} action="download-Billing-Pdf/{{Groupfilter}}/{{IPOTypefilter}}/{{InvestorTypeFilter}}" 
+                                            {%else%}  action="download-Billing-Pdf/{{Groupfilter}}/{{IPOTypefilter}}/All" {%endif%} >
+                                                {% csrf_token %}
+                                                <label><b style="margin: 0 12px;"> Download PDF :</b></label>
+                                                <button type="submit" class="btn btn-primary"> Download &nbsp;<i
+                                                        class="fa fa-file-pdf-o" aria-hidden="true"
+                                                        style='font-size:18px;'></i></button>
+                                            </form>
+                                            {% for profile in entry%}
+                                            {{profile.name}}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>                            
+                        </div> {% endcomment %}
+                        {% comment %} <div class="form-group col-xl-2 col-lg-1 col-md-1 col-sm-1 col-1 bkp" style="margin-top: 32px;">
+                            <form method="POST" {% if IPOName.IPOType == "MAINBOARD" %} action="Backup/" 
+                                            {%else%}  action="Backup/" {%endif%} >
+                                                {% csrf_token %} 
+                                                    <button type="submit" class="btn btn-secondary bkpc" data-toggle="modal" >Back Up &nbsp; 
+                                                        <i class="fa fa-download"aria-hidden="true"style='font-size:18px;'></i>
+                                                    </button>
+                            </form>
+                            {% for profile in entry%}
+                            {{profile.name}}
+                            {% endfor %}
+                        </div> {% endcomment %}
+                    </div>
+                    <div class="form-row tb">
+                        <div class="form-group col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                            <form method="POST" action="BillingFilter" name="BillingFilter">
+                                {% csrf_token %}
+                                <div class="form-row">
+                                     {% comment %} <div style="overflow-x:auto;">   {% endcomment %}
+                                    <div class="table-responsive text-nowrap">
+                                        <table id="bootstrapdatatable" class="table table-bordered table-hover table-striped " style="margin-bottom: 30px; border: 1px solid #dee2e6;">
+                                            <thead>
+                                                <tr>
+                                                    <th style='text-align: inherit; text-align:center;' >
+                                                        Total
+                                                    </th>
+                                                    <th class="tablelinel " style='text-align: inherit; text-align:center;' >
+                                                        IPO Price
+                                                    </th>
+                                                    <th class="tablelinel " style='text-align: inherit; text-align:center;'>
+                                                        Pre-Open Price
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                               
+                                                <tr>
+                                                    <td class="tablecenter">
+                                                        {{total|floatformat:2 }}
+                                                    </td>
+                                                    <td class="tablecenter">
+                                                        {{IPO.IPOPrice|floatformat:2 }}
+                                                    </td>
+                                                    <td class="tablecenter">
+                                                        {{IPO.PreOpenPrice|floatformat:2 }}
+                                                        <i style='color: #007bff;' class="fa fa-pencil-square-o" aria-hidden="true" data-toggle="modal" data-target="#editbtn"></i>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>  
+                                </div>
+                            </form>
+                            <!--NEW  Modal FOR EDIT BUTTON-->
+                            <div class="modal fade" id="editbtn" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabels"
+                                aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header" style="border-bottom: 1px solid black;">
+                                            <h5 class="modal-title" id="exampleModalLabels">Pre-Open Price Edit</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            {{prompt}}
+                                            <form {% if IPOName.IPOType == "MAINBOARD" %} action="/{{IPOid}}/updatepreopenprice/{{Groupfilter}}/{{IPOTypefilter}}/{{InvestorTypeFilter}}" {%else%} action="/{{IPOid}}/updatepreopenprice/{{Groupfilter}}/{{IPOTypefilter}}/All" {% endif %} method="POST"
+                                                enctype="multipart/form-data" style="margin: 15px 22px;" class="needs-validation"
+                                                novalidate>
+                                                {% csrf_token %}
+                                                <input type="hidden" name="selected_ids" id="top-selected-ids-input">
+                                                <label for="category"><b>Pre-Open Price : </b></label>
+                                                <input type="text" value="{{IPO.PreOpenPrice}}" name="PreOpenPrice"
+                                                    oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..?)\../g, '$1');" / style="height: 37px;">
+                                                <button type="submit" class="btn btn-outline-primary">Submit</button>
+                                            </form>
+                                            {% for profile in entry%}
+                                            {{profile.name}}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <!-- JAVASCRIPT FOR FLIE UPDAT BUTTON FORM VALIDATION -->
+                                    <script>
+                                        // Example starter JavaScript for disabling form submissions if there are invalid fields
+                                        (function () {
+                                            'use strict'
+                
+                                            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                                            var forms = document.querySelectorAll('.needs-validation')
+                
+                                            // Loop over them and prevent submission
+                                            Array.prototype.slice.call(forms)
+                                                .forEach(function (form) {
+                                                    form.addEventListener('submit', function (event) {
+                                                        if (!form.checkValidity()) {
+                                                            event.preventDefault()
+                                                            event.stopPropagation()
+                                                        }
+                
+                                                        form.classList.add('was-validated')
+                                                    }, false)
+                                                })
+                                        })()
+                                    </script>
+                                </div>
+                            </div>
+                
+                        </div>
+                    </div>
+        </div>
+    </div>
+    
+    <div class="table-responsive text-nowrap ft">
+       
+        <table id="example" class="table table-bordered table-hover table-striped" style='width:100%'>
+              {{ html_table | safe }}
+        </table>
+
+        <div class="modal fade" id="edit-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabels"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header" style="border-bottom: 1px solid black;">
+                        <h5 class="modal-title" id="exampleModalLabels">Pre-Open Price Edit</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-header" style="border-bottom: 1px solid black;">
+                        <form id="edit-form"  method="POST"
+                            enctype="multipart/form-data" style="margin: 15px 22px;" class="need-validation"
+                            novalidate>
+                            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                            <input type="hidden" name="selected_ids" id="selected-ids-input">
+                            <label for="category"><b>PreOpenPrice : </b></label>
+                            <input type="text" value="" id="preopen-price" name="PreOpenPrice"
+                                oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..?)\../g, '$1');" / style="height: 37px;">
+                            <button type="submit" class="btn btn-outline-primary">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                // Find all links that trigger the modal
+                const editLinks = document.querySelectorAll('[data-target="#edit-modal"]');
+                const modal = document.getElementById('edit-modal');
+                const preopenPriceInput = document.getElementById('preopen-price');
+                const editForm = document.getElementById('edit-form');
+        
+                editLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        const rowId = this.getAttribute('data-id');
+                        const preOpenPrice = this.getAttribute('data-preopen-price');
+                        const actionUrl = this.getAttribute('data-action-url');
+                        
+                        // Handle Bulk Selection
+                        const checkedBoxes = document.querySelectorAll('.billing-row-checkbox:checked');
+                        const selectedIdsInput = document.getElementById('selected-ids-input');
+                        const modalTitle = modal.querySelector('.modal-title');
+                        
+                        if (checkedBoxes.length > 0) {
+                            const ids = Array.from(checkedBoxes).map(cb => cb.value);
+                            selectedIdsInput.value = ids.join(',');
+                            modalTitle.innerText = "Bulk Pre-Open Price Edit (" + checkedBoxes.length + " rows)";
+                        } else {
+                            selectedIdsInput.value = "";
+                            modalTitle.innerText = "Pre-Open Price Edit";
+                        }
+
+                        preopenPriceInput.value = preOpenPrice;
+                        editForm.action = actionUrl;
+                    });
+                });
+
+                // Select All logic
+                const selectAll = document.getElementById('select-all-billing');
+                if (selectAll) {
+                    selectAll.addEventListener('change', function() {
+                        const checkboxes = document.querySelectorAll('.billing-row-checkbox');
+                        checkboxes.forEach(cb => {
+                            cb.checked = selectAll.checked;
+                        });
+                    });
+                }
+                const editBtnModal = document.getElementById('editbtn');
+                
+                const topSelectedIdsInput = document.getElementById('top-selected-ids-input');
+                const topEditIcon = document.querySelector('[data-target="#editbtn"]');
+                
+                if (topEditIcon && topSelectedIdsInput && editBtnModal) {
+                    topEditIcon.addEventListener('click', function() {
+                        const checkedBoxes = document.querySelectorAll('.billing-row-checkbox:checked');
+                        const modalTitle = editBtnModal.querySelector('.modal-title');
+                        
+                        if (checkedBoxes.length > 0) {
+                            const ids = Array.from(checkedBoxes).map(cb => cb.value);
+                            topSelectedIdsInput.value = ids.join(',');
+                            modalTitle.innerText = "Bulk Pre-Open Price Edit (" + checkedBoxes.length + " records)";
+                        } else {
+                            topSelectedIdsInput.value = "";
+                            modalTitle.innerText = "Pre-Open Price Edit (All Records)";
+                        }
+                    });
+                }
+                if (editBtnModal) {
+                    const closeButton = editBtnModal.querySelector('button.close[data-dismiss="modal"]');
+                    if (closeButton) {
+                        closeButton.addEventListener('click', function() {
+                            this.blur(); // Remove focus from the button to prevent the aria-hidden error
+                        });
+                    }
+                }
+                if (modal) { // 'modal' variable already refers to the '#edit-modal'
+                    const closeButtonEditModal = modal.querySelector('button.close[data-dismiss="modal"]');
+                    if (closeButtonEditModal) {
+                        closeButtonEditModal.addEventListener('click', function() {
+                            this.blur(); // Remove focus from the button to prevent the aria-hidden error
+                        });
+                    }
+                }
+            });
+        </script>
+
+        {% comment %} <thead>
+            <tr style="text-align: center;">
+                <th scope="col">Group</th>
+                <th scope="col" class="no-sort">Order Category</th>
+                {% if IPOName.IPOType == "MAINBOARD" %}<th scope="col" class="no-sort">Investor Type</th>{%endif%}
+                <th scope="col" class="no-sort">Order Type</th>
+                <th scope="col" class="no-sort">Rate</th>
+                <th scope="col" class="no-sort">PAN No</th>
+                <th scope="col" class="no-sort">PreOpenPrice</th>
+                <th scope="col" class="no-sort">Alloted Qty</th>
+                <th scope="col" class="no-sort">Amount</th>
+            </tr>
+        </thead>
+
+        <tbody style="text-align: center;white-space: nowrap;">
+            {% for i in entry %}
+                <tr style="text-align: center;">
+                    <td>{{ i.Order.OrderGroup }}</td>
+                    <td>{{ i.Order.OrderCategory }}</td>
+                {% if IPOName.IPOType == "MAINBOARD" %}   <td>{{i.Order.InvestorType }}</td> {%endif%}
+                    <td>{{i.Order.OrderType }}</td>
+                    <td>{{ i.Order.Rate|floatformat:2 }}</td>
+                    <td>{{ i.OrderDetailPANNo.PANNo }}</td>
+                    <td><a style='color: #007bff;'  aria-hidden="true" data-toggle="modal" data-target="#edit-{{ i.id }}">{% if i.PreOpenPrice != 0.0 %} {{i.PreOpenPrice|floatformat:2 }} {% else %} {{IPO.PreOpenPrice|floatformat:2 }}  {%endif%} </a></td>
+                    <td>{{ i.AllotedQty|floatformat:0 }}</td>
+                    <td>{{ i.Amount|floatformat:1 }}</td>
+                    </td>
+                </tr>
+                
+                <div class="modal fade" id="edit-{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabels"
+                    aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header" style="border-bottom: 1px solid black;">
+                                <h5 class="modal-title" id="exampleModalLabels">Pre-Open Price Edit</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-header" style="border-bottom: 1px solid black;">
+                                <form action="/{{IPOid}}/{{ i.id }}/EditOrderPreOpenPrice/{{i.Order.OrderCategory}}/{{i.Order.InvestorType}}" id="form-id2" method="POST"
+                                    enctype="multipart/form-data" style="margin: 15px 22px;" class="need-validation"
+                                    novalidate>
+                                    {% csrf_token %}
+                                    <label for="category"><b>PreOpenPrice : </b></label>
+                                    <input type="text" value="{{i.PreOpenPrice}}" name="PreOpenPrice"
+                                        oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..?)\../g, '$1');" / style="height: 37px;">
+                                    <button type="submit" class="btn btn-outline-primary">Submit</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% comment %} <div class="modal fade" id="edit-{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabels"
+                            aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header" style="border-bottom: 1px solid black;">
+                                        <h5 class="modal-title" id="exampleModalLabels">Pre-Open Price Edit</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        {{prompt}}
+                                        <form action="/{{IPOid}}/{{ i.id }}/EditOrderPreOpenPrice/{{i.Order.OrderGroup }}/{{i.Order.OrderCategory}}/{{i.Order.InvestorType}}" id="form-id2" method="POST"
+                                            enctype="multipart/form-data" style="margin: 15px 22px;" class="need-validation"
+                                            novalidate>
+                                            {% csrf_token %}
+                                            <label for="category"><b>PreOpenPrice : </b></label>
+                                            <input type="text" value="{{i.PreOpenPrice}}" name="PreOpenPrice"
+                                                oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..?)\../g, '$1');" / style="height: 37px;">
+                                            <button type="submit" class="btn btn-outline-primary">Submit</button>
+                                        </form>
+                                        {% for i in entry%}
+                                        {{i.name}}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <!-- JAVASCRIPT FOR FLIE UPDAT BUTTON FORM VALIDATION -->
+                                <script>
+                                    // Example starter JavaScript for disabling form submissions if there are invalid fields
+                                    (function () {
+                                        'use strict'
+
+                                        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                                        var forms = document.querySelectorAll('.need-validation')
+
+                                        // Loop over them and prevent submission
+                                        Array.prototype.slice.call(forms)
+                                            .forEach(function (form) {
+                                                form.addEventListener('submit', function (event) {
+                                                    if (!form.checkValidity()) {
+                                                        event.preventDefault()
+                                                        event.stopPropagation()
+                                                    }
+
+                                                    form.classList.add('was-validated')
+                                                }, false)
+                                            })
+                                    })()
+                                </script>
+                            </div>
+                        </div>
+                    </div> 
+
+            {% endfor %}
+            {% for i in order %}
+                <tr style="text-align: center;">
+                    <td>{{ i.OrderGroup }}</td>
+                    <td>{{ i.OrderCategory }}</td>
+                {% if IPOName.IPOType == "MAINBOARD" %}   <td>PREMIUM</td> {%endif%}
+                    <td>{{i.OrderType }}</td>
+                    <td>{{ i.Rate|floatformat:2 }}</td>
+                    <td>-</td>
+                    <td>{{IPO.PreOpenPrice|floatformat:2 }}</td>
+                    <td>{{ i.Quantity|floatformat:0 }}</td>
+                    <td>{{ i.Amount|floatformat:1 }}</td>
+                    </td>
+                </tr>
+            {% endfor %}
+
+        </tbody> {% endcomment %}
+    {% comment %} </table> {% endcomment %}
+    </div>
+
+    <div class="row" style='margin-top:-1%'>
+        <div class="col-md-6">
+            <!-- Total rows and current range display (left aligned) -->
+            <p class="text-left">
+                Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} Rows
+            </p>
+        </div>
+
+        {% comment %} <div class="col-md-6">
+            <ul class="pagination justify-content-end text-left" style="margin: 0; margin-right:2%;">
+                <!-- First page link -->
+                <li class="page-item">
+                    <a class="page-link" href="/{{IPOid}}/Billing?page=1">First</a>
+                </li>
+                
+                <!-- Previous page link -->
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="/{{IPOid}}/Billing?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Previous</span>
+                    </li>
+                {% endif %}
+                
+                <!-- Current page number -->
+                <li class="page-item active">
+                    <a class="page-link">{{ page_obj.number }}</a>
+                </li>
+                
+                <!-- Next page link -->
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="/{{IPOid}}/Billing?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Next</span>
+                    </li>
+                {% endif %}
+                
+                <!-- Last page link -->
+                <li class="page-item">
+                    <a class="page-link" href="/{{IPOid}}/Billing?page={{ page_obj.paginator.num_pages }}">Last</a>
+                </li>
+            </ul>
+        </div> {% endcomment %}
+        <div class="col-md-6">
+            <ul class="pagination justify-content-end text-left" style="margin: 0; margin-right:2%;">
+                <!-- Always show the first page -->
+                {% if page_obj.number != 1 %}
+                    <li class="page-item">
+                        <a class="page-link" {% if IPOName.IPOType == "MAINBOARD" %} href="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/{{InvestorTypeFilter}}?page=1" {%else%} href="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/All?page=1" {% endif %}>1</a>
+                    </li>
+                {% endif %}
+                
+                <!-- Show ellipsis if current page is greater than 4 -->
+                {% if page_obj.number > 4 %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+                
+                <!-- Display pages before the current page -->
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num > 1 and num < page_obj.number and num >= page_obj.number|add:'-2' %}
+                        <li class="page-item">
+                            <a class="page-link" {% if IPOName.IPOType == "MAINBOARD" %} href="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/{{InvestorTypeFilter}}?page={{ num }}" {%else%} href="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/All?page={{ num }}"{% endif %}>{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                <!-- Display current page -->
+                <li class="page-item active">
+                    <span class="page-link">{{ page_obj.number }}</span>
+                </li>
+                
+                <!-- Display pages after the current page -->
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num > page_obj.number and num < page_obj.number|add:'3' and num < page_obj.paginator.num_pages %}
+                        <li class="page-item">
+                            <a class="page-link" {% if IPOName.IPOType == "MAINBOARD" %}  href="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/{{InvestorTypeFilter}}?page={{ num }}" {%else%} href="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/All?page={{ num }}" {% endif %}>{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                <!-- Show ellipsis if current page is less than num_pages - 3 -->
+                {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+                
+                <!-- Always show the last page -->
+                {% if page_obj.number != page_obj.paginator.num_pages %}
+                    <li class="page-item">
+                        <a class="page-link" {% if IPOName.IPOType == "MAINBOARD" %} href="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/{{InvestorTypeFilter}}?page={{ page_obj.paginator.num_pages }}" {%else%} href="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/All?page={{ page_obj.paginator.num_pages }}" {% endif %}>{{ page_obj.paginator.num_pages }}</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+<div class="footer">
+    <a href="/{{IPOid}}/BUY" class="btn button btn-dark"><span>BUY</span></a>
+    <a href="/{{IPOid}}/SELL" class="btn button btn-dark"><span>SELL</span></a>
+    <a href="/{{IPOid}}/Order" class="btn button btn-dark"><span>Orders</span></a>
+    <a href="/{{IPOid}}/OrderDetail/BUY" class="btn button btn-dark" style="white-space: nowrap;"><span>App. Buy Order (PAN)</span></a>
+    <a href="/{{IPOid}}/OrderDetail/SELL" class="btn button btn-dark" style="white-space: nowrap;"><span>App. Sell Order (PAN)</span></a>
+    <a href="/{{IPOid}}/Billing" class="btn button btn-dark disabled"><span>Client Wise Billing</span></a>
+    <a href="/{{IPOid}}/Status" class="btn button btn-dark"><span>Group Wise Billing</span></a>
+    <a href="/{{IPOid}}/Dashboard/A" class="btn button btn-dark"><span>Analysis</span></a>
+</div>
+
+{% comment %} <script>
+    $(function () {
+        $(".auto").autocomplete({
+            source: "{% url 'autocomplete' %}"
+        });
+    });
+</script> {% endcomment %}
+
+<script>
+    $(document).ready(function () {
+        $('#example thead tr')
+            .clone(true)
+            .addClass('filters')
+            .appendTo('#example thead');
+    
+            var pageLength = "{{ Billing_page_size|default:'50' }}";
+            pageLength = pageLength === "All" ? -1 : parseInt(pageLength, 10);
+
+        var table = $('#example').DataTable({
+            orderCellsTop: true,
+            fixedHeader: true,
+            {% comment %} lengthMenu: [50, 100, 150, 200,-1], {% endcomment %}
+            lengthChange: true,
+            info:false,
+            stateSave: true,
+            stateLoadParams: function (settings, data) {
+                data.length = pageLength;
+            },
+            columnDefs: [
+                { targets: 'remark-col', visible: false }
+            ],
+            "pageLength": pageLength,
+            buttons: [ {
+                text: 'Columns', 
+                extend: 'colvis',
+            },
+            {   
+                extend: 'collection',
+                text: 'Download',
+                buttons:[
+                    {
+                        extend: 'excel',
+                        text: 'Excel',
+                        footer: true,
+                        exportOptions: {
+                            columns: ':visible'
+                        },
+                        customize: function(xlsx) {
+                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                    
+                            {% comment %} $('row:first', sheet).remove(); {% endcomment %}
+                        }
+                    },
+                    {
+                        extend: 'pdf',
+                        text: 'PDF',
+                        footer: true,
+                        exportOptions: {
+                            columns: ':visible',
+                            rows: ':visible',
+                            modifier: {
+                                page: 'current'
+                            }
+                        },
+                        customize: function(doc) {
+                            doc.pageOrientation = 'landscape';
+                           doc.styles.tableHeader = {
+                                fillColor: 'grey',
+                                color: 'whitesmoke',
+                                bold: true,
+                                alignment: 'center',
+                            };
+                            doc.styles.tableBodyEven = {
+                                alignment: 'center',
+                                fillColor: 'bisque',
+                            };
+                            doc.styles.tableBodyOdd = {
+                                alignment: 'center',
+                                fillColor: 'bisque',
+                            };
+                            doc.styles.tableFooter = {
+                                fillColor: 'grey',
+                                color: 'whitesmoke',
+                                bold: true,
+                                alignment: 'center',
+                            };
+                            
+                            doc.pageSize = 'A4'; 
+
+                            doc.content[1].layout = {
+                                hLineWidth: function(i, node) {
+                                    return 1; 
+                                },
+                                vLineWidth: function(i, node) {
+                                    return 1; 
+                                },
+                                hLineColor: function(i, node) {
+                                    return 'black'; 
+                                },
+                                vLineColor: function(i, node) {
+                                    return 'black'; 
+                                },
+                            };
+                        }
+                    }
+                ]
+            },                
+                
+            ],
+            initComplete: function () {
+                var api = this.api();
+                
+                api
+                    .columns('')
+                    .eq(0)
+                    .each(function (colIdx) {
+                        
+                        var cell = $('.filters th').eq(
+                            $(api.column(colIdx).header()).index()
+                        );
+                        if (colIdx !== 0) {
+                            var title = $(cell).text();
+                            $(cell).html('<input type="text" placeholder="' + title + '" style="text-align: center ; width: 100%;" />');
+        
+                            
+                            $(
+                                'input',
+                                $('.filters th').eq($(api.column(colIdx).header()).index())
+                            )
+                                .off('keyup change')
+                                .on('change', function (e) {
+                                    
+                                    $(this).attr('title', $(this).val());
+                                    var regexr = '({search})'; //$(this).parents('th').find('select').val();
+        
+                                    var cursorPosition = this.selectionStart;
+                                    
+                                    api
+                                        .column(colIdx)
+                                        .search(
+                                            this.value != ''
+                                                ? regexr.replace('{search}', '(((' + this.value + ')))')
+                                                : '',
+                                            this.value != '',
+                                            this.value == ''
+                                        )
+                                        .draw();
+                                })
+                                .on('keyup', function (e) {
+                                    e.stopPropagation();
+        
+                                    $(this).trigger('change');
+                                    $(this)
+                                        .focus()[0]
+                                        .setSelectionRange(cursorPosition, cursorPosition);
+                                });
+                        } 
+                        else {
+                            $(cell).html('');
+                        }
+                    });
+                    /*var lastCell = $('.filters th').eq(
+                    $(api.column(':last-child').header()).index()
+                    );
+                    $(lastCell).html('');*/
+            },
+            language: {
+                info: 'Showing _START_ to _END_ of _TOTAL_ Rows',
+                infoFiltered: '(filtered from _MAX_ total Rows)',
+                emptyTable: "No data available",
+                lengthMenu: 'Show <select>' +
+                    '<option value="50">50</option>' +
+                    '<option value="100">100</option>' +
+                    '<option value="150">150</option>' +
+                    '<option value="200">200</option>' +
+                    '<option value="-1">All</option>' +
+                    '</select> Rows',
+                search: 'Search:',
+                paginate: {
+                    first: 'First',
+                    last: 'Last',
+                    next: 'Next',
+                    previous: 'Previous'
+                }
+            },
+        });
+
+
+        $('select[name="example_length"] option[value="-1"]').text('All');
+        
+        table.buttons().container()
+            .appendTo( '#example_wrapper .col-md-6:eq(0)' );
+
+        function updateButtonColor() {
+            var button = $('#searchButton');
+
+            if (table.data().any()) {
+                button.removeClass('btn-secondary').addClass('btn-primary');
+            } else {
+                button.removeClass('btn-primary').addClass('btn-secondary');
+            }
+        }
+
+        $('#searchButton').on('click', function () {
+            updateButtonColor();
+        });
+
+        updateButtonColor();
+
+        var dataTableLengthDiv = document.getElementById('example_length');
+
+        var firstLabel = dataTableLengthDiv.querySelector('label');
+
+        if (firstLabel) {
+        firstLabel.classList.add('slr');
+        }
+
+        {% comment %} table.page.len({{ Billing_page_size|default:50 }}).draw(); {% endcomment %}
+
+        // Fix: Inject search input when a hidden column becomes visible
+        table.on('column-visibility.dt', function (e, settings, colIdx, state) {
+            if (state && colIdx !== 0) {
+                var api = table;
+                var headerIndex = $(api.column(colIdx).header()).index();
+                var cell = $('.filters th').eq(headerIndex);
+                
+                if (cell.find('input').length === 0) {
+                    var title = $(api.column(colIdx).header()).text();
+                    cell.html('<input type="text" placeholder="' + title + '" style="text-align: center; width: 100%;" />');
+                    
+                    $('input', cell)
+                        .off('keyup change')
+                        .on('change', function (e) {
+                            $(this).attr('title', $(this).val());
+                            var regexr = '({search})';
+                            var cursorPosition = this.selectionStart;
+                            api.column(colIdx).search(
+                                this.value != '' ? regexr.replace('{search}', '(((' + this.value + ')))') : '',
+                                this.value != '',
+                                this.value == ''
+                            ).draw();
+                        })
+                        .on('keyup', function (e) {
+                            e.stopPropagation();
+                            $(this).trigger('change');
+                            $(this).focus()[0].setSelectionRange(cursorPosition, cursorPosition);
+                        });
+                }
+            }
+        });
+
+    } );
+</script>
+
+<script>
+    $(document).ready(function() {
+        // Initialize DataTables instance
+        // Remove the existing rows selection dropdown and pagination if needed
+        $('.slr').remove();
+        $('#example_paginate').remove();
+        const wrapper = document.getElementById("example_wrapper");
+        if (wrapper) {
+            const rows = wrapper.querySelectorAll(".row");
+            if (rows.length >= 3) {
+                rows[2].remove(); // Removes the third '.row' div (index 2)
+            }
+        }
+
+        
+        // Create the new form HTML for rows per page selection
+        var formHtml = `
+        <label class='slr' for="page_size">
+            <form method="POST" {% if IPOName.IPOType == "MAINBOARD" %} action="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/{{InvestorTypeFilter}}" {%else%} action="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/All" {% endif %}> 
+                {% csrf_token %}
+                Show 
+                <select name="Billing_page_size" id="Billing_page_size" onchange="this.form.submit()">
+                    <option value="{{Billing_page_size}}" style='display:None;' {% if Billing_page_size|default_if_none:50 == 50 %}selected{% endif %}>{{Billing_page_size}}</option>
+                    <option value="50" {% if Billing_page_size == 50 %}selected{% endif %}>50</option>
+                    <option value="100" {% if Billing_page_size == 100 %}selected{% endif %}>100</option>
+                    <option value="200" {% if Billing_page_size == 200 %}selected{% endif %}>200</option>
+                    <option value="250" {% if Billing_page_size == 250 %}selected{% endif %}>250</option>
+                    <option value="All" {% if Billing_page_size == 'All' %}selected{% endif %}>All</option>
+                </select>
+                Rows
+                <input type="hidden" name="page" value="{{ page_obj.number }}">
+            </form></label>
+        `;
+    
+        // Append the form to a specific element
+        $('.dataTables_length').append(formHtml);
+
+        // Update page length when selection is changed
+        {% comment %} $('#Billing_page_size').on('change', function() {
+            var pageSize = $(this).val();
+            if (pageSize === 'All') {
+                table.page.len(-1).draw(); // Show all rows if "All" is selected
+            } else {
+                table.page.len(parseInt(pageSize)).draw(); // Set to selected page length
+            }
+        }); {% endcomment %}
+
+        // Set the initial page length when the page loads (from the server-side)
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        $(".col-sm-12.col-md-6:first").addClass("custom-width");
+        $(".col-sm-12.col-md-6").addClass("cw");
+        $(".dataTables_filter").addClass("ff");
+        $(".dt-row:first").addClass("table-responsive");
+        $(".buttons-collection").addClass("d-flex justify-content-center align-items-center");
+    });
+    
+</script>
+<script>
+    function sendPostRequest(ipoId, orderGroup,IPOTypefilter,InvestorTypeFilter) {
+        // Create a hidden form dynamically
+        var form = document.createElement('form');
+        form.method = 'POST';
+        // Set the action to your Django Billing view URL
+        // Based on your urls.py, it appears to be '/Billing/<int:IPOid>'
+        form.action = '/'+ ipoId + '/Billing' ; 
+
+        // Add CSRF token as a hidden input
+        var csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = '{{ csrf_token }}'; // Django's CSRF token
+        form.appendChild(csrfInput);
+
+        // Add Groupfilter as a hidden input
+        var groupFilterInput = document.createElement('input');
+        groupFilterInput.type = 'hidden';
+        groupFilterInput.name = 'Groupfilter';
+        groupFilterInput.value = orderGroup;
+        form.appendChild(groupFilterInput);
+
+        // Add other filters. Set them to 'All' or retrieve their current values
+        // from existing filter inputs on the page if you want to preserve them.
+        var ipoTypeFilterInput = document.createElement('input');
+        ipoTypeFilterInput.type = 'hidden';
+        ipoTypeFilterInput.name = 'IPOTypefilter';
+        ipoTypeFilterInput.value = IPOTypefilter; // Or get value from an existing element: document.getElementById('your_ipo_type_filter_id').value;
+        form.appendChild(ipoTypeFilterInput);
+
+        var investorTypeFilterInput = document.createElement('input');
+        investorTypeFilterInput.type = 'hidden';
+        investorTypeFilterInput.name = 'InvestorTypeFilter';
+        investorTypeFilterInput.value = InvestorTypeFilter; // Or get value from an existing element: document.getElementById('your_investor_type_filter_id').value;
+        form.appendChild(investorTypeFilterInput);
+
+        // Append the form to the body and submit it
+        document.body.appendChild(form);
+        form.submit();
+    }
+</script>
+
+
+<script src="{% static 'DataTables/js/jquery-3.7.0.js' %}"></script>
+<script src="{% static 'DataTables/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.fixedHeader.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.bootstrap5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.bootstrap5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/jszip.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.colVis.min.js' %}"></script>
+<script src="{% static 'DataTables/js/pdfmake.min.js' %}"></script>
+<script src="{% static 'DataTables/js/vfs_fonts.js' %}"></script>
+
+{% endblock %}

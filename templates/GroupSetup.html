@@ -1,0 +1,1805 @@
+{% extends 'basic.html' %}
+{% block title%} Kostak Group Setup{% endblock %}
+{% block css %}
+{% load static %}
+<!-- ADD NEW CODE DELETE CSS -->
+
+<link rel="stylesheet" href="{% static  'DataTables/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static  'DataTables/css/buttons.bootstrap5.min.css' %}">
+<link rel="stylesheet" href="{% static  'DataTables/css/dataTables.bootstrap5.min.css' %}">
+
+<style>
+    #example_wrapper{
+        margin-top: 2% !important;
+    }
+    #example th{
+        text-align: center;
+        width: 25%;
+    }
+    #example_filter{
+        float: right;
+        width: 23% !important;
+        margin-right: 7rem !important;
+    }
+    .Input{
+        item-align: center;
+        width: 98.5% !important;
+    }
+    .dropdown-menu {
+        min-width: 7rem !important;
+        margin-top: 0 !important;
+        background-color: #6c757d;
+    }
+    .buttons-colvis{
+        left:-11px;
+        width: 95px !important;
+    }
+    .buttons-collection{
+        height: 35px;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .flex-wrap {
+        position: relative !important;
+        margin-top: -60px !important; 
+        left: 76% !important; 
+    }
+    .form-control-sm {
+        border: 0.3px solid black;
+        height:30px !important;
+      }
+    .row.dt-row {
+        margin-top: -23px !important; 
+    }
+    .cw {
+        margin-left: 3px;
+        width:41.5% ; 
+    }
+
+    .custom-width {
+        margin-left: 0px !important;
+        right : 0px !important;
+        width: 58% !important; 
+    }
+    .btn-outline-success{
+        height: 30px !important;
+        text-align: center !important;
+    }
+    #example_wrapper{
+        margin-top: 1.8% !important;
+    }
+    .akg{
+        left: -30rem !important;
+        width: 10%;
+    }
+    .bi{
+        left: -9rem ;
+    }
+     .h3,
+    h3 {
+        font-size: 1.75rem;
+        border-block-end: 3px solid #e9ecef;
+        margin: 3% 0%;
+    }
+
+    {% comment %} body {
+        font-family: Arial, Helvetica, sans-serif;
+
+    } {% endcomment %}
+
+    * {
+        box-sizing: border-box;
+    }
+
+    .container-fluid {
+        width: 100%;
+        margin-right: auto;
+        margin-left: auto;
+    }
+
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+        width: 100%;
+        border: 1px solid #ddd;
+        margin-bottom: 2%;
+    }
+
+    th,
+    td {
+        text-align: center;
+        padding: 5px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2
+    }
+
+    .col-md-3 {
+        display: inline-block;
+        margin-left: -4px;
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        /* border: 2px solid black; */
+    }
+
+    .modal {
+        display: none;
+        margin: 8% 0%;
+        position: fixed;
+    }
+
+    table.table-sortable th.currently-sorted[data-sort-dir="asc"]::after {
+        content: "\25b2";
+    }
+
+    table.table-sortable th.currently-sorted[data-sort-dir="desc"]::after {
+        content: "\25bc";
+    }
+    .bi{
+        left: -35rem; 
+    }
+
+    .cl{
+        position: fixed!important;
+        background-color: white;
+        height: 35px;
+        margin-top: 35px;
+        width: 100%;
+        text-align: center;
+        text-align: center;
+    }
+
+    @media (min-width: 1200px) {
+        .fc{
+            margin-top: 4%;
+        }
+    }
+
+
+    @media (max-width: 767px) {
+        .container {
+            width: 100%;
+            padding-right: 15px;
+            padding-left: 15px;
+            margin-right: auto;
+            margin-left: auto;
+        }
+    }
+    @media (min-width: 5701px) and (max-width: 8000px) {
+        .fc {
+            margin-top: 2%;
+        }
+        .bi{
+            margin-top: 1.7%;
+            left: 40rem !important;
+        }
+        #example_filter{
+            margin-right: 0.4rem !important;
+        }
+        #example_wrapper {
+            margin-top: 0.8% !important;
+        }
+    }
+    @media (min-width: 3805px) and (max-width: 5700px) {
+        .fc {
+            margin-top: 2%;
+        }
+        .bi{
+            margin-top: 1.7%;
+            left: 40rem !important;
+        }
+        #example_filter{
+            margin-right: 0.4rem !important;
+        }
+        #example_wrapper {
+            margin-top: 0.8% !important;
+        }
+    }
+    @media (min-width: 2536px) and (max-width: 3804px) {
+        .bi{
+            margin-top: 1.7%;
+            left: 40rem !important;
+        }
+        #example_filter{
+            margin-right: 0.4rem !important;
+        }
+        #example_wrapper {
+            margin-top: 0.8% !important;
+        }
+    }
+    @media (min-width: 1951px) and (max-width: 2535px) {
+        .bi{
+            margin-top: 1.7%;
+            left: 37rem !important;
+        }
+        #example_filter{
+            margin-right: 3rem !important;
+        }
+        #example_wrapper {
+            margin-top: 0.8% !important;
+        }
+    }
+    @media (min-width: 1881px) and (max-width: 1950px) {
+        .bi{
+            margin-top: 1.7%;
+            left: 37rem;
+        }
+        #example_filter{
+            margin-right: 4.5rem !important;
+        }
+        #example_wrapper {
+            margin-top: 0.8% !important;
+        }
+    }
+
+    @media (min-width: 1541px) and (max-width: 1880px) {
+        .bi{
+            margin-top: 1.7%;
+            left: 37rem;
+        }
+        #example_filter{
+            margin-right: -3rem;
+        }
+    }
+    @media (min-width: 1350px) and (max-width: 1540px) {
+        .bi{
+            margin-top: 0%;
+            left: 25rem;
+        }
+        #example_wrapper{
+            margin-top: 2% !important;
+        }
+        #example_filter{
+            margin-right: 22.5% !important;
+        }
+        .flex-wrap {
+            margin-left: -32.5% !important;
+        }
+    }
+
+    @media (min-width: 1200px) and (max-width: 1349px) {
+        .bi{
+            margin-top: 0%;
+            left: 25rem;
+        }
+        #example_wrapper{
+            margin-top: 3% !important;
+        }
+        #example_filter{
+            margin-right: 29.5% !important;
+        }
+        .flex-wrap {
+            margin-left: -32.5% !important;
+        }
+    }
+
+    @media (min-width: 992px) and (max-width: 1199px) {
+        .fc{
+            margin-top: 7%;
+        }
+        #example_wrapper > .row:first-child {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            gap: 10px !important;
+        }
+        #example_wrapper > .row:first-child > .col-md-6 {
+            display: contents !important;
+        }
+
+        /* Order: Show -> Buttons(Col/Down) -> Buttons(Add/Bulk) -> Search */
+        #example_length { 
+            order: 1 !important; 
+            margin: 0 !important; 
+        }
+        .flex-wrap { 
+            order: 2 !important; 
+            position: static !important; 
+            display: flex !important; 
+            gap: 10px !important; 
+            margin: 0 !important;
+            width: auto !important;
+        }
+        .akg { 
+            order: 3 !important; 
+            display: flex !important; 
+            gap: 10px !important; 
+            position: static !important; 
+            margin: 0 !important;
+            width: auto !important;
+            left: 0 !important;
+        }
+        #example_filter { 
+            order: 4 !important; 
+            margin: 0 !important; 
+            width: auto !important; 
+        }
+
+        /* Reset individual button offsets */
+        .bi, .buttons-colvis, .buttons-collection {
+            position: static !important;
+            margin: 0 !important;
+            left: 0 !important;
+            width: auto !important;
+            height: 30px !important;
+        }
+
+        /* Table spacing adjustment to prevent underlap */
+        .row.dt-row {
+            margin-top: 10px !important;
+        }
+
+        .moa{
+            padding: 0 0px!important;
+        }
+        #example_wrapper{
+            margin-top: 1% !important;
+        }
+    }
+
+    @media (min-width: 768px) and (max-width: 991px) {
+        .fc{
+            margin-top: 11%;
+        }
+        /* Create a flex row that wraps to allow second row of buttons */
+        #example_wrapper > .row:first-child {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+        }
+        /* Make column wrappers transparent to flex flow so we can distribute 3 items in row 1 */
+        #example_wrapper > .row:first-child > .col-md-6 {
+            display: contents !important;
+        }
+
+        /* ROW 1: Distribute Length, Column/Download buttons, and Search */
+        #example_length {
+            order: 1 !important;
+            margin: 0 !important;
+        }
+        .flex-wrap {
+            order: 2 !important;
+            position: static !important;
+            display: flex !important;
+            margin: 0 !important;
+            left: 0 !important;
+            top: 0 !important;
+            gap: 10px !important;
+            width: auto !important;
+        }
+        .buttons-colvis, .buttons-collection {
+            left: 0 !important;
+            position: static !important;
+        }
+        #example_filter {
+            order: 3 !important;
+            margin: 0 !important;
+            width: auto !important;
+        }
+        .form-control-sm {
+            width: auto !important;
+        }
+
+        /* ROW 2: Center the ADD/BULK buttons */
+        .akg {
+            order: 4 !important;
+            width: 100% !important;
+            display: flex !important;
+            justify-content: center !important;
+            gap: 10px !important;
+            margin-top: 15px !important;
+            position: static !important;
+            left: 0 !important;
+            transform: none !important;
+        }
+        .akg .bi {
+            width: auto !important;
+            min-width: 150px;
+            height: 32px !important;
+            padding: 0 15px !important;
+            margin: 0 !important;
+            position: static !important;
+            white-space: nowrap !important;
+        }
+
+        /* Table spacing adjustment */
+        .row.dt-row {
+            margin-top: 15px !important;
+        }
+        .moa {
+            padding: 0 0px !important;
+            max-width: 53% !important;
+        }
+    }
+    @media (min-width: 620px) and (max-width: 767px) {
+        .cl{
+            margin-top: 54px;     
+        }
+        .fc{
+            margin-top: 15%;
+        }
+        
+        /* Apply the same flex logic as 768px range */
+        #example_wrapper > .row:first-child {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+        }
+        #example_wrapper > .row:first-child > .col-md-6 {
+            display: contents !important;
+        }
+
+        /* ROW 1 */
+        #example_length {
+            order: 1 !important;
+            margin: 0 !important;
+        }
+        .slr {
+            position: static !important;
+        }
+        .flex-wrap {
+            order: 2 !important;
+            position: static !important;
+            display: flex !important;
+            margin: 0 !important;
+            left: 0 !important;
+            top: 0 !important;
+            gap: 10px !important;
+            width: auto !important;
+        }
+        #example_filter {
+            order: 3 !important;
+            margin: 0 !important;
+            width: auto !important;
+        }
+        .form-control-sm {
+            width: auto !important;
+        }
+
+        /* ROW 2 */
+        .akg {
+            order: 4 !important;
+            width: 100% !important;
+            display: flex !important;
+            justify-content: center !important;
+            gap: 10px !important;
+            margin-top: 15px !important;
+            position: static !important;
+        }
+        .akg .bi {
+            width: auto !important;
+            min-width: 130px;
+            height: 32px !important;
+            padding: 0 10px !important;
+            margin: 0 !important;
+            position: static !important;
+            white-space: nowrap !important;
+        }
+
+        /* Table spacing adjustment */
+        .row.dt-row {
+            margin-top: 15px !important;
+        }
+    }
+
+    @media (min-width: 576px) and (max-width: 619px) {
+        .cl{
+            margin-top: 54px;     
+        }
+        .fc{
+            margin-top: 18%;
+        }
+        .bi{
+            top: -3.7rem;
+            left: 51.3rem;
+        }
+        .row.dt-row {
+            margin-top: 15px !important;
+        }
+        .moa{
+            padding: 0 0px!important;
+            max-width: 71%!important;
+        }
+        #example_wrapper{
+            margin-top: 7% !important;
+        }
+        #example_length{
+            margin-right: 54% !important;
+        }
+        .flex-wrap {
+            margin-left: -72.5% !important;
+            width: auto !important;
+        }
+        #example_filter{
+            margin-right: -58.5% !important;
+            margin-top: -9%;
+        }
+        .form-control-sm {
+            width: 221% !important;
+        }
+        .slr{
+            position: absolute;
+            top: 32%;
+            left: 0%;
+        } 
+    }
+
+    @media (min-width: 451px) and (max-width: 575px) {
+        .cl{
+            margin-top: 54px;     
+        }
+        .fc {
+            margin-top: 23%;
+        }
+        #example_wrapper > .row:first-child {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+        }
+        #example_wrapper > .row:first-child > .col-md-6 {
+            display: contents !important;
+        }
+
+        /* ROW 1: Distribute Length, Column/Download buttons, and Search */
+        #example_length {
+            order: 1 !important;
+            margin: 0 !important;
+        }
+        .slr {
+            position: static !important;
+        }
+        .flex-wrap {
+            order: 2 !important;
+            position: static !important;
+            display: flex !important;
+            margin: 0 !important;
+            left: 0 !important;
+            top: 0 !important;
+            gap: 10px !important;
+            width: auto !important;
+        }
+        .buttons-colvis, .buttons-collection {
+            position: static !important;
+            left: 0 !important;
+            width: auto !important;
+        }
+        #example_filter {
+            order: 3 !important;
+            margin: 0 !important;
+            width: auto !important;
+        }
+        .form-control-sm {
+            width: auto !important;
+        }
+
+        /* ROW 2: Center the ADD/BULK buttons */
+        .akg {
+            order: 4 !important;
+            width: 100% !important;
+            display: flex !important;
+            justify-content: center !important;
+            gap: 15px !important;
+            margin-top: 20px !important;
+            position: static !important;
+        }
+        .akg .bi {
+            width: auto !important;
+            min-width: 160px;
+            height: 32px !important;
+            padding: 0 15px !important;
+            margin: 0 !important;
+            position: static !important;
+        }
+
+        /* Push table down */
+        .row.dt-row {
+            margin-top: 15px !important;
+        }
+        .moa {
+            padding: 0 0px !important;
+            max-width: 86% !important;
+        }
+    }
+    @media (min-width: 400px) and (max-width: 450px) {
+        .cl{
+            margin-top: 54px;     
+        }
+        .fc {
+            margin-top: 40% !important;
+        }
+        #example_wrapper > .row:first-child {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+            justify-content: center !important;
+            gap: 12px 0 !important;
+        }
+        #example_wrapper > .row:first-child > .col-md-6 {
+            display: contents !important;
+        }
+
+        /* ROW 1: Column / Download */
+        .flex-wrap {
+            order: 1 !important;
+            display: flex !important;
+            justify-content: center !important;
+            gap: 10px !important;
+            position: static !important;
+            margin: 0 !important;
+            width: 100% !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        .buttons-colvis, .buttons-collection {
+            position: static !important;
+            width: auto !important;
+        }
+
+        /* ROW 2: Add Kostak Group / Bulk Upload */
+        .akg {
+            order: 2 !important;
+            display: flex !important;
+            justify-content: center !important;
+            gap: 10px !important;
+            width: 100% !important;
+            position: static !important;
+            margin: 0 !important;
+        }
+        .akg .bi {
+            width: auto !important;
+            min-width: 150px;
+            height: 32px !important;
+            padding: 0 10px !important;
+            margin: 0 !important;
+            position: static !important;
+        }
+
+        /* ROW 3: Show 50 & Search on a single row */
+        #example_length {
+            order: 3 !important;
+            margin: 0 !important;
+            width: 46% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+        }
+        .slr {
+            position: static !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 5px;
+        }
+        #example_filter {
+            order: 4 !important;
+            margin: 0 !important;
+            width: 54% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-end !important;
+        }
+        #example_filter label {
+            display: flex !important;
+            align-items: center !important;
+            gap: 5px;
+        }
+        .form-control-sm {
+            width: 110px !important;
+            height: 30px !important;
+        }
+
+        #example_wrapper{
+            margin-top: 0% !important;
+        }
+        .row.dt-row {
+            margin-top: 15px !important;
+        }        
+    }
+    @media (min-width: 364px) and (max-width: 399px) {
+        .cl{
+            margin-top: 54px;     
+        }
+        /* Push the whole container down to clear the fixed header */
+        .fc {
+            margin-top: 45% !important;
+        }
+        
+        #example_wrapper > .row:first-child {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+            justify-content: center !important;
+            gap: 12px 0 !important;
+        }
+        #example_wrapper > .row:first-child > .col-md-6 {
+            display: contents !important;
+        }
+
+        /* ROW 1: Column / Download */
+        .flex-wrap {
+            order: 1 !important;
+            display: flex !important;
+            justify-content: center !important;
+            gap: 10px !important;
+            position: static !important;
+            margin: 0 !important;
+            width: 100% !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            left: 0 !important;
+            top: 0 !important;
+        }
+        .buttons-colvis, .buttons-collection {
+            position: static !important;
+            width: auto !important;
+            display: inline-block !important;
+        }
+
+        /* ROW 2: Add Kostak Group / Bulk Upload */
+        .akg {
+            order: 2 !important;
+            display: flex !important;
+            justify-content: center !important;
+            gap: 8px !important;
+            width: 100% !important;
+            position: static !important;
+            margin: 0 !important;
+        }
+        .akg .bi {
+            width: auto !important;
+            min-width: 135px;
+            height: 32px !important;
+            padding: 0 8px !important;
+            margin: 0 !important;
+            position: static !important;
+            font-size: 11px !important;
+        }
+
+        /* ROW 3: Show 50 & Search on a single row */
+        #example_length {
+            order: 3 !important;
+            margin: 0 !important;
+            width: 46% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            font-size: 12px !important;
+        }
+        .slr {
+            position: static !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 4px;
+        }
+        #example_filter {
+            order: 4 !important;
+            margin: 0 !important;
+            width: 54% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-end !important;
+            font-size: 12px !important;
+        }
+        #example_filter label {
+            display: flex !important;
+            align-items: center !important;
+            gap: 4px;
+        }
+        .form-control-sm {
+            width: 90px !important;
+            height: 28px !important;
+        }
+
+        #example_wrapper{
+            margin-top: 0% !important;
+        }
+        .row.dt-row {
+            margin-top: 15px !important;
+        }        
+    }
+
+    @media (min-width: 316px) and (max-width: 363px) {
+        .cl{
+            margin-top: 54px;     
+        }
+        .fc {
+            margin-top: 48% !important;
+        }
+        #example_wrapper > .row:first-child {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+            justify-content: center !important;
+            gap: 12px 0 !important;
+        }
+        #example_wrapper > .row:first-child > .col-md-6 {
+            display: contents !important;
+        }
+
+        /* ROW 1: Column / Download */
+        .flex-wrap {
+            order: 1 !important;
+            display: flex !important;
+            justify-content: center !important;
+            gap: 8px !important;
+            position: static !important;
+            margin: 0 !important;
+            width: 100% !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        .buttons-colvis, .buttons-collection {
+            position: static !important;
+            width: auto !important;
+            font-size: 11px !important;
+        }
+
+        /* ROW 2: Add Kostak Group / Bulk Upload */
+        .akg {
+            order: 2 !important;
+            display: flex !important;
+            justify-content: center !important;
+            gap: 8px !important;
+            width: 100% !important;
+            position: static !important;
+            margin: 0 !important;
+        }
+        .akg .bi {
+            width: auto !important;
+            min-width: 125px;
+            height: 32px !important;
+            padding: 0 6px !important;
+            margin: 0 !important;
+            position: static !important;
+            font-size: 10px !important;
+        }
+
+        /* ROW 3: Show 50 & Search on a single row */
+        #example_length {
+            order: 3 !important;
+            margin: 0 !important;
+            width: 46% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            font-size: 11px !important;
+        }
+        .slr {
+            position: static !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 3px;
+        }
+        #example_filter {
+            order: 4 !important;
+            margin: 0 !important;
+            width: 54% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-end !important;
+            font-size: 11px !important;
+        }
+        #example_filter label {
+            display: flex !important;
+            align-items: center !important;
+            gap: 3px;
+        }
+        .form-control-sm {
+            width: 80px !important;
+            height: 28px !important;
+        }
+
+        #example_wrapper{
+            margin-top: 0% !important;
+        }
+        .row.dt-row {
+            margin-top: 15px !important;
+        }        
+    }
+
+    @media (min-width: 280px) and (max-width: 315px){ 
+        .bi{
+            margin-top: 0.5%;
+            left: 33rem;
+        } 
+        .bi{
+            top: -2.5rem;
+        }
+
+
+        .moa{
+            padding: 0 0px!important;
+            max-width: 101%!important;
+        }
+
+        .clo{
+            margin: -42px -50px!important;
+        } 
+
+        .cl{
+            margin-top: 54px;     
+        }
+
+        .fc{
+            margin-top: 38%;
+        }
+        #example_wrapper{
+            margin-top: 0% !important;
+        }
+        .flex-wrap {
+            margin-top: -3.5% !important;
+            margin-left: -56.5% !important;
+        }
+        .buttons-colvis{
+            left: 39% !important;
+            top: -2% !important;
+            width: 89px !important;
+        }
+        .buttons-collection{
+            top: -101% ;
+            left: 136% ;
+            width:97px ;
+        }
+        #example_filter{
+            margin-right: 91.5% !important;
+            margin-top: -4%;
+            margin-bottom: 0% !important;
+        } 
+        .row.dt-row {
+            margin-top: -3px !important;
+          
+          }
+
+        {% comment %} .fc{
+            margin-top: 16%;
+        } {% endcomment %}
+    }
+
+</style>
+
+{% endblock %}
+{% block body %}
+
+
+{% comment %} <div>
+    {% if messages %}
+    <div class="alert alert-danger fixed-top" id="success-alert" style="height: 40px;">
+        {% for message in messages %}
+
+        <button type=" button" class="close" data-dismiss="alert">x</button>
+        <strong>{{message}}</strong>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <script src="{% static 'JS/jquery.min.js' %}"></script>
+    <script>
+        $("#success-alert").fadeTo(5000, 500).slideUp(500, function () {
+            $("#success-alert").slideUp(500);
+        });
+    </script>
+</div> {% endcomment %}
+
+{% for message in messages %}
+    {% if messages %}
+        <div class="alert {{ message.tags }} alert-dismissible  fixed-top" id="successalerts" role="alert" style="position:fixed;">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+            {{ message }}
+        </div>
+    {% endif %}
+{% endfor %}
+
+<div>
+    <h3 style="text-align: center; z-index: 9; " class="fixed-top cl">KOSTAK GROUP</h3>
+</div>
+
+
+<div class="container-fluid fc">
+    <div class="table-responsive text-nowrap table-wrapper-scroll-x my-custom-scrollbar"> 
+    <table id="example" class="table table-bordered table-hover table-striped table-responsive" style='width:100%;'>
+        {% comment %} <thead>
+            <tr style="text-align: center; white-space: nowrap;">
+                <th scope="col" style="width:90px;">Sr No.&nbsp;</th>
+                <th scope="col">Group Name&nbsp;</th>
+                <th scope="col">Mobile No&nbsp;</th>
+                <th scope="col">Address&nbsp;</th>
+                <th scope="col">Remark&nbsp;</th>
+                <th scope="col">Action&nbsp;</th>
+            </tr>
+        </thead> {% endcomment %}
+
+        {% comment %} <h3 style="text-align: center;">KOSTAK GROUP</h3> {% endcomment %}
+
+        <div>
+            {% comment %} <button type="button" class="btn btn-outline-success bi d-flex justify-content-center align-items-center" style="float:right;" data-bs-toggle="modal"
+                data-bs-target="#ADDGROUP">ADD KOSTAK GROUP</button> {% endcomment %}
+            <!-- MODAL FOR ADDCLIENT PAGE -->
+            <div class="modal fade addipomodal " id="ADDGROUP" tabindex="-1" role="dialog"
+                aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog1 moa" role="document" style="padding: 0 60px; margin: 5px auto;">
+                    <div class="modal-content"
+                        style="background-color: whitesmoke; border-radius: 40px; border: 1px solid black;">
+                        <div class="modal-body">
+                            <div class="modal-header"
+                                style="background: rgb(49, 183, 183); color: white; border-radius: 40px; border: 3px solid black; text-align: center; display: block;">
+                                <b>
+                                    <h5 class="modal-title" id="exampleModalLabel">ADD KOSTAK GROUP</h5>
+                                </b>
+                                <button type="button" class="close clo" data-bs-dismiss="modal" aria-label="Close"
+                                    style="margin: -45px 0;">X</button>
+                            </div>
+                            <form action="AddGroup" method="post" class="needs-validation" style="margin: 10px 20px;">{% csrf_token %}
+
+                                <div class="form-group">
+                                    <script>
+                                        $(document).ready(function() {
+                                            $(".alert").each(function() {
+                                                var alert = $(this);
+                                                setTimeout(function() {
+                                                    alert.fadeOut(500, function() {
+                                                        alert.remove();
+                                                    });
+                                                }, 3000); // 5000 milliseconds = 5 seconds
+                                            });
+                                        });
+                                    </script>
+                                    <label for="GroupName" class="form-label"><b>Name&nbsp;<font color="red">*</font>
+                                        </b></label>
+                                    <input type="text" name='GroupName' class="form-control" placeholder="Enter Name"
+                                        id="GroupName" autofocus="autofocus" onfocus="this.select()" maxlength="50" required>
+                                    <div class="invalid-feedback" id="nameError">
+                                        Please Enter Name.
+                                    </div>
+                                    <script>
+                                        const input = document.getElementById("GroupName");
+                                        const errorDiv = document.getElementById("nameError");
+
+                                        input.addEventListener("input", function () {
+                                            if (input.value.includes(",") || input.value.includes("/")) {
+                                                errorDiv.textContent = "Commas (,) and slashes (/) are not allowed in the group name.";
+                                                input.setCustomValidity("Commas (,) and slashes (/) are not allowed.");
+                                                input.classList.add("is-invalid");
+                                            } else {
+                                                errorDiv.textContent = "Please Enter Name.";
+                                                input.setCustomValidity("");
+                                                input.classList.remove("is-invalid");
+                                            }
+                                        });
+                                    </script>
+
+                                </div>
+                                <div>
+                                    <label class="form-label"><b>Group Mobile No :&nbsp;</b></label>
+                                    <input type="text" name='MobileNo' class="form-control" id="MobileNo" maxlength="10"
+                                        minlength="10"
+                                        oninput="validateMobileNo(this);"
+                                        placeholder="Enter Group Mobile No">
+                                    <div class="invalid-feedback">
+                                        Enter 10 Digit Group Mobile Number.
+                                    </div>
+                                </div>
+                                <div><br>
+                                    <label class="form-label"><b>Email :&nbsp;</b></label>
+                                    <input type="email" name='Email' class="form-control" placeholder="Enter Email"
+                                        maxlength="100" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
+                                    <div class="invalid-feedback">
+                                        Please enter a valid email address.
+                                    </div>
+                                </div><br>
+                                <div>
+                                    <label class="form-label"><b>Address :</b></label>
+                                    <input type="text" name='Address' class="form-control" placeholder="Enter Address"
+                                        maxlength="100">
+                                </div><br>
+                                <div>
+                                    <label class="form-label"><b>Remark :</b></label>
+                                    <input type="text" name='Remark' class="form-control" placeholder="Enter Remark"
+                                        maxlength="100">
+                                </div><br>
+
+
+                                <div class="modal-footer" style="border-top: 1px solid black;">
+                                    <button type="button" class="btn btn-outline-secondary"
+                                        data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-outline-primary">Submit Form</button>
+                                </div>
+                            </form>
+                        </div>
+                        <!-- JAVASCRIPT FOR ADDGROUP FORM VALIDATION -->
+                        <script>
+                            // Example starter JavaScript for disabling form submissions if there are invalid fields
+                            (function () {
+                                'use strict'
+
+                                // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                                var forms = document.querySelectorAll('.needs-validation')
+
+                                // Loop over them and prevent submission
+                                Array.prototype.slice.call(forms)
+                                    .forEach(function (form) {
+                                        form.addEventListener('submit', function (event) {
+                                            if (!form.checkValidity()) {
+                                                event.preventDefault()
+                                                event.stopPropagation()
+                                            }
+
+                                            form.classList.add('was-validated')
+                                        }, false)
+                                    })
+                            })()
+                            function validateMobileNo(input) {
+                                // 1. Strip non-digits from the input value
+                                input.value = input.value.replace(/[^0-9]/g, '');
+                        
+                                // 2. Get the associated feedback div
+                                const feedbackDiv = document.getElementById('mobileNoError');
+                        
+                                // 3. Check the length and set custom validity
+                                if (input.value.length !== 10) {
+                                    input.setCustomValidity("Invalid mobile number length."); // Mark the input as invalid
+                                    // Optionally update the feedback message if different from default
+                                    feedbackDiv.textContent = "Please enter exactly 10 digits for the Group Mobile Number.";
+                                } else {
+                                    input.setCustomValidity(""); // Mark the input as valid
+                                }
+                        
+                                // 4. Manually trigger Bootstrap's validation styling based on current validity
+                                if (input.checkValidity()) { // checkValidity re-evaluates minlength/maxlength/required etc.
+                                    input.classList.remove('is-invalid');
+                                    input.classList.add('is-valid');
+                                } else {
+                                    input.classList.remove('is-valid');
+                                    input.classList.add('is-invalid');
+                                }
+                            }
+                        </script>
+                        <!-- JAVASCRIPT FOR ADDGROUP FORM WITHOUT ENTERING ANY NUMBER USER CANNOT TO BE NEXT INPUT -->
+                        <script>
+                            $(document).ready(function () {
+                                $('#GroupName').focusout(function () {
+                                    var thisValue = $(this).val();
+                                    if (thisValue.trim() == '') {
+                                        $(this).next().show();
+                                        $(this).focus();
+                                    } else {
+                                        $(this).next().hide();
+                                    }
+                                });
+
+                            });
+                        </script>
+                        
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+        <!-- MODAL FOR BULK UPLOAD KOSTAK GROUP -->
+        <div class="modal fade" id="BULKUPLOADGROUP" tabindex="-1" role="dialog"
+            aria-labelledby="bulkUploadModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog1 moa" role="document" style="padding: 0 60px; margin: 5px auto;">
+                <div class="modal-content"
+                    style="background-color: whitesmoke; border-radius: 40px; border: 1px solid black;">
+                    <div class="modal-body">
+                        <div class="modal-header"
+                            style="background: rgb(49, 183, 183); color: white; border-radius: 40px; border: 3px solid black; text-align: center; display: block;">
+                            <b>
+                                <h5 class="modal-title" id="bulkUploadModalLabel">BULK UPLOAD KOSTAK GROUP</h5>
+                            </b>
+                            <button type="button" class="close clo" data-bs-dismiss="modal" aria-label="Close"
+                                style="margin: -45px 0;">X</button>
+                        </div>
+                        <form action="BulkUploadGroup" method="post" enctype="multipart/form-data" class="needs-validation" style="margin: 10px 20px;">
+                            {% csrf_token %}
+                            <div class="text-center mb-3 mt-3">
+                                <a href="DownloadGroupSample" class="btn btn-info">Download Sample CSV</a>
+                            </div>
+                            <div class="form-group mt-3">
+                                <label for="bulkFile" class="form-label"><b>Upload File (.csv, .xls, .xlsx) <font color="red">*</font></b></label>
+                                <input type="file" name="file" class="form-control" id="bulkFile" accept=".csv, .xls, .xlsx" required>
+                                <div class="invalid-feedback">
+                                    Please select a file to upload.
+                                </div>
+                            </div>
+                            <div class="modal-footer mt-4" style="border-top: 1px solid black;">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-outline-primary">Upload</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL FOR BULK DELETE KOSTAK GROUP -->
+        <div class="modal fade" id="BULKDELETEGROUP" tabindex="-1" role="dialog"
+            aria-labelledby="bulkDeleteModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content" style="border-radius: 20px; border: 1px solid black;">
+                    <div class="modal-header" style="border-bottom: 1px solid black;">
+                        <b>
+                            <h5 class="modal-title" id="bulkDeleteModalLabel">Bulk Delete Kostak Groups</h5>
+                        </b>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" style="white-space: normal;">
+                        <center>
+                            <p id="bulk_delete_text">Are you sure you want to delete the selected groups?</p>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"
+                                    style="width:100%;">Cancel</button>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <button type="button" class="btn btn-outline-danger" id="confirm_bulk_delete"
+                                    style="width:100%;">Delete</button>
+                                </div>
+                            </div>
+                        </center>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{ html_table | safe }}
+
+        {% comment %} <tbody style="text-align: center;">
+            {% for i in product %}
+            <tr>
+                <th>{{forloop.counter}}</th>
+                <td style="white-space: nowrap;">{{ i.GroupName }}</td>
+                <td>{{ i.MobileNo }}</td>
+                <td>{{ i.Address }}</td>
+                <td style="word-break: break-word;">{{ i.Remark }}</td>
+                <td style="white-space: nowrap;"><button onclick="window.location.href='EditGroup/{{ i.id }}';" class="btn btn-outline-primary"
+                        style="width: 72px;">Edit</button>
+                    <!-- BUTTON OF DELETE MODAL -->
+                    <button type="button" class="btn btn-outline-danger"
+                        onclick="document.getElementById('{{ i.id }}').style.display='block'" style="width: 72px;"
+                        data-toggle="modal" data-target="#{{ i.id }}">Delete</button>
+                    <!--NEW  Modal FOR DELETE MODAL-->
+                    <div class="modal fade" id="{{ i.id }}" tabindex="-1" role="dialog"
+                        aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header" style="border-bottom: 1px solid black;">
+                                    <b>
+                                        <h5 class="modal-title" id="exampleModalLabel">Delete Kostak Group</h5>
+                                    </b>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body" style="white-space: normal;">
+                                    {{prompt}}
+                                    <center>
+                                        <p>Are you sure you want to delete {{ i.GroupName }} group?</p>
+                                        <div class="form-row">
+                                            <div class="form-group col-md-6">
+                                                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal"
+                                                style="width:50%;">Cancel</button>
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <button type="button" class="btn btn-outline-danger"
+                                                style="width:50%;" onclick="window.location.href='DeleteGroup/{{ i.id }}';">Delete</button>
+                                            </div>
+                                        </div>
+
+                                    </center>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody> {% endcomment %}
+    </table>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <!-- Total rows and current range display (left aligned) -->
+            <p class="text-left">
+                Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} Rows
+            </p>
+        </div>
+
+        <div class="col-md-6">
+            <ul class="pagination justify-content-end text-left" style="margin: 0; margin-right:2%;">
+                <!-- Always show the first page -->
+                {% if page_obj.number != 1 %}
+                    <li class="page-item">
+                        <a class="page-link" href="/GroupSetup?page=1">1</a>
+                    </li>
+                {% endif %}
+                
+                <!-- Show ellipsis if current page is greater than 4 -->
+                {% if page_obj.number > 4 %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+                
+                <!-- Display pages before the current page -->
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num > 1 and num < page_obj.number and num >= page_obj.number|add:'-2' %}
+                        <li class="page-item">
+                            <a class="page-link" href="/GroupSetup?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                <!-- Display current page -->
+                <li class="page-item active">
+                    <span class="page-link">{{ page_obj.number }}</span>
+                </li>
+                
+                <!-- Display pages after the current page -->
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num > page_obj.number and num < page_obj.number|add:'3' and num < page_obj.paginator.num_pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="/GroupSetup?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                <!-- Show ellipsis if current page is less than num_pages - 3 -->
+                {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+                
+                <!-- Always show the last page -->
+                {% if page_obj.number != page_obj.paginator.num_pages %}
+                    <li class="page-item">
+                        <a class="page-link" href="/GroupSetup?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+        
+    </div>
+
+</div>
+
+
+
+<script>
+    // Get the modal
+    var modal = document.getElementById('id01');
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+
+<script>
+    $(document).ready(function () {
+        $('#example thead tr')
+            .clone(true)
+            .addClass('filters')
+            .appendTo('#example thead');
+
+        var pageLength = "{{ Gp_page_size|default:'50' }}";
+        pageLength = pageLength === "All" ? -1 : parseInt(pageLength, 10);
+    
+        var table = $('#example').DataTable({
+            orderCellsTop: true,
+            {% comment %} fixedHeader: true, {% endcomment %}
+            {% comment %} lengthMenu: [50, 100, 150, 200,-1], {% endcomment %}
+            lengthChange: true,
+            info:false,
+            "pageLength": pageLength,
+            buttons: [ {
+                text: 'Columns', 
+                extend: 'colvis',
+            },
+            {   
+                extend: 'collection',
+                text: 'Download',
+                buttons:[
+                    {
+                        extend: 'excel',
+                        text: 'Excel',
+                        exportOptions: {
+                            columns: [1, 2, 3, 4],
+                        },
+                        customize: function(xlsx) {
+                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                    
+                            $('row:first', sheet).remove();
+                        }
+                    },
+                    {
+                        extend: 'pdf',
+                        text: 'PDF',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4],
+                            rows: ':visible',
+                            modifier: {
+                                page: 'current'
+                            }
+                        },
+                        customize: function(doc) {
+                           doc.pageMargins = [60, 50, 100, 100];
+                           doc.styles.tableHeader = {
+                                fillColor: 'grey',
+                                color: 'whitesmoke',
+                                bold: true,
+                                alignment: 'center',
+                            };
+                            doc.styles.tableBodyEven = {
+                                alignment: 'center',
+                                fillColor: 'bisque',
+                            };
+                            doc.styles.tableBodyOdd = {
+                                alignment: 'center',
+                                fillColor: 'bisque',
+                            };
+                            
+                            doc.pageSize = 'A4'; 
+                            doc.content[1].table.widths = [50, 100, 100, 100, 100];
+                            {% comment %} doc.content[1].table.heights = Array(table.rows({ page: 'current' }).count() + 1).join('*').split(''); {% endcomment %}
+
+                            doc.content[1].layout = {
+                                hLineWidth: function(i, node) {
+                                    return 1; 
+                                },
+                                vLineWidth: function(i, node) {
+                                    return 1; 
+                                },
+                                hLineColor: function(i, node) {
+                                    return 'black'; 
+                                },
+                                vLineColor: function(i, node) {
+                                    return 'black'; 
+                                },
+                            };
+                        }
+                    }
+                ]
+            },                
+                
+            ],
+            initComplete: function () {
+                var api = this.api();
+    
+                
+                api
+                    .columns(':not(:last-child)')
+                    .eq(0)
+                    .each(function (colIdx) {
+                        
+                        var cell = $('.filters th').eq(
+                            $(api.column(colIdx).header()).index()
+                        );
+                        var title = $(cell).text();
+                        $(cell).html('<input class="Input" type="text" placeholder="' + title + '" style="text-align: center ;  width: auto;" />');
+                        
+                        $(
+                            'input',
+                            $('.filters th').eq($(api.column(colIdx).header()).index())
+                        )
+                            .off('keyup change')
+                            .on('change', function (e) {
+                                
+                                $(this).attr('title', $(this).val());
+                                var regexr = '({search})'; //$(this).parents('th').find('select').val();
+    
+                                var cursorPosition = this.selectionStart;
+                                
+                                api
+                                    .column(colIdx)
+                                    .search(
+                                        this.value != ''
+                                            ? regexr.replace('{search}', '(((' + this.value + ')))')
+                                            : '',
+                                        this.value != '',
+                                        this.value == ''
+                                    )
+                                    .draw();
+                            })
+                            .on('keyup', function (e) {
+                                e.stopPropagation();
+    
+                                $(this).trigger('change');
+                                $(this)
+                                    .focus()[0]
+                                    .setSelectionRange(cursorPosition, cursorPosition);
+                            });
+                    });
+                    var lastCell = $('.filters th').eq(
+                    $(api.column(':last-child').header()).index()
+                    );
+                    $(lastCell).html('');
+            },
+            language: {
+                info: 'Showing _START_ to _END_ of _TOTAL_ Rows',
+                infoFiltered: '(filtered from _MAX_ total Rows)',
+                emptyTable: "No data available",
+                lengthMenu: 'Show <select>' +
+                    '<option value="50">50</option>' +
+                    '<option value="100">100</option>' +
+                    '<option value="150">150</option>' +
+                    '<option value="200">200</option>' +
+                    '<option value="-1">All</option>' +
+                    '</select> Rows',
+                search: 'Search:',
+                paginate: {
+                    first: 'First',
+                    last: 'Last',
+                    next: 'Next',
+                    previous: 'Previous'
+                }
+            },
+        });
+
+        $('select[name="example_length"] option[value="-1"]').text('All');
+        
+        table.buttons().container()
+            .appendTo( '#example_wrapper .col-md-6:eq(0)' );
+
+        var table = $('#example').DataTable();
+
+        var dataTableLengthDiv = document.getElementById('example_length');
+
+        var firstLabel = dataTableLengthDiv.querySelector('label');
+
+        if (firstLabel) {
+        firstLabel.classList.add('slr');
+        }
+    } );
+</script>
+<script>
+      $(document).ready(function() {
+        $(".col-sm-12.col-md-6:first").addClass("custom-width");
+        $(".col-sm-12.col-md-6").addClass("cw");
+        $(".dt-row:first").addClass("table-responsive");
+        $(".buttons-collection").addClass("d-flex justify-content-center align-items-center");
+
+        var customButtonHtml2 =    '<div class="btn-group akg"><button type="button" class="btn btn-outline-success bi d-flex justify-content-center align-items-center" style="float:right;" data-bs-toggle="modal"'+
+            'data-bs-target="#ADDGROUP">ADD KOSTAK GROUP</button>'+
+            '<button type="button" id="bulk_upload_btn" class="btn btn-outline-primary bi d-flex justify-content-center align-items-center" style="height: 30px !important; margin-left: 5px; float:right;" data-bs-toggle="modal"'+
+            'data-bs-target="#BULKUPLOADGROUP">BULK UPLOAD</button>'+
+            '<button type="button" id="bulk_delete_btn" class="btn btn-outline-danger bi d-flex justify-content-center align-items-center d-none" style="height: 30px !important; margin-left: 5px; float:right;" data-bs-toggle="modal"'+
+            'data-bs-target="#BULKDELETEGROUP">BULK DELETE</button>'+
+            '</div>';
+        
+        $('.col-sm-12.col-md-6.cw:eq(1)').append(customButtonHtml2);
+
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        // Handle "Select All" checkbox
+        $(document).on('change', '#select_all_groups', function () {
+            $('.group-checkbox').prop('checked', this.checked);
+            toggleBulkButtons();
+        });
+
+        // Handle individual checkbox changes
+        $(document).on('change', '.group-checkbox', function () {
+            if ($('.group-checkbox:checked').length == $('.group-checkbox').length && $('.group-checkbox').length > 0) {
+                $('#select_all_groups').prop('checked', true);
+            } else {
+                $('#select_all_groups').prop('checked', false);
+            }
+            toggleBulkButtons();
+        });
+
+        function toggleBulkButtons() {
+            var selectedCount = $('.group-checkbox:checked').length;
+            if (selectedCount > 0) {
+                var groupText = selectedCount === 1 ? 'group' : 'groups';
+                $('#bulk_upload_btn').addClass('d-none');
+                $('#bulk_delete_btn').removeClass('d-none');
+                $('#bulk_delete_btn').text('BULK DELETE (' + selectedCount + ')');
+                $('#bulk_delete_text').text('Are you sure you want to delete ' + selectedCount + ' selected ' + groupText + '?');
+            } else {
+                $('#bulk_upload_btn').removeClass('d-none');
+                $('#bulk_delete_btn').addClass('d-none');
+            }
+        }
+
+        // Handle Bulk Delete Confirmation
+        $('#confirm_bulk_delete').on('click', function () {
+            var selectedIds = [];
+            $('.group-checkbox:checked').each(function () {
+                selectedIds.push($(this).val());
+            });
+
+            if (selectedIds.length === 0) return;
+
+            // Show loading or disable button
+            $(this).prop('disabled', true).text('Deleting...');
+
+            fetch('/BulkDeleteGroup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ group_ids: selectedIds })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    location.reload();
+                } else {
+                    alert('Error: ' + (data.message || 'Something went wrong'));
+                    $(this).prop('disabled', false).text('Delete');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while deleting.');
+                $(this).prop('disabled', false).text('Delete');
+            });
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        // Initialize DataTables instance
+        // Remove the existing rows selection dropdown and pagination if needed
+        $('.slr').remove();
+        $('#example_paginate').remove();
+        
+        // Create the new form HTML for rows per page selection
+        var formHtml = `
+            <form method="POST" action="/GroupSetup"> 
+                {% csrf_token %}
+                <label class='slr' for="page_size">Show 
+                <select name="Gp_page_size" id="Gp_page_size" onchange="this.form.submit()">
+                    <option value="{{Gp_page_size}}" style='display:None;' {% if Gp_page_size|default_if_none:50 == 50 %}selected{% endif %}>{{Gp_page_size}}</option>
+                    <option value="50" {% if Gp_page_size == 50 %}selected{% endif %}>50</option>
+                    <option value="100" {% if Gp_page_size == 100 %}selected{% endif %}>100</option>
+                    <option value="200" {% if Gp_page_size == 200 %}selected{% endif %}>200</option>
+                    <option value="250" {% if Gp_page_size == 250 %}selected{% endif %}>250</option>
+                    <option value="All" {% if Gp_page_size == 'All' %}selected{% endif %}>All</option>
+                </select>
+                Rows</label>
+                <input type="hidden" name="page" value="{{ page_obj.number }}">
+            </form>
+        `;
+    
+        // Append the form to a specific element
+        $('.dataTables_length').append(formHtml);
+
+        // Update page length when selection is changed
+        {% comment %} $('#Gp_page_size').on('change', function() {
+            var pageSize = $(this).val();
+            if (pageSize === 'All') {
+                table.page.len(-1).draw(); // Show all rows if "All" is selected
+            } else {
+                table.page.len(parseInt(pageSize)).draw(); // Set to selected page length
+            }
+        });
+
+        // Set the initial page length when the page loads (from the server-side)
+        table.page.len({{ Gp_page_size|default:50 }}).draw(); {% endcomment %}
+    });
+</script>
+
+{% comment %} <script>
+    $(document).ready(function () {
+        $('#bootstrapdatatable').DataTable({
+            "aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
+            "iDisplayLength": 25
+        }
+        );
+    });
+</script>
+
+<script>
+    $('table.table-sortable th').on('click', function (e) {
+        sortTableByColumn(this)
+    })
+
+    function sortTableByColumn(tableHeader) {
+        // extract all the relevant details
+        let table = tableHeader.closest('table')
+        let index = tableHeader.cellIndex
+        let sortType = tableHeader.dataset.sortType
+        let sortDirection = tableHeader.dataset.sortDir || 'asc' // default sort to ascending
+
+        // sort the table rows
+        let items = Array.prototype.slice.call(table.rows);
+        let sortFunction = getSortFunction(sortType, index, sortDirection)
+        let sorted = items.sort(sortFunction)
+
+        // remove and re-add rows to table
+        for (let row of sorted) {
+            let parent = row.parentNode
+            let detatchedItem = parent.removeChild(row)
+            parent.appendChild(row)
+        }
+
+        // reset heading values and styles
+        for (let header of tableHeader.parentNode.children) {
+            header.classList.remove('currently-sorted')
+            delete header.dataset.sortDir
+        }
+
+        // update this headers's values and styles
+        tableHeader.dataset.sortDir = sortDirection == 'asc' ? 'desc' : 'asc'
+        tableHeader.classList.add('currently-sorted')
+    }
+    function getSortFunction(sortType, index, sortDirection) {
+        let dir = sortDirection == 'asc' ? -1 : 1
+        switch (sortType) {
+            case 'text': return stringRowComparer(index, dir);
+            case 'numeric': return numericRowComparer(index, dir);
+            default: return stringRowComparer(index, dir);
+        }
+    }
+
+    // asc = alphanumeric order - eg 0->9->a->z
+    // desc = reverse alphanumeric order - eg z->a->9->0
+    function stringRowComparer(index, direction) {
+        return (a, b) => -1 * direction * a.children[index].textContent.localeCompare(b.children[index].textContent)
+    }
+
+    // asc = higest to lowest - eg 999->0
+    // desc = lowest to highest - eg 0->999
+    function numericRowComparer(index, direction) {
+        return (a, b) => direction * (Number(a.children[index].textContent) - Number(b.children[index].textContent))
+    }
+</script> {% endcomment %}
+
+<script src="{% static 'JS/jquery.min.js' %}"></script>
+<script>
+    $(document).ready(function() {
+        $(".alert").each(function() {
+            var alert = $(this);
+            setTimeout(function() {
+                alert.fadeOut(500, function() {
+                    alert.remove();
+                });
+            }, 3000); // 5000 milliseconds = 5 seconds
+        });
+    });
+</script>
+{% comment %} <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script> {% endcomment %}
+{% comment %} <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script> {% endcomment %}
+
+<script src="{% static 'DataTables/js/jquery-3.7.0.js' %}"></script>
+<script src="{% static 'DataTables/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.fixedHeader.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.bootstrap5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.bootstrap5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/jszip.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.colVis.min.js' %}"></script>
+<script src="{% static 'DataTables/js/pdfmake.min.js' %}"></script>
+<script src="{% static 'DataTables/js/vfs_fonts.js' %}"></script>
+
+{% comment %} <script src="{% static 'JS/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'JS/dataTables.bootstrap4.min.js' %}"></script> {% endcomment %}
+{% endblock %}
+
+
+

@@ -1,0 +1,1058 @@
+{% load static %}
+{% load pwa %}
+<!doctype html>
+<html lang="en">
+
+<head>
+    {% progressive_web_app_meta %}
+    <!-- OLD Required meta tags -->
+    <!-- <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> -->
+
+    <!-- NEW Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <!-- OLD Bootstrap CSS -->
+    <link rel="stylesheet" href="{% static  'CSS/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static  'CSS/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static  'CSS/jquery-ui.css' %}">
+    <link rel="stylesheet" href="{% static  'CSS/loader.css' %}">
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" /> -->
+
+
+
+
+
+    <title>{% block title%} {% endblock %}</title>
+
+    {% block css %} {% endblock %}
+
+    <style>
+        .fixed-top {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            z-index: 1030;
+        }
+
+        .navbar-dark .navbar-nav .active>.nav-link,
+        .navbar-dark .navbar-nav .nav-link.active,
+        .navbar-dark .navbar-nav .nav-link.show,
+        .navbar-dark .navbar-nav .show>.nav-link {
+            color: white;
+        }
+
+        .user-dropdown {
+            left: -71px !important;
+        }
+
+        .navbar-expand-md .navbar-nav .dropdown-menu {
+            position: absolute;
+            background: #686868;
+            color: white;
+            margin-top: -2.875px;
+            margin-left: 0px;
+            cursor: pointer;
+        }
+
+        .navbar-expand-md .navbar-nav .logout {
+            margin-top: 11.125px;
+            margin-left: 4px;
+        }
+
+        .dropdown-menu {
+            top: 100%;
+            left: 0;
+            z-index: 1000;
+            display: none;
+            min-width: 10rem;
+            padding: .5rem 0;
+            margin: .125rem 0 0;
+            font-size: 1rem;
+            text-align: left;
+            list-style: none;
+            border: 1px solid rgba(0, 0, 0, .15);
+            border-radius: .25rem;
+        }
+
+
+        .dropdown-item {
+            display: block;
+            width: 100%;
+            padding: .25rem 1.5rem;
+            clear: both;
+            font-weight: 400;
+            color: white;
+            text-align: inherit;
+            white-space: nowrap;
+            background-color: transparent;
+            border: 0;
+        }
+
+        a {
+            color: black;
+            text-decoration: none;
+            background-color: transparent;
+
+        }
+
+        a:not([href]):not([tabindex]):focus,
+        a:not([href]):not([tabindex]):hover {
+            color: inherit;
+            text-decoration: none;
+            color: black;
+        }
+
+
+        /* Changepassword MODAL */
+        .addipomodal {
+            margin: 0% 2%;
+            position: fixed;
+        }
+
+        .modal-dialog1 {
+            max-width: 46%;
+            margin: 1.75rem auto;
+        }
+
+        /* MODAL CSS */
+        /* * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: arabic typesetting;
+        } */
+
+        .background {
+
+            overflow: hidden;
+            border-radius: 28px;
+        }
+
+        ::selection {
+            background: rgba(26, 188, 156, 0.3);
+        }
+
+        /* .container {
+            max-width: 440px;
+            padding: 0 20px;
+            margin: 170px auto;
+        } */
+
+        /* .wrapper {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.48);
+            border-radius: 5px;
+            box-shadow: 0px 4px 10px 1px rgba(0, 0, 0, 0.1);
+        }  */
+
+        .wrapper .title {
+            height: 75px;
+            /* background: #16a085; */
+            border-radius: 5px 5px 0 0;
+            color: black;
+            font-size: 31px;
+            font-weight: 609;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+        }
+
+        .wrapper form {
+            padding: 0px 25px 25px 25px;
+        }
+
+        .wrapper form .row {
+            height: 45px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .wrapper form .row input {
+            height: 100%;
+            width: 100%;
+            outline: none;
+            padding-left: 60px;
+            border-radius: 5px;
+            border: 1px solid lightgrey;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        form .row input:focus {
+            border-color: #16a085;
+            box-shadow: inset 0px 0px 2px 2px rgba(26, 188, 156, 0.25);
+        }
+
+        form .row input::placeholder {
+            color: #999;
+        }
+
+        .wrapper form .row i {
+            position: absolute;
+            width: 47px;
+            height: 100%;
+            color: #fff;
+            font-size: 18px;
+            background: #5cb85c;
+            border: 1px solid #4cae4c;
+            border-radius: 5px 0 0 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .wrapper form .pass {
+            margin: -8px 0 20px 0;
+        }
+
+        .wrapper form .pass a {
+            color: white;
+            font-size: 19px;
+            text-decoration: none;
+        }
+
+        .wrapper form .pass a:hover {
+            text-decoration: underline;
+        }
+
+        .wrapper form .button input {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 500;
+            padding-left: 0px;
+            background: green;
+            border: none;
+            cursor: pointer;
+            border-radius: 50px;
+        }
+
+        /* form .button input:hover{
+        background: #12876f;
+        } */
+        .wrapper form .signup-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 17px;
+        }
+
+        .wrapper form .signup-link a {
+            color: whitesmoke;
+            text-decoration: none;
+        }
+
+        form .signup-link a:hover {
+            text-decoration: underline;
+        }
+
+        ::placeholder {
+            font-size: 1.0em;
+            font-weight: bold;
+        }
+
+        .modal1 {
+            display: none;
+            margin: 8% 0%;
+            padding: 0% 0%;
+            position: fixed;
+
+        }
+
+        .field-icon1 {
+            float: right;
+            margin-left: -31px;
+            margin-top: 13px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .field-icon2 {
+            float: right;
+            margin-left: -31px;
+            margin-top: 13px;
+            position: relative;
+            z-index: 2;
+        }
+
+        @media (min-width: 992px) and (max-width: 41991px) {
+            .chng-box {
+                margin-right: 0rem !important;
+            }
+
+            .title {
+                padding: 0px 9px !important;
+            }
+        }
+
+        @media (min-width: 768px) and (max-width: 991px) {
+            .chng-box {
+                margin-left: 11rem;
+            }
+
+            .title {
+                padding: 0px 9px !important;
+            }
+        }
+
+        @media (min-width: 722px) and (max-width: 767px) {
+            .chng-box {
+                margin-left: 1rem;
+            }
+
+            .title {
+                padding: 0px 9px !important;
+            }
+
+            .addipomodal {
+                margin: 0% -50.5% !important;
+                width: 198%;
+            }
+
+            .wrapper form .row input {
+                padding-left: 50px !important;
+                font-size: 14px;
+            }
+
+            .wrapper form {
+                padding: 0px 0px 0px 0px !important;
+            }
+        }
+
+        @media (min-width: 666px) and (max-width: 721px) {
+            .chng-box {
+                margin-left: 1rem;
+            }
+
+            .title {
+                padding: 0px 9px !important;
+            }
+
+            .addipomodal {
+                margin: -2% -46.5% !important;
+                width: 193%;
+            }
+
+            .wrapper form .row input {
+                padding-left: 50px !important;
+                font-size: 14px;
+            }
+
+            .wrapper form {
+                padding: 0px 0px 0px 0px !important;
+            }
+        }
+
+        @media (min-width: 616px) and (max-width: 665px) {
+            .chng-box {
+                margin-left: 1rem;
+            }
+
+            .title {
+                padding: 0px 9px !important;
+            }
+
+            .addipomodal {
+                margin: -2% -49.5% !important;
+                width: 193%;
+            }
+
+            .wrapper form .row input {
+                padding-left: 50px !important;
+                font-size: 14px;
+            }
+
+            .wrapper form {
+                padding: 0px 0px 0px 0px !important;
+            }
+        }
+
+        @media (min-width: 558px) and (max-width: 615px) {
+            .chng-box {
+                margin-left: 1rem;
+            }
+
+            .title {
+                padding: 0px 9px !important;
+            }
+
+            .addipomodal {
+                margin: -2% -48.5% !important;
+                width: 193%;
+            }
+
+            .wrapper form .row input {
+                padding-left: 50px !important;
+                font-size: 14px;
+            }
+
+            .wrapper form {
+                padding: 0px 0px 0px 0px !important;
+            }
+        }
+
+        @media (min-width: 503px) and (max-width: 557px) {
+            .chng-box {
+                margin-left: 1rem;
+            }
+
+            .title {
+                padding: 0px 9px !important;
+            }
+
+            .addipomodal {
+                margin: -2% -48.5% !important;
+                width: 193%;
+            }
+
+            .wrapper form .row input {
+                padding-left: 50px !important;
+                font-size: 14px;
+            }
+
+            .wrapper form {
+                padding: 0px 0px 0px 0px !important;
+            }
+        }
+
+        @media (min-width: 451px) and (max-width: 502px) {
+            .chng-box {
+                margin-left: 1rem;
+            }
+
+            .title {
+                padding: 0px 9px !important;
+            }
+
+            .addipomodal {
+                margin: -2% -48.5% !important;
+                width: 193%;
+            }
+
+            .wrapper form .row input {
+                padding-left: 50px !important;
+                font-size: 14px;
+            }
+
+            .wrapper form {
+                padding: 0px 0px 0px 0px !important;
+            }
+        }
+
+        @media (min-width: 411px) and (max-width: 450px) {
+            .chng-box {
+                margin-left: 0.5rem;
+            }
+
+            .title {
+                padding: 0px 9px !important;
+            }
+
+            .addipomodal {
+                margin: -2% -48.5% !important;
+                width: 193%;
+            }
+
+            .wrapper form .row input {
+                padding-left: 50px !important;
+                font-size: 14px;
+            }
+
+            .wrapper form {
+                padding: 0px 0px 0px 0px !important;
+            }
+        }
+
+        @media (min-width: 390px) and (max-width: 410px) {
+            .chng-box {
+                margin-left: 1rem;
+            }
+
+            .title {
+                padding: 0px 9px !important;
+            }
+
+            .addipomodal {
+                margin: -2% -48.5% !important;
+                width: 193%;
+            }
+
+            .wrapper form .row input {
+                padding-left: 50px !important;
+                font-size: 14px;
+            }
+
+            .wrapper form {
+                padding: 0px 0px 0px 0px !important;
+            }
+        }
+
+        .expiry-message {
+            padding: 10px;
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            margin: 10px 0;
+            display: none;
+            /* Initially hidden */
+        }
+    </style>
+</head>
+
+
+<body style="max-width: 100vw;">
+    <div class="loader"></div>
+
+    <!-- NEW NAVBAR -->
+
+
+
+    <nav class="navbar navbar-expand-md navbar-dark justify-content-center fixed-top"
+        style="background:#686868; position: fixed;">
+        <!-- <a class="navbar-brand abs" href="#" style="color: white; cursor:unset;"> IPO UTILITY
+        </a> -->
+
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+            data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false"
+            aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        {% comment %} <div class="expiry-message collapse fixed-top" id="expiry-message">
+            <span>Your account expires on: {{ expiry_date }}.</span>
+            <button type="button" class="close" data-bs-toggle="collapse" data-bs-target="#expiry-message"
+                aria-label="Close" style="font-size: 20px;">X</button>
+            {% comment %} <button class="close-btn" id="close-btn">&times;</button>
+        </div> {% endcomment %}
+        <div class="expiry-message fixed-top" id="expiry-message" style="margin-bottom: -8px; margin-top: 0px;">
+            <span>Your account expires on: {{ expiry_date }}.</span>
+            <button type="button" class="close" id="close-btn" aria-label="Close" style="font-size: 20px;">X</button>
+        </div>
+
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup" style="margin-bottom: -8px; margin-top: -15px;">
+            <ul class="navbar-nav" style="margin-bottom: -3px;">
+                {% comment %} <li class="nav-item active">
+                    <b> <a class="nav-link" href="/" style="color: orange; margin-bottom: -4px;"> <img
+                                src='/../static/image/home.png' width="23px" height="23px" style="margin-bottom: 5px;">
+                            IPO UTILITY </a></b>
+                    <!-- <a class="nav-link" href="#" style="color: white; cursor:unset;"> IPO UTILITY</a> -->
+                </li> {% endcomment %}
+
+                {% if request.user.is_authenticated %}
+                <li class="nav-item active">
+                    <b>
+                        <a class="nav-link" href="/" style="color: orange; margin-bottom: -4px;">
+                            <img src="{% static 'image/home.png' %}" width="23px" height="23px"
+                                style="margin-bottom: 5px;">
+                            IPO UTILITY
+                        </a>
+                    </b>
+                </li>
+                {% else %}
+                <li class="nav-item active">
+                    <b>
+                        <span class="nav-link" style="color: orange; margin-bottom: -4px; cursor: default;">
+                            <img src="{% static 'image/home.png' %}" width="23px" height="23px"
+                                style="margin-bottom: 5px;">
+                            IPO UTILITY
+                        </span>
+                    </b>
+                </li>
+                {% endif %}
+
+                {% if request.user.groups.all.0.name == 'Broker' %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLinks" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: white;">
+                        <b style="color: #fff;">|</b> &nbsp; Setup
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLinks">
+                        <a class="dropdown-item" href="/IPOSETUP">IPOs Details</a>
+                        <a class="dropdown-item" href="/ClientSetup">Clients Details</a>
+                        <a class="dropdown-item" href="/GroupSetup">Groups Details</a>
+                        <!-- <a class="dropdown-item" href="/PremiumGroupSetup">Premium Trade Group</a> -->
+                    </div>
+                </li>
+                {% else %}
+                <span class="nav-link ms-2">
+                    <b style="color: #fff;">|</b> &nbsp; Setup
+                </span>
+                {% endif %}
+
+                {% if request.user.is_authenticated%}
+                <li class="nav-item active">
+                    <a class="nav-link" href="/GroupWiseDashboard"><b>|</b>&nbsp; Group Wise Dashboard</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="/accounting"><b>|</b>&nbsp; Accounting</a>
+                </li>
+                {% else %}
+                <span class="nav-link ms-2">
+                    <b style="color: #fff;">|</b> &nbsp; Group Wise Dashboard
+                </span>
+
+                <span class="nav-link ms-2">
+                    <b style="color: #fff;">|</b> &nbsp; Accounting
+                </span>
+                {% endif %}
+                {% if request.user.groups.all.0.name == 'Broker' %}
+                <li class="nav-item active">
+                    <a class="nav-link" href="/BackUp"><b>|</b>&nbsp; Backup</a>
+                </li>
+                {% else %}
+                <span class="nav-link ms-2">
+                    <b style="color: #fff;">|</b> &nbsp; Backup
+                </span>
+                {% endif %}
+                {% comment %} <li class="nav-item active">
+                    <a class="nav-link" href="/panalloted">IPO Allotment Analysis</a>
+                </li> {% endcomment %}
+
+            </ul>
+            <ul class="navbar-nav ml-auto" method="post" style="margin-bottom: 0px;margin-top: 2px;">
+
+                <li class="nav-item active">
+                </li>
+
+                <!-- <li class="nav-item active">
+                     <a class="nav-link" data-bs-toggle="modal" data-bs-target="#CreateUser">Create User</a> 
+                    <a class="nav-link" href="/AddCustomerUser"><b>|</b>&nbsp;&nbsp;Create User</a>
+                </li> -->
+                <li class="nav-item dropdown">
+                    <!-- href="/" -->
+                    <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false" style="margin-bottom: 0px; color: white;">
+                        <i class="fa fa-user-circle" aria-hidden="true" style='font-size:18px; color: white;'></i>
+                        Welcome,
+                        {% comment %} {{request.user }} {% endcomment %}
+                        {% if not request.user.is_authenticated %}
+                        {{ request.session.group_name }}
+                        {% else %}
+                        {{ request.user }}
+                        {% endif %}
+                    </a>
+                    <div class="dropdown-menu user-dropdown" aria-labelledby="navbarDropdownMenuLink">
+                        {% if request.user.groups.all.0.name == 'Broker' %}
+                        <a class="dropdown-item" href="{% url 'user_profile' %}">User Profile</a>
+                        {% else %}
+                        <span class="dropdown-item" style="cursor: default; pointer-events: none; opacity: 0.7;"
+                            title="Profile editing is managed by your broker.">
+                            User Profile
+                        </span>
+                        {% endif %}
+                        {% comment %} <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#UserProfileModal"
+                            style="line-height: 1.2;">User Profile</a> {% endcomment %}
+                        <a class="dropdown-item" data-bs-toggle="modal" style="line-height: 1.2;">Expiry Date :
+                            {{expiry_date }}</a>
+                        <div style="height: 5px;"></div>
+                        {% if request.user.is_authenticated %}
+                        <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#Changepassword"
+                            style="line-height: 1.2;">Change Password</a>
+                        {% else %}
+                        <span class="dropdown-item" style="cursor: default; pointer-events: none; opacity: 0.7;"
+                            title="Profile editing is managed by your broker.">
+                            Change Password
+                        </span>
+                        {%endif%}
+                        <div style="height: 5px;"></div>
+                        <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#logout"
+                            style="line-height: 1.2;"><img src='/../static/image/logout.png' width="23px" height="23px"
+                                style="margin-bottom: 5px;">Logout</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- User Profile Modal -->
+    <div class="modal fade" id="UserProfileModal" tabindex="-1" aria-labelledby="UserProfileModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog1">
+            <div class="modal-content chng-box"
+                style="background-color: whitesmoke; border: 1px solid white; border-radius: 29px;">
+                <div class="modal-body background">
+                    <div class="modal-header"
+                        style="background: rgb(49, 183, 183); justify-content: center; border: 4px solid rgb(0, 0, 0); border-top-right-radius: 22px; border-top-left-radius: 22px; border-bottom: 0px solid white;">
+                        <b>
+                            <h4> <span class="modal-title title" id="UserProfileModalLabel"
+                                    style="color: white; padding: 0 1%;">User Profile</span></h4>
+                        </b>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                            style="cursor: pointer; background: none; border: none; color: white; font-size: 22px;">X</button>
+                    </div>
+                    <div class="containers"
+                        style="border: 4px solid black; border-bottom-left-radius: 22px; border-bottom-right-radius: 22px; padding: 0 15%;">
+                        <div class="wrapper">
+                            <div class="title"><span>{{ request.user }}</span></div>
+                            <form method="post" action="/update-user-profile">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <i class="fa fa-user" aria-hidden="true"></i>
+                                    <input type="text" name="username" value="{{ user.username }}" readonly>
+                                </div>
+                                <div class="row">
+                                    <i class="fa fa-envelope" aria-hidden="true"></i>
+                                    <input type="email" name="email" value="{{ user.email }}" placeholder="Email"
+                                        required>
+                                </div>
+                                <div class="row">
+                                    <i class="fa fa-key" aria-hidden="true"></i>
+                                    <input type="apppassword" id="appPassword1" name="app_password"
+                                        placeholder="App Password" required>
+                                    <span toggle="#appPassword1"
+                                        class="fa fa-fw fa-eye field-icon1 toggle-password1"></span>
+                                </div>
+                                <!-- <div class="row">
+                                    <i class="fa fa-key" aria-hidden="true"></i>
+                                    <input type="password" id="appPassword2" name="confirm_app_password" placeholder="Confirm App Password" required>
+                                    <span toggle="#appPassword2" class="fa fa-fw fa-eye field-icon2 toggle-password2"></span>
+                                </div> -->
+                                <br>
+                                <div class="row button">
+                                    <input class="btn loginbtn" type="submit" value="Update Profile">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--NEW  Modal FOR Create User MODAL-->
+    <div class="modal fade modal1" id="CreateUser" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header" style="border-bottom: 1px solid black;">
+                    <b>
+                        <h5 class="modal-title" id="exampleModalLabel">Create User</h5>
+                    </b>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
+                        style="font-size: 20px;">X</button>
+                </div>
+                <div class="modal-body">
+                    <center>
+                        <div class="clearfix">
+                            <button type="button" class="btn btn-outline-secondary"
+                                style="margin-right: 60px; width: 25%;" data-bs-dismiss="modal">Close</button>
+                            <a type="button" class="btn btn-outline-danger" style="margin-left:-20px; width: 25%;"
+                                href="/logout">Logout</a>
+                        </div>
+                    </center>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    <!--NEW  Modal FOR logout MODAL-->
+    <div class="modal fade modal1" id="logout" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" style="border-bottom: 1px solid black;">
+                    <b>
+                        <h5 class="modal-title" id="exampleModalLabel">Logout&nbsp;<img
+                                src='/../static/image/logout.png' width="23px" height="23px"
+                                style="margin-bottom: 10px;"></h5>
+                    </b>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
+                        style="font-size: 20px;">X</button>
+
+
+                </div>
+                <div class="modal-body">
+                    <center>
+                        <p>Are you sure you want to logout from {{ request.user }}?</p>
+
+                        <div class="clearfix">
+                            <button type="button" class="btn btn-outline-secondary"
+                                style="margin-right: 60px; width: 25%;" data-bs-dismiss="modal">Close</button>
+                            <a type="button" class="btn btn-outline-danger" style="margin-left:-20px; width: 25%;"
+                                href="/logout">Logout</a>
+                        </div>
+                    </center>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- MODAL FOR Changepassword PAGE -->
+    <!-- Modal -->
+
+    <div class="modal fade addipomodal" id="Changepassword" tabindex="-1" role="dialog"
+        aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog1" role="document">
+            <div class="modal-content chng-box"
+                style="background-color: whitesmoke; border: 1px solid white; border-radius: 29px;">
+                <div class="modal-body background">
+                    <div class="modal-header"
+                        style="background: rgb(49, 183, 183) ; align-item:center;display:flex; justify-content: space-between; border: 4px solid rgb(0, 0, 0); border-top-right-radius: 22px; border-top-left-radius: 22px; border-bottom: 0px solid white;">
+                        <div style="flex: 1; text-align: center;">
+                            <b>
+                                <h4> <span class="modal-title title" id="staticBackdroLabel"
+                                        style="color: white; margin:0PX; ">Change Password</span></h4>
+                            </b>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                            style="cursor: pointer; background: none; border: none; color: black; font-size: 22px; font-weight: 700;">X</button>
+                    </div>
+
+                    <div class="containers"
+                        style="border: 4px solid black; border-bottom-left-radius: 22px; border-bottom-right-radius: 22px; padding: 0 15%;">
+                        <div class="wrapper">
+                            <div class="title"><span>{{request.user }}</span></div>
+                            <form method="post" action="/ChangeUserpassword">
+                                {% csrf_token %}
+
+                                <div class="row">
+                                    <i class="fa fa-lock" aria-hidden="true"></i>
+                                    <input type="password" id="inputPassword1" name="NewPassword"
+                                        placeholder="New Password" required>
+                                    <span toggle="#inputPassword1"
+                                        class="fa fa-fw fa-eye field-icon1 toggle-password1"></span>
+                                </div>
+                                <div class="row">
+                                    <i class="fa fa-lock" aria-hidden="true"></i>
+                                    <input type="password" id="inputPassword2" name="ConfirmPassword"
+                                        placeholder="Confirm Password" required>
+                                    <span toggle="#inputPassword2"
+                                        class="fa fa-fw fa-eye field-icon2 toggle-password2"></span>
+                                </div><br>
+                                <div class="row button">
+                                    <input class="btn loginbtn" type="submit" value="Submit">
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    </div>
+
+
+
+
+    <!-- Optional JavaScript; choose one of the two! -->
+    <script src="{% static  'JS/a076d05399.js' %}"></script>
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="{% static  'JS/bootstrap.bundle.min.js' %}"></script>
+
+    <!-- Option 2: Separate Popper and Bootstrap JS -->
+
+    <script src="{% static  'JS/jquery-3.2.1.slim.min.js' %}"></script>
+    <script src="{% static  'JS/popper.min.js' %}"></script>
+    <script src="{% static  'JS/bootstrap.min.js' %}"></script>
+    <!-- Alert MESSAGE CODE AND SCRIPT -->
+    {% comment %} {% if messages %}
+
+    <div class="alert alert-danger fixed-top" id="success-alert" style="position:fixed;">
+        <button type="button" class="close" data-dismiss="alert">x</button>
+        {% for message in messages %}
+
+        <strong>{{message}}</strong><br>
+        {% endfor %}
+
+    </div>
+    {% endif %} {% endcomment %}
+
+    {% block body %} {% endblock %}
+
+
+    <script>
+        $(".toggle-password1").click(function () {
+
+            $(this).toggleClass("fa-eye fa-eye-slash");
+            var input = $($(this).attr("toggle"));
+            if (input.attr("type") == "password") {
+                input.attr("type", "text");
+            } else {
+                input.attr("type", "password");
+            }
+        });
+    </script>
+    <script>
+        $(".toggle-password2").click(function () {
+
+            $(this).toggleClass("fa-eye fa-eye-slash");
+            var input = $($(this).attr("toggle"));
+            if (input.attr("type") == "password") {
+                input.attr("type", "text");
+            } else {
+                input.attr("type", "password");
+            }
+        });
+    </script>
+
+    <script>
+        window.addEventListener("load", () => {
+            const loader = document.querySelector(".loader");
+            if (loader) {
+                loader.classList.add("loader-hidden");
+            }
+        })    
+    </script>
+
+    <script>
+        // JavaScript to show the message and hide it after 15 seconds
+        // JavaScript to show the message and hide it after 15 seconds
+        window.onload = function () {
+            const messageElement = document.getElementById("expiry-message");
+            const closeButton = document.getElementById("close-btn");
+
+            const today = new Date();
+
+            const expiryDateStr = "{{ expiry_date|date:'Y-m-d' }}";
+            const expiryDate = new Date(expiryDateStr);
+
+            const timeDiff = expiryDate - today; // difference in milliseconds
+            const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24)); // convert to days
+
+            if (daysDiff <= 15 && daysDiff >= 0) {
+                if (messageElement) {
+                    // Show the message
+                    messageElement.style.display = "block";
+
+                    // Set a timeout to hide the message after 15 seconds (15000 ms)
+                    setTimeout(function () {
+                        messageElement.style.display = "none";
+                    }, 15000);
+
+                    // Add event listener to the "X" button to manually close the message
+                    closeButton.addEventListener("click", function () {
+                        messageElement.style.display = "none";
+                    });
+                }
+            }
+        };
+    </script>
+
+    <!-- ======= PWA INSTALL BANNER ======= -->
+    <div id="pwa-install-banner" style="display:none; position:fixed; bottom:0; left:0; right:0; z-index:9999;
+    background: linear-gradient(135deg, #2c2c2c 0%, #3a3a3a 100%);
+    color: white; padding: 14px 16px; box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+    border-top: 2px solid #f0a500; font-family: Arial, sans-serif;">
+        <div style="display:flex; align-items:center; gap:12px; max-width:700px; margin:0 auto;">
+            <img src="{% static 'image/pwa_icon_192.png' %}" width="44" height="44"
+                style="border-radius:10px; flex-shrink:0;" alt="IPO Utility Icon">
+            <div style="flex:1; min-width:0;">
+                <div style="font-weight:700; font-size:15px; color:#f0a500;">📲 Install IPO Utility</div>
+                <div id="pwa-banner-msg" style="font-size:12px; color:#ccc; margin-top:2px;">
+                    Add to your home screen for quick access
+                </div>
+            </div>
+            <div style="display:flex; gap:8px; flex-shrink:0;">
+                <button id="pwa-install-btn" style="display:none; background:#f0a500; color:#111;
+                border:none; padding:8px 16px; border-radius:20px; font-weight:700;
+                cursor:pointer; font-size:13px; white-space:nowrap;">
+                    ⬇ Install
+                </button>
+                <button id="pwa-dismiss-btn" style="background:transparent; color:#aaa;
+                border:1px solid #555; padding:8px 12px; border-radius:20px;
+                cursor:pointer; font-size:13px; white-space:nowrap;">
+                    ✕ Close
+                </button>
+            </div>
+        </div>
+        <!-- iOS instructions panel (hidden by default) -->
+        <div id="pwa-ios-instructions" style="display:none; max-width:700px; margin:10px auto 0;
+        background:#444; border-radius:10px; padding:10px 14px; font-size:12px; color:#eee; line-height:1.7;">
+            <b style="color:#f0a500;">How to install on iPhone / iPad:</b><br>
+            1. Tap the <b>Share</b> button <span style="font-size:16px;">⬆</span> in Safari's toolbar<br>
+            2. Scroll down and tap <b>"Add to Home Screen"</b> <span style="font-size:14px;">➕</span><br>
+            3. Tap <b>Add</b> in the top-right corner
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var DISMISSED_KEY = 'pwa_banner_dismissed_v1';
+            var banner = document.getElementById('pwa-install-banner');
+            var installBtn = document.getElementById('pwa-install-btn');
+            var dismissBtn = document.getElementById('pwa-dismiss-btn');
+            var bannerMsg = document.getElementById('pwa-banner-msg');
+            var iosInstr = document.getElementById('pwa-ios-instructions');
+
+            // Don't show if already dismissed recently (7 days)
+            var lastDismissed = localStorage.getItem(DISMISSED_KEY);
+            if (lastDismissed && (Date.now() - parseInt(lastDismissed)) < 7 * 24 * 60 * 60 * 1000) return;
+
+            var deferredPrompt = null;
+
+            // Detect iOS
+            var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+            var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+            var isInStandaloneMode = ('standalone' in window.navigator) && window.navigator.standalone;
+
+            // Detect Android / other
+            var isAndroid = /android/i.test(navigator.userAgent);
+
+            function showBanner() {
+                banner.style.display = 'block';
+                // animate in
+                banner.style.transform = 'translateY(100%)';
+                banner.style.transition = 'transform 0.4s ease';
+                setTimeout(function () { banner.style.transform = 'translateY(0)'; }, 50);
+            }
+
+            function hideBanner() {
+                banner.style.transition = 'transform 0.3s ease';
+                banner.style.transform = 'translateY(100%)';
+                setTimeout(function () { banner.style.display = 'none'; }, 350);
+                localStorage.setItem(DISMISSED_KEY, Date.now().toString());
+            }
+
+            dismissBtn.addEventListener('click', hideBanner);
+
+            // ---- Android / Desktop Chrome: use beforeinstallprompt ----
+            window.addEventListener('beforeinstallprompt', function (e) {
+                e.preventDefault();
+                deferredPrompt = e;
+                installBtn.style.display = 'inline-block';
+                bannerMsg.textContent = 'Now Install IPOUtility in your Phone';
+                showBanner();
+            });
+
+            installBtn.addEventListener('click', function () {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then(function (choiceResult) {
+                        if (choiceResult.outcome === 'accepted') {
+                            hideBanner();
+                        }
+                        deferredPrompt = null;
+                    });
+                }
+            });
+
+            // ---- iOS Safari: show manual instructions ----
+            if (isIOS && isSafari && !isInStandaloneMode) {
+                bannerMsg.textContent = 'Tap the steps below to install on your iPhone/iPad';
+                iosInstr.style.display = 'block';
+                // Show banner after short delay so user notices it
+                setTimeout(showBanner, 1500);
+            }
+
+            // ---- Already installed ----
+            window.addEventListener('appinstalled', function () {
+                hideBanner();
+                deferredPrompt = null;
+            });
+        })();
+    </script>
+    <!-- ======= END PWA INSTALL BANNER ======= -->
+
+</body>
+
+</html>

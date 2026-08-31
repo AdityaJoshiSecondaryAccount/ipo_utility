@@ -1,0 +1,1084 @@
+{% extends 'basic.html' %}
+{% block title%} {{IPOName}}-Dashboard{% endblock %}
+{% block css %}
+{% load static %}
+<style>
+    * {
+        padding: 0;
+        margin: 0;
+        {% comment %} font-family: sans-serif; {% endcomment %}
+
+    }
+    .navbar{
+        padding: 0.5rem 0rem !important;
+    }
+
+    body {
+        /* background: linear-gradient(135deg, #71b7e6, #9b59b6); */
+        background-color: white;
+        background-size: cover;
+        color: rgb(19, 16, 16);
+        justify-content: center;
+        line-height: 1.5;
+        margin-top: 84px;
+        padding: 0 60px;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .container,
+    .container-lg,
+    .container-md,
+    .container-sm,
+    .container-xl,
+    .container-xxl {
+        max-width: 100%;
+        margin-top: 0px;
+
+    }
+
+    .container h3 {
+        display: flex;
+        margin: 0;
+        transform: translateY(-50%);
+        background: #fff;
+        color: black;
+        border-block-end: 3px solid #e9ecef;
+        width: 100%;
+
+    }
+
+ 
+    .h3,
+        h3 {
+            margin: 0px 0px;
+            margin-top: 85px;
+            font-size: 1.75rem;
+            border-block-end: 3px solid #e9ecef;
+        }
+
+    .iponame {
+            background-color: white;
+            height: 38px;
+            margin-top: 35px;
+            width: 100%;
+            text-align: center;
+            position: fixed;
+        }
+
+    .modal-footer {
+        border-top: none;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .container-fluid {
+        margin: 0px 0%;
+    }
+
+    .nav-tabs {
+        border-bottom: none;
+        margin: 0px 320px;
+    }
+
+    .nav-tabs .nav-item.show .nav-link,
+    .nav-tabs .nav-link.active {
+        color: #e76d24;
+        background-color: #fff;
+        border-color: #e76d24;
+        border: none;
+        border-bottom-color: currentcolor;
+        border-bottom-style: none;
+        border-bottom-width: medium;
+        border-bottom: 3px solid orange;
+    }
+
+    .nav-tabs .nav-link {
+        border: 1px solid transparent;
+        border-top-left-radius: .25rem;
+        border-top-right-radius: .25rem;
+        color: black;
+    }
+
+    .common-tabs .nav-tabs .nav-link.active {
+        color: #e76d24;
+        background-color: transparent;
+        border-color: transparent transparent #f3f3f3;
+        border-bottom-color: rgb(243, 243, 243);
+        border-bottom: 4px solid;
+        font-weight: bold;
+    }
+
+    .table {
+        border-color: black;
+    }
+
+    .table-bordered {
+        border: 2px solid #0009;
+    }
+
+    .table thead th {
+        vertical-align: bottom;
+        border-bottom: 2px solid #0009;
+        border-bottom-width: 2px;
+    }
+
+    .table-bordered td,
+    .table-bordered th {
+        border: 1px solid #000;
+        border-bottom-color: rgb(0, 0, 0);
+        border-bottom-style: solid;
+        border-bottom-width: 1px;
+    }
+
+    .tablecenter {
+        text-align: center;
+        width: 37%;
+    }
+
+    .tableline {
+        width: 25%;
+    }
+
+    .tablelinel {
+        width: 22%;
+    }
+
+    .footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: #686868;
+        color: white;
+        text-align: center;
+        padding: 5px 0px;
+    }
+
+    .button {
+        margin: 0px 10px;
+        color: black;
+        background-color: antiquewhite;
+        width: auto;
+    }
+
+    .btn-dark.disabled,
+    .btn-dark:disabled {
+        color: #000;
+        background-color: #ffddaf;
+        border-color: #040404;
+    }
+
+    {% comment %} @media (max-width: 767px) {
+        body {
+            padding: 0 0;
+        }
+
+        .nav-tabs .nav-link {
+            padding-right: 80px;
+        }
+
+        .container {
+            width: 100%;
+            margin-right: auto;
+            margin-left: auto;
+            white-space: nowrap;
+        }
+
+        .nav-tabs {
+            border-bottom: none;
+            margin: 0px -15px;
+        }
+
+        .footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+        }
+
+        .button {
+            margin: 0px 5px;
+            color: black;
+            background-color: antiquewhite;
+            width: 98%;
+        }
+        .table{
+            overflow-x: scroll;
+            margin-bottom: 14%;
+        }
+    } {% endcomment %}
+
+    .bordercc{
+        border-right: 1px solid ;
+        margin-left: 4.1%; 
+        margin-right: 4.1%;
+    }
+
+    
+    @media (min-width: 1249px) and (max-width: 1950px){
+        .dnn{
+            display: none;
+        }
+
+        .al{
+            margin-top: 1%;
+        }
+    }
+
+    @media (min-width: 992px) and (max-width: 1250px){
+        .nav-tabs .nav-link {
+            padding-right: 5px;
+        }
+
+        .nav-tabs {
+            border-bottom: none;
+            margin: 0px 205px;
+        }
+
+        .dnn{
+            display: none;
+        }
+
+        .al{
+            margin-top: 1%;
+        }
+    }
+
+    @media screen and (min-width: 818px) and (max-width: 991px) {
+        .nav-tabs .nav-link {
+            padding-right: 5px;
+        }
+
+        .nav-tabs {
+            border-bottom: none;
+            margin: 0px 120px;
+        }
+
+        .dnn{
+            display: none;
+        }
+
+        .al{
+            margin-top: 2%;
+        }
+    }
+
+    @media (min-width: 768px) and (max-width: 817px){
+        .nav-tabs .nav-link {
+            padding-right: 5px;
+        }
+
+        .nav-tabs {
+            border-bottom: none;
+            margin: 0px 95px;
+        }
+
+        .dnn{
+            display: none;
+        }
+
+        .al{
+            margin-top: 2%;
+        }
+    }
+    
+    @media screen and (min-width: 576px) and (max-width: 767px) {
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+        }
+
+        .nav-tabs .nav-link {
+            padding-right: 0px;
+        }
+           
+        .nav-tabs {
+            border-bottom: none;
+            margin: 0px 5px;
+        }
+
+        .iponame {
+            margin-top: 54px;         
+        } 
+
+        .fc{
+            margin-top: 17%;
+        }
+
+        .bordercc{
+            border-right: 1px solid ;
+            margin-left: 3.5%; 
+            margin-right: 3.5%;
+        }
+
+        .dnn{
+            display: none;
+        }
+
+        .al{
+            margin-top: 3%;
+        }
+    }
+
+    @media screen and (min-width: 576px) and (max-width: 606px) {
+        .wc{
+            width: 118%;
+        }
+
+        .bw{
+            margin-top: 2%;
+        }
+
+        .dnn{
+            display: none;
+        }
+    }
+
+    @media screen and (min-width: 433px) and (max-width: 575px) {
+        .wcc{
+            width: 186%;
+        }
+
+        .sc{
+            margin-left: 5%;
+        }
+
+        .bordercc{
+            border-right: 1px solid ;
+            margin-left: 2%; 
+            margin-right: 2%;
+        }
+
+        .vc{
+            margin-bottom: 3%;
+        }
+
+        .rl{
+            margin-left: 21%;
+        }
+
+        .dnn{
+            display: none;
+        }
+    }
+
+    @media screen and (min-width: 280px) and (max-width: 432px) {
+        .dn{
+            display: none;
+        }    
+
+        .vc{
+            margin-bottom: 2%;
+        }
+
+        .vcc{
+            margin-top: 3%;
+        }
+    }
+
+
+    @media screen and (min-width: 423px) and (max-width:575px) {
+        .iponame {
+            margin-top: 54px;         
+        } 
+
+        .fc{
+            margin-top: 24%;
+        }
+
+        .nav-tabs .nav-link {
+            padding-right: 0px;
+        }
+
+        .nav-tabs {
+            border-bottom: none;
+            margin: 0px -30px;
+        }
+
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+        }
+    }
+
+    @media screen and (min-width: 423px) and (max-width: 502px) {
+        .nav-tabs .nav-link {
+            padding-right: 90px;
+        }
+
+        .nav-tabs {
+            border-bottom: none;
+            margin: 0px -30px;
+        }
+
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+        }
+    }
+
+    @media screen and (min-width: 390px) and (max-width: 422px) {
+        .iponame {
+            margin-top: 54px;         
+        } 
+
+        .fc{
+            margin-top: 26%;
+        }
+
+        .nav-tabs .nav-link {
+            padding-right: 36px;
+        }
+
+        .nav-tabs {
+            border-bottom: none;
+            margin: 0px -30px;
+        }
+
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+        }
+    }
+
+    @media screen and (min-width: 360px) and (max-width: 389px) {
+        .iponame {
+            margin-top: 54px;         
+        } 
+
+        .fc{
+            margin-top: 28%;
+        }
+
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+        }
+    }
+
+
+    @media screen and (min-width: 280px) and (max-width: 389px) {
+        .nav-tabs .nav-link {
+            padding-right: 36px;
+        }
+
+        .nav-tabs {
+            border-bottom: none;
+            margin: 0px -30px;
+        }
+
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+        }
+    }
+
+    @media screen and (min-width: 270px) and (max-width: 359px) {
+        .iponame {
+            margin-top: 54px;         
+        } 
+
+        .fc{
+            margin-top: 41%;
+        }
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+        }
+    }
+</style>
+{% endblock %}
+
+
+{% block body %}
+
+
+
+<div>
+    <h3 class="fixed-top iponame" style="z-index: 9; position: fixed;">{{IPOName}}</h3>
+</div>
+
+<div class="container fc">
+    <h4 style=" border-block-end: 3px solid #e9ecef;">Analysis</h4>
+
+
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12 w-100">
+                <nav>
+                    <div class="container">
+                        <div class="nav nav-tabs" name="value" role="tablist">
+                            <form id="form-id" method="post" action="/{{IPOid}}/Dashboard/A">
+                                {% csrf_token %}
+                                <!-- <input type="hidden" name="value" value="A"></input> -->
+                                <div class="nav-item nav-link" data-toggle="tab" type="button" role="tab"
+                                    id="inlineRadio1" onclick="document.getElementById('form-id').submit();"
+                                    aria-selected="false">Initial P&L Analysis</div>
+                            </form>
+                            <form id="form-id2" method="post" action="/{{IPOid}}/Dashboard/B">
+                                {% csrf_token %}
+                                <!-- <input type="hidden" name="value" value="B"></input> -->
+                                <div class="nav-item nav-link active show" data-toggle="tab" role="tab"
+                                    onclick="document.getElementById('form-id2').submit();" id="inlineRadio2"
+                                    aria-selected="false">After Allotment P&L Analysis</div>
+
+                            </form>
+                            <form id="form-id3" method="post" action="/{{IPOid}}/Dashboard/C">
+                                {% csrf_token %}
+                                <!-- <input type="hidden" name="value" value="C"></input> -->
+                                <div class="nav-item nav-link" data-toggle="tab" role="tab"
+                                    onclick="document.getElementById('form-id3').submit();" id="inlineRadio3"
+                                    aria-selected="true">After Listing</div>
+
+                        </div>
+                        </form>
+                    </div>
+                </nav>
+
+            </div>
+        </div>
+    </div>
+    <form action="/{{IPOid}}/DashboardForm/B" method="post" class="needs-validation" style="margin: 30px 0;" novalidate>
+        {% csrf_token %}
+
+        <div class="row mb-3 dn">
+            <label for="inputPassword3" class="col-xl-2 col-lg-2 col-md-3 col-sm-3 col-12 col-form-label vc"  style="padding-top: 2%;"><b>Actual allotted Qty</b></label>
+            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-3" style="text-align: center;">
+                <label ><b>TOTAL</b></label>
+                <!-- <label class="col-sm-10"><b>{{ActualallottedQty}}</b></label> -->
+                <input type="text" value="{{shares.ALLOTED}}" title="BUY:{{shares.ALLOTEDBUY}}     SELL:{{shares.ALLOTEDSELL}}" class="form-control wc" onkeypress="return event.charCode >= 48 && event.charCode <= 57" disabled>
+            </div>
+            <div class="vertical borderc bordercc"></div>
+            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2" style="text-align: center;">   
+                <label class="rl"><b>RETAIL</b></label>
+                <input type="text"value="{{shares.RETAILAlloted}}" title="BUY:{{shares.RETAILBUYAlloted}}     SELL:{{shares.RETAILSELLAlloted}}" class="form-control wc wcc" onkeypress="return event.charCode >= 48 && event.charCode <= 57" disabled>
+            </div>
+            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 sc" style="text-align: center;">
+                <label  class="rl"><b>SHNI</b></label>
+                <input type="text" value="{{shares.SHNIAlloted}}" title="BUY:{{shares.SHNIBUYAlloted}}     SELL:{{shares.SHNISELLAlloted}}" class="form-control wc wcc" onkeypress="return event.charCode >= 48 && event.charCode <= 57" disabled>
+            </div>
+            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 sc" style="text-align: center;">
+                <label  class="rl"><b>BHNI</b></label>
+                <input type="text" value="{{shares.BHNIAlloted}}" title="BUY:{{shares.BHNIBUYAlloted}}     SELL:{{shares.BHNISELLAlloted}}" class="form-control wc wcc" onkeypress="return event.charCode >= 48 && event.charCode <= 57" disabled>
+            </div>
+        </div>
+
+
+
+        <div class="row mb-3 dnn">
+            <label for="inputPassword3" class="col-12 col-form-label vc"  style="padding-top: 2%;"><b>Actual allotted Qty</b></label>
+            <div class="col-4 vcc" style="text-align: center;">
+                <label ><b>TOTAL</b></label>
+            </div>
+            <div class="col-6 vc" style="text-align: center;">
+                <!-- <label class="col-sm-10"><b>{{ActualallottedQty}}</b></label> -->
+                <input type="text" value="{{shares.ALLOTED}}" title="BUY:{{shares.ALLOTEDBUY}}     SELL:{{shares.ALLOTEDSELL}}" class="form-control wc" onkeypress="return event.charCode >= 48 && event.charCode <= 57" disabled>
+            </div>
+            <div class="col-4 vcc" style="text-align: center;">   
+                <label class="rl"><b>RETAIL</b></label>
+            </div>
+            <div class="col-6 vc" style="text-align: center;">
+                <input type="text"value="{{shares.RETAILAlloted}}" title="BUY:{{shares.RETAILBUYAlloted}}     SELL:{{shares.RETAILSELLAlloted}}" class="form-control wc wcc" onkeypress="return event.charCode >= 48 && event.charCode <= 57" disabled>
+            </div>
+            <div class="col-4 vcc" style="text-align: center;">
+                <label  class="rl"><b>SHNI</b></label>
+            </div>
+            <div class="col-6 vc" style="text-align: center;">
+                <input type="text" value="{{shares.SHNIAlloted}}" title="BUY:{{shares.SHNIBUYAlloted}}     SELL:{{shares.SHNISELLAlloted}}" class="form-control wc wcc" onkeypress="return event.charCode >= 48 && event.charCode <= 57" disabled>
+            </div>
+            <div class="col-4 vcc" style="text-align: center;">
+                <label  class="rl"><b>BHNI</b></label>
+            </div>
+            <div class="col-6" style="text-align: center;">
+                <input type="text" value="{{shares.BHNIAlloted}}" title="BUY:{{shares.BHNIBUYAlloted}}     SELL:{{shares.BHNISELLAlloted}}" class="form-control wc wcc" onkeypress="return event.charCode >= 48 && event.charCode <= 57" disabled>
+            </div>
+        </div>
+        
+
+        <div class="row mb-3">
+            <label for="inputPassword3" class="col-xl-2 col-lg-2 col-md-3 col-sm-3 col-sm-2 col-form-label"><b>Profit Margin (%)&nbsp;<font color="red">*</font>
+                </b></label>
+            <div class="col-xl-9 col-lg-9 col-md-9 col-sm-9">
+                <input type="text" name="ProfitMargin" {% if ProfitMargin is none %} value="15" {% else %}
+                    value="{{ ProfitMargin }}" {% endif %} class="form-control bw" 
+                    autofocus="autofocus" onfocus="this.select()"
+                    oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..?)\../g, '$1');" / required>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label for="inputEmail3" class="col-xl-2 col-lg-2 col-md-3 col-sm-3 col-form-label"><b>Spot Premium&nbsp;<font color="red">*</font>
+                </b></label>
+            <div class="col-xl-9 col-lg-9 col-md-9 col-sm-9">
+                <input type="tel" value="{{Premium}}" class="form-control bw" name="Premium" id="inputEmail3"
+                    oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\--*)\-/g, '$1').replace(/(\..?)\../g, '$1');" /required>
+            </div>
+        </div>
+        {% comment %} <br> {% endcomment %}
+        <div class="modal-footer">
+            <button class="btn btn-outline-primary" type="submit">Submit</button>
+        </div>
+    </form>
+
+    <!-- <div class="table">
+        <table id="bootstrapdatatable" class="table table-hover table-bordered">
+            <thead>
+
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col" class="tablecenter">Without Profit Margin</th>
+                    <th scope="col" class="tablecenter">With Profit Margin</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+                <tr>
+                    <th class="tableline">
+                        Kostak Rate
+                    </th>
+                    <td class="tablecenter" style="background-color: rgba(0, 0, 0, 0.35);">
+                        -
+                    </td>
+                    <td class="tablecenter" style="background-color: rgba(0, 0, 0, 0.35);">
+                        -
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tableline">
+                        Subject Rate
+                    </th>
+                    <td class="tablecenter">
+                        {{BaseSubjectToRate}}
+                    </td>
+                    <td class="tablecenter">
+                        {{SubjectToRateForCustomer}}
+                    </td>
+                </tr>
+
+
+            </tbody>
+        </table> -->
+
+        <div class="table-responsive text-nowrap">
+        <table id="bootstrapdatatable" class="table table-hover table-bordered" style="text-align: center;">
+            <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th colspan="2" >RETAIL</th>
+                    <th colspan="2" >SHNI</th>
+                    <th colspan="2" >BHNI</th>
+                </tr>
+                <tr>
+                    <td scope="col"></td>
+                    <td>Without Profit Margin</td>
+                    <td>With Profit Margin</td>
+                    <td>Without Profit Margin</td>
+                    <td>With Profit Margin</td>
+                    <td>Without Profit Margin</td>
+                    <td>With Profit Margin</td>
+                </tr>
+            </thead>
+    
+            <tbody>
+                <tr>
+                    <th style="width: 14%;">
+                        Kostak Rate
+                    </th>
+                    <td style="background-color: rgba(0, 0, 0, 0.35);">
+                        -
+                    </td>
+                    <td style="background-color: rgba(0, 0, 0, 0.35);">
+                        -
+                    </td>
+                    <td style="background-color: rgba(0, 0, 0, 0.35);">
+                        -
+                    </td>
+                    <td style="background-color: rgba(0, 0, 0, 0.35);">
+                        -
+                    </td>
+                    <td style="background-color: rgba(0, 0, 0, 0.35);">
+                        -
+                    </td>
+                    <td style="background-color: rgba(0, 0, 0, 0.35);">
+                        -
+                    </td>
+                </tr>
+                <tr>
+                    <th style="width: 14%;">
+                        Subject Rate
+                    </th>
+                    <td >
+                        {{retail.BaseSubjectToRate|floatformat:2}}
+                    </td>
+                    <td >
+                        {{retail.SubjectToRateForCustomer|floatformat:2}}
+                    </td>
+                    <td >
+                        {{shni.BaseSubjectToRate|floatformat:2}}
+                    </td>
+                    <td >
+                        {{shni.SubjectToRateForCustomer|floatformat:2}}
+                    </td>
+                    <td >
+                        {{bhni.BaseSubjectToRate|floatformat:2}}
+                    </td>
+                    <td >
+                        {{bhni.SubjectToRateForCustomer|floatformat:2}}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+        <br>
+
+        <div class="table-responsive text-nowrap">
+        <table id="bootstrapdatatable" class="table table-hover table-bordered" style="text-align: center;">
+            <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th colspan="3">Kostak</th>
+                    <th colspan="3">Subject To</th>
+                    <th>Premium</th>
+                </tr>
+    
+                <tr>
+                    <tr style="font-weight: bold;">
+                    <td scope="row"></td>
+                    <td>Retail</td>
+                    <td>SHNI</td>
+                    <td>BHNI</td>
+                    <td>Retail</td>
+                    <td>SHNI</td>
+                    <td>BHNI</td>
+                    <td></td>
+                </tr>
+            </thead>
+    
+            <tbody>
+                <tr>
+                    <th scope="row" style="width: 14%;">BUY Count</th>
+                    <td>{{count.KostakRETAILBUYCount|floatformat:0}}</td>
+                    <td>{{count.KostakSHNIBUYCount|floatformat:0}}</td>
+                    <td>{{count.KostakBHNIBUYCount|floatformat:0}}</td>
+                    <td>{{count.SubjectToRETAILBUYCount|floatformat:0}}</td>
+                    <td>{{count.SubjectToSHNIBUYCount|floatformat:0}}</td>
+                    <td>{{count.SubjectToBHNIBUYCount|floatformat:0}}</td>
+                    <td>{{count.PremiumBUYCount|floatformat:0}}</td>
+                </tr>
+    
+                <tr>
+                    <th scope="row">SELL Count</th>
+                    <td>{{count.KostakRETAILSELLCount|floatformat:0}}</td>
+                    <td>{{count.KostakSHNISELLCount|floatformat:0}}</td>
+                    <td>{{count.KostakBHNISELLCount|floatformat:0}}</td>
+                    <td>{{count.SubjectToRETAILSELLCount|floatformat:0}}</td>
+                    <td>{{count.SubjectToSHNISELLCount|floatformat:0}}</td>
+                    <td>{{count.SubjectToBHNISELLCount|floatformat:0}}</td>
+                    <td>{{count.PremiumSELLCount|floatformat:0}}</td>
+                </tr>
+            </tbody>
+    
+            <tfoot >
+                <tr>
+                    <th scope="row">NET Count</th>
+                    <td>{{count.KostakRETAILNet|floatformat:0}}</td>
+                    <td>{{count.KostakSHNINet|floatformat:0}}</td>
+                    <td>{{count.KostakBHNINet|floatformat:0}}</td>
+                    <td>{{count.SubjectToRETAILNet|floatformat:0}}</td>
+                    <td>{{count.SubjectToSHNINet|floatformat:0}}</td>
+                    <td>{{count.SubjectToBHNINet|floatformat:0}}</td>
+                    <td>{{count.PremiumNet|floatformat:0}}</td>
+                </tr>
+            </tfoot>
+    
+        </table>
+        </div>
+        <br>
+        
+        <div class="table-responsive text-nowrap">
+        <table id="bootstrapdatatable" class="table table-hover table-bordered" style="text-align: center;">
+            <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th colspan="3">Kostak</th>
+                    <th colspan="3">Subject To</th>
+                    <th>Premium</th>
+                </tr>
+    
+                <tr>
+                    <tr style="font-weight: bold;">
+                    <td scope="row"></td>
+                    <td>Retail</td>
+                    <td>SHNI</td>
+                    <td>BHNI</td>
+                    <td>Retail</td>
+                    <td>SHNI</td>
+                    <td>BHNI</td>
+                    <td></td>
+                </tr>
+            </thead>
+    
+            <tbody>
+                <tr>
+                    <th scope="row" style="width: 14%;">Share Purchase Qty</th>
+                    <td>{{shares.KostakRETAILBUYShares|floatformat:1}}</td>
+                    <td>{{shares.KostakSHNIBUYShares|floatformat:1}}</td>
+                    <td>{{shares.KostakBHNIBUYShares|floatformat:1}}</td>
+                    <td>{{shares.SubjectToRETAILBUYShares|floatformat:1}}</td>
+                    <td>{{shares.SubjectToSHNIBUYShares|floatformat:1}}</td>
+                    <td>{{shares.SubjectToBHNIBUYShares|floatformat:1}}</td>
+                    <td>{{count.PremiumBUYCount|floatformat:1}}</td>
+                </tr>
+    
+                <tr>
+                    <th scope="row" style="width: 14%;">Share Sell Qty</th>
+                    <td>{{shares.KostakRETAILSELLShares|floatformat:1}}</td>
+                    <td>{{shares.KostakSHNISELLShares|floatformat:1}}</td>
+                    <td>{{shares.KostakBHNISELLShares|floatformat:1}}</td>
+                    <td>{{shares.SubjectToRETAILSELLShares|floatformat:1}}</td>
+                    <td>{{shares.SubjectToSHNISELLShares|floatformat:1}}</td>
+                    <td>{{shares.SubjectToBHNISELLShares|floatformat:1}}</td>
+                    <td>{{count.PremiumSELLCount|floatformat:1}}</td>
+                </tr>
+            </tbody>
+    
+            <tfoot>
+                <tr>
+                    <th scope="row" style="width: 14%;">NET Qty</th>
+                    <td>{{shares.KostakRETAILNet|floatformat:1}}</td>
+                    <td>{{shares.KostakSHNINet|floatformat:1}}</td>
+                    <td>{{shares.KostakBHNINet|floatformat:1}}</td>
+                    <td>{{shares.SubjectToRETAILNet|floatformat:1}}</td>
+                    <td>{{shares.SubjectToSHNINet|floatformat:1}}</td>
+                    <td>{{shares.SubjectToBHNINet|floatformat:1}}</td>
+                    <td>{{count.PremiumDiff|floatformat:1}}</td>
+                </tr>
+            </tfoot>
+    
+        </table>
+        </div>
+        <br>
+
+
+        <!-- <table id="bootstrapdatatable" class="table table-hover table-bordered">
+            <thead>
+
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col" class="tablecenter">Count</th>
+                    {% comment %} <th scope="col" class="tablecenter">Avg Rate</th> {% endcomment %}
+                </tr>
+
+            </thead>
+
+            <tbody>
+                <tr>
+                    <th class="tableline">
+                        Net Kostak Purchase
+                    </th>
+                    <td class="tablecenter" data-toggle="tooltip" data-placement="auto" title="BUY:{{CountofBUYKostak}}     SELL:{{CountofSELLKostak}}">
+                        {{CountOfKostak}}
+                    </td>
+                    {% comment %} <td class="tablecenter">
+                        {{KostakAvg}}
+                    </td> {% endcomment %}
+                </tr>
+                <tr>
+                    <th class="tableline">
+                        Net Subject To Purchase
+                    </th>
+                    <td class="tablecenter" data-toggle="tooltip" data-placement="auto" title="BUY:{{CountofBUYSubjectTo}}     SELL:{{CountofSELLSubjectTo}}">
+                        {{CountOfSubjectTo}}
+                    </td>
+                    {% comment %} <td class="tablecenter">
+                        {{SubjectToAvg}}
+                    </td> {% endcomment %}
+                </tr>
+                <tr>
+                    <th class="tableline">
+                        Net Premium Purchase
+                    </th>
+                    <td class="tablecenter" data-toggle="tooltip" data-placement="auto" title="BUY:{{TotalBuyPremiumShareQty}}     SELL:{{TotalSellPremiumShareQty}}">
+                        {{CountOfPremium}}
+                    </td>
+                    {% comment %} <td class="tablecenter">
+                        {{SubjectToAvg}}
+                    </td> {% endcomment %}
+                </tr>
+
+            </tbody>
+        </table>
+
+        <table id="bootstrapdatatable" class="table table-hover table-bordered">
+            <thead>
+
+                <tr>
+                    <th scope="col" class="tableline"></th>
+                    <th scope="col" class="tablecenter">Kostak + Subject To</th>
+                    <th scope="col" class="tablecenter">Premium</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+                <tr>
+                    <th class="tableline">
+                        Share Purchase Qty
+                    </th>
+                    <td class="tablecenter" title="BUY:{{ActualallottedQtyBuy}}     SELL:{{ActualallottedQtySell}}" >
+                        {{KostakShareQty}}
+                    </td>
+                    <td class="tablecenter">
+                        {% if TotalBuyPremiumShareQty is none %} 0 {% else %} {{TotalBuyPremiumShareQty}} {%endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tableline">
+                        Share Sell Qty
+                    </th>
+                    <td colspan="2" class="tablecenter">
+                        {% if TotalSellPremiumShareQty is none %} 0 {% else %} {{TotalSellPremiumShareQty}} {%endif %}
+                    </td>
+                </tr>
+
+            </tbody>
+        </table> -->
+
+        
+
+        <div class="table-responsive text-nowrap">
+            <table id="bootstrapdatatable" class="table table-hover table-bordered">
+                <thead>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th class="tablelinel">
+                            Differene Qty (To Hedge)
+                        </th>
+                        <td class="tablecenter">
+                            {{shares.Diff_Qty|floatformat:1}}
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+
+            <br><br><br>
+
+        </div>
+        
+
+    </div>
+
+</div>
+
+<div class="footer">
+    {% comment %} <a href="/{{IPOid}}/SetRate" class="btn button btn-dark"><span>Set Rate</span></a> {% endcomment %}
+    <a href="/{{IPOid}}/BUY" class="btn button btn-dark"><span>BUY</span></a>
+    <a href="/{{IPOid}}/SELL" class="btn button btn-dark"><span>SELL</span></a>
+    <a href="/{{IPOid}}/Order" class="btn button btn-dark"><span>Orders</span></a>
+    <a href="/{{IPOid}}/OrderDetail/BUY" class="btn button btn-dark" style="white-space: nowrap;"><span>App. Buy Order (PAN)</span></a>
+    <a href="/{{IPOid}}/OrderDetail/SELL" class="btn button btn-dark" style="white-space: nowrap;"><span>App. Sell Order (PAN)</span></a>
+    <a href="/{{IPOid}}/Billing" class="btn button btn-dark"><span>Client Wise Billing</span></a>
+    <a href="/{{IPOid}}/Status" class="btn button btn-dark"><span>Group Wise Billing</span></a>
+    <a href="/{{IPOid}}/Dashboard/A" class="btn button btn-dark disabled"><span>Analysis</span></a>
+    <!-- <a href="PremiumBilling" class="btn button btn-dark" style="white-space: nowrap;"><span>Premium Billing</span></a> -->
+</div>
+
+
+
+<!-- JAVASCRIPT FOR ADDGROUP FORM VALIDATION -->
+<script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+
+
+<!-- Optional JavaScript; choose one of the two! -->
+
+<!-- Option 1: Bootstrap Bundle with Popper -->
+<script src="{% static 'JS/bootstrap.bundle.min.js' %}"></script>
+
+{% endblock %}

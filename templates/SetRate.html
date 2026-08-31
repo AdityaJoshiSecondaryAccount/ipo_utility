@@ -1,0 +1,337 @@
+{% extends 'basic.html' %}
+{% block title%} {{IPOName}}-SetRate{% endblock %}
+{% block css %}
+{% load static %}
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+    integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+
+{% comment %} <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"
+    integrity="sha384-eMNCOe7tC1doHpGoWe/6oMVemdAVTMs2xqW4mwXrXsW0L84Iytr2wi5v2QjrP/xp"
+    crossorigin="anonymous"></script> {% endcomment %}
+{% comment %} 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.min.js"
+    integrity="sha384-cn7l7gDp0eyniUwwAZgrzD06kc/tftFf19TOAs2zVinnD/C7E91j9yyk5//jjpt/"
+    crossorigin="anonymous"></script> {% endcomment %}
+
+
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    .iponame{
+        background-color:white; 
+        height: 45px; 
+        margin-top: 35px; 
+        width: 100%; 
+        text-align: center;
+    }
+
+    .h3,
+    h3 {
+        margin: 0px 0px;
+        margin-top: 85px;
+        font-size: 1.75rem;
+        border-block-end: 3px solid #e9ecef;
+    }
+
+    .selltitle {
+        margin: 0px 0px;
+        margin-top: 10px;
+        font-size: 1.75rem;
+        border-block-end: 3px solid #e9ecef;
+    }
+
+    .main{
+        margin: 10px 0px;
+    }
+
+    .main2{
+        margin: 10px 0px;
+    }
+
+    label{
+        font-weight: bold;
+    }
+
+    .labelA{
+        text-align: center;
+        display: block ruby;
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        padding: 1rem;
+        border-top: 3px solid #e9ecef;
+        margin: 0 0px;
+        margin-bottom: 8%;
+    }
+
+   
+    .footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: #686868;
+        color: white;
+        text-align: center;
+        padding: 5px 0px;
+    }
+
+    .button {
+        margin: 0px 10px;
+        color: black;
+        background-color: antiquewhite;
+        width: auto;
+    }   
+
+    .btn-dark.disabled, .btn-dark:disabled {
+        color: #000;
+        background-color: #ffddaf;
+        border-color: #040404;
+    }
+    @media (max-width: 767px) {
+        body {
+        font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #212529;
+        text-align: left;
+        background-color: #fff;
+}  
+    .h3,
+    h3 {
+        margin: 0px 0px;
+        margin-top: 85px;
+        font-size: 1.75rem;
+        border-block-end: 3px solid #e9ecef;
+    }
+
+    .iponame{
+        background-color:white; 
+        height: 40px; 
+        margin-top: 55px; 
+        width: 100%; 
+        text-align: center;
+    }  
+    .form{
+        margin: 30% 0%;
+    }
+    .labelA {
+        text-align: left;
+        display: block ruby;
+    }
+    .footer {
+            position: inherit;
+            left: 0;
+            bottom: 0;
+            width: auto;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            margin: 0px -15px;
+            display: grid;
+        }
+    .button {
+        margin: 0px 5px;
+        color: black;
+        background-color: antiquewhite;
+        width: 97%;
+    }  }
+    @media (min-width: 768px) and (max-width: 979px) {
+        body {
+        margin: 0;
+        margin-bottom: 0px;
+        font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #212529;
+        text-align: left;
+        background-color: #fff;
+} 
+    .form{
+        margin: 10% 0%;
+        }
+        .footer {
+            position: inherit;
+            left: 0;
+            bottom: 0;
+            width: auto;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            margin: 0px -15px;
+            display: grid;
+        }
+    .button {
+        margin: 0px 5px;
+        color: black;
+        background-color: antiquewhite;
+        width: 98%;
+    }
+    }
+</style>
+    
+{% endblock %}
+
+{% block body %}
+
+
+
+<div class="container" style="max-width: 1350px;">
+
+<div>
+    <h3 class="fixed-top iponame" style="z-index: 9; ">{{ IPOName }}</h3>
+</div>
+
+<form method="post" class="needs-validation form" novalidate>
+    {% csrf_token %}
+    <h3>BUY</h3>
+    <div class="main">
+        <div class="form-row">
+            <label class="col-sm-2 col-form-label" style="margin-top: 30px;">Kostak</label>
+            <div class="form-group col-md-5">
+                <label class="labelA">Quantity</label>
+                <input type="text" name="KostakQTY" class="form-control" placeholder="Quantity"
+                    aria-label="Quantity" autofocus="autofocus" min="0" max="10" step="1" id="numberBox"
+                    onkeypress="return event.charCode >= 48 && event.charCode <= 57"s>
+            </div>
+            <div class="form-group col-md-5">
+                <label class="labelA">Rate</label>
+                <input type="text" name="KostakRate" class="form-control" id="inputPassword4" placeholder="Rate"
+                    aria-label="Rate" oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\..*)\./g, '$1');"  
+                    value="{% if Ratelist.kostakBuyRate is not None%} {{ Ratelist.kostakBuyRate }} {% else %} 0 {% endif %}">
+            </div>
+        </div>
+
+        <div class="form-row">
+            
+            <label class="col-sm-2 col-form-label">Subject To</label>
+            <div class="form-group col-md-5">
+               
+                <input type="text" name="SubjectToQTY" class="form-control" placeholder="Quantity"
+                    aria-label="Quantity" min="0" max="10" step="" id="numberBox"
+                    onkeypress="return event.charCode >= 48 && event.charCode <= 57"> 
+            </div>
+            <div class="form-group col-md-5">
+               <input type="text" name="SubjectToSellRate" class="form-control" id="inputPassword4" placeholder="Rate" aria-label="Rate"
+                    value="{% if Ratelist.SubjecToBuyRate is not None%} {{ Ratelist.SubjecToBuyRate }}{%else%} 0 {% endif %}" 
+                    oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\..*)\./g, '$1');">  </div>
+        </div>
+
+        <div class="form-row">
+            <label class="col-sm-2 col-form-label">Premium</label>
+            <div class="form-group col-md-5">
+                <input type="text" name="PremiumQTY" class="form-control" placeholder="Quantity"
+                    aria-label="Quantity" min="0" max="10" step="1" id="numberBox"
+                    onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+            </div>
+            <div class="form-group col-md-5">
+                <input type="text" name="PremiumRate" class="form-control" id="inputPassword4" placeholder="Rate"
+                    aria-label="Rate" oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\..*)\./g, '$1');"
+                    value="{% if Ratelist.PremiumBuyRate is not None%} {{ Ratelist.PremiumBuyRate }}{%else%} 0  {% endif %}">
+
+            </div>
+        </div>
+
+        <div><h3 class="selltitle">SELL</h3></div>
+        <div class="form-row">
+            <label class="col-sm-2 col-form-label" style="margin-top: 30px;">Kostak</label>
+            <div class="form-group col-md-5">
+                <label class="labelA">Quantity</label>
+                <input type="text" name="KostakSellQTY" class="form-control" placeholder="Quantity"
+                    aria-label="Quantity" autofocus="autofocus" min="0" max="10" step="1" id="numberBox"
+                    onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+            </div>
+            <div class="form-group col-md-5">
+                <label class="labelA">Rate</label>
+                <input type="text" name="KostakSellRate" class="form-control" id="inputPassword4" placeholder="Rate"
+                    aria-label="Rate" oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\..*)\./g, '$1');"  
+                    value="{% if Ratelist.kostakSellRate is not None%} {{ Ratelist.kostakSellRate }} {% else %} 0 {% endif %}">
+            </div>
+        </div>
+
+        <div class="form-row">
+            
+            <label class="col-sm-2 col-form-label">Subject To</label>
+            <div class="form-group col-md-5">
+                
+                <input type="text" name="SubjectToSellQTY" class="form-control" placeholder="Quantity"
+                    aria-label="Quantity" min="0" max="10" step="" id="numberBox"
+                    onkeypress="return event.charCode >= 48 && event.charCode <= 57"> 
+            </div>
+            <div class="form-group col-md-5">
+               <input type="text" name="SubjectToRate" class="form-control" id="inputPassword4" placeholder="Rate" aria-label="Rate"
+                    value="{% if Ratelist.SubjecToSellRate is not None%} {{ Ratelist.SubjecToSellRate }}{%else%} 0 {% endif %}" 
+                    oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\..*)\./g, '$1');">  </div>
+        </div>
+        <div class="form-row main2">
+            <label class="col-sm-2 col-form-label">Premium</label>
+            <div class="form-group col-md-5">
+                <input type="text" name="PremiumSellQTY" class="form-control" placeholder="Quantity"
+                    aria-label="Quantity" min="0" max="10"  minlength="2" step="1" id="numberBox"
+                    onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+            </div>
+            <div class="form-group col-md-5">
+                
+                <input type="text" name="PremiumSellRate" class="form-control" id="inputPassword4" placeholder="Rate"
+                    aria-label="Rate" oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\..*)\./g, '$1');"
+                    value="{% if Ratelist.PremiumSellRate is not None%} {{ Ratelist.PremiumSellRate }}{%else%} 0 {% endif %}">
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-primary" type="submit" style="padding: 6px 40px;">Save</button>
+         </div>
+
+
+    </div>
+</form>
+
+</div>
+
+<div class="footer">
+    <a href="/{{IPOid}}/SetRate" class="btn button btn-dark disabled"><span>Set Rate</span></a>
+    <a href="/{{IPOid}}/BUY" class="btn button btn-dark"><span>BUY</span></a>
+    <a href="/{{IPOid}}/SELL" class="btn button btn-dark"><span>SELL</span></a>
+    <a href="/{{IPOid}}/Order" class="btn button btn-dark"><span>Orders</span></a>
+    <a href="/{{IPOid}}/OrderDetail/BUY" class="btn button btn-dark" style="white-space: nowrap;"><span>App.-Buy Order Detail</span></a>
+    <a href="/{{IPOid}}/OrderDetail/SELL" class="btn button btn-dark" style="white-space: nowrap;"><span>App.-Sell Order Detail</span></a>
+    <a href="/{{IPOid}}/Billing" class="btn button btn-dark"><span>Client Wise Billing</span></a>
+    <a href="/{{IPOid}}/Status" class="btn button btn-dark"><span>Group Wise Billing</span></a>
+    <a href="/{{IPOid}}/Dashboard/A" class="btn button btn-dark"><span>Analysis</span></a>
+    <!-- <a href="PremiumBilling" class="btn button btn-dark" style="white-space: nowrap;"><span>Premium Billing</span></a> -->
+</div>
+
+<script> 
+document.querySelector('input').addEventListener('input', e=>{
+    const el = e.target || e
+  
+    if(el.type == "number" && el.max && el.min ){
+      let value = parseInt(el.value)
+      el.value = value // for 000 like input cleanup to 0
+      let max = parseInt(el.max)
+      let min = parseInt(el.min)
+      if ( value > max ) el.value = el.max
+      if ( value < min ) el.value = el.min
+    }
+  });
+  $("#txtNumber" ).keyup(function() {
+  if($('#txtNumber').val()<0 || $('#txtNumber').val()>10 ){
+      $('#errorMsg').show();
+  }
+  else{
+    $('#errorMsg').hide();
+  }
+});
+</script>
+
+{% endblock %}

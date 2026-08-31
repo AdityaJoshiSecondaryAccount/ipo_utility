@@ -1,0 +1,578 @@
+{% extends 'basic.html' %}
+{% block title%} Client Setup{% endblock %}
+{% block css %}
+{% load static %}
+
+<!-- Responsive meta tag -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Bootstrap CSS (already included via static, but ensure it's loaded first) -->
+<link rel="stylesheet" href="{% static  'DataTables/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static  'DataTables/css/buttons.bootstrap5.min.css' %}">
+<link rel="stylesheet" href="{% static  'DataTables/css/dataTables.bootstrap5.min.css' %}">
+
+<style>
+    /* Minimal custom styles for table and modal */
+    .cl {
+        background-color: white;
+        height: 25px;
+        width: 100%;
+        text-align: center;
+        position: fixed !important;
+        z-index: 1050;
+    }
+    .modal-content {
+        background-color: #fefefe;
+    }
+    .form-control-sm {
+        border: 0.3px solid black;
+        height: 30px !important;
+    }
+    .btn-outline-success, .btn-outline-danger {
+        min-width: 120px;
+        margin: 4px 2px;
+    }
+    /* 🔹 Style both main buttons (Columns + Download) */
+    #datatable-buttons .btn-secondary {
+        background-color: #6c757d !important;
+        color: #fff !important;
+        font-family: "Segoe UI", Arial, sans-serif;
+        border: none !important;
+        padding: 6px 12px !important;
+        border-radius: 4px !important;
+        gap: 4px;
+        margin-right: 8px;
+    }
+
+    /* 🔹 Dropdown menu container */
+    #datatable-buttons .dropdown-menu {
+        background-color: #6c757d !important;
+        padding: 4px 0 !important;   /* removes extra top/bottom space */
+        margin: 0 !important;
+        border-radius: 6px !important;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 14.5px;
+    }
+
+    /* 🔹 Dropdown items */
+    #datatable-buttons .dropdown-menu .dt-button {
+        color: #fff !important;
+        padding: 6px 14px !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        text-align: left !important;
+        display: flex !important;
+        justify-content: space-between; /* checkmark alignment */
+        align-items: center;
+    }
+
+    /* 🔹 Hover effect */
+    #datatable-buttons .dropdown-menu .dt-button:hover {
+        background-color: #fff !important;
+        color: #0c0a0aff !important;
+    }
+
+
+    .custom-btn {
+        background: #fff !important;
+        border-radius: 8px !important;
+        font-weight: 500;
+        font-size: 1rem;
+        padding: 6px 18px;
+        border-width: 2px !important;
+        transition: background 0.2s, color 0.2s;
+        }
+    .custom-btn-green {
+        border: 2px solid #28a745 !important;
+        color: #28a745 !important;
+        }
+    .custom-btn-green:hover, .custom-btn-green:focus {
+        background: #28a745 !important;
+        color: #fff !important;
+    }
+    .custom-btn-red {
+        border: 2px solid #dc3545 !important;
+        color: #dc3545 !important;
+        }
+    .custom-btn-red:hover, .custom-btn-red:focus {
+        background: #dc3545 !important;
+        color: #fff !important;
+    }
+    .custom-btn-blue {
+        border: 2px solid #007bff !important;
+        color: #007bff !important;
+        }
+    .custom-btn-blue:hover, .custom-btn-blue:focus {
+        background: #007bff !important;
+        color: #fff !important;
+        }
+    @media (max-width: 767.98px) {
+        .cl { font-size: 1.2rem;margin-top:3.4%; }
+        .modal-dialog { max-width: 95vw; margin: 1.75rem auto; }
+        .btn { width: 100%; margin-bottom: 8px; }
+        .table-responsive { font-size: 0.95rem; }
+        .action-row > * {
+            flex: 1 1 100%;
+            margin-bottom: 8px;
+        }
+        .action-row {
+            flex-direction: column !important;
+            align-items: stretch !important;
+        }
+        
+        body{
+            margin-top:8.9%;
+        }
+    }
+    .mt-4 {
+        margin-top: 2.5rem !important;
+    }
+    /* Hide DataTables default search bar and page length dropdown */
+    .dataTables_filter,
+    .dataTables_length,
+    .dataTables_paginate {
+        display: none !important;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div>
+    <h3 style="text-align: center; z-index: 9;" class="cl">CLIENT</h3>
+</div>
+
+<div class="container-fluid pt-5 mt-4">
+{% for message in messages %}
+    {% if messages %}
+            <div class="alert {{ message.tags }} alert-dismissible fade show fixed-top mt-5" role="alert" style="z-index: 2000;">
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            {{ message }}
+        </div>
+    {% endif %}
+{% endfor %}
+
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2 action-row">
+        <!-- Show Rows Dropdown -->
+        <form method="POST" action="/ClientSetup" class="d-flex align-items-center gap-2 mb-0">
+                                {% csrf_token %}
+            <label for="client_page_size" class="mb-0 me-2">Show</label>
+            <select name="client_page_size" id="client_page_size" class="form-select form-select-sm" style="width:auto;" onchange="this.form.submit()">
+                <option value="50" {% if client_page_size|stringformat:"s" == "50" or not client_page_size %}selected{% endif %}>50</option>
+                <option value="100" {% if client_page_size|stringformat:"s" == "100" %}selected{% endif %}>100</option>
+                <option value="200" {% if client_page_size|stringformat:"s" == "200" %}selected{% endif %}>200</option>
+                <option value="250" {% if client_page_size|stringformat:"s" == "250" %}selected{% endif %}>250</option>
+                <option value="All" {% if client_page_size|stringformat:"s" == "All" %}selected{% endif %}>All</option>
+            </select>
+            <span class="ms-2">Rows</span>
+
+            <label for="group_filter" class="mb-0 ms-3 me-2">Group:</label>
+            <select name="group_filter" id="group_filter" class="form-select form-select-sm" style="width:auto;" onchange="this.form.submit()">
+                <option value="All" {% if client_group_filter == "All" %}selected{% endif %}>All Group</option>
+                {% for g in Group %}
+                <option value="{{ g.GroupName }}" {% if client_group_filter == g.GroupName %}selected{% endif %}>{{ g.GroupName }}</option>
+                {% endfor %}
+            </select>
+
+            <input type="hidden" name="page" value="{{ page_obj.number }}">
+        </form>
+
+        <!-- DataTable Buttons (Columns, Download) -->
+        <div id="datatable-buttons" class="d-flex gap-2"></div>
+
+        <!-- Delete Client Button (Dynamic: All or Selected) -->
+        <button type="button" class="custom-btn custom-btn-red" data-toggle="modal" data-target="#DeleteAllClient" id="deleteAllClientsBtn">
+            Delete All Clients
+        </button>
+
+        <!-- Add Client -->
+        <button type="button" class="custom-btn custom-btn-green" data-bs-toggle="modal" data-bs-target="#ADDCLIENT">
+            ADD CLIENT
+        </button>
+
+        <!-- Search -->
+        <div class="d-flex align-items-center gap-2">
+            <label for="table-search" class="mb-0">Search:</label>
+            <input type="search" id="table-search" class="form-control form-control-sm" style="width: 150px;">
+        </div>
+    </div>
+
+    <!-- ADD CLIENT MODAL -->
+    <div>
+        <div class="modal fade" id="ADDCLIENT" tabindex="-1" aria-labelledby="addClientLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" style="padding: 1px 0px; margin: 5px auto;">
+                <div class="modal-content moa" style="background-color: whitesmoke; border-radius: 40px; border: 1px solid black;">
+                    <div class="modal-body">
+                        <div class="modal-header" style="background: rgb(49, 183, 183); color: white; border-radius: 40px; border: 3px solid black; text-align: center; display: block;">
+                            <b>
+                                <h5 class="modal-title" id="addClientLabel">ADD CLIENT</h5>
+                            </b>
+                            <button type="button" class="close clo" data-bs-dismiss="modal" aria-label="Close"style="margin: -45px 0;">X</button>
+                        </div>
+                        <form action="/AddClient" method="post" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="PANNo" class="form-label"><b>PAN Number <span class="text-danger">*</span></b></label>
+                                    <input type="text" class="form-control" placeholder="Enter PAN number" name="PANNo" id="PANNo" maxlength="10" minlength="10" style="text-transform: uppercase;" required>
+                                    <div class="invalid-feedback">Please Enter PAN Number.</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="Name" class="form-label"><b>Name <span class="text-danger">*</span></b></label>
+                                    <input type="text" class="form-control" placeholder="Enter Name" name="Name" id="Name" maxlength="50" required>
+                                    <div class="invalid-feedback">Please Enter Name.</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="group" class="form-label"><b>Group <span class="text-danger">*</span></b></label>
+                                    <select class="form-control" id="group" name="Group" required>
+                                        <option selected disabled value="">Select Group</option>
+                                        {% for i in Group %}
+                                        <option value="{{ i.GroupName }}">{{ i.GroupName }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="invalid-feedback">Please Select A Valid Group.</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label"><b>Client-ID/DP-ID :</b></label>
+                                    <input type="text" class="form-control" name="ClientIdDpId" maxlength="16" minlength="16" placeholder="Enter Client-ID or DP-ID">
+                                </div>
+                            </div>
+                            <div class="modal-footer "style="border-top: 1px solid black;">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-outline-primary">Submit Form</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DELETE ALL CLIENT MODAL -->
+    <div class="modal fade" id="DeleteAllClient" tabindex="-1" aria-labelledby="deleteAllClientLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4">
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title" id="deleteAllClientLabel">Delete All Clients</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p>Are you sure you want to delete all clients?</p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-outline-secondary" style="height: 40px;width: 79px;min-width: 120px;margin: 4px 2px;" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-outline-danger "  onclick="downloadAndRedirect('{{ page_number }}')">Delete</button>
+                        <iframe id="downloadIframe" style="display:none; "></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-responsive">
+        <table id="example" class="table table-bordered table-hover table-striped w-100">
+        {{ html_table | safe }}
+        </table>
+    </div>
+
+    <!-- PAGINATION & ROWS INFO -->
+    <div class="row mt-2">
+        <div class="col-12 col-md-6">
+            <p>
+                Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} Rows
+            </p>
+        </div>
+        <div class="col-12 col-md-6">
+            <ul class="pagination justify-content-end flex-wrap">
+                {% if page_obj.number != 1 %}
+                    <li class="page-item"><a class="page-link" href="/ClientSetup?page=1">1</a></li>
+                {% endif %}
+                {% if page_obj.number > 4 %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num > 1 and num < page_obj.number and num >= page_obj.number|add:'-2' %}
+                        <li class="page-item"><a class="page-link" href="/ClientSetup?page={{ num }}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+                <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num > page_obj.number and num < page_obj.number|add:'3' and num < page_obj.paginator.num_pages %}
+                        <li class="page-item"><a class="page-link" href="/ClientSetup?page={{ num }}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+                {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+                {% if page_obj.number != page_obj.paginator.num_pages %}
+                    <li class="page-item"><a class="page-link" href="/ClientSetup?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- SCRIPTS -->
+<script src="{% static 'JS/jquery.min.js' %}"></script>
+<script src="{% static 'DataTables/js/jquery-3.7.0.js' %}"></script>
+<script src="{% static 'DataTables/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.fixedHeader.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.bootstrap5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.bootstrap5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/jszip.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.colVis.min.js' %}"></script>
+<script src="{% static 'DataTables/js/pdfmake.min.js' %}"></script>
+<script src="{% static 'DataTables/js/vfs_fonts.js' %}"></script>
+
+<script>
+    // Bootstrap validation
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })();
+
+    // DataTable initialization
+    $(document).ready(function() {
+        // Clone the header row and append as filter row
+        $('#example thead tr').clone(true).appendTo('#example thead');
+        $('#example thead tr:eq(1) th').each(function(i) {
+            if (i === 0 || i === 5) { // For the checkbox/Sr No. and Action column, no input
+                $(this).html('');
+            } else {
+                $(this).html('<input type="text" placeholder="Search" style="width: 100%;" />');
+            }
+            $('input', this).on('keyup change', function() {
+                if ($('#example').DataTable().column(i).search() !== this.value) {
+                    $('#example').DataTable()
+                        .column(i)
+                        .search(this.value)
+                        .draw();
+                }
+            });
+        });
+
+        // Initialize DataTable
+        var pageLength = "{{ client_page_size|default:'50' }}";
+        console.log(pageLength)
+        pageLength = pageLength === "All" ? -1 : parseInt(pageLength, 10);
+        
+        var table = $('#example').DataTable({
+            orderCellsTop: true,
+            {% comment %} lengthChange: true, {% endcomment %}
+            info: false,
+            {% comment %} pageLength: pageLength, {% endcomment %}
+            responsive: true,
+            paging: false,        // Disable DataTables pagination
+            info: false,          // Hide DataTables info
+            searching: true,     // Hide DataTables search
+            lengthChange: false,  // Hide DataTables length menu
+            buttons: [
+                { extend: 'colvis', text: 'Columns' },
+            {   
+                extend: 'collection',
+                text: 'Download',
+                    buttons: [
+                    {
+                        extend: 'excel',
+                        text: 'Excel',
+                            exportOptions: { columns: [1, 2, 3, 4] },
+                            customize: function (xlsx) {
+                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                            $('row:first', sheet).remove();
+                        }
+                    },
+                    {
+                        extend: 'pdf',
+                        text: 'PDF',
+                            exportOptions: { columns: [0, 1, 2, 3, 4], rows: ':visible', modifier: { page: 'current' } },
+                            customize: function (doc) {
+                           doc.styles.tableHeader = {
+                                fillColor: 'grey',
+                                color: 'whitesmoke',
+                                bold: true,
+                                alignment: 'center',
+                            };
+                                doc.styles.tableBodyEven = { alignment: 'center', fillColor: 'bisque' };
+                                doc.styles.tableBodyOdd = { alignment: 'center', fillColor: 'bisque' };
+                            doc.content[1].layout = {
+                                    hLineWidth: function () { return 1; },
+                                    vLineWidth: function () { return 1; },
+                                    hLineColor: function () { return 'black'; },
+                                    vLineColor: function () { return 'black'; },
+                            };
+                        }
+                    }
+                ]
+                }
+            ],
+            initComplete: function () {
+                var api = this.api();
+                api.columns(':not(:last-child)').eq(0).each(function (colIdx) {
+                    var cell = $('.filters th').eq($(api.column(colIdx).header()).index());
+                        var title = $(cell).text();
+                    $(cell).html('<input type="text" placeholder="' + title + '" class="form-control form-control-sm" />');
+                    $('input', cell)
+                            .off('keyup change')
+                        .on('change', function () {
+                            api.column(colIdx).search(this.value).draw();
+                            });
+                    });
+                var lastCell = $('.filters th').eq($(api.column(':last-child').header()).index());
+                    $(lastCell).html('');
+            },
+            language: {
+                info: 'Showing _START_ to _END_ of _TOTAL_ Rows',
+                infoFiltered: '(filtered from _MAX_ total Rows)',
+                emptyTable: "No data available",
+                lengthMenu: 'Show <select>' +
+                    '<option value="50">50</option>' +
+                    '<option value="100">100</option>' +
+                    '<option value="150">150</option>' +
+                    '<option value="200">200</option>' +
+                    '<option value="-1">All</option>' +
+                    '</select> Rows',
+                search: 'Search:',
+                paginate: { first: 'First', last: 'Last', next: 'Next', previous: 'Previous' }
+            },
+        });
+
+        // Move DataTable buttons to custom container
+        table.buttons().container().appendTo('#datatable-buttons');
+
+        // Connect custom search bar to DataTables
+        $('#table-search').on('keyup', function () {
+            table.search(this.value).draw();
+        });
+
+        toggleDeleteSelectedBtn();
+
+        // Handle dropdown change for DataTables page length
+        $('#client_page_size').on('change', function() {
+            var pageSize = $(this).val();
+            if (pageSize === 'All') {
+                table.page.len(-1).draw();
+            } else {
+                table.page.len(parseInt(pageSize)).draw();
+            }
+            // Optionally, submit the form to reload server-side data
+            // this.form.submit();
+        });
+
+        // Select All Clients
+        $('#select_all_clients').on('click', function() {
+            $('.client-checkbox').prop('checked', this.checked);
+            toggleDeleteSelectedBtn();
+        });
+
+        $(document).on('change', '.client-checkbox', function() {
+            toggleDeleteSelectedBtn();
+            if (!this.checked) {
+                $('#select_all_clients').prop('checked', false);
+            } else if ($('.client-checkbox:checked').length === $('.client-checkbox').length) {
+                $('#select_all_clients').prop('checked', true);
+            }
+        });
+
+        function toggleDeleteSelectedBtn() {
+            var count = $('.client-checkbox:checked').length;
+            var btn = $('#deleteAllClientsBtn');
+            if (count > 0) {
+                btn.text('Delete Selected');
+                btn.removeAttr('data-toggle');
+                btn.removeAttr('data-target');
+                btn.addClass('is-selected-mode');
+            } else {
+                btn.text('Delete All Clients');
+                btn.attr('data-toggle', 'modal');
+                btn.attr('data-target', '#DeleteAllClient');
+                btn.removeClass('is-selected-mode');
+            }
+        }
+
+        $('#deleteAllClientsBtn').on('click', function(e) {
+            if ($(this).hasClass('is-selected-mode')) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                var ids = [];
+                $('.client-checkbox:checked').each(function() {
+                    ids.push($(this).val());
+                });
+
+                if (ids.length > 0) {
+                    if (confirm("Are you sure you want to delete selected client(s)?")) {
+                        var self = $(this);
+                        self.prop('disabled', true);
+                        self.text('Please wait...');
+                        $.ajax({
+                            url: '/BulkDeleteClients',
+                            type: 'POST',
+                            data: {
+                                'ids[]': ids,
+                                'csrfmiddlewaretoken': '{{ csrf_token }}',
+                                'page': '{{ page_obj.number }}'
+                            },
+                            success: function(response) {
+                                window.location.reload();
+                            },
+                            error: function() {
+                                alert("Something went wrong!");
+                                self.prop('disabled', false);
+                                toggleDeleteSelectedBtn();
+                            }
+                        });
+                    }
+                }
+            } else {
+                // If in "Delete All" mode, the button will naturally trigger the modal due to data attributes.
+                // We should ensure the "Please wait" logic only happens when the ACTUAL delete button inside the modal is clicked.
+                // The previous script was slightly wrong because it disabled the button that OPENS the modal.
+            }
+        });
+    });
+
+    // Delete All Client logic
+    function downloadAndRedirect(page) {
+        if (!page) page = 1;
+        document.cookie = "download_complete=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        let iframe = document.getElementById('downloadIframe');
+        if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.id = 'downloadIframe';
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+        }
+        iframe.src = `/DeleteAllClient?page=${page}`;
+        const intervalId = setInterval(function () {
+            if (document.cookie.split(';').some((item) => item.trim().startsWith('download_complete='))) {
+                clearInterval(intervalId);
+                window.location.href = `/ClientSetup?page=${page}`;
+            }
+        }, 500);
+    }
+
+    // This will fade out and remove all alerts after 5 seconds (5000 ms)
+    setTimeout(function() {
+        var alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+            alert.style.transition = "opacity 0.5s";
+            alert.style.opacity = 0;
+            setTimeout(function() {
+                if(alert.parentNode) alert.parentNode.removeChild(alert);
+            }, 500);
+        });
+    }, 5000);
+</script>
+{% endblock %}

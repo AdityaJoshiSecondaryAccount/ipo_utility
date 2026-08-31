@@ -1,0 +1,1765 @@
+{% extends 'basic.html' %}
+{% block title%} IPO Setup{% endblock %}
+{% block css %}
+{% load static %}
+
+
+<!-- ADD NEW CODE DELETE CSS -->
+
+<link rel="stylesheet" href="{% static  'DataTables/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static  'DataTables/css/buttons.bootstrap5.min.css' %}">
+<link rel="stylesheet" href="{% static  'DataTables/css/dataTables.bootstrap5.min.css' %}">
+
+<style>
+    {% comment %} body {
+        font-family: Arial, Helvetica, sans-serif;
+
+    } {% endcomment %}
+    #example_wrapper{
+        margin-top: 2% !important;
+    }
+    #example th{
+        {% comment %} border: 0.1px solid black !important; {% endcomment %}
+        text-align: center;
+        width: 10% !important;
+    }
+    #example_filter{
+        float: right;
+        width: 50% !important;
+    }
+    .Input{
+        item-align: center;
+        width: 98.5% !important;
+    }
+    .dropdown-menu {
+        min-width: 7rem !important;
+        margin-top: 0 !important;
+        background-color: #6c757d;
+    }
+    .buttons-colvis{
+        left:-11px;
+        width: 95px !important;
+    }
+    .buttons-collection{
+        height: 35px;
+        width: 100px ;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .flex-wrap {
+        position: relative !important;
+        margin-top: -60px !important; 
+        left: 71% !important; 
+    }
+    .form-control-sm {
+        border: 0.3px solid black;
+        height:30px !important;
+      }
+    .row.dt-row {
+        margin-top: -23px !important; 
+    }
+    .cw {
+        margin-left: 3px;
+        width: 644px ; 
+    }
+
+    .custom-width {
+        margin-left: 0px !important;
+        right : 0px !important;
+        width: 1232px !important; 
+    }
+    .btn-outline-success{
+        height: 30px !important;
+        text-align: center !important;
+    }
+    .bi {
+        right: -10rem;
+      
+      }
+      #example_filter {
+        margin-right: -6rem;
+      
+      }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    .h3,
+    h3 {
+        font-size: 1.75rem;
+        border-block-end: 3px solid #e9ecef;
+        margin: 0% 0%;
+
+    }
+
+    .container-fluid {
+        width: 100%;
+        margin-right: auto;
+        margin-left: auto;
+        margin-bottom: 5%;
+    }
+
+
+    /* The Modal (background) */
+    .modal1 {
+        display: none;
+        margin: 8% 0%;
+        padding: 0% 35%;
+        position: fixed;
+
+    }
+
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+        width: 100%;
+        border: 1px solid #ddd;
+        margin-bottom: 2%;
+    }
+
+    th,
+    td {
+        text-align: center;
+        padding: 5px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2
+    }
+    
+    .addipomodal {
+        margin: 0% 1%;
+        padding: 0% 2%;
+        position: fixed;
+    }
+
+    .modal-dialog1 {
+        max-width: 98%;
+        margin: 1.75rem auto;
+    }
+
+
+
+    table.table-sortable th.currently-sorted[data-sort-dir="asc"]::after {
+        content: "\25b2";
+
+    }
+
+    table.table-sortable th.currently-sorted[data-sort-dir="desc"]::after {
+        content: "\25bc";
+
+    }
+
+    .cl{
+        position: fixed !important;
+        background-color: white;
+        height: 35px;
+        margin-top: 35px;
+        width: 100%;
+        text-align: center;
+        text-align: center;
+    }
+
+    @media (min-width: 1200px) {
+        .fc{
+            margin-top: 4%;
+        }
+    }
+    @media (min-width: 3806px) and (max-width: 8000px) {
+        .bi{
+            margin-top: 0%;
+        }
+        .flex-wrap{
+            margin-left: 4% !important;
+        }
+        .cw {
+            width: 39.5% ; 
+        }
+        .ft{
+            margin-top: 3.5% !important;
+        }
+        .custom-width {
+            width: 60% !important; 
+        }
+        #example_wrapper{
+            margin-top: 0.2% !important;
+        }
+        #example_filter {
+            margin-right: -0.1rem;
+        }
+    }
+    @media (min-width: 2537.33px) and (max-width: 3805px) {
+        .bi{
+            margin-top: 0%;
+        }
+        .flex-wrap{
+            margin-left: 4% !important;
+        }
+        .cw {
+            width: 39.5% ; 
+        }
+        .ft{
+            margin-top: 3.5% !important;
+        }
+        .custom-width {
+            width: 60% !important; 
+        }
+        #example_wrapper{
+            margin-top: 0.2% !important;
+        }
+        #example_filter {
+            margin-right: -0.1rem;
+        }
+    }
+    @media (min-width: 1951px) and (max-width: 2535.33px) {
+        .bi{
+            margin-top: 0%;
+        }
+        .flex-wrap{
+            margin-left: 4% !important;
+        }
+        .cw {
+            width: 39.5% ; 
+        }
+        .ft{
+            margin-top: 3.5% !important;
+        }
+    
+        .custom-width {
+            width: 60% !important; 
+        }
+        #example_wrapper{
+            margin-top: 0.2% !important;
+        }
+        #example_filter {
+            margin-right: -0.1rem;
+          
+          }
+       
+    }
+
+    @media (min-width: 1541px) and (max-width: 1950px) {
+        .bi{
+            margin-top: 0%;
+        }
+        .flex-wrap{
+            margin-left: 4% !important;
+        }
+        .cw {
+            width: 39.5% ; 
+        }
+        .ft{
+            margin-top: 5% !important;
+        }
+    
+        .custom-width {
+            width: 60% !important; 
+        }
+        #example_wrapper{
+            margin-top: 0.4% !important;
+        }
+        #example_filter {
+            margin-right: -0.1rem;
+          
+          }
+       
+    }
+    @media (min-width: 1500px) and (max-width: 1540px) {
+        .bi{
+            margin-top: 2%;
+            right: -19rem;
+        }
+        #example_wrapper{
+            margin-top: 0.5% !important;
+        }
+        .flex-wrap{
+            margin-left: 21% !important;
+        }
+        .cw {
+            width: 470px ; 
+        }
+        .ft{
+            margin-top: 5.5% !important;
+        }
+        .custom-width {
+            width:680px !important; 
+        }
+        #example_filter {
+            margin-right: -18.8rem;
+        }
+    }
+    @media (min-width: 1376px) and (max-width: 1499px) {
+        .bi{
+            margin-top: 2%;
+            right: -125%;
+        }
+        #example_wrapper{
+            margin-top: 0.5% !important;
+        }
+        .flex-wrap{
+            margin-left: 4% !important;
+        }
+        .cw {
+            width: 470px ; 
+        }
+        .ft{
+            margin-top: 5.5% !important;
+        }
+        .custom-width {
+            width:680px !important; 
+        }
+        #example_filter {
+            margin-right: -11rem;
+        }
+    }
+
+    @media (min-width: 1284px) and (max-width: 1375px) {
+        .bi{
+            margin-top: 2%;
+            right: -80%;
+        }
+        #example_wrapper{
+            margin-top: 0.5% !important;
+        }
+        .flex-wrap{
+            margin-left: 4% !important;
+        }
+        .cw {
+            width: 470px ; 
+        }
+        .ft{
+            margin-top: 5.5% !important;
+        }
+        .custom-width {
+            width:680px !important; 
+        }
+        #example_filter {
+            margin-right: -5rem;
+        }
+    }
+
+    @media (min-width: 1200px) and (max-width: 1283px) {
+        .bi{
+            margin-top: 2%;
+            right: -80%;
+        }
+        #example_wrapper{
+            margin-top: 1.5% !important;
+        }
+        .flex-wrap{
+            margin-left: 4% !important;
+        }
+        .cw {
+            width: 470px ; 
+        }
+        .ft{
+            margin-top: 5.5% !important;
+        }
+    
+        .custom-width {
+            width:680px !important; 
+        }
+        #example_filter {
+            margin-right: 0rem;
+          
+          }
+    }
+    @media (min-width: 1100px) and (max-width: 1199px) {
+        .bi{
+            margin-top: 2%;
+            right: 18rem;
+        }
+        .mod{
+            width: 130%;
+            margin-left: -11%!important;
+        }
+        #example_wrapper{
+            margin-top: 2.5% !important;
+        }
+        .flex-wrap{
+            margin-left: -8% !important;
+        }
+        .cw {
+            width: 361px ; 
+        }
+        .ft{
+            margin-top: 5.5% !important;
+        }
+        .custom-width {
+            width:526px !important; 
+        }
+        #example_filter {
+            margin-left: 17.5rem;
+            float: left !important;
+        }
+    }
+
+    @media (min-width: 992px) and (max-width: 1099px) {
+        .bi{
+            margin-top: 2%;
+            right: 1rem;
+        }
+
+        .mod{
+            width: 130%;
+            margin-left: -11%!important;
+        }
+        #example_wrapper{
+            margin-top: 2.5% !important;
+        }
+        .flex-wrap{
+            margin-left: -24% !important;
+        }
+        .cw {
+            width: 361px ; 
+        }
+        .ft{
+            margin-top: 5.5% !important;
+        }
+    
+        .custom-width {
+            width:526px !important; 
+        }
+        #example_filter {
+            margin-right: 0rem;
+        }
+    }
+    @media (min-width: 936px) and (max-width: 991px) {
+        .fc{
+            margin-top: 8%;
+        }
+        .bi{
+            margin-top: 0.5%;
+            right: 1rem;
+        }
+        .mod{
+            width: 160%;
+            margin-left: -27%!important;
+        }
+        #example_wrapper{
+            margin-top: 1.5% !important;
+        }
+        .flex-wrap{
+            margin-left: -22% !important;
+        }
+        .cw {
+            width: 229px ; 
+        }
+        .custom-width {
+            width:499px !important; 
+        }
+        #example_filter{
+            margin-right: -18% !important;
+        }
+    }
+    @media (min-width: 851px) and (max-width: 935px) {
+        .fc{
+            margin-top: 8%;
+        }
+        .bi{
+            margin-top: 0.5%;
+            right: 5rem;
+        }
+        .mod{
+            width: 160%;
+            margin-left: -27%!important;
+        }
+        #example_wrapper{
+            margin-top: 1.5% !important;
+        }
+        .flex-wrap{
+            margin-left: -29% !important;
+        }
+        .cw {
+            width: 229px ; 
+        }
+        .custom-width {
+            width:499px !important; 
+        }
+        #example_filter{
+            margin-right: 21% !important;
+        }
+    }
+
+    @media (min-width: 768px) and (max-width: 850px) {
+        .fc{
+            margin-top: 9%;
+        }
+        .bi{
+            margin-top: 0.5%;
+            right: 8rem;
+        }
+        .mod{
+            width: 160%;
+            margin-left: -27%!important;
+        }
+        #example_wrapper{
+            margin-top: 1.5% !important;
+        }
+        .flex-wrap{
+            margin-left: -36% !important;
+        }
+        .cw {
+            width: 229px ; 
+        }
+        .custom-width {
+            width:499px !important; 
+        }
+        #example_filter{
+            margin-right: 60% !important;
+        }
+    }
+
+    @media (min-width: 651px) and (max-width: 767px) {
+        .cl{
+            margin-top: 54px;     
+        }
+        .fc{
+            margin-top: 14%;
+        }
+        .bi{
+            margin-top: -18.5%;
+            left: 6.5rem;
+        }
+        .mod{
+            width: 200%;
+            margin-left: -47%!important;
+        }
+        #example_wrapper{
+            margin-top: 6.5% !important;
+        }
+        .flex-wrap{
+            margin-left: -2% !important;
+            margin-top: -8% !important;
+            width: auto !important;
+        }
+        
+        #example_filter{
+            margin-right: -16% !important;
+            margin-top: -3%;
+        }
+        #example_length{
+            margin-right:68% ;
+        }
+        .row.dt-row{
+            margin-top: -1% !important;
+        }
+        .slr{
+            position: absolute;
+            top: 75%;
+            left: 0%;
+        }
+        .cw {
+            margin-left: 15%;
+            width: 411px;
+        }
+    }
+    @media (min-width: 576px) and (max-width: 650px) {
+        .cl{
+            margin-top: 54px;     
+        }
+        .fc{
+            margin-top: 16%;
+        }
+        .bi{
+            margin-top: -66.5%;
+            left: -5.5rem;
+        }
+        .mod{
+            width: 200%;
+            margin-left: -47%!important;
+        }
+        #example_wrapper{
+            margin-top: 6.5% !important;
+        }
+        .flex-wrap{
+            margin-left: -6% !important;
+            margin-top: -8% !important;
+            width: auto !important;
+        }
+        
+        #example_filter{
+            margin-right: -1% !important;
+            margin-top: -3%;
+        }
+        #example_length{
+            margin-right:68% ;
+        }
+        .row.dt-row{
+            margin-top: -1% !important;
+        }
+        .slr{
+            position: absolute;
+            top: 75%;
+            left: 0%;
+        }
+        .cw {
+            margin-left: 15%;
+            width: 411px;
+        }
+    }
+
+    @media (min-width: 430px) and (max-width: 575px) {
+        .mod{
+            width: 215%;
+            margin-left: -55%!important;
+        }
+        .bi{
+            margin-top: -36% !important;
+            right: 0.5rem;
+        }
+        #example_wrapper{
+            margin-top: 4.5% !important;
+        }
+        .flex-wrap{
+            margin-left: -17% !important;
+            margin-top: -15% !important;
+        }
+        #example_filter{
+            margin-right: 16% !important;
+            margin-top: -5% !important;;
+        }
+        #example_length{
+            margin-right:68% !important; ;
+        }
+        .row.dt-row{
+            margin-top: 2% !important;
+        }
+    }
+
+    @media (min-width: 320px) and (max-width: 429px) {
+        .mod{
+            width: 274%;
+            margin-left: -86%!important;
+        }
+        .bi{
+            margin-top: -6rem !important;
+            left: 11rem;
+        }
+        #example_wrapper{
+            margin-top: 2.5% !important;
+        }
+        .flex-wrap{
+            margin-left: -49% !important;
+            margin-top: 1% !important;
+            width: auto !important;
+        }
+        
+        #example_filter{
+            margin-right: 48% !important;
+            margin-top: -1% !important;;
+        }
+        #example_length{
+            margin-right: 44% !important;   
+        }
+        .row.dt-row{
+            margin-top: -1% !important;
+        }   
+    }
+
+    @media (min-width: 280px) and (max-width: 319px) {
+        .mod{
+            width: 309%;
+            margin-left: -103%!important;
+        }
+        .bi{
+            margin-top: -6rem !important;
+            right: -9.2rem;
+        }
+        #example_wrapper{
+            margin-top: -3.5% !important;
+        }
+        .flex-wrap{
+            margin-left: -47% !important;
+            margin-top: -1% !important;
+            width: auto !important;
+        }
+        
+        #example_filter{
+            margin-right: 55% !important;
+            margin-top: 0% !important;
+        }
+        #example_length{
+            margin-top: 9% !important;
+            margin-right:37% !important; ;
+        }
+        .row.dt-row{
+            margin-top: -1% !important;
+        }  
+        .buttons-colvis{    
+            left:-12px !important;
+            width: 90px !important;
+            margin-bottom: 1% !important;
+        } 
+        
+    }
+    @media (min-width: 491px) and (max-width: 575px) {
+        .cl{
+            margin-top: 54px;     
+        }
+        .fc{
+            margin-top: 19%;
+        }
+        .bi{
+            margin-top: -3.2rem !important ;
+            left: -0.8rem;
+        }
+        #example_length{
+            margin-top: 0% !important;
+            margin-right:61% !important; ;
+        }
+        .flex-wrap{
+            margin-left: -11.5% !important;
+            margin-top: -2% !important;
+            width: auto !important;
+        }
+        #example_filter{
+            margin-right: 4% !important;
+            margin-top: -1% !important;
+        }
+        #example_wrapper{
+            margin-top: 2.5% !important;
+        }
+        #example_filter input {
+            width: 79% !important;
+        }
+        .row.dt-row {
+            margin-top: -1% !important;
+        }
+        .slr{
+            position: absolute;
+            top: 100%;
+            left: 0%;
+        }
+    }
+    @media (min-width: 415px) and (max-width: 490px) {
+        .cl{
+            margin-top: 54px;     
+        }
+        .fc{
+            margin-top: 23%;
+        }
+        .bi{
+            margin-top: -3.2rem !important ;
+            left: -0.8rem;
+        }
+        #example_length{
+            margin-top: 0% !important;
+            margin-right:61% !important; ;
+        }
+        .flex-wrap{
+            margin-left: -19% !important;
+            margin-top: -2% !important;
+            width: auto !important;
+        }
+        #example_filter{
+            margin-right: 7% !important;
+            margin-top: -1% !important;
+        }
+        #example_filter input {
+            width: 79% !important;
+        }
+        .slr{
+            position: absolute;
+            top: 100%;
+            left: 0%;
+        }
+    }
+
+    @media (min-width: 280px) and (max-width: 414px) {
+        .cl{
+            margin-top: 54px;     
+        }
+
+        .fc{
+            margin-top: 38%;
+        }
+    }
+    @media (min-width: 400px) and (max-width: 414px) {
+        .bi{
+            margin-top: -3.45rem !important;
+            left: 16.5rem;
+        }
+        .fc{
+            margin-top: 26%;
+        }
+        .flex-wrap {
+            margin-left: -66% !important;
+            margin-top: 1% !important;
+        }
+        #example_filter {
+            margin-right: 9% !important;
+            margin-top: -1% !important;
+        }
+        #example_filter input {
+            width: 79% !important;
+        }
+        #example_wrapper {
+            margin-top: 0% !important;
+        }
+        .slr{
+            position: absolute;
+            top: 100%;
+            left: 0%;
+        }
+    }
+
+    @media (min-width: 371px) and (max-width: 399px) {
+        .bi{
+            margin-top: -3.45rem !important;
+            left: 14.5rem;
+        }
+        .fc{
+            margin-top: 26%;
+        }
+        .flex-wrap {
+            margin-left: -66% !important;
+            margin-top: 1% !important;
+        }
+        #example_filter {
+            margin-right: 9% !important;
+            margin-top: -1% !important;
+        }
+        #example_filter input {
+            width: 79% !important;
+        }
+        #example_wrapper {
+            margin-top: 0% !important;
+        }
+        .slr{
+            position: absolute;
+            top: 100%;
+            left: 0%;
+        }
+    }
+
+    @media (min-width: 280px) and (max-width: 370px) {
+        .bi{
+            margin-left: 6%;
+            margin-top: 6.5%;
+        }
+        
+    }
+    
+</style>
+
+<!-- TABLE CODE CSS  -->
+
+<style>
+
+</style>
+
+{% endblock %}
+
+{% block body %}
+{% comment %} {% if messages %}
+
+<div class="alert alert-danger fixed-top" id="success-alert" style="height: 40px;">
+    {% for message in messages %}
+
+    <button type=" button" class="close" data-dismiss="alert">x</button>
+    <strong>{{message}}</strong>
+    {% endfor %}
+
+</div>
+{% endif %}
+
+<script src="{% static 'JS/jquery.min.js' %}"></script>
+
+<script>
+
+    $("#success-alert").fadeTo(5000, 500).slideUp(500, function () {
+        $("#success-alert").slideUp(500);
+    });
+</script> {% endcomment %}
+{% for message in messages %}
+    {% if messages %}
+        <div class="alert {{ message.tags }} alert-dismissible  fixed-top" id="successalerts" role="alert" style="position:fixed;">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+            {{ message }}
+        </div>
+    {% endif %}
+{% endfor %}
+
+
+<div>
+    <h3 style="text-align:center;z-index: 9; " class="fixed-top cl">IPOs</h3>
+</div>
+
+<div class="container-fluid fc ft">
+
+    <div class="table-responsive text-nowrap table-wrapper-scroll-x my-custom-scrollbar"> 
+        <table id="example" class="table table-bordered table-hover table-striped" style='width:100%;'>
+            {% comment %} <thead>
+                <tr style="text-align: center; white-space: nowrap;">
+                    <th scope="col" style="width:90px;">Sr No. &nbsp; </th>
+                    <th scope="col">Name&nbsp;</th>
+                    <th scope="col">IPO Type&nbsp;</th>
+                    <th scope="col">IPO Price&nbsp;</th>
+                    <th scope="col">Pre-Open Price&nbsp;</th>
+                    <th scope="col">Lot Retail</th>
+                    <th scope="col">Lot SHNI</th>
+                    <th scope="col">Lot BHNI</th>
+                    <th scope="col">Total IPOSize in Cr.&nbsp;</th>
+                    <th scope="col">Retail %&nbsp;</th>
+                    <th scope="col">BHNI %&nbsp;</th>
+                    <th scope="col">SHNI %&nbsp;</th>
+                    <th scope="col">Remark&nbsp;</th>
+                    <th scope="col">Action&nbsp;</th>
+                </tr>
+            </thead> {% endcomment %}
+
+            {% comment %} <h3 style="text-align:center;">IPOs</h3> {% endcomment %}
+
+
+            <div>
+                <!-- Button trigger modal -->
+                {% comment %} <button type="button" class="btn btn-outline-success bi d-flex justify-content-center align-items-center" style="float:right;" data-bs-toggle="modal"
+                    data-bs-target="#ADDIPO">
+                    ADD IPO
+                </button> {% endcomment %}
+                
+                <!-- MODAL FOR ADD IPO PAGE -->
+                <div class="modal fade addipomodal mod" id="ADDIPO" tabindex="-1" role="dialog"
+                    aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog1" role="document" style="padding: 0 60px; margin: 5px auto;">
+                        <div class="modal-content"
+                            style="background-color: whitesmoke; border-radius: 40px; border: 1px solid black;">
+                            <div class="modal-body">
+                                <div class="modal-header"
+                                    style="background: rgb(49, 183, 183); color: white; border-radius: 40px; border: 3px solid black; text-align: center; display: block;">
+                                    <b>
+                                        <h5 class="modal-title" id="exampleModalLabel">ADD IPO</h5>
+                                    </b>
+                                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
+                                        style="margin: -45px 0;" >X</button>
+                                </div>
+                                <br>
+
+                                <form action="/AddIPO" method="post" id="addipoform" class="needs-validation" style="margin: 10px 20px;"
+                                    novalidate>
+
+                                    {% csrf_token %}
+
+                                                            
+                                    {% comment %} <script>
+
+                                        $("#success-alert").fadeTo(5000, 500).slideUp(500, function () {
+                                            $("#success-alert").slideUp(500);
+                                        });
+
+                                    </script> {% endcomment %}
+
+                                    <div>
+                                        <label for="name" class="form-label"><b>IPO type</b></label>
+                                        <br>
+                                        <div style="display: inline-block; margin: 3px;">
+                                            <input type="radio" id="mainboardipo" name="typeofipo" value="mainboardipo" onclick="closethis(this)" checked>
+                                            <label for="">Main Board IPOs</label>
+                                        </div>
+                                        &nbsp;&nbsp;
+                                        <div style="display: inline-block; margin: 3px;">
+                                            <input type="radio" id="smeipo" name="typeofipo" value="smeipo" onclick="closethis(this)"  disabled>
+                                            <label for="smeipo">SME IPOs</label>
+                                        </div> 
+                                        <br>
+                                    </div>
+                                    
+                                    <input type="text" class="form-control" placeholder="Enter" id="notype" maxlength="10" name='IPOType'
+                                        value="MAINBOARD" hidden>
+
+                                    <div>
+                                        <label for="name" class="form-label"><b>Name&nbsp;<font color="red">*</font>
+                                            </b></label>
+                                        <input type="text" class="form-control" placeholder="Enter Name" id="name"
+                                            name='name' autofocus="autofocus" onfocus="this.select()" maxlength="50"
+                                            required>
+                                        <div class="invalid-feedback">
+                                            Please Enter IPO Name.
+                                        </div>
+                                        <br>
+                                    </div>
+                                    <div>
+                                        <label for="IPOPrice" class="form-label"><b>IPO Upper Price Band&nbsp;<font
+                                                    color="red">*
+                                                </font>
+                                            </b></label>
+                                        <input type="text" class="form-control" placeholder="Enter IPO Upper Price Band"
+                                            id="IPOPrice"
+                                            oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..?)\../g, '$1');"
+                                            / name='IPOPrice' maxlength="10" required>
+                                        <div class="invalid-feedback">
+                                            Please Enter IPO Upper Price Band.
+                                        </div>
+                                        <br>
+                                    </div>
+
+                                    <div>
+                                        <label class="form-label"><b>Total IPO Size in Cr.&nbsp;<font color="red">*</font>
+                                            </b></label>
+                                        <input type="text" class="form-control" name='TotalIPOSzie'
+                                            placeholder="Enter Total IPO Size in Cr." value=""
+                                            oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..?)\../g, '$1');"
+                                            / maxlength="10" required>
+                                        <div class="invalid-feedback">
+                                            Please Enter Total IPO Size.
+                                        </div>
+                                        <br>
+                                    </div>
+                                    
+                                    <div  id="LotSizeRetail">
+                                        <label for="LotSize" class="form-label"><b>IPO Retail Lot Size&nbsp;<font color="red">*
+                                                </font>
+                                            </b></label>
+                                        <input type="text" class="form-control" placeholder="Enter IPO Lot Size for Retail" id="LotSize" name='LotSizeRetail'
+                                            oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..?)\../g, '$1');"
+                                            maxlength="10"onkeypress="return event.charCode >= 48 && event.charCode <= 57" required>
+                                        <div class="invalid-feedback">
+                                            Please Enter Lot Size.
+                                        </div>
+                                        <br>
+                                    </div>
+
+                                    <div id="LotSizeSHNI">
+                                        <label for="LotSize" class="form-label"><b>IPO SHNI Lot Size&nbsp;<font color="red">*
+                                                </font>
+                                            </b></label>
+                                        <input type="text" class="form-control" placeholder="Enter IPO Lot Size"  id="LotSizeSH" name='LotSizeSHNI'
+                                            oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..?)\../g, '$1');"
+                                            maxlength="10"onkeypress="return event.charCode >= 48 && event.charCode <= 57" required>
+                                        <div class="invalid-feedback">
+                                            Please Enter Lot Size.
+                                        </div>
+                                        <br>
+                                    </div>
+                                    
+                                    <div  id="LotSizeBHNI">
+                                        <label for="LotSize" class="form-label"><b>IPO BHNI Lot Size&nbsp;<font color="red">*
+                                                </font>
+                                            </b></label>
+                                        <input type="text" class="form-control" placeholder="Enter IPO Lot Size"  id="LotSizeBH" name='LotSizeBHNI'
+                                            oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..?)\../g, '$1');"
+                                            maxlength="10"onkeypress="return event.charCode >= 48 && event.charCode <= 57" required>
+                                        <div class="invalid-feedback">
+                                            Please Enter Lot Size.
+                                        </div>
+                                        <br>
+                                    </div>
+                                    {% comment %} <div id="LotSizeSHNI">
+                                        <label for="LotSize" class="form-label"><b>IPO SHNI Lot Size&nbsp;<font color="red">*
+                                                </font>
+                                            </b></label>
+                                        <input type="text" class="form-control" placeholder="Enter IPO Lot Size"  id="LotSizeSH" name='LotSizeSHNI'
+                                            maxlength="10"onkeypress="return event.charCode >= 48 && event.charCode <= 57" required>
+                                        <div class="invalid-feedback">
+                                            Please Enter Lot Size.
+                                        </div>
+                                        <br>
+                                    </div> {% endcomment %}
+
+                                    <div>
+                                        <label class="form-label"><b>Retail Percentage&nbsp;<font color="red">*</font>
+                                            </b></label>
+                                        <input type="text" class="form-control" placeholder="Enter Retail Percentage" id="Retail%" maxlength="10" name='RetailPercentage'
+                                            value="35"onkeypress="return event.charCode >= 48 && event.charCode <= 57" required>
+                                        <div class="invalid-feedback">
+                                            Please Enter Retail Percentage.
+                                        </div>
+                                        <br>
+                                    </div>
+
+                                    <div id="BHNIPercentage">
+                                        <label class="form-label"><b>BHNI Percentage&nbsp;<font color="red">*</font>
+                                            </b></label>
+                                        <input type="text" class="form-control" placeholder="Enter BHNI Percentage" id="BHNI%" maxlength="10" name='BHNIPercentage'
+                                            value="10"onkeypress="return event.charCode >= 48 && event.charCode <= 57" required>     
+                                        <div class="invalid-feedback">
+                                            Please Enter BHNI Percentage.
+                                        </div>
+                                        <br>
+                                    </div>
+
+                                    <div id="SHNIPercentage">
+                                        <label class="form-label"><b>SHNI Percentage&nbsp;<font color="red">*</font>
+                                            </b></label>
+                                        <input type="text" class="form-control" placeholder="Enter SHNI Percentage" id="SHNI%" maxlength="10" name='SHNIPercentage'
+                                            value="5"onkeypress="return event.charCode >= 48 && event.charCode <= 57" required>
+                                        <div class="invalid-feedback">
+                                            Please Enter SHNI Percentage.
+                                        </div>
+                                        <br>
+                                    </div>
+
+                                    <div>
+                                        <label class="form-label"><b>Remark:</b></label>
+                                        <input type="text" class="form-control" placeholder="Enter Remark" name='Remark'
+                                            maxlength="100">
+                                    </div><br>
+
+                                    <div class="modal-footer" style="border-top: 1px solid black;">
+                                        <button type="button" class="btn btn-outline-secondary"
+                                            data-bs-dismiss="modal" onclick="reset1()">Close</button>
+                                        <button type="submit" class="btn btn-outline-primary">Submit Form</button>
+                                    </div>
+                                                                    
+                                </form>
+                                
+                            </div>
+                            <!-- JAVASCRIPT FOR ADDGROUP FORM VALIDATION -->
+                            <script> 
+                            
+                                function reset1()
+                                {
+                                    document.getElementById('addipoform').reset();   
+                                }
+
+                                function closethis(clickedRadio)
+                                {
+                                    if (clickedRadio.value === "mainboardipo") {
+
+                                        document.getElementById('LotSizeBH').setAttribute("required", "required"); 
+                                        document.getElementById('LotSizeSH').setAttribute("required", "required"); 
+                                        document.getElementById('BHNI%').setAttribute("required", "required"); 
+                                        document.getElementById('SHNI%').setAttribute("required", "required");
+
+                                        
+                                        document.getElementById('notype').value = 'MAINBOARD';
+                                        // document.getElementById('addipoform').reset();
+                                        // document.getElementById('Retail%').value = '35';
+                                        // document.getElementById('BHNI%').value = '10';
+                                        // document.getElementById('SHNI%').value = '5';
+
+                                        document.getElementById('LotSizeBHNI').style.display = 'block';
+                                        document.getElementById('LotSizeSHNI').style.display = 'block';
+                                        document.getElementById('BHNIPercentage').style.display = 'block';
+                                        document.getElementById('SHNIPercentage').style.display = 'block';
+                                    }
+                                    else if (clickedRadio.value === "smeipo") {
+                                        // document.getElementById('addipoform').reset();
+                                        // document.getElementById('LotsizeBH').value = '0';
+                                        // document.getElementById('LotsizeSH').value = '0';
+                                        document.getElementById('LotSizeBH').removeAttribute("required"); 
+                                        document.getElementById('LotSizeSH').removeAttribute("required");
+                                        document.getElementById('BHNI%').removeAttribute("required"); 
+                                        document.getElementById('SHNI%').removeAttribute("required"); 
+
+                                        // document.getElementById('BHNI%').value = '';
+                                        // document.getElementById('SHNI%').value = '';
+                                        document.getElementById('notype').value = 'SME';
+
+                                        document.getElementById('LotSizeSHNI').style.display = 'none';
+                                        document.getElementById('LotSizeBHNI').style.display = 'none';
+                                        document.getElementById('BHNIPercentage').style.display = 'none';
+                                        document.getElementById('SHNIPercentage').style.display = 'none';  
+                                    }
+                                }
+                            </script>
+
+                            <script>
+                                // Example starter JavaScript for disabling form submissions if there are invalid fields
+                                (function () {
+                                    'use strict'
+
+                                    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                                    var forms = document.querySelectorAll('.needs-validation')
+
+                                    // Loop over them and prevent submission
+                                    Array.prototype.slice.call(forms)
+                                        .forEach(function (form) {
+                                            form.addEventListener('submit', function (event) {
+                                                if (!form.checkValidity()) {
+                                                    event.preventDefault()
+                                                    event.stopPropagation()
+                                                }
+
+                                                form.classList.add('was-validated')
+                                            }, false)
+                                        })
+                                })()
+                            </script>
+                            <!-- JAVASCRIPT FOR ADDIPO FORM WITHOUT ENTERING ANY NUMBER USER CANNOT TO BE NEXT INPUT -->
+                            <script>
+                                $(document).ready(function () {
+                                    $('#name, #IPOPrice, #LotSize').focusout(function () {
+                                        var thisValue = $(this).val();
+                                        if (thisValue.trim() == '') {
+                                            $(this).next().show();
+                                            $(this).focus();
+                                        } else {
+                                            $(this).next().hide();
+                                        }
+                                    });
+
+                                });
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            
+
+            </div>
+            {{ html_table | safe }}
+            
+            {% comment %} <tbody style="text-align: center;">
+                {% for i in product %}
+                <tr>
+                    <th>{{forloop.counter}}</th>
+                    <td><a href="/{{i.id}}/Order" >{{ i.IPOName }}</a></td>
+                    <td>{{ i.IPOType }}</td>
+                    <td>{{ i.IPOPrice|floatformat:2  }}</td>
+                    <td>{{ i.PreOpenPrice|floatformat:2 }}</td>
+                    <td>{{ i.LotSizeRetail|floatformat:1 }}</td>
+                    <td>{{ i.LotSizeBHNI|floatformat:1 }}</td>
+                    <td>{{ i.LotSizeSHNI|floatformat:1 }}</td>
+                    <td>{{ i.LotSizeBHNI|floatformat:1 }}</td>
+                    <td>{{ i.TotalIPOSzie|floatformat:2 }}</td>
+                    <td>{{ i.RetailPercentage }}</td>
+                    <td>{{ i.BHNIPercentage }}</td>
+                    <td>{{ i.SHNIPercentage }}</td>
+                    <td>{{ i.Remark }}</td>
+                    <td style="white-space: nowrap;"><button onclick="window.location.href='edit/{{ i.id }}';"
+                            class="btn btn-outline-primary" style="width: 72px;">Edit</button>
+                        <!-- BUTTON OF DELETE MODAL -->
+                        <button type="button" class="btn btn-outline-danger"
+                            onclick="document.getElementById('{{ i.id }}').style.display='block'" style="width: 72px;"
+                            data-toggle="modal" data-target="#{{ i.id }}">Delete</button>
+
+                        <!--NEW  Modal FOR DELETE MODAL-->
+                        <div class="modal fade" id="{{ i.id }}" tabindex="-1" role="dialog"
+                            aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header" style="border-bottom: 1px solid black;">
+                                        <b>
+                                            <h5 class="modal-title" id="exampleModalLabel">Delete IPO</h5>
+                                        </b>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body" style="white-space: normal;">
+                                        {{prompt}}
+                                        <center>
+                                            <p>Are you sure you want to delete {{ i.IPOName }} IPO?</p>
+                                            <div class="form-row">
+                                                <div class="form-group col-md-6">
+                                                    <button type="button" class="btn btn-outline-secondary"
+                                                        data-dismiss="modal" style="width: 50%;"
+                                                        class="cancelbtn">Cancel</button>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <button type="button" class="btn btn-outline-danger" style="width: 50%;"
+                                                        class="deletebtn"
+                                                        onclick="window.location.href='delete/{{ i.id }}';">Delete</button>
+                                                </div>
+                                        </center>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody> {% endcomment %}
+        </table>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <!-- Total rows and current range display (left aligned) -->
+            <p class="text-left">
+                Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} Rows
+            </p>
+        </div>
+
+        {% comment %} <div class="col-md-6">
+            <ul class="pagination justify-content-end text-left" style="margin: 0; margin-right:2%;">
+                <!-- First page link -->
+                <li class="page-item">
+                    <a class="page-link" href="/IPOSETUP?page=1">First</a>
+                </li>
+                
+                <!-- Previous page link -->
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="/IPOSETUP?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Previous</span>
+                    </li>
+                {% endif %}
+                
+                <!-- Current page number -->
+                <li class="page-item active">
+                    <a class="page-link">{{ page_obj.number }}</a>
+                </li>
+                
+                <!-- Next page link -->
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="/IPOSETUP?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Next</span>
+                    </li>
+                {% endif %}
+                
+                <!-- Last page link -->
+                <li class="page-item">
+                    <a class="page-link" href="/IPOSETUP?page={{ page_obj.paginator.num_pages }}">Last</a>
+                </li>
+            </ul>
+        </div> {% endcomment %}
+
+        <div class="col-md-6">
+            <ul class="pagination justify-content-end text-left" style="margin: 0; margin-right:2%;">
+                <!-- Always show the first page -->
+                {% if page_obj.number != 1 %}
+                    <li class="page-item">
+                        <a class="page-link" href="/IPOSETUP?page=1">1</a>
+                    </li>
+                {% endif %}
+                
+                <!-- Show ellipsis if current page is greater than 4 -->
+                {% if page_obj.number > 4 %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+                
+                <!-- Display pages before the current page -->
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num > 1 and num < page_obj.number and num >= page_obj.number|add:'-2' %}
+                        <li class="page-item">
+                            <a class="page-link" href="/IPOSETUP?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                <!-- Display current page -->
+                <li class="page-item active">
+                    <span class="page-link">{{ page_obj.number }}</span>
+                </li>
+                
+                <!-- Display pages after the current page -->
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num > page_obj.number and num < page_obj.number|add:'3' and num < page_obj.paginator.num_pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="/IPOSETUP?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                <!-- Show ellipsis if current page is less than num_pages - 3 -->
+                {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+                
+                <!-- Always show the last page -->
+                {% if page_obj.number != page_obj.paginator.num_pages %}
+                    <li class="page-item">
+                        <a class="page-link" href="/IPOSETUP?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+{% for profile in entry%}
+{{profile.name}}
+{% endfor %}
+
+{% comment %} <script>
+    $(document).ready(function () {
+        $('#bootstrapdatatable').DataTable({
+            "aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
+            "iDisplayLength": 25
+        }
+        );
+    });
+</script>
+
+<script>
+    $('table.table-sortable th').on('click', function (e) {
+        sortTableByColumn(this)
+    })
+
+    function sortTableByColumn(tableHeader) {
+        // extract all the relevant details
+        let table = tableHeader.closest('table')
+        let index = tableHeader.cellIndex
+        let sortType = tableHeader.dataset.sortType
+        let sortDirection = tableHeader.dataset.sortDir || 'asc' // default sort to ascending
+
+        // sort the table rows
+        let items = Array.prototype.slice.call(table.rows);
+        let sortFunction = getSortFunction(sortType, index, sortDirection)
+        let sorted = items.sort(sortFunction)
+
+        // remove and re-add rows to table
+        for (let row of sorted) {
+            let parent = row.parentNode
+            let detatchedItem = parent.removeChild(row)
+            parent.appendChild(row)
+        }
+
+        // reset heading values and styles
+        for (let header of tableHeader.parentNode.children) {
+            header.classList.remove('currently-sorted')
+            delete header.dataset.sortDir
+        }
+
+        // update this headers's values and styles
+        tableHeader.dataset.sortDir = sortDirection == 'asc' ? 'desc' : 'asc'
+        tableHeader.classList.add('currently-sorted')
+    }
+    function getSortFunction(sortType, index, sortDirection) {
+        let dir = sortDirection == 'asc' ? -1 : 1
+        switch (sortType) {
+            case 'text': return stringRowComparer(index, dir);
+            case 'numeric': return numericRowComparer(index, dir);
+            default: return stringRowComparer(index, dir);
+        }
+    }
+
+    // asc = alphanumeric order - eg 0->9->a->z
+    // desc = reverse alphanumeric order - eg z->a->9->0
+    function stringRowComparer(index, direction) {
+        return (a, b) => -1 * direction * a.children[index].textContent.localeCompare(b.children[index].textContent)
+    }
+
+    // asc = higest to lowest - eg 999->0
+    // desc = lowest to highest - eg 0->999
+    function numericRowComparer(index, direction) {
+        return (a, b) => direction * (Number(a.children[index].textContent) - Number(b.children[index].textContent))
+    }
+</script> {% endcomment %}
+    <div id="delete-error" class="alert alert-danger" style="display:none;"></div>
+
+    <script>
+    function handleDelete(btn, rowId) {
+        const canDelete = btn.getAttribute("data-can-delete") === "True";
+
+        if (canDelete) {
+            // ✅ Open modal
+            $('#'+rowId).modal('show');
+        } else {
+            // ❌ Show error
+            const errorDiv = document.getElementById("delete-error");
+            errorDiv.innerText = "This IPO cannot be deleted because it has active collections.";
+            errorDiv.style.display = "block";
+            setTimeout(() => errorDiv.style.display = "none", 10000);
+        }
+    }
+</script>
+<script>
+document.getElementById("deleteIpoBtn").addEventListener("click", function() {
+    const ipoId = this.getAttribute("data-ipo-id");
+
+    fetch(`/delete-ipo/${ipoId}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);
+        if (data.redirect_url) {
+            window.location.href = data.redirect_url;  // Redirect based on condition
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("An unexpected error occurred.");
+    });
+});
+</script>
+<script>
+    $(document).ready(function () {
+        $('#example thead tr')
+            .clone(true)
+            .addClass('filters')
+            .appendTo('#example thead');
+        var pageLength = "{{ Ip_page_size|default:'50' }}";
+        pageLength = pageLength === "All" ? -1 : parseInt(pageLength, 10);
+    
+        var table = $('#example').DataTable({
+            orderCellsTop: true,
+            order: [[0, 'desc']],
+            {% comment %} fixedHeader: true, {% endcomment %}
+            {% comment %} lengthMenu: [50, 100, 150, 200,-1], {% endcomment %}
+            lengthChange: true,
+            info:false,
+            "pageLength": pageLength,
+            buttons: [ {
+                text: 'Columns', 
+                extend: 'colvis',
+            },
+            {   
+                extend: 'collection',
+                text: 'Download',
+                buttons:[
+                    {
+                        extend: 'excel',
+                        text: 'Excel',
+                        exportOptions: {
+                            columns: [1, 2, 3, 4,5,6,7,8,9,10,11,12],
+                        },
+                        customize: function(xlsx) {
+                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                    
+                            $('row:first', sheet).remove();
+                        }
+                    },
+                    {
+                        extend: 'pdf',
+                        text: 'PDF',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4,5,6,7,8,9,10,11,12],
+                            rows: ':visible',
+                            modifier: {
+                                page: 'current'
+                            }
+                        },
+                        customize: function(doc) {
+                           {% comment %} doc.pageMargins = [60, 50, 100, 100]; {% endcomment %}
+                           doc.styles.tableHeader = {
+                                fillColor: 'grey',
+                                color: 'whitesmoke',
+                                bold: true,
+                                alignment: 'center',
+                            };
+                            doc.styles.tableBodyEven = {
+                                alignment: 'center',
+                                fillColor: 'bisque',
+                            };
+                            doc.styles.tableBodyOdd = {
+                                alignment: 'center',
+                                fillColor: 'bisque',
+                            };
+                            
+                            /*doc.pageSize = 'A4'; 
+                            doc.content[1].table.widths = [50, 100, 100, 100, 100];
+                            doc.content[1].table.heights = Array(table.rows({ page: 'current' }).count() + 1).join('*').split('');*/
+
+                            doc.content[1].layout = {
+                                hLineWidth: function(i, node) {
+                                    return 1; 
+                                },
+                                vLineWidth: function(i, node) {
+                                    return 1; 
+                                },
+                                hLineColor: function(i, node) {
+                                    return 'black'; 
+                                },
+                                vLineColor: function(i, node) {
+                                    return 'black'; 
+                                },
+                            };
+                        }
+                    }
+                ]
+            },                
+                
+            ],
+            initComplete: function () {
+                var api = this.api();
+    
+                
+                api
+                    .columns(':not(:last-child)')
+                    .eq(0)
+                    .each(function (colIdx) {
+                        
+                        var cell = $('.filters th').eq(
+                            $(api.column(colIdx).header()).index()
+                        );
+                        var title = $(cell).text();
+                        $(cell).html('<input class="Input" type="text" placeholder="' + title + '" style="text-align: center ;  width: auto;" />');
+                        
+                        $(
+                            'input',
+                            $('.filters th').eq($(api.column(colIdx).header()).index())
+                        )
+                            .off('keyup change')
+                            .on('change', function (e) {
+                                
+                                $(this).attr('title', $(this).val());
+                                var regexr = '({search})'; //$(this).parents('th').find('select').val();
+    
+                                var cursorPosition = this.selectionStart;
+                                
+                                api
+                                    .column(colIdx)
+                                    .search(
+                                        this.value != ''
+                                            ? regexr.replace('{search}', '(((' + this.value + ')))')
+                                            : '',
+                                        this.value != '',
+                                        this.value == ''
+                                    )
+                                    .draw();
+                            })
+                            .on('keyup', function (e) {
+                                e.stopPropagation();
+    
+                                $(this).trigger('change');
+                                $(this)
+                                    .focus()[0]
+                                    .setSelectionRange(cursorPosition, cursorPosition);
+                            });
+                    });
+                    var lastCell = $('.filters th').eq(
+                    $(api.column(':last-child').header()).index()
+                    );
+                    $(lastCell).html('');
+            },
+            language: {
+                info: 'Showing _START_ to _END_ of _TOTAL_ Rows',
+                infoFiltered: '(filtered from _MAX_ total Rows)',
+                emptyTable: "No data available",
+                lengthMenu: 'Show <select>' +
+                    '<option value="50">50</option>' +
+                    '<option value="100">100</option>' +
+                    '<option value="150">150</option>' +
+                    '<option value="200">200</option>' +
+                    '<option value="-1">All</option>' +
+                    '</select> Rows',
+                search: 'Search:',
+                paginate: {
+                    first: 'First',
+                    last: 'Last',
+                    next: 'Next',
+                    previous: 'Previous'
+                }
+            },
+        });
+
+        $('select[name="example_length"] option[value="-1"]').text('All');
+        
+        table.buttons().container()
+            .appendTo( '#example_wrapper .col-md-6:eq(0)' );
+
+        var table = $('#example').DataTable();
+
+        var dataTableLengthDiv = document.getElementById('example_length');
+
+        var firstLabel = dataTableLengthDiv.querySelector('label');
+
+        if (firstLabel) {
+        firstLabel.classList.add('slr');
+        }
+    } );
+</script>
+<script>
+      $(document).ready(function() {
+        $(".col-sm-12.col-md-6:first").addClass("custom-width");
+        $(".col-sm-12.col-md-6").addClass("cw");
+        $(".dt-row:first").addClass("table-responsive");
+        $(".buttons-collection").addClass("d-flex justify-content-center align-items-center");
+
+        var customButtonHtml2 =    '<div class="btn-group "><button type="button" class="btn btn-outline-success bi d-flex justify-content-center align-items-center" style="float:right;" data-bs-toggle="modal"'+
+            'data-bs-target="#ADDIPO">'+
+            'ADD IPO'+
+        '</button>'+
+            '</div>';
+        
+        $('.col-sm-12.col-md-6.cw:eq(1)').append(customButtonHtml2);
+
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        // Initialize DataTables instance
+        // Remove the existing rows selection dropdown and pagination if needed
+        $('.slr').remove();
+        $('#example_paginate').remove();
+        
+        // Create the new form HTML for rows per page selection
+        var formHtml = `
+            <form method="POST" action="/IPOSETUP"> 
+                {% csrf_token %}
+                <label class="slr" for="page_size">Show 
+                <select name="Ip_page_size" id="Ip_page_size" onchange="this.form.submit()">
+                    <option value="{{Ip_page_size}}" style='display:None;' {% if Ip_page_size|default_if_none:50 == 50 %}selected{% endif %}>{{Ip_page_size}}</option>
+                    <option value="50" {% if Ip_page_size == 50 %}selected{% endif %}>50</option>
+                    <option value="100" {% if Ip_page_size == 100 %}selected{% endif %}>100</option>
+                    <option value="200" {% if Ip_page_size == 200 %}selected{% endif %}>200</option>
+                    <option value="250" {% if Ip_page_size == 250 %}selected{% endif %}>250</option>
+                    <option value="All" {% if Ip_page_size == 'All' %}selected{% endif %}>All</option>
+                </select>
+                Rows</label>
+                <input type="hidden" name="page" value="{{ page_obj.number }}">
+            </form>
+        `;
+    
+        // Append the form to a specific element
+        $('.dataTables_length').append(formHtml);
+
+        // Update page length when selection is changed
+        {% comment %} $('#Ip_page_size').on('change', function() {
+            var pageSize = $(this).val();
+            if (pageSize === 'All') {
+                table.page.len(-1).draw(); // Show all rows if "All" is selected
+            } else {
+                table.page.len(parseInt(pageSize)).draw(); // Set to selected page length
+            }
+        });
+
+        // Set the initial page length when the page loads (from the server-side)
+        table.page.len({{ Ip_page_size|default:50 }}).draw(); {% endcomment %}
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        $(".alert").each(function() {
+            var alert = $(this);
+            setTimeout(function() {
+                alert.fadeOut(500, function() {
+                    alert.remove();
+                });
+            }, 5000); // 5000 milliseconds = 5 seconds
+        });
+    });
+</script>
+
+<script src="{% static 'JS/jquery.min.js' %}"></script>
+    {% comment %} <script>
+        $("#successalerts").fadeTo(3000, 500).slideUp(500, function () {
+            $("#successalerts").slideUp(500);
+        });
+    </script> {% endcomment %}
+
+<script src="{% static 'DataTables/js/jquery-3.7.0.js' %}"></script>
+<script src="{% static 'DataTables/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.fixedHeader.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.bootstrap5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.bootstrap5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/jszip.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.colVis.min.js' %}"></script>
+<script src="{% static 'DataTables/js/pdfmake.min.js' %}"></script>
+<script src="{% static 'DataTables/js/vfs_fonts.js' %}"></script>
+{% comment %} <script src="{% static 'JS/bootstrap.min.js' %}"></script>
+<script src="{% static 'JS/jquery-1.11.1.min.js' %}"></script> {% endcomment %}
+
+{% comment %} <script src="{% static 'JS/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'JS/dataTables.bootstrap4.min.js' %}"></script> {% endcomment %}
+{% endblock %}

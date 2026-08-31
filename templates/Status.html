@@ -1,0 +1,1541 @@
+{% extends 'basic.html' %}
+{% block title%} {{IPOName}}-Group Wise Billing{% endblock %}
+{% block css %}
+{% load static %}
+<!-- ADD NEW CODE DELETE CSS -->
+<link rel="stylesheet" href="{% static  'DataTables/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static  'DataTables/css/buttons.bootstrap5.min.css' %}">
+<link rel="stylesheet" href="{% static  'DataTables/css/dataTables.bootstrap5.min.css' %}">
+<!-- Add FixedColumns CSS -->
+<!-- <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.3.0/css/fixedColumns.bootstrap5.min.css"> -->
+
+<style>
+    {% comment %} body {
+        font-family: Arial, Helvetica, sans-serif;
+
+    } {% endcomment %}
+    #example th{
+        text-align: center;
+        width: 10% !important;
+    }
+    #example{
+       width: 100% !important;
+    }
+    
+    #example td{
+        text-align: center;
+    }
+    .flex-wrap {
+        position: relative !important;
+        margin-top: -60px !important; 
+        left: 70% !important; 
+    }
+    .text-left{
+        margin-bottom: 6.5% !important;
+    }
+    #example_filter{
+        float: left;
+        width: 50% !important;
+    }
+    #example_filter {
+        margin-top: 0% !important;
+        margin-right: 0rem !important;
+    }
+    #example striped{
+        margin-top : 1% !important;
+    }
+    .form-control-sm {
+        border: 0.3px solid black;
+        height:30px !important;
+      }
+    .dropdown-menu {
+        min-width: 7rem !important;
+        margin-top: 0 !important;
+        background-color: #6c757d;
+    }
+    .buttons-colvis{
+        left:-11px;
+        width: 95px !important;
+    }
+    .buttons-collection{
+        height: 35px;
+        width: 100% ;
+    }
+    .cw {
+        margin-left: 3px;
+        width: 34.83% ; 
+    }
+
+    .custom-width {
+        margin-left: 0px !important;
+        right : 0px !important;
+        width: 65% !important; 
+    }
+    #example_wrapper{
+        margin-top: 0.5% !important;
+    }
+    .row.dt-row {
+        margin-top: -25px ! important; 
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+  .h3,
+    h3 {
+        margin-top: 80px;
+        font-size: 1.75rem;
+        border-block-end: 3px solid #e9ecef;
+    }
+
+
+    .iponame {
+        background-color: white;
+        height: 35px;
+        margin: 35px 0px;
+        width: 100%;
+        text-align: center;
+    }
+
+   
+    .container-fluid {
+        margin-top: -31px;
+        width: 100%;
+        padding-right: 30px;
+        padding-left: 30px;
+        margin-right: auto;
+        margin-left: auto;
+        {% comment %} margin-bottom: 0%;   {% endcomment %}
+    }
+
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+        width: 100%;
+        border: 1px solid #ddd;
+        margin-bottom: 1%;  
+    }
+
+    th,
+    td {
+        text-align: center;
+        padding: 5px;
+    }
+    thead th {
+        position: sticky !important;
+        left: 0;
+        background-color: #f1f1f1;
+        z-index: 11;
+    }
+    thead td {
+        text-align:center !important;
+        {% comment %} font-weight: bold; {% endcomment %}
+        unicode-bidi: isolate;
+    }
+    tbody th {
+        font-weight: normal;
+        position: sticky !important;
+        left: 0;
+        background-color: #f1f1f1;
+        {% comment %} z-index: 1; {% endcomment %}
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2
+    }
+
+    .page-item.active .page-link {
+        z-index: 0;
+        color: #fff;
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+    
+    .col-md-3 {
+        display: inline-block;
+        margin-left: -4px;
+    }
+
+
+    table.table-sortable th.currently-sorted[data-sort-dir="asc"]::after {
+        content: "\25b2";
+    }
+
+    table.table-sortable th.currently-sorted[data-sort-dir="desc"]::after {
+        content: "\25bc";
+    }
+
+    .footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: #686868;
+        color: white;
+        text-align: center;
+        padding: 5px 0px;
+    }
+
+    .button {
+        margin: 0px 10px;
+        color: black;
+        background-color: antiquewhite;
+        width: auto;
+    }
+
+    .btn-dark.disabled,
+    .btn-dark:disabled {
+        color: #000;
+        background-color: #ffddaf;
+        border-color: #040404;
+    }
+
+    .wc{
+        padding-left: 0px;
+    }
+    @media screen and (min-width: 7651px) and (max-width: 8650px){
+        #example_filter {
+            margin-top: 0% !important;
+            margin-left: 86.3rem !important;
+        }
+        .cw {
+            margin-left: 3px;
+            width: 33.83%;
+        }
+        div.dataTables_wrapper div.dt-row {
+            position: relative;
+            width: 100.5% !important;
+        }
+        .flex-wrap {
+            left: 75% !important;
+        }
+        #example_paginate{
+            margin-right: -1%;
+        }
+    }
+    @media screen and (min-width: 5751px) and (max-width: 7650px){
+        #example_filter {
+            margin-top: 0% !important;
+            margin-left: 71.3rem !important;
+        }
+        .cw {
+            margin-left: 3px;
+            width: 33.83%;
+        }
+        div.dataTables_wrapper div.dt-row {
+            position: relative;
+            width: 100.5% !important;
+        }
+        .flex-wrap {
+            left: 75% !important;
+        }
+        #example_paginate{
+            margin-right: -1%;
+        }
+    }
+    @media screen and (min-width: 3951px) and (max-width: 5750px){
+        #example_filter {
+            margin-top: 0% !important;
+            margin-left: 53.8rem !important;
+        }
+        .cw {
+            margin-left: 3px;
+            width: 33.83%;
+        }
+        div.dataTables_wrapper div.dt-row {
+            position: relative;
+            width: 100.8% !important;
+        }
+        .flex-wrap {
+            left: 72% !important;
+        }
+        #example_paginate{
+            margin-right: -1%;
+        }
+    }
+    @media screen and (min-width: 3051px) and (max-width: 3950px){
+        #example_filter {
+            margin-top: 0% !important;
+            margin-left: 35rem !important;
+        }
+        .cw {
+            margin-left: 3px;
+            width: 33.83%;
+        }
+        div.dataTables_wrapper div.dt-row {
+            position: relative;
+            width: 100.8% !important;
+        }
+        .flex-wrap {
+            left: 72% !important;
+        }
+        #example_paginate{
+            margin-right: -1%;
+        }
+    }
+    @media screen and (min-width: 2851px) and (max-width: 3050px){
+        #example_filter {
+            margin-top: 0% !important;
+            margin-left: 32.3rem !important;
+        }
+        .cw {
+            margin-left: 3px;
+            width: 33.83%;
+        }
+        div.dataTables_wrapper div.dt-row {
+            position: relative;
+            width: 101.5% !important;
+        }
+        .flex-wrap {
+            left: 72% !important;
+        }
+        #example_paginate{
+            margin-right: -1%;
+        }
+    }
+    @media screen and (min-width: 2551px) and (max-width: 2850px){
+        #example_filter {
+            margin-top: 0% !important;
+            margin-left: 28.3rem !important;
+        }
+        .cw {
+            margin-left: 3px;
+            width: 33.83%;
+        }
+        div.dataTables_wrapper div.dt-row {
+            position: relative;
+            width: 101.5% !important;
+        }
+        .flex-wrap {
+            left: 72% !important;
+        }
+        #example_paginate{
+            margin-right: -1%;
+        }
+    }
+    @media screen and (min-width: 2351px) and (max-width: 2550px){
+        #example_filter {
+            margin-top: 0% !important;
+            margin-left: 26.3rem !important;
+        }
+        .cw {
+            margin-left: 3px;
+            width: 33.83%;
+        }
+        div.dataTables_wrapper div.dt-row {
+            position: relative;
+            width: 101.5% !important;
+        }
+        #example_paginate{
+            margin-right: -1%;
+        }
+    }
+    @media screen and (min-width: 1951px) and (max-width: 2350px){
+        #example_filter {
+            margin-top: 0% !important;
+            margin-left: 22.3rem !important;
+        }
+        .cw {
+            margin-left: 3px;
+            width: 33.83%;
+        }
+        div.dataTables_wrapper div.dt-row {
+            position: relative;
+            width: 101.5% !important;
+        }
+    }
+    @media screen and (min-width: 1884px) and (max-width: 1951px){
+        #example_filter {
+            margin-top: 0% !important;
+            margin-left: 20.3rem !important;
+        }
+        .cw {
+            margin-left: 3px;
+            width: 33.83%;
+        }
+        {% comment %} div.dataTables_wrapper div.dt-row {
+            position: relative;
+            width: 100.5% !important;
+        } {% endcomment %}
+    }
+    @media screen and (min-width: 1811px) and (max-width: 1883px) {
+        #example_filter {
+            margin-top: 0% !important;
+            margin-left: 20.3rem !important;
+        }
+        .cw {
+            margin-left: 3px;
+            width: 33.83%;
+        }
+    }
+    @media screen and (min-width: 1751px) and (max-width: 1810px) {
+        #example_filter {
+            {% comment %} margin-top: -8% !important; {% endcomment %}
+            margin-left: 86.7rem !important;
+            margin-top: -10% !important;
+        }
+    }
+    @media screen and (min-width: 1695px) and (max-width: 1750px) {
+        #example_filter {
+            margin-top: -10% !important;
+            margin-left: 83.8rem !important;
+        }
+    }
+    @media (min-width: 1621px) and (max-width: 1694px) {
+        #example_filter {
+            margin-top: -11% !important;
+            margin-left: 80rem !important;
+        }  
+        .flex-wrap {
+            left: 70% !important;
+        }     
+    }
+    @media (min-width: 1583px) and (max-width: 1620px) {
+        #example_filter {
+            margin-top: -11% !important;
+            margin-left: 77.8rem !important;
+        }  
+        .flex-wrap {
+            left: 70% !important;
+        }     
+    }
+    @media (min-width: 1541px) and (max-width: 1582px) {
+        #example_filter {
+            margin-top: -11% !important;
+            margin-left: 75.8rem !important;
+        }  
+        .flex-wrap {
+            left: 70% !important;
+        }     
+    }
+    @media (min-width: 1481px) and (max-width: 1540px) {
+        #example_filter {
+            margin-top: -12% !important;
+            margin-left: 72.2rem !important;
+        }  
+    }
+    @media (min-width: 1431px) and (max-width: 1480px) {
+        #example_filter {
+            margin-top: -12% !important;
+            margin-left: 69rem !important;
+        }  
+    }
+    @media (min-width: 1365px) and (max-width: 1430px) {
+        #example_filter {
+            margin-top: -13% !important;
+            margin-left: 65rem !important;
+        }  
+    }
+    @media (min-width: 1301px) and (max-width: 1364px) {
+        #example_filter {
+            margin-top: -13% !important;
+            margin-left: 60.8rem !important;
+        }  
+    }
+    @media (min-width: 1250px) and (max-width: 1300px) {
+        #example_filter {
+            margin-top: -14%!important;
+            margin-left: 57.8rem !important;
+        }  
+        .flex-wrap {
+            left: 68% !important;
+        }     
+    }
+    @media (min-width: 1200px) and (max-width: 1249px) {
+        #example_filter {
+            margin-top: -15%!important;
+            margin-left: 54.5rem !important;
+        }  
+        .flex-wrap {
+            left: 68% !important;
+        }     
+    }
+    @media (min-width: 1120px) and (max-width: 1199px) {
+        #example_filter {
+            margin-top: -16% !important;
+            margin-left: 49.7rem !important;
+        } 
+        .container-fluid {
+            margin-bottom: 8%;
+        }   
+    }
+    @media (min-width: 1069px) and (max-width: 1119px) {
+        #example_filter {
+            margin-top: -16% !important;
+            margin-left: 46rem !important;
+        } 
+        .container-fluid {
+            margin-bottom: 8%;
+        }   
+    }
+    @media (min-width: 992px) and (max-width: 1068px) {
+        #example_filter {
+            margin-top: -18%!important;
+            margin-left: 41.5rem !important;
+        }  
+        .flex-wrap {
+            left: 64% !important;
+        } 
+        .container-fluid {
+            margin-bottom: 9%;
+        }   
+    }
+    @media (min-width: 960px) and (max-width: 991px) {
+        #example_filter {
+            margin-top: -20% !important;
+            margin-left: 39.7rem !important;
+        } 
+        .flex-wrap {
+            left: 57% !important;
+        } 
+        .container-fluid {
+            margin-bottom: 13%;
+        }   
+        #example_wrapper {
+            margin-top: 1.5% !important;
+        }
+    }
+    @media (min-width: 882px) and (max-width: 959px) {
+        #example_filter {
+            margin-top: -20% !important;
+            margin-left: 34.7rem !important;
+        } 
+        .flex-wrap {
+            left: 48% !important;
+        } 
+        .container-fluid {
+            margin-bottom: 13%;
+        }   
+    }
+    @media (min-width: 809px) and (max-width: 881px) {
+        #example_filter {
+            margin-top: -22% !important;
+            margin-left: 30rem !important;
+        } 
+        .flex-wrap {
+            left: 48% !important;
+        }
+        .container-fluid {
+            margin-bottom: 13%;
+        }    
+    }
+    @media (min-width: 768px) and (max-width: 808px) {
+        #example_filter {
+            margin-top: -24%!important;
+            margin-left: 27.5rem !important;
+        }  
+        .flex-wrap {
+            left: 48% !important;
+        }   
+        .container-fluid {
+            margin-bottom: 13%;
+        } 
+    }
+    @media (min-width: 700px) and (max-width: 767px) {
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+        }
+        #example_wrapper {
+            margin-top: -0.5% !important;
+        }
+        .iponame {
+            margin-top: 54px;         
+        } 
+        .slr{
+            position: absolute;
+            top: 31%;
+            left: 1%;
+        }
+        .form-control-sm {
+            width: 157% !important;
+        }
+        .fc{
+            margin-top: 15%;
+        }
+        #example_length{
+            margin-right: 69%;
+        }
+        .flex-wrap{
+            margin-top: 2% !important;
+            margin-left: -23% !important;
+            width: 60% !important;
+        }
+        #example_filter{
+            margin-top: -19% !important;
+            margin-bottom: 9% !important;
+            margin-left: 24.8rem !important;
+        }
+    }
+    @media (min-width: 649px) and (max-width: 699px) {
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+        }
+        #example_wrapper {
+            margin-top: -1.5% !important;
+        }
+        .iponame {
+            margin-top: 54px;         
+        } 
+        .slr{
+            position: absolute;
+            top: 31%;
+            left: 1%;
+        }
+        .form-control-sm {
+            width: 157% !important;
+        }
+        .fc{
+            margin-top: 15%;
+        }
+        #example_length{
+            margin-right: 69%;
+        }
+        .flex-wrap{
+            margin-top: 2% !important;
+            margin-left: -23% !important;
+            width: 60% !important;
+        }
+        #example_filter{
+            margin-top: -20% !important;
+            margin-bottom: 9% !important;
+            margin-left: 22.5rem !important;
+        }
+    }
+    @media (min-width: 576px) and (max-width: 648px) {
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+        }
+        #example_wrapper {
+            margin-top: 6.5% !important;
+        }
+        .iponame {
+            margin-top: 54px;         
+        } 
+        .slr{
+            position: absolute;
+            top: 31%;
+            left: 1%;
+        }
+        .form-control-sm {
+            width: 209% !important;
+        }
+        .fc{
+            margin-top: 15%;
+        }
+        #example_length{
+            margin-right: 69%;
+        }
+        .flex-wrap{
+            margin-top: -15% !important;
+            margin-left: -23% !important;
+            width: 60% !important;
+        }
+        #example_filter{
+            margin-top: -9% !important;
+            margin-bottom: 9% !important;
+            margin-left: 16.5rem !important;
+        }
+    }
+    @media (min-width: 466px) and (max-width: 575px) {
+        .flex-wrap{
+            margin-top: -24% !important;
+            margin-left: -22% !important;
+        }
+        #example_length{
+            margin-right: 69%;
+        }
+        .iponame{
+            margin: 55px 0px;
+        }        
+        #example_filter{
+            margin-top: -17% !important;
+            margin-bottom: 15.5% !important;
+            margin-left: 125% !important;
+            width: auto !important;
+        }
+        #example_wrapper {
+            margin-top: 10.5% !important;
+            margin-bottom: 4%;
+        }
+        .slr{
+            position: absolute;
+            top: 31%;
+            left: 1%;
+        }
+        .fc{
+            margin-top: 19.5% !important;
+        }
+        .form-control-sm {
+            width: 209% !important;
+        }
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+        }
+    }
+
+    @media (min-width: 415px) and (max-width: 465px) {
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+        }
+        .iponame {
+            margin-top: 54px;         
+        } 
+        .fc{
+            margin-top: 19%;
+        }
+        #example_length{
+            margin-right: 69%;
+        }
+        .flex-wrap{
+            margin-top: -27% !important;
+            margin-left: -10% !important;
+            width: 89% !important;
+        }
+        .buttons-collection{
+            width: 100px ;
+        }
+        .buttons-colvis{
+            width: 95px !important; ;
+        }
+        #example_wrapper {
+            margin-top: 12.5% !important;
+        }
+        #example_filter{
+            margin-top: -17% !important;
+            margin-bottom: 15.5% !important;
+            margin-left: 139% !important;
+        }
+        .form-control-sm {
+            width: 153% !important;
+        }
+        .slr{
+            position: absolute;
+            top: 47%;
+            left: 1%;
+        }
+    }
+    @media (min-width: 400px) and (max-width: 414px) {
+        #example_length{
+            margin-right: 69%;
+        }
+        .flex-wrap{
+            margin-top: -2% !important;
+            margin-left: -32% !important;
+        }
+        #example_filter{
+            margin-top: 1% !important;
+            margin-bottom: 19% !important;
+            margin-left: 132% !important;
+        }
+        .form-control-sm {
+            width: 153% !important;
+        }
+        #example_wrapper {
+            margin-top: 2.5% !important;
+        }
+        .buttons-colvis {
+            left: -7% !important;
+            top: 0 !important;
+        }
+        .buttons-collection{
+            left: 6%;
+            top: 0%;
+        }
+        .container-fluid {
+            margin-bottom: 4%;
+            margin-top: 19%;
+        }
+        .iponame {
+            margin: 56px 0px;
+        }
+        .slr{
+            position: absolute;
+            top: 115%;
+            left: 1%;
+        }
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+        }
+    }
+    @media (min-width: 377px) and (max-width: 399px) {
+        #example_length{
+            margin-right: 69%;
+        }
+        .cw {
+            margin-left: -89px;
+        }
+        .flex-wrap {
+            margin-top: 0% !important;
+            margin-left: -15% !important;
+            margin-bottom: 11% !important;
+        }
+        #example_filter{
+            margin-top: -4% !important;
+            margin-bottom: 19% !important;
+            margin-right: 64% !important;
+        }
+        .form-control-sm {
+            width: 171% !important;
+        }
+        .buttons-colvis {
+            left: -7% !important;
+            top: 0 !important;
+        }
+        .buttons-collection{
+            left: 6%;
+            top: 0%;
+        }
+        .container-fluid {
+            margin-bottom: 4%;
+            margin-top: 24%;
+        }
+        .iponame {
+            margin: 56px 0px;
+        }
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+        }
+    }
+    @media (min-width: 308px) and (max-width: 376px) {
+        #example_length{
+            margin-right: 69%;
+        }
+        .flex-wrap{
+            margin-top: 24% !important;
+            margin-left: -62% !important;
+        }
+        #example_filter{
+            margin-top: -35% !important;
+            margin-bottom: 19% !important;
+            margin-right: 64% !important;
+        }
+        .form-control-sm {
+            width: 171% !important;
+        }
+        .buttons-colvis {
+            left: -7% !important;
+            top: 0 !important;
+        }
+        .buttons-collection{
+            left: 96%;
+            top: -99% ;
+        }
+        .container-fluid {
+            margin-bottom: 8%;
+            margin-top: 29%;
+        }
+        .iponame {
+            margin: 56px 0px;
+            font-size: 7vw !important;
+
+        }
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+        }
+    }
+
+    @media (min-width: 280px) and (max-width: 307px) {
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+        }
+        
+        .iponame {
+            margin-top: 54px;    
+            font-size: 7vw !important;     
+        } 
+
+        .fc{
+            margin-top: 30%;
+        }
+        #example_length{
+            margin-right: 69%;
+        }
+        .flex-wrap{
+            margin-top: 23% !important;
+            margin-left: -62% !important;
+        }
+        #example_filter{
+            margin-top: -56% !important;
+            margin-bottom: 25% !important;
+            margin-right: 69% !important;
+        }
+        .form-control-sm {
+            width: 171% !important;
+        }
+        .buttons-colvis {
+            left: -7% !important;
+            top: 0 !important;
+        }
+        .buttons-collection{
+            left: 96%;
+            top: -99% ;
+        }
+    }
+    
+    /* Add these styles for better fixed columns appearance */
+   
+</style>
+
+{% endblock %}
+{% block body %}
+
+{% comment %} <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script> {% endcomment %}
+
+
+
+{% comment %} <div>
+    {% if messages %}
+    <div class="alert alert-danger fixed-top" id="success-alert" style="height: 40px;">
+        {% for message in messages %}
+
+        <button type=" button" class="close" data-dismiss="alert">x</button>
+        <strong>{{message}}</strong>
+        {% endfor %}
+    </div>
+    {% endif %}
+  
+    <script src="{% static 'JS/jquery.min.js' %}"></script>
+    <script>
+        $("#success-alert").fadeTo(5000, 500).slideUp(500, function () {
+            $("#success-alert").slideUp(500);
+        });
+    </script>
+</div> {% endcomment %}
+
+{% for message in messages %}
+    {% if messages %}
+        <div class="alert {{ message.tags }} alert-dismissible  fixed-top" id="successalerts" role="alert" style="position:fixed;">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+            {{ message }}
+        </div>
+    {% endif %}
+{% endfor %}
+
+
+<h3 class="fixed-top iponame" style="z-index: 9; position: fixed;">{{IPOName}}</h3>
+<button onclick="exportTableToExcel('example', 'my_excel_file')">Export to Excel</button>
+
+
+
+<div class="container-fluid fc">
+    <h3>Group Wise Billing</h3>
+    
+    {% if IPOName.IPOType == "SME" %}
+    
+    <div class="text-nowrap table-wrapper-scroll-x my-custom-scrollbar"> 
+        {{ html_table | safe }}
+    </div> 
+    {% else %}
+
+    <div class="text-nowrap table-wrapper-scroll-x my-custom-scrollbar"> 
+        {{ html_table | safe }}
+    </div>
+
+    
+    {%endif%}
+
+    <div class="row">
+        <div class="col-md-6">
+            <!-- Total rows and current range display (left aligned) -->
+            <p class="text-left">
+                Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} Rows
+            </p>
+        </div>
+
+        {% comment %} <div class="col-md-6">
+            <ul class="pagination justify-content-end text-left" style="margin: 0; margin-right:2%;">
+                <!-- First page link -->
+                <li class="page-item">
+                    <a class="page-link" href="/{{IPOid}}/Status?page=1">First</a>
+                </li>
+                
+                <!-- Previous page link -->
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="/{{IPOid}}/Status?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Previous</span>
+                    </li>
+                {% endif %}
+                
+                <!-- Current page number -->
+                <li class="page-item active">
+                    <a class="page-link">{{ page_obj.number }}</a>
+                </li>
+                
+                <!-- Next page link -->
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="/{{IPOid}}/Status?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Next</span>
+                    </li>
+                {% endif %}
+                
+                <!-- Last page link -->
+                <li class="page-item">
+                    <a class="page-link" href="/{{IPOid}}/Status?page={{ page_obj.paginator.num_pages }}">Last</a>
+                </li>
+            </ul>
+        </div> {% endcomment %}
+        <div class="col-md-6">
+            <ul class="pagination justify-content-end text-left" style="margin: 0; margin-right:2%;">
+                <!-- Always show the first page -->
+                {% if page_obj.number != 1 %}
+                    <li class="page-item">
+                        <a class="page-link" href="/{{IPOid}}/Status?page=1">1</a>
+                    </li>
+                {% endif %}
+                
+                <!-- Show ellipsis if current page is greater than 4 -->
+                {% if page_obj.number > 4 %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+                
+                <!-- Display pages before the current page -->
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num > 1 and num < page_obj.number and num >= page_obj.number|add:'-2' %}
+                        <li class="page-item">
+                            <a class="page-link" href="/{{IPOid}}/Status?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                <!-- Display current page -->
+                <li class="page-item active">
+                    <span class="page-link">{{ page_obj.number }}</span>
+                </li>
+                
+                <!-- Display pages after the current page -->
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num > page_obj.number and num < page_obj.number|add:'3' and num < page_obj.paginator.num_pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="/{{IPOid}}/Status?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                <!-- Show ellipsis if current page is less than num_pages - 3 -->
+                {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+                
+                <!-- Always show the last page -->
+                {% if page_obj.number != page_obj.paginator.num_pages %}
+                    <li class="page-item">
+                        <a class="page-link" href="/{{IPOid}}/Status?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+    
+</div>
+
+    <div class="footer">
+        {% comment %} <a href="/{{IPOid}}/SetRate" class="btn button btn-dark"><span>Set Rate</span></a> {% endcomment %}
+        <a href="/{{IPOid}}/BUY" class="btn button btn-dark"><span>BUY</span></a>
+        <a href="/{{IPOid}}/SELL" class="btn button btn-dark"><span>SELL</span></a>
+        <a href="/{{IPOid}}/Order" class="btn button btn-dark"><span>Orders</span></a>
+        <a href="/{{IPOid}}/OrderDetail/BUY" class="btn button btn-dark" style="white-space: nowrap;"><span>App. Buy Order (PAN)</span></a>
+        <a href="/{{IPOid}}/OrderDetail/SELL" class="btn button btn-dark" style="white-space: nowrap;"><span>App. Sell Order (PAN)</span></a>
+        <a href="/{{IPOid}}/Billing" class="btn button btn-dark"><span>Client Wise Billing</span></a>
+        <a href="/{{IPOid}}/Status" class="btn button btn-dark disabled"><span>Group Wise Billing</span></a>
+        <a href="/{{IPOid}}/Dashboard/A" class="btn button btn-dark"><span>Analysis</span></a>
+        <!-- <a href="PremiumBilling" class="btn button btn-dark" style="white-space: nowrap;"><span>Premium Billing</span></a> -->
+    </div>
+
+
+{% comment %} <script>
+  const IPO_ID = "{{ IPOid }}";
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const shareSelectedBtn = document.getElementById('share-selected');
+    const shareAllBtn = document.getElementById('share-all');
+
+    function postShare(payload) {
+      return fetch("{% url 'share_status_telegram' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCookie('csrftoken')
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(r => r.json())
+      .then(d => {
+        if (d.status === "success") {
+          alert('Shared to Telegram:\n' + d.results.join('\n'));
+        } else if (d.status === "session_expired") {
+          alert("Telegram session not verified yet. Please verify in profile.");
+        } else {
+          alert("Error: " + (d.message || "Failed"));
+        }
+      })
+      .catch(err => alert("Error: " + err));
+    }
+
+    if (shareSelectedBtn) {
+      shareSelectedBtn.addEventListener('click', function () {
+        const selected = Array.from(document.querySelectorAll('.group-checkbox:checked'))
+          .map(cb => cb.value);
+        if (selected.length === 0) {
+          alert('Select at least one group (checkbox in first column).');
+          return;
+        }
+        postShare({ IPO_id: IPO_ID, group_names: selected });
+      });
+    }
+
+    if (shareAllBtn) {
+      shareAllBtn.addEventListener('click', function () {
+        postShare({ IPO_id: IPO_ID, all: true });
+      });
+    }
+  });
+</script> {% endcomment %}
+
+<script>
+    // Get the modal
+    var modal = document.getElementById('id01');
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+
+{% comment %} <script>
+    $(document).ready(function () {
+        $('#bootstrapdatatable').DataTable({
+            "aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
+            "iDisplayLength": 25,
+            {% comment %} "scrollX": true {% endcomment %}
+        {% comment %} }
+        );
+    }); {% endcomment %}
+    {% comment %} $('#bootstrapdatatable').DataTable( {
+        scrollX: true,
+        pageLength: 50
+    }); 
+</script> {% endcomment %}
+
+{% comment %} <script>
+    $('table.table-sortable th').on('click', function (e) {
+        sortTableByColumn(this)
+    })
+
+    function sortTableByColumn(tableHeader) {
+        // extract all the relevant details
+        let table = tableHeader.closest('table')
+        let index = tableHeader.cellIndex
+        let sortType = tableHeader.dataset.sortType
+        let sortDirection = tableHeader.dataset.sortDir || 'asc' // default sort to ascending
+
+        // sort the table rows
+        let items = Array.prototype.slice.call(table.rows);
+        let sortFunction = getSortFunction(sortType, index, sortDirection)
+        let sorted = items.sort(sortFunction)
+
+        // remove and re-add rows to table
+        for (let row of sorted) {
+            let parent = row.parentNode
+            let detatchedItem = parent.removeChild(row)
+            parent.appendChild(row)
+        }
+
+        // reset heading values and styles
+        for (let header of tableHeader.parentNode.children) {
+            header.classList.remove('currently-sorted')
+            delete header.dataset.sortDir
+        }
+
+        // update this headers's values and styles
+        tableHeader.dataset.sortDir = sortDirection == 'asc' ? 'desc' : 'asc'
+        tableHeader.classList.add('currently-sorted')
+    }
+    function getSortFunction(sortType, index, sortDirection) {
+        let dir = sortDirection == 'asc' ? -1 : 1
+        switch (sortType) {
+            case 'text': return stringRowComparer(index, dir);
+            case 'numeric': return numericRowComparer(index, dir);
+            default: return stringRowComparer(index, dir);
+        }
+    }
+
+    // asc = alphanumeric order - eg 0->9->a->z
+    // desc = reverse alphanumeric order - eg z->a->9->0
+    function stringRowComparer(index, direction) {
+        return (a, b) => -1 * direction * a.children[index].textContent.localeCompare(b.children[index].textContent)
+    }
+
+    // asc = higest to lowest - eg 999->0
+    // desc = lowest to highest - eg 0->999
+    function numericRowComparer(index, direction) {
+        return (a, b) => direction * (Number(a.children[index].textContent) - Number(b.children[index].textContent))
+    }
+</script> {% endcomment %}
+
+{% comment %} <script src="{% static 'JS/jquery.min.js' %}"></script> {% endcomment %}
+    {% comment %} <script>
+        $("#successalerts").fadeTo(3000, 500).slideUp(500, function () {
+            $("#successalerts").slideUp(500);
+        });
+    </script> {% endcomment %}
+{% comment %} <script src="{% static 'JS/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'JS/dataTables.bootstrap4.min.js' %}"></script> {% endcomment %}
+
+
+<script>
+    $(document).ready(function () {
+        $.fn.dataTable.ext.order['dom-checkbox'] = function  ( settings, col ) {
+            return this.api().column( col, {order:'index'} ).nodes().map( function ( td, i ) {
+                return $('input', td).prop('checked') ? 1 : 0;
+            } );
+        };
+        var scrollYHeight = window.innerHeight * 0.60;
+        var pageLength = "{{ status_page_size|default:'50' }}";
+        pageLength = pageLength === "All" ? -1 : parseInt(pageLength, 10);
+
+        var table = $('#example').DataTable({
+            orderCellsTop: true,
+            scrollY: scrollYHeight,
+            scrollX: true, // Enable horizontal scrolling
+            lengthChange: true,
+            info: false,
+            "pageLength": pageLength,
+            
+            // Fixed Columns configuration
+            fixedColumns: {
+                left: 2 // Fix the first 2 columns (Tally checkbox and Group Name)
+            },
+            
+            buttons: [ 
+                {   
+                    extend: 'collection',
+                    text: 'Download',
+                    buttons:[
+                        {
+                            extend: 'excelHtml5',
+                            text: 'Excel',
+                            exportOptions: {
+                                columns: ':visible',
+                                rows: ':visible',
+                            },
+                            customize: function(xlsx) {
+                                var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                                $('row:first c', sheet).attr('s', '2');
+                            }
+                        }
+                    ]
+                }                
+            ],
+            
+            language: {
+                info: 'Showing _START_ to _END_ of _TOTAL_ Rows',
+                infoFiltered: '(filtered from _MAX_ total Rows)',
+                emptyTable: "No data available",
+                lengthMenu: 'Show <select>' +
+                    '<option value="50">50</option>' +
+                    '<option value="100">100</option>' +
+                    '<option value="150">150</option>' +
+                    '<option value="200">200</option>' +
+                    '<option value="-1">All</option>' +
+                    '</select> Rows',
+                search: 'Search:',
+                paginate: {
+                    first: 'First',
+                    last: 'Last',
+                    next: 'Next',
+                    previous: 'Previous'
+                }
+            },
+            columnDefs: [ {
+                orderDataType: 'dom-checkbox',
+                targets: 0 // Target the first column (index 0)
+            } ],
+            order: [[1, 'asc']]
+        });
+
+        $('select[name="example_length"] option[value="-1"]').text('All');
+        
+        table.buttons().container()
+            .appendTo( '#example_wrapper .col-md-6:eq(0)' );
+
+        var dataTableLengthDiv = document.getElementById('example_length');
+        var firstLabel = dataTableLengthDiv.querySelector('label');
+        if (firstLabel) {
+            firstLabel.classList.add('slr');
+        }
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        // Initialize DataTables instance
+        // Remove the existing rows selection dropdown and pagination if needed
+        $('.slr').remove();
+        $('#example_paginate').remove();
+        
+        // Create the new form HTML for rows per page selection
+        var formHtml = `
+        <label class='slr' for="page_size"> 
+            <form method="POST" action="/{{IPOid}}/Status"> 
+                {% csrf_token %}
+                Show
+                <select name="status_page_size" id="status_page_size" onchange="this.form.submit()">
+                    <option value="{{status_page_size}}" style='display:None;' {% if status_page_size|default_if_none:50 == 50 %}selected{% endif %}>{{status_page_size}}</option>
+                    <option value="50" {% if status_page_size == 50 %}selected{% endif %}>50</option>
+                    <option value="100" {% if status_page_size == 100 %}selected{% endif %}>100</option>
+                    <option value="200" {% if status_page_size == 200 %}selected{% endif %}>200</option>
+                    <option value="250" {% if status_page_size == 250 %}selected{% endif %}>250</option>
+                    <option value="All" {% if status_page_size == 'All' %}selected{% endif %}>All</option>
+                </select>
+                Rows
+                <input type="hidden" name="page" value="{{ page_obj.number }}">
+            </form>
+            </label>
+        `;
+    
+        // Append the form to a specific element
+        $('.dataTables_length').append(formHtml);
+
+        // Update page length when selection is changed
+        {% comment %} $('#status_page_size').on('change', function() {
+            var pageSize = $(this).val();
+            if (pageSize === 'All') {
+                table.page.len(-1).draw(); // Show all rows if "All" is selected
+            } else {
+                table.page.len(parseInt(pageSize)).draw(); // Set to selected page length
+            }
+        });
+
+        // Set the initial page length when the page loads (from the server-side)
+        table.page.len({{ status_page_size|default:50 }}).draw(); {% endcomment %}
+    });
+</script>
+<script>
+    function updateTellyStatus(checkbox) {
+        const groupName = checkbox.value;
+        const status = checkbox.checked;
+        const IPO_id = "{{IPOid}}"
+
+        fetch('/update-telly-status/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')  // Required for Django
+        },
+        body: JSON.stringify({
+            updateType:'One',
+            groupname: groupName,
+            status: status,
+            IPO_id:IPO_id
+        })
+        })
+        .then(response => response.json())
+        .then(data => {
+        if (data.success) {
+            window.location.reload();
+        } else {
+            window.location.reload();
+            alert('Failed to update!');
+        }
+        });
+    }
+    function updateAllTellyStatus(masterCheckbox) {
+        const isChecked = masterCheckbox.checked;
+        const groupCheckboxes = document.querySelectorAll('.group-checkbox');
+        const IPO_id = "{{IPOid}}";
+        const groupNames = Array.from(groupCheckboxes).map(cb => cb.value);
+
+        // Update all individual checkboxes
+        groupCheckboxes.forEach(checkbox => {
+            checkbox.checked = isChecked;
+        });
+
+        // Send a single POST request to update all groups
+        fetch('/update-telly-status/', { // You'll need to create this URL and view
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                updateType:'All',
+                group_names: groupNames,
+                status: isChecked,
+                IPO_id: IPO_id
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert('Failed to update all groups!');
+                // Revert master checkbox and individual checkboxes on failure
+                masterCheckbox.checked = !isChecked;
+                groupCheckboxes.forEach(checkbox => {
+                    checkbox.checked = !isChecked;
+                });
+            }
+        });
+    }
+
+    function updateMasterTallyCheckbox() {
+        const masterCheckbox = document.getElementById('master-tally-checkbox');
+        const groupCheckboxes = document.querySelectorAll('.group-checkbox');
+        const allChecked = Array.from(groupCheckboxes).every(checkbox => checkbox.checked);
+        masterCheckbox.checked = allChecked;
+    }
+
+    // Call updateMasterTallyCheckbox on page load
+    $(document).ready(function() {
+        updateMasterTallyCheckbox();
+
+        // Attach event listeners to individual checkboxes
+        document.querySelectorAll('.group-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', updateMasterTallyCheckbox);
+        });
+    });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+            }
+        }
+        }
+        return cookieValue;
+    }
+</script>
+<script src="{% static 'JS/jquery.min.js' %}"></script>
+<script>
+    $("#successalerts").fadeTo(3000, 500).slideUp(500, function () {
+        $("#successalerts").slideUp(500);
+    });
+</script>
+<script>
+    $(document).ready(function() {
+      $(".col-sm-12.col-md-6:first").addClass("custom-width");
+      $(".col-sm-12.col-md-6").addClass("cw");
+      $(".dt-row:first").addClass("table-responsive");
+  });
+</script>
+
+<script src="{% static 'DataTables/js/jquery-3.7.0.js' %}"></script>
+<script src="{% static 'DataTables/js/jquery.dataTables.min.js' %}"></script>
+{% comment %} <script src="https://cdn.datatables.net/fixedcolumns/4.3.0/js/dataTables.fixedColumns.min.js"></script> {% endcomment %}
+<script src="{% static 'DataTables/js/fixedColumns.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.bootstrap5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.bootstrap5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/jszip.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.colVis.min.js' %}"></script>
+<script src="{% static 'DataTables/js/pdfmake.min.js' %}"></script>
+<script src="{% static 'DataTables/js/vfs_fonts.js' %}"></script>
+{% endblock %}
+

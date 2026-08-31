@@ -1,0 +1,1219 @@
+{% extends 'basic.html' %}
+{% block title%} {{IPOName}}-Dashboard{% endblock %}
+{% block css %}
+{% load static %}
+<style>
+    * {
+        padding: 0;
+        margin: 0;
+        {% comment %} font-family: sans-serif; {% endcomment %}
+
+    }
+    .navbar{
+        padding: 0.5rem 0rem !important;
+    }
+
+    {% comment %} .container {
+        width: 100%!important;
+        padding-right: 15px!important;
+        padding-left: 15px!important;
+        margin-right: auto!important;
+        margin-left: auto!important;
+    }  {% endcomment %}
+
+    .h3,
+        h3 {
+            margin: 0px 0px;
+            margin-top: 85px;
+            font-size: 1.75rem;
+            border-block-end: 3px solid #e9ecef;
+        }
+
+    .iponame {
+            background-color: white;
+            height: 38px;
+            margin-top: 35px;
+            width: 100%;
+            text-align: center;
+            position: fixed;
+        }
+
+    body {
+        /* background: linear-gradient(135deg, #71b7e6, #9b59b6); */
+        background-color: white;
+        background-size: cover;
+        color: rgb(19, 16, 16);
+        justify-content: center;
+        line-height: 1.5;
+        margin-top: 84px;
+        padding: 0 60px;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .container h3 {
+        display: flex;
+        margin: 0;
+        transform: translateY(-50%);
+        background: #fff;
+        color: black;
+        border-block-end: 3px solid #e9ecef;
+        width: 100%;
+
+    }
+
+    .container,
+    .container-lg,
+    .container-md,
+    .container-sm,
+    .container-xl,
+    .container-xxl {
+        max-width: 100%;
+        margin-top: 0px;
+
+    }
+
+    .container-fluid {
+        margin: 0px 0px;
+    }
+
+    .nav-tabs {
+        border-bottom: none;
+        margin: 0px 320px;
+    }
+
+    .nav-tabs .nav-item.show .nav-link,
+    .nav-tabs .nav-link.active {
+        color: #e76d24;
+        background-color: #fff;
+        border-color: #e76d24;
+        border: none;
+        border-bottom-color: currentcolor;
+        border-bottom-style: none;
+        border-bottom-width: medium;
+        border-bottom: 3px solid orange;
+    }
+
+    .nav-tabs .nav-link {
+        border: 1px solid transparent;
+        border-top-left-radius: .25rem;
+        border-top-right-radius: .25rem;
+        color: black;
+    }
+
+    .common-tabs .nav-tabs .nav-link.active {
+        color: #e76d24;
+        background-color: transparent;
+        border-color: transparent transparent #f3f3f3;
+        border-bottom-color: rgb(243, 243, 243);
+        border-bottom: 4px solid;
+        font-weight: bold;
+    }
+
+    .modal-footer {
+        border-top: none;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .table-bordered {
+        border: 2px solid #0009;
+    }
+
+    .table thead th {
+        vertical-align: bottom;
+        border-bottom: 2px solid #0009;
+        border-bottom-width: 2px;
+    }
+
+    .table-bordered td,
+    .table-bordered th {
+        border: 1px solid #000;
+        border-bottom-color: rgb(0, 0, 0);
+        border-bottom-style: solid;
+        border-bottom-width: 1px;
+    }
+
+    .tablecenter {
+        text-align: center;
+        width: 25%;
+    }
+
+    .tableline {
+        width: 25%;
+    }
+
+    .tablelinel {
+        width: 15%;
+    }
+
+    .footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: #686868;
+        color: white;
+        text-align: center;
+        padding: 5px 0px;
+    }
+
+    .button {
+        margin: 0px 10px;
+        color: black;
+        background-color: antiquewhite;
+        width: auto;
+    }   
+
+    .btn-dark.disabled, .btn-dark:disabled {
+        color: #000;
+        background-color: #ffddaf;
+        border-color: #040404;
+    }
+
+    {% comment %} @media (max-width: 767px) { 
+        body {
+            padding-left: 15px;
+            padding-right: 15px;
+        }  
+
+        .nav-tabs .nav-link {
+            padding-right: 80px;
+        }
+        .container {
+            width: 100%;
+            margin-right: auto;
+            margin-left: auto;
+            white-space: nowrap;
+        }    
+        .nav-tabs {
+            border-bottom: none;
+            margin: 0px -15px;
+        }
+
+        .footer {
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+        }
+
+        .button {
+            margin: 0px 5px;
+            color: black;
+            background-color: antiquewhite;
+            width: 98%;
+        }
+
+        .table{
+            overflow-x: scroll;
+            margin-bottom: 5%;
+        }
+    } {% endcomment %}
+
+    {% comment %} @media screen and (min-width: 1250px) and (max-width: 1341px){
+        .nav-tabs {
+            border-bottom: none;
+            margin: 0px 264px;
+        }
+    }
+
+    @media screen and (min-width: 992px) and (max-width: 1077px){
+        .nav-tabs {
+            border-bottom: none;
+            margin: 0px 152px!important;
+        }
+    }
+
+    @media screen and (min-width: 768px) and (max-width: 907px){
+        .nav-tabs .nav-link {
+            padding-right: 5px!important;
+        }
+
+        .nav-tabs {
+            border-bottom: none!important;
+            margin: 0px 40px!important;
+        }
+    } {% endcomment %}
+
+    @media screen and (min-width: 1300px) and (max-width: 1950px){
+        .shc{
+            margin-left: 28%;
+        }
+
+        .rc{
+            margin-left:5%;
+        }
+
+        .rcc{
+            margin-left:7%;
+        }
+        
+        .ri{
+            margin-left: 10%;
+        }
+
+        .dnn{
+            display: none;
+        }
+        
+    }
+
+    @media (min-width: 992px) and (max-width: 1250px){
+        .nav-tabs .nav-link {
+            padding-right: 5px;
+        }
+
+        .nav-tabs {
+            border-bottom: none;
+            margin: 0px 205px;
+        }
+
+        .dnn{
+            display: none;
+        }
+    }
+
+    @media screen and (min-width: 992px) and (max-width: 1299px) {
+        .shc{
+            margin-left: 59%;
+        }
+
+        .rc{
+            margin-left: 3%;
+        }
+
+        .rcc{
+            margin-left: 5%;
+        }
+        
+        .ri{
+            margin-left: 22%;
+        }
+
+        .ric{
+            margin-left: 25%;
+        }
+
+        .dnn{
+            display: none;
+        }
+        
+    }
+
+    @media screen and (min-width: 768px) and (max-width: 991px) {
+        .shc{
+            margin-left: 15%;
+        }
+
+        .rc{
+            margin-left: 8%;
+        }
+
+        .rcc{
+            margin-left: 7%;
+        }
+        
+        .ri{
+            margin-left: 52%;
+            width: 142%;
+        }
+
+        .ric{
+            margin-left: 25%;
+            width: 142%;
+        }
+
+        .iponame {
+            margin-top: 27px;         
+        } 
+
+        .nav-tabs .nav-link {
+            padding-right: 5px;
+        }
+
+        .nav-tabs {
+            border-bottom: none;
+            margin: 0px 120px;
+        }
+
+        .dnn{
+            display: none;
+        }
+        
+    }
+
+    @media (min-width: 768px) and (max-width: 817px){
+        .nav-tabs .nav-link {
+            padding-right: 5px;
+        }
+
+        .nav-tabs {
+            border-bottom: none;
+            margin: 0px 95px;
+        }
+
+        .dnn{
+            display: none;
+        }
+    }
+
+    @media screen and (min-width: 576px) and (max-width: 767px) {
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+        }
+
+        {% comment %} .footer body{
+            padding-left: 0px;
+            padding-right: 0px;
+        } {% endcomment %}
+
+        .nav-tabs .nav-link {
+            padding-right: 0px;
+        }
+           
+        .nav-tabs {
+            border-bottom: none;
+            margin: 0px 5px;
+        }
+
+        .shc{
+            margin-left: 249%;
+        }
+
+        .rc{
+            margin-left: 6%;
+        }
+
+        .rcc{
+            margin-left: 7%;
+        }
+        
+        .ri{
+            margin-left: 68%;
+            width: 180%;
+        }
+
+        .ric{
+            margin-left: 85%;
+            width: 178%;
+        }
+
+        .iponame {
+            margin-top: 54px;         
+        } 
+
+        .fc{
+            margin-top: 18%;
+        }
+
+        .ml{
+            margin-bottom: 1%;
+        }
+
+        .dnn{
+            display: none;
+        }
+    }
+
+    @media screen and (min-width: 423px) and (max-width:575px) {
+        .iponame {
+            margin-top: 54px;         
+        } 
+
+        .fc{
+            margin-top: 24%;
+        }
+
+        .nav-tabs .nav-link {
+            padding-right: 0px;
+        }
+
+        .nav-tabs {
+            border-bottom: none;
+            margin: 0px -30px;
+        }
+
+        {% comment %} .ri{
+            margin-left: 68%;
+            width: 180%;
+        }
+
+        .ric{
+            margin-left: 85%;
+            width: 595%;
+        }
+
+        .shc{
+            margin-left: 249%;
+        }
+
+        .rc{
+            margin-left: 6%;
+        }
+
+        .rcc{
+            margin-left: 7%;
+        } {% endcomment %}
+
+        .dn{
+            display: none;
+        }
+
+        .nl{
+            margin-left: 36%;
+        }
+
+        .sm{
+            margin-right: -1%;
+        }
+
+        .cl{
+            width: 130%;
+        }
+
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+        }
+    }
+
+    @media screen and (min-width: 423px) and (max-width: 502px) {
+        .nav-tabs .nav-link {
+            padding-right: 90px;
+        }
+
+        .nav-tabs {
+            border-bottom: none;
+            margin: 0px -30px;
+        }
+    }
+
+    @media screen and (min-width: 390px) and (max-width: 422px) {
+        .iponame {
+            margin-top: 54px;         
+        } 
+
+        .fc{
+            margin-top: 26%;
+        }
+
+        .nav-tabs .nav-link {
+            padding-right: 36px;
+        }
+
+        .nav-tabs {
+            border-bottom: none;
+            margin: 0px -30px;
+        }
+
+        .dn{
+            display: none;
+        }
+        
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+        }
+
+        .cl{
+            width: 155%;
+        }
+
+        .nl{
+            margin-left: 36%;
+        }
+
+    }
+
+    @media screen and (min-width: 360px) and (max-width: 389px) {
+        .iponame {
+            margin-top: 54px;         
+        } 
+
+        .fc{
+            margin-top: 28%;
+        }
+    }
+
+
+    @media screen and (min-width: 280px) and (max-width: 389px) {
+        .nav-tabs .nav-link {
+            padding-right: 36px;
+        }
+
+        .nav-tabs {
+            border-bottom: none;
+            margin: 0px -30px;
+        }
+
+        .dnn{
+            display: none;
+        }
+        
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+        }
+
+        .cl{
+            width: 155%;
+        }
+
+        .nl{
+            margin-left: 36%;
+        }
+
+        .cmb{
+            margin-bottom: 5%;
+        }
+
+        
+    }
+
+    @media screen and (min-width: 270px) and (max-width: 359px) {
+        .iponame {
+            margin-top: 54px;         
+        } 
+
+        .fc{
+            margin-top: 41%;
+        }
+    }
+
+</style>
+{% endblock %}
+
+
+{% block body %}
+
+
+
+
+<div>
+    <h3 class="fixed-top iponame" style="z-index: 9; position: fixed;">{{IPOName}}</h3>
+</div>
+
+<div class="container fc">
+    <h4 style=" border-block-end: 3px solid #e9ecef;">Analysis</h4>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12 w-100">
+                <nav>
+                    <div class="container">
+                        <div class="nav nav-tabs" name="value" role="tablist">
+                            <form id="form-id" method="post" action="/{{IPOid}}/Dashboard/A">
+                                {% csrf_token %}
+                                <!-- <input type="hidden" name="value" value="A"></input> -->
+                                <div class="nav-item nav-link active show" data-toggle="tab" type="button" role="tab"
+                                    id="inlineRadio1" onclick="document.getElementById('form-id').submit();"
+                                    aria-selected="false">Initial P&L Analysis</div>
+                            </form>
+                            <form id="form-id2" method="post" action="/{{IPOid}}/Dashboard/B">
+                                {% csrf_token %}
+                                <!-- <input type="hidden" name="value" value="B"></input> -->
+                                <div class="nav-item nav-link" data-toggle="tab" role="tab"
+                                    onclick="document.getElementById('form-id2').submit();" id="inlineRadio2"
+                                    aria-selected="false">After Allotment P&L Analysis</div>
+
+                            </form>
+                            <form id="form-id3" method="post" action="/{{IPOid}}/Dashboard/C">
+                                {% csrf_token %}
+                                <!-- <input type="hidden" name="value" value="C"></input> -->
+                                <div class="nav-item nav-link" data-toggle="tab" role="tab"
+                                    onclick="document.getElementById('form-id3').submit();" id="inlineRadio3"
+                                    aria-selected="true">After Listing</div>
+                        </div>
+                        </form>
+                    </div>
+                </nav>
+
+            </div>
+        </div>
+    </div>
+    <form action="/{{IPOid}}/DashboardForm/A" method="post" class="needs-validation" style="margin: 30px 0;" novalidate>
+        {% csrf_token %}
+        <div class="row mb-3">
+            <label for="inputEmail3" class="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-form-label ml"><b>Expected Applications&nbsp;<font
+                        color="red">*</font></b></label>
+            <div class="col-xl-9 col-lg-9 col-md-9 col-sm-11">
+                <div class="row dn">
+                    
+                    <div class="col-xl-1 col-lg-1 col-md-1 col-sm-1 col-4 cmb">  
+                        <label class="col-xl-2 col-lg-2 col-md-2 col-sm-2  col-form-label" ><b>RETAIL&nbsp;</b></label>
+                    </div>
+                    <div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-6"> 
+                    <input type="text" name="ExpecetdRetailApplication" class="form-control ri" onfocus="this.select()"
+                        maxlength="50" {% if ExpecetdRetailApplication == '' %} value="2500000" {% else %}
+                        value="{{ ExpecetdRetailApplication }}" {% endif %}  autofocus="autofocus"
+                        onfocus="this.select()" maxlength="50"onkeypress="return event.charCode >= 48 && event.charCode <= 57" 
+                        oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..?)\../g, '$1');" / >
+                    </div>   
+
+                    <div class="col-xl-1 col-lg-1 col-md-1 col-sm-1 col-4 rc cmb">  
+                        <label class="col-xl-1 col-lg-1 col-md-1 col-sm-2 col-form-label shc" ><b>SHNI&nbsp;</b></label>
+                    </div>
+                    <div  class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-6">  
+                        <input type="text" name="ExpecetdSHNIApplication" class="form-control ric" onfocus="this.select()"
+                        maxlength="50" {% if ExpecetdSHNIApplication is none %} value="150000" {% else %}
+                        value="{{ ExpecetdSHNIApplication }}" {% endif %}  autofocus="autofocus"
+                        onfocus="this.select()" maxlength="50"onkeypress="return event.charCode >= 48 && event.charCode <= 57" 
+                        oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..?)\../g, '$1');" / >
+                    </div>
+
+                    <div class="col-xl-1 col-lg-1 col-md-1 col-sm-1 col-4 rcc">    
+                        <label class="col-xl-3 col-lg-3 col-md-2 col-sm-2 col-form-label shc" ><b>BHNI&nbsp;</b></label> 
+                    </div>
+                    <div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-6">    
+                        <input type="text" name="ExpecetdBHNIApplication" class="form-control ric" onfocus="this.select()"
+                        maxlength="50" {% if ExpecetdBHNIApplication is none %} value="50000" {% else %}
+                        value="{{ ExpecetdBHNIApplication }}" {% endif %}  autofocus="autofocus"
+                        onfocus="this.select()" maxlength="50"onkeypress="return event.charCode >= 48 && event.charCode <= 57" 
+                        oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..?)\../g, '$1');" / >
+                    </div>
+                </div>
+
+
+
+                {% comment %} <div class="row mb-3 dnn">
+                    <div class="col-3 col-form-label"> 
+                        <label class="col-form-label nl"><b>RETAIL&nbsp;</b></label>
+                        <input type="text" name="ExpecetdRetailApplication" class="form-control cl" onfocus="this.select()"
+                                    maxlength="50" {% if ExpecetdRetailApplication == '' %} value="2500000" {% else %}
+                                    value="{{ ExpecetdRetailApplication }}" {% endif %}  autofocus="autofocus"
+                                    onfocus="this.select()" maxlength="50"onkeypress="return event.charCode >= 48 && event.charCode <= 57" 
+                                    oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..?)\../g, '$1');" / >
+                    </div>
+                <div class="col-1 sm"></div>
+                    <div class="col-3 col-form-label"> 
+                        <label class="col-form-label nl"><b>SHNI&nbsp;</b></label>
+                        <input type="text" name="ExpecetdSHNIApplication" class="form-control cl" onfocus="this.select()"
+                                    maxlength="50" {% if ExpecetdSHNIApplication is none %} value="2500000" {% else %}
+                                    value="{{ ExpecetdSHNIApplication }}" {% endif %}  autofocus="autofocus"
+                                    onfocus="this.select()" maxlength="50"onkeypress="return event.charCode >= 48 && event.charCode <= 57" 
+                                    oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..?)\../g, '$1');" / >
+                    </div>
+                
+                <div class="col-1 sm"></div>
+                    <div class="col-3 col-form-label"> 
+                        <label class="col-form-label nl"><b>BHNI&nbsp;</b></label>
+                        <input type="text" name="ExpecetdBHNIApplication" class="form-control cl" onfocus="this.select()"
+                                maxlength="50" {% if ExpecetdBHNIApplication is none %} value="2500000" {% else %}
+                                value="{{ ExpecetdBHNIApplication }}" {% endif %}  autofocus="autofocus"
+                                onfocus="this.select()" maxlength="50"onkeypress="return event.charCode >= 48 && event.charCode <= 57" 
+                                oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..?)\../g, '$1');" / >
+                    </div>
+                </div> {% endcomment %}
+
+
+                <div class="invalid-feedback">
+                    Please Enter Answer.
+                </div>
+            </div>
+        </div>
+        
+
+        <div class="row mb-3">
+            <label for="inputPassword3" class="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-form-label"><b>Profit Margin (%)&nbsp;<font color="red">*
+                    </font></b></label>
+            <div class="col-xl-8 col-lg-9 col-md-9 col-sm-12 col-12">
+                <input type="text" class="form-control" {% if ProfitMargin is none %} value="15" {% else %}
+                    value="{{ ProfitMargin }}" {% endif %} id="inputPassword3" name="ProfitMargin"
+                     oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..?)\../g, '$1');" / required>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label for="inputEmail3" class="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-form-label"><b>Spot Premium&nbsp;<font color="red">*</font>
+                </b></label>
+            <div class="col-xl-8 col-lg-9 col-md-9 col-sm-12 col-12">
+                <input type="tel" value="{{Premium}}" class="form-control" name="Premium" id="inputEmail3" oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\--*)\-/g, '$1').replace(/(\..?)\../g, '$1');" / required>
+            </div>
+        </div>
+        {% comment %} <br> {% endcomment %}
+        <div class="modal-footer">
+            <button class="btn btn-outline-primary" type="submit">Submit</button>
+        </div>
+
+    </form>
+
+    <div class="table">
+        <div class="table-responsive text-nowrap">
+        <table id="bootstrapdatatable" class="table table-hover table-bordered" style="text-align: center;">
+            <thead>
+                <tr>
+                    <th scope="col" >Investor Type</th>
+                    <th scope="col" >Application For One Time</th>
+                    <th scope="col">Avg Share Per Application</th>
+                    <th scope="col" >IPO Subscription</th>
+                    <th scope="col" >IPO Price Per Share</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <th>
+                        RETAIL
+                    </th>
+                    <td>
+                        {{retail.ApplicationFor1Time|floatformat:0}}
+                    </td>
+                    <td>
+                        {{retail.AvgShare|floatformat:1}}
+                    </td>
+                    <td>
+                        {{retail.NumberOfTimeIPO|floatformat:1}}
+                    </td>
+                    <td rowspan="3">
+                        {{IpoPricePerShare|floatformat:1}}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>
+                        SHNI
+                    </th>
+                    <td>
+                        {{shni.ApplicationFor1Time|floatformat:0}}
+                    </td>
+                    <td>
+                        {{shni.AvgShare|floatformat:1}}
+                    </td>
+                    <td>
+                        {{shni.NumberOfTimeIPO|floatformat:1}}
+                    </td>
+                    <!-- <td>
+                        {{IpoPricePerShare|floatformat:1}}
+                    </td> -->
+                </tr>
+
+                <tr>
+                    <th>
+                        BHNI
+                    </th>
+                    <td >
+                        {{bhni.ApplicationFor1Time|floatformat:0}}
+                    </td>
+                    <td >
+                        {{bhni.AvgShare|floatformat:1}}
+                    </td>
+                    <td>
+                        {{bhni.NumberOfTimeIPO|floatformat:1}}
+                    </td>
+                    <!-- <td>
+                        {{IpoPricePerShare|floatformat:1}}
+                    </td> -->
+                </tr>
+            </tbody>
+        </table>
+        </div>
+        <br>
+
+        <div class="table-responsive text-nowrap">
+        <table id="bootstrapdatatable" class="table table-hover table-bordered" style="text-align: center;">
+            <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th colspan="2" >RETAIL</th>
+                    <th colspan="2" >SHNI</th>
+                    <th colspan="2" >BHNI</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr style="font-weight: bold;">
+                    <td scope="row"></td>
+                    <td>Without Profit Margin</td>
+                    <td>With Profit Margin</td>
+                    <td>Without Profit Margin</td>
+                    <td>With Profit Margin</td>
+                    <td>Without Profit Margin</td>
+                    <td>With Profit Margin</td>
+                </tr>
+
+                <tr>
+                    <th style="width: 14%;">
+                        Kostak Rate
+                    </th>
+                    <td >
+                        {{retail.BaseKostakRate|floatformat:2}}
+                    </td>
+                    <td >
+                        {{retail.kostakRateForCustomer|floatformat:2}}
+                    </td>
+                    <td >
+                        {{shni.BaseKostakRate|floatformat:2}}
+                    </td>
+                    <td >
+                        {{shni.kostakRateForCustomer|floatformat:2}}
+                    </td>
+                    <td >
+                        {{bhni.BaseKostakRate|floatformat:2}}
+                    </td>
+                    <td >
+                        {{bhni.kostakRateForCustomer|floatformat:2}}
+                    </td>
+                </tr>
+                <tr>
+                    <th style="width: 14%;">
+                        Subject Rate
+                    </th>
+                    <td >
+                        {{retail.BaseSubjectToRate|floatformat:2}}
+                    </td>
+                    <td >
+                        {{retail.SubjectToRateForCustomer|floatformat:2}}
+                    </td>
+                    <td >
+                        {{shni.BaseSubjectToRate|floatformat:2}}
+                    </td>
+                    <td >
+                        {{shni.SubjectToRateForCustomer|floatformat:2}}
+                    </td>
+                    <td >
+                        {{bhni.BaseSubjectToRate|floatformat:2}}
+                    </td>
+                    <td >
+                        {{bhni.SubjectToRateForCustomer|floatformat:2}}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+        <br>
+
+        <div class="table-responsive text-nowrap">
+        <table id="bootstrapdatatable" class="table table-hover table-bordered" style="text-align: center;">
+            <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th colspan="3">Kostak</th>
+                    <th colspan="3">Subject To</th>
+                    <th>Premium</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="font-weight: bold;">
+                    <td scope="row"></td>
+                    <td>Retail</td>
+                    <td>SHNI</td>
+                    <td>BHNI</td>
+                    <td>Retail</td>
+                    <td>SHNI</td>
+                    <td>BHNI</td>
+                    <td></td>
+                </tr>
+            
+
+            
+                <tr>
+                    <th scope="row" style="width: 14%;">BUY Count</th>
+                    <td>{{count.KostakRETAILBUYCount|floatformat:0}}</td>
+                    <td>{{count.KostakSHNIBUYCount|floatformat:0}}</td>
+                    <td>{{count.KostakBHNIBUYCount|floatformat:0}}</td>
+                    <td>{{count.SubjectToRETAILBUYCount|floatformat:0}}</td>
+                    <td>{{count.SubjectToSHNIBUYCount|floatformat:0}}</td>
+                    <td>{{count.SubjectToBHNIBUYCount|floatformat:0}}</td>
+                    <td>{{count.PremiumBUYCount|floatformat:0}}</td>
+                </tr>
+
+                <tr>
+                    <th scope="row">SELL Count</th>
+                    <td>{{count.KostakRETAILSELLCount|floatformat:0}}</td>
+                    <td>{{count.KostakSHNISELLCount|floatformat:0}}</td>
+                    <td>{{count.KostakBHNISELLCount|floatformat:0}}</td>
+                    <td>{{count.SubjectToRETAILSELLCount|floatformat:0}}</td>
+                    <td>{{count.SubjectToSHNISELLCount|floatformat:0}}</td>
+                    <td>{{count.SubjectToBHNISELLCount|floatformat:0}}</td>
+                    <td>{{count.PremiumSELLCount|floatformat:0}}</td>
+                </tr>
+            </tbody>
+
+            <tfoot >
+                <tr>
+                    <th scope="row">NET Count</th>
+                    <td>{{count.KostakRETAILNet|floatformat:0}}</td>
+                    <td>{{count.KostakSHNINet|floatformat:0}}</td>
+                    <td>{{count.KostakBHNINet|floatformat:0}}</td>
+                    <td>{{count.SubjectToRETAILNet|floatformat:0}}</td>
+                    <td>{{count.SubjectToSHNINet|floatformat:0}}</td>
+                    <td>{{count.SubjectToBHNINet|floatformat:0}}</td>
+                    <td>{{count.PremiumNet|floatformat:0}}</td>
+                </tr>
+            </tfoot>
+
+        </table>
+        </div>
+        <br>
+
+        <div class="table-responsive text-nowrap">
+        <table id="bootstrapdatatable" class="table table-hover table-bordered" style="text-align: center;">
+            <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th colspan="3">Kostak</th>
+                    <th colspan="3">Subject To</th>
+                    <th>Premium</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr style="font-weight: bold;">
+                    <th scope="row"></td>
+                    <td>Retail</td>
+                    <td>SHNI</td>
+                    <td>BHNI</td>
+                    <td>Retail</td>
+                    <td>SHNI</td>
+                    <td>BHNI</td>
+                    <td></td>
+                </tr>
+            
+                <tr>
+                    <th scope="row" style="width: 14%;">Share Purchase Qty</th>
+                    <td>{{shares.KostakRETAILBUYShares|floatformat:0}}</td>
+                    <td>{{shares.KostakSHNIBUYShares|floatformat:0}}</td>
+                    <td>{{shares.KostakBHNIBUYShares|floatformat:0}}</td>
+                    <td>{{shares.SubjectToRETAILBUYShares|floatformat:0}}</td>
+                    <td>{{shares.SubjectToSHNIBUYShares|floatformat:0}}</td>
+                    <td>{{shares.SubjectToBHNIBUYShares|floatformat:0}}</td>
+                    <td>{{count.PremiumBUYCount|floatformat:0}}</td>
+                </tr>
+
+                <tr>
+                    <th scope="row" style="width: 14%;">Share Sell Qty</th>
+                    <td>{{shares.KostakRETAILSELLShares|floatformat:0}}</td>
+                    <td>{{shares.KostakSHNISELLShares|floatformat:0}}</td>
+                    <td>{{shares.KostakBHNISELLShares|floatformat:0}}</td>
+                    <td>{{shares.SubjectToRETAILSELLShares|floatformat:0}}</td>
+                    <td>{{shares.SubjectToSHNISELLShares|floatformat:0}}</td>
+                    <td>{{shares.SubjectToBHNISELLShares|floatformat:0}}</td>
+                    <td>{{count.PremiumSELLCount|floatformat:0}}</td>
+                </tr>
+            
+                <tr>
+                    <th scope="row" style="width: 14%;">NET Qty</th>
+                    <td>{{shares.KostakRETAILNet|floatformat:0}}</td>
+                    <td>{{shares.KostakSHNINet|floatformat:0}}</td>
+                    <td>{{shares.KostakBHNINet|floatformat:0}}</td>
+                    <td>{{shares.SubjectToRETAILNet|floatformat:0}}</td>
+                    <td>{{shares.SubjectToSHNINet|floatformat:0}}</td>
+                    <td>{{shares.SubjectToBHNINet|floatformat:0}}</td>
+                    <td>{{count.PremiumDiff|floatformat:0}}</td>
+                </tr>
+            </tbody>
+
+        </table>
+        </div>
+        <br>
+
+        <!-- <table id="bootstrapdatatable" class="table table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col" class="tablecenter">RETAIL Count</th>
+                    {% comment %} <th scope="col" class="tablecenter">Avg Rate</th> {% endcomment %}
+                    <th scope="col" class="tablecenter">SHNI Count</th>
+                    <th scope="col" class="tablecenter">BHNI Count</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <th class="tableline">
+                        Net Kostak Purchase
+                    </th>
+                    <td class="tablecenter" data-toggle="tooltip" data-placement="auto" title="BUY:{{CountofBUYKostak}}     SELL:{{CountofSELLKostak}}">
+                        {{CountOfKostak}}
+                    </td>
+                    <td class="tablecenter" data-toggle="tooltip" data-placement="auto" title="BUY:{{CountofBUYKostak}}     SELL:{{CountofSELLKostak}}">
+                        {{CountOfKostak}}
+                    </td>
+                    <td class="tablecenter" data-toggle="tooltip" data-placement="auto" title="BUY:{{CountofBUYKostak}}     SELL:{{CountofSELLKostak}}">
+                        {{CountOfKostak}}
+                    </td>
+                    {% comment %} <td class="tablecenter">
+                        {{KostakAvg}}
+                    </td> {% endcomment %}
+                </tr>
+                <tr>
+                    <th class="tableline">
+                        Net Subject To Purchase
+                    </th>
+                    <td class="tablecenter" data-toggle="tooltip" data-placement="auto" title="BUY:{{CountofBUYSubjectTo}}     SELL:{{CountofSELLSubjectTo}}">
+                        {{CountOfSubjectTo}}
+                    </td>
+                    <td class="tablecenter" data-toggle="tooltip" data-placement="auto" title="BUY:{{CountofBUYSubjectTo}}     SELL:{{CountofSELLSubjectTo}}">
+                        {{CountOfSubjectTo}}
+                    </td>
+                    <td class="tablecenter" data-toggle="tooltip" data-placement="auto" title="BUY:{{CountofBUYSubjectTo}}     SELL:{{CountofSELLSubjectTo}}">
+                        {{CountOfSubjectTo}}
+                    </td>
+                    {% comment %} <td class="tablecenter">
+                        {{SubjectToAvg}}
+                    </td> {% endcomment %}
+                </tr>
+                <tr>
+                    <th class="tableline">
+                        Net Premium Purchase
+                    </th>
+                    <td class="tablecenter" data-toggle="tooltip" data-placement="auto" title="BUY:{{TotalBuyPremiumShareQty}}     SELL:{{TotalSellPremiumShareQty}}">
+                        {{CountOfPremium}}
+                    </td>
+                    <td class="tablecenter" data-toggle="tooltip" data-placement="auto" title="BUY:{{TotalBuyPremiumShareQty}}     SELL:{{TotalSellPremiumShareQty}}">
+                        {{CountOfPremium}}
+                    </td>
+                    <td class="tablecenter" data-toggle="tooltip" data-placement="auto" title="BUY:{{TotalBuyPremiumShareQty}}     SELL:{{TotalSellPremiumShareQty}}">
+                        {{CountOfPremium}}
+                    </td>
+                    {% comment %} <td class="tablecenter">
+                        {{SubjectToAvg}}
+                    </td> {% endcomment %}
+                </tr>
+            </tbody>
+        </table>
+        <br>
+
+        <table id="bootstrapdatatable" class="table table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col" class="tableline"></th>
+                    <th scope="col" class="tablecenter">Kostak + Subject To</th>
+                    <th scope="col" class="tablecenter">Premium</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <th class="tableline">
+                        Share Purchase Qty
+                    </th>
+                    <td class="tablecenter">
+                        {{KostakShareQty}}
+                    </td>
+                    <td class="tablecenter">
+                        {% if TotalBuyPremiumShareQty is none %} 0 {% else %} {{TotalBuyPremiumShareQty}} {%endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tableline">
+                        Share Sell Qty
+                    </th>
+                    <td colspan="2" class="tablecenter">
+                        {% if TotalSellPremiumShareQty is none %} 0 {% else %} {{TotalSellPremiumShareQty}} {%endif %}
+                    </td>
+                </tr>
+            </tbody>
+        </table> -->
+
+
+
+        <div class="table-responsive text-nowrap">
+        <table id="bootstrapdatatable" class="table table-hover table-bordered">
+            <thead>
+            </thead>
+            <tbody>
+                <tr>
+                    <th class="tablelinel">
+                        Difference Qty (To Hedge)
+                    </th>
+                    <td class="tablecenter">
+                        {{shares.Diff_Qty|floatformat:0}}
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+        </div>
+
+        
+
+  
+</div>
+<br>
+<br>
+
+
+
+<div class="footer">
+    {% comment %} <a href="/{{IPOid}}/SetRate" class="btn button btn-dark"><span>Set Rate</span></a> {% endcomment %}
+    <a href="/{{IPOid}}/BUY" class="btn button btn-dark"><span>BUY</span></a>
+    <a href="/{{IPOid}}/SELL" class="btn button btn-dark"><span>SELL</span></a>
+    <a href="/{{IPOid}}/Order" class="btn button btn-dark"><span>Orders</span></a>
+    <a href="/{{IPOid}}/OrderDetail/BUY" class="btn button btn-dark" style="white-space: nowrap;"><span>App. Buy Order (PAN)</span></a>
+    <a href="/{{IPOid}}/OrderDetail/SELL" class="btn button btn-dark" style="white-space: nowrap;"><span>App. Sell Order (PAN)</span></a>
+    <a href="/{{IPOid}}/Billing" class="btn button btn-dark"><span>Client Wise Billing</span></a>
+    <a href="/{{IPOid}}/Status" class="btn button btn-dark"><span>Group Wise Billing</span></a>
+    <a href="/{{IPOid}}/Dashboard/A" class="btn button btn-dark disabled"><span>Analysis</span></a>
+    <!-- <a href="PremiumBilling" class="btn button btn-dark" style="white-space: nowrap;"><span>Premium Billing</span></a> -->
+</div>
+<!-- JAVASCRIPT FOR ADDGROUP FORM VALIDATION -->
+<script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+
+
+<!-- Optional JavaScript; choose one of the two! -->
+
+<!-- Option 1: Bootstrap Bundle with Popper -->
+<script src="{% static 'JS/bootstrap.bundle.min.js' %}"></script>
+
+{% endblock %}

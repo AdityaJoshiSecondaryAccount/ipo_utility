@@ -1,0 +1,3219 @@
+{% extends 'basic.html' %}
+{% block title %}Accounting{% endblock %}
+
+{% block css %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'DataTables/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'DataTables/css/dataTables.bootstrap5.min.css' %}">
+<link rel="stylesheet" href="{% static 'DataTables/css/buttons.bootstrap5.min.css' %}">
+<link rel="stylesheet" href="{% static 'DataTables/css/select2.min.css' %}">
+
+{% comment %} <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" /> {% endcomment %}
+
+{% comment %} <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"> {% endcomment %}
+<style>
+    
+    /* --- Table and form styling --- */
+    #example th{
+        width: 10% !important;
+        text-align: center;
+    }
+    #example tbody td {
+        line-height: 40px;   /* row height */
+        vertical-align: middle; /* center text vertically */
+    }
+    #example_filter{
+        float: right;
+        width: 50% !important;
+        position: absolute;
+        top: 3% !important;
+        left: 50% ;
+    }
+    .fm{
+        margin-bottom: -26px;
+    }
+    #example th{
+        width: 15% !important;
+        text-align: center;
+    }
+    
+    #example_length{
+        margin-top:1% !important;
+    }
+    
+    .row.dt-row {
+        top: -23px; 
+    }
+    .flex-wrap {
+        position: relative !important;
+        margin-top: -71px !important; 
+        left: 49% ;
+    }
+    .buttons-colvis{
+        width: 95px;
+        left:-11px;
+    }
+    .form-control-sm {
+        border: 0.3px solid black;
+        {% comment %} height:30px !important; {% endcomment %}
+    }
+    .custom-select {
+        border: 0.3px solid black;
+        height:37px !important;
+    }
+    .buttons-collection{
+        height: 35px;
+    }
+    .dropdown-menu {
+        min-width: 7rem !important;
+        margin-top: 0 !important;
+        background-color: #6c757d;
+    }
+    .tb{
+        position: absolute !important;
+        top: -0.5rem !important;
+        left: 59% !important;
+    }
+    .tb{
+        width: 41.2% !important;
+    }
+    .tbl{
+        width: 100% !important;
+    }
+    .tld{
+        margin-left: 0.5px;
+        width: 100% !important;
+    }
+    .cw {
+        margin-left: 0px;
+        width: 554px ; 
+    }
+    .custom-width {
+        margin-left: 0px !important;
+        right : 0px !important;
+        width: 1206px !important; 
+    }
+    table.dataTable {
+        margin-bottom: 0px !important;
+    }
+    #trans_group {
+        appearance: auto;           /* show default OS arrow */
+        -webkit-appearance: auto;   /* for Safari/Chrome */
+        -moz-appearance: auto;      /* for Firefox */
+        background-image: none !important; /* remove any custom icon override */
+        padding-right: 20px !important; /* space for default arrow */
+    }
+    #trans_amount_type {
+        appearance: auto;
+        -webkit-appearance: auto;
+        -moz-appearance: auto;
+        background-image: none !important;
+    }
+    #trans_ipo {
+        appearance: auto;
+        -webkit-appearance: auto;
+        -moz-appearance: auto;
+        background-image: none !important;
+    }
+    
+    #accounting_table_wrapper 
+    { 
+        margin-top: 4% !important; 
+    }
+    #accounting_table th 
+    { text-align: center; white-space: nowrap; cursor: pointer; }
+    .table-hover tbody tr:hover 
+    { 
+        background-color: rgba(0,0,0,0.02); 
+    }
+    .selected 
+    { 
+        background-color: #e9ecef !important; font-weight: bold; 
+    }
+    .filters 
+    { 
+        background:#f8f9fa; padding:15px; 
+        border-radius:5px; 
+        margin-bottom:20px; 
+        box-shadow:0 0.15rem 0.5rem rgba(0,0,0,0.1);
+    }
+    .CDTAB{
+        float: right;
+        left: 99%;
+        margin-top: -39px; 
+        margin-right: -50%;
+    }
+    .jvbut{
+        float: left;
+        top: 65px;
+    }
+    .AB{
+        width:  55% !important;
+    }
+    .filter-row 
+    { display:flex; flex-wrap:wrap; gap:15px; margin-bottom:10px; }
+    .filter-group 
+    { flex:1; min-width:200px; }
+    .search-box { position: relative; margin-bottom: 20px; }
+    .search-box input { padding-left:35px; width:100%; }
+    .search-box i { position:absolute; left:12px; top:10px; color:#6c757d; }
+    .table th, .table td { border:1px solid #e3e6f0; padding:0.5rem; }
+    .table thead th { border-bottom:2px solid #e3e6f0; background-color: rgb(182,182,158);}
+    .table-responsive { margin-top:20px; }
+    .modal-xl { max-width: 90%; }
+    /* Form styling */
+    .form-control { border:1px solid #d1d3e2; border-radius:0.35rem; padding:0.375rem 0.75rem; font-size:0.9rem; }
+    .form-control:focus { border-color:#bac8f3; box-shadow:0 0 0 0.2rem rgba(78,115,223,0.25);}
+    .filters {
+        background:#f8f9fa;
+        padding:15px;
+        border-radius:5px;
+        margin:20px 0;   /* Add vertical spacing */
+        margin-top: 40px;  /* Extra top space */
+        box-shadow:0 0.15rem 0.5rem rgba(0,0,0,0.1);
+    }
+    /* Add this to your styles section or CSS file */
+    #accounting-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    #accounting-controls .export-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    #accounting-controls .pagination-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    #accounting-controls .page-size-selector {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Style for the export buttons */
+    #accounting-controls .btn-export {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    /* Make the page size selector more compact */
+    #accounting-controls select {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        height: auto;
+    }
+    
+
+    /* Responsive adjustments */
+    @media (max-width: 992px) {
+        #accounting-controls {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        #accounting-controls > div {
+            width: 100%;
+            justify-content: space-between;
+        }
+    }
+
+    /* 250% Zoom Level Fixes */
+    @media screen and (min-resolution: 250dpi) and (max-resolution: 300dpi),
+           screen and (-webkit-min-device-pixel-ratio: 2.5) and (-webkit-max-device-pixel-ratio: 3),
+           screen and (min--moz-device-pixel-ratio: 2.5) and (max--moz-device-pixel-ratio: 3) {
+        
+        /* Adjust container and spacing */
+        .container-fluid.fc {
+            padding: 0 10px;
+            max-width: 100%;
+            zoom: 0.9; /* Slightly reduce zoom to fit content */
+        }
+        
+        /* Adjust buttons and controls */
+        #accounting-controls {
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 0.5rem;
+        }
+        
+        /* Adjust table responsiveness */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            -ms-overflow-style: -ms-autohiding-scrollbar;
+        }
+        
+        /* Fix modal positioning */
+        .modal-dialog {
+            margin: 0.5rem auto;
+            max-width: 95%;
+        }
+        
+        /* Adjust form controls */
+        .form-control, .form-select, .btn {
+            font-size: 0.9rem;
+            padding: 0.25rem 0.5rem;
+        }
+        
+        /* Fix header and navigation */
+        .navbar {
+            padding: 0.25rem 0.5rem;
+        }
+        
+        /* Adjust filters section */
+        .filters {
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+        }
+        
+        /* Fix DataTables elements */
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_filter,
+        .dataTables_wrapper .dataTables_info,
+        .dataTables_wrapper .dataTables_paginate {
+            font-size: 0.85rem;
+        }
+    }
+    
+    /* Additional zoom level handling */
+    @media screen and (min-resolution: 300dpi),
+           screen and (-webkit-min-device-pixel-ratio: 3),
+           screen and (min--moz-device-pixel-ratio: 3) {
+        /* Further adjustments for higher zoom levels */
+        .container-fluid.fc {
+            zoom: 0.8;
+        }
+        
+        .table-responsive {
+            font-size: 0.9em;
+        }
+    }
+
+    @media (min-width: 7612px){
+        .jvbut{
+            {% comment %} width:40% {% endcomment %}
+            margin-top: -10px;
+            top: 55px !important; 
+            left: 160px !important;
+            {% comment %} width: 21%; {% endcomment %}
+        }
+        .AB{
+            margin-right: 37px !important;
+            width:  183px !important;
+        }
+        .fixed-section{
+            margin-bottom: 49px !important;
+            left: 14%;
+            width:  182px !important;
+                    margin-top: 42px;
+        }
+        .flex-wrap {
+            left: 51% !important;
+        }
+        .CDTAB{
+            margin-top: -43px !important;
+            font-size: 15px !important;
+        }
+    }
+    @media (min-width: 4501px) and (max-width: 7612px) {
+        .jvbut{
+            {% comment %} width:40% {% endcomment %}
+            margin-top: -10px;
+            top: 55px !important; 
+            left: 82px !important;
+            {% comment %} width: 21%; {% endcomment %}
+        }
+        .AB{
+            margin-right: 37px !important;
+            width:  183px !important;
+        }
+        .fixed-section{
+            margin-bottom: 49px !important;
+            left: 14%;
+            width:  182px !important;
+            margin-top: 42px;
+        }
+        .flex-wrap{
+            right: 55px !important;
+            left: -79% !important;
+            top: 68%;
+         }
+        .CDTAB{
+            margin-bottom: 1% !important;
+            margin-top: -3% !important;
+            margin-right: 41% !important;
+            padding-top: 2% !important;
+         }
+         .slr{
+            margin-top: -1% !important;
+            {% comment %} margin-left: 1% !important; {% endcomment %}
+         }
+         #example_filter{
+            margin-top: 0% !important;
+            left: 50%;
+         } 
+         #example_length{
+            margin-bottom: -3% !important;
+         }
+         .fl{
+            margin-top: 4% !important;
+            width:  100% !important;
+            {% comment %} margin-bottom: -11% !important; {% endcomment %}
+        }
+    }
+    @media (min-width: 3806px) and (max-width: 4500px) {
+        .jvbut{
+            {% comment %} width:40% {% endcomment %}
+            margin-top: -10px;
+            top: 55px !important; 
+            left: 82px !important;
+            {% comment %} width: 21%; {% endcomment %}
+        }
+        .AB{
+            margin-right: 37px !important;
+            width:  183px !important;
+        }
+        .fixed-section{
+            margin-bottom: 49px !important;
+            left: 14%;
+            width:  182px !important;
+            margin-top: 42px;
+        }
+        .flex-wrap{
+            right: 55px !important;
+            left: -79% !important;
+            top: 68%;
+         }
+        .CDTAB{
+            margin-bottom: 1% !important;
+            margin-top: -3% !important;
+            margin-right: 41% !important;
+            padding-top: 1% !important;
+         }
+         .slr{
+            margin-top: -1% !important;
+            {% comment %} margin-left: 1% !important; {% endcomment %}
+         }
+         #example_filter{
+            margin-top: 0% !important;
+            left: 50%;
+         } 
+         #example_length{
+            margin-bottom: -3% !important;
+         }
+         .fl{
+            margin-top: 4% !important;
+            width:  100% !important;
+            {% comment %} margin-bottom: -11% !important; {% endcomment %}
+        }
+    }
+    @media (min-width: 2538px) and (max-width: 3805px) {
+        .jvbut{
+            {% comment %} width:40% {% endcomment %}
+            margin-top: -10px;
+            top: 55px !important; 
+            left: 82px !important;
+            {% comment %} width: 21%; {% endcomment %}
+        }
+        .AB{
+            margin-right: 37px !important;
+            width:  183px !important;
+        }
+        .fixed-section{
+            margin-bottom: 49px !important;
+            left: 14%;
+            width:  182px !important;
+            margin-top: 42px;
+        }
+        .flex-wrap{
+            right: 55px !important;
+            left: -79% !important;
+            top: 68%;
+         }
+        .CDTAB{
+            margin-bottom: 1% !important;
+            margin-top: -3% !important;
+            margin-right: 41% !important;
+            padding-top: 1% !important;
+         }
+         .slr{
+            margin-top: -1% !important;
+            {% comment %} margin-left: 1% !important; {% endcomment %}
+         }
+         #example_filter{
+            margin-top: 0% !important;
+            left: 50%;
+         } 
+         #example_length{
+            margin-bottom: -3% !important;
+         }
+         .fl{
+            margin-top: 4% !important;
+            width:  100% !important;
+            {% comment %} margin-bottom: -11% !important; {% endcomment %}
+        }
+    }
+    @media (min-width: 2116px) and (max-width: 2537px) {
+        .jvbut{
+            {% comment %} width:40% {% endcomment %}
+            margin-top: -10px;
+            top: 55px !important; 
+            left: 82px !important;
+            {% comment %} width: 21%; {% endcomment %}
+        }
+        .AB{
+            margin-right: 37px !important;
+            width:  183px !important;
+        }
+        .fixed-section{
+            margin-bottom: 49px !important;
+            left: 14%;
+            width:  90% !important;
+            margin-top: 42px;
+        }
+        .flex-wrap{
+            right: 55px !important;
+            left: -79% !important;
+            top: 74%;
+         }
+        .CDTAB{
+            margin-bottom: 1% !important;
+            margin-top: -3% !important;
+            margin-right: 41% !important;
+         }
+         .slr{
+            margin-top: 0% !important;
+            {% comment %} margin-left: 1% !important; {% endcomment %}
+         }
+         #example_filter{
+            margin-top: 0% !important;
+            left: 50%;
+         } 
+         #example_length{
+            margin-bottom: -3% !important;
+         }
+         .fl{
+            margin-top: 4% !important;
+            width:  100% !important;
+            {% comment %} margin-bottom: -11% !important; {% endcomment %}
+        }
+    }
+    @media (min-width: 1884px) and (max-width: 2115px) {
+        .jvbut{
+            {% comment %} width:40% {% endcomment %}
+            margin-top: -10px;
+            top: 55px !important; 
+            left: 82px !important;
+            {% comment %} width: 21%; {% endcomment %}
+        }
+        .AB{
+            margin-right: 37px !important;
+            width:  183px !important;
+        }
+        .fixed-section{
+            margin-bottom: 49px !important;
+            left: 14%;
+            width:  90% !important;
+            margin-top: 42px;
+        }
+        .flex-wrap{
+            right: 55px !important;
+            left: -79% !important;
+            top: 74%;
+         }
+        .CDTAB{
+            margin-bottom: 1% !important;
+            margin-top: -3% !important;
+            margin-right: 41% !important;
+         }
+         .slr{
+            margin-top: 0% !important;
+            {% comment %} margin-left: 1% !important; {% endcomment %}
+         }
+         #example_filter{
+            margin-top: 0% !important;
+            left: 50%;
+         } 
+         #example_length{
+            margin-bottom: -3% !important;
+         }
+         .fl{
+            margin-top: 4% !important;
+            width:  100% !important;
+            {% comment %} margin-bottom: -11% !important; {% endcomment %}
+        }
+    }
+    @media (min-width: 1758px) and (max-width: 1883px) {
+        .jvbut{
+            {% comment %} width:40% {% endcomment %}
+            margin-top: -10px;
+            top: 55px !important; 
+            left: 82px !important;
+            {% comment %} width: 21%; {% endcomment %}
+        }
+        .AB{
+            margin-right: 37px !important;
+            width:  183px !important;
+        }
+        .fixed-section{
+            margin-bottom: 49px !important;
+            left: 14%;
+            width:  182px !important;
+            margin-top: 42px;
+        }
+        .flex-wrap{
+            right: 55px !important;
+            left: -79% !important;
+            top: 74%;
+         }
+        .CDTAB{
+            margin-bottom: 1% !important;
+            margin-top: -3% !important;
+            margin-right: 44% !important;
+         }
+         .slr{
+            margin-top: 2% !important;
+            {% comment %} margin-left: 1% !important; {% endcomment %}
+         }
+         #example_filter{
+            margin-top: 1% !important;
+            left: 50%;
+         } 
+         #example_length{
+            margin-bottom: -3% !important;
+         }
+         .fl{
+            margin-top: 4% !important;
+            width:  100% !important;
+            {% comment %} margin-bottom: -11% !important; {% endcomment %}
+        }
+    }
+    @media (min-width: 1541px) and (max-width: 1757px) {
+        .jvbut{
+            {% comment %} width:40% {% endcomment %}
+            margin-top: -10px;
+            top: 55px !important; 
+            left: 82px !important;
+            {% comment %} width: 21%; {% endcomment %}
+        }
+        .AB{
+            margin-right: 37px !important;
+            width:  85% !important;
+        }
+        .fixed-section{
+            margin-bottom: 49px !important;
+            left: 14%;
+            width:  182px !important;
+            margin-top: 42px;
+        }
+        .flex-wrap{
+            right: 55px !important;
+            left: -79% !important;
+            top: 74%;
+         }
+        .CDTAB{
+            margin-bottom: 1% !important;
+            margin-top: -3% !important;
+            margin-right: 44% !important;
+         }
+         .slr{
+            margin-top: 1% !important;
+            {% comment %} margin-left: 1% !important; {% endcomment %}
+         }
+         #example_filter{
+            margin-top: 1% !important;
+            left: 50%;
+         } 
+         #example_length{
+            margin-bottom: -3% !important;
+         }
+         .fl{
+            margin-top: 4% !important;
+            width:  100% !important;
+            {% comment %} margin-bottom: -11% !important; {% endcomment %}
+        }
+        hr {
+            border: none;
+            border: 1px solid #000;  /* vertical line */
+            width: 100%%;                     /* no horizontal size */
+            margin: 0 auto;               /* center if needed */
+        }
+    }
+    @media (min-width: 1485px) and (max-width: 1540px) {
+        .jvbut{
+            {% comment %} width:40% {% endcomment %}
+            margin-top: -10px;
+            top: 55px !important; 
+            left: 82px !important;
+            {% comment %} width: 21%; {% endcomment %}
+        }
+        .AB{
+            margin-right: 37px !important;
+            width:  183px !important;
+        }
+        .fixed-section{
+            margin-bottom: 49px !important;
+            left: 14%;
+            width:  182px !important;
+            margin-top: 42px;
+        }
+        .flex-wrap{
+            right: 55px !important;
+            left: -79% !important;
+            top: 74%;
+         }
+        .CDTAB{
+            margin-bottom: 1% !important;
+            margin-top: -3% !important;
+            margin-right: 42% !important;
+         }
+         .slr{
+            margin-top: 2% !important;
+            {% comment %} margin-left: 1% !important; {% endcomment %}
+         }
+         #example_filter{
+            margin-top: 1% !important;
+            left: 50%;
+         } 
+         #example_length{
+            margin-bottom: -3% !important;
+         }
+         .fl{
+            margin-top: 4% !important;
+            width:  100% !important;
+            {% comment %} margin-bottom: -11% !important; {% endcomment %}
+        }
+    }
+    @media (min-width: 1316px) and (max-width: 1484px) {
+        .jvbut{
+            {% comment %} width:40% {% endcomment %}
+            margin-top: -10px;
+            top: 55px !important; 
+            left: 82px !important;
+            {% comment %} width: 21%; {% endcomment %}
+        }
+        .AB{
+            margin-right: 37px !important;
+            width:  183px !important;
+        }
+        .fixed-section{
+            margin-bottom: 49px !important;
+            left: 14%;
+            width:  182px !important;
+            margin-top: 42px;
+        }
+        .flex-wrap{
+            right: 55px !important;
+            left: -79% !important;
+            top: 74%;
+         }
+        .CDTAB{
+            margin-bottom: 1% !important;
+            margin-top: -3% !important;
+            margin-right: 44% !important;
+         }
+         .slr{
+            margin-top: 2% !important;
+            {% comment %} margin-left: 1% !important; {% endcomment %}
+         }
+         #example_filter{
+            margin-top: 1% !important;
+            left: 50%;
+         } 
+         #example_length{
+            margin-bottom: -3% !important;
+         }
+         .fl{
+            margin-top: 4% !important;
+            width:  100% !important;
+            {% comment %} margin-bottom: -11% !important; {% endcomment %}
+        }
+    }
+    @media (min-width: 1214px) and (max-width: 1315px) {
+        .jvbut{
+            {% comment %} width:40% {% endcomment %}
+            margin-top: -10px;
+            top: 55px !important; 
+            left: 82px !important;
+            {% comment %} width: 21%; {% endcomment %}
+        }
+        .AB{
+            margin-right: 37px !important;
+            width:  183px !important;
+        }
+        .fixed-section{
+            margin-bottom: 49px !important;
+            left: 14%;
+            width:  182px !important;
+                    margin-top: 42px;
+        }
+        .slr{
+            margin-bottom: 89px !important;
+            margin-left: 1% !important;
+         }
+        .CDTAB{
+            margin-bottom: 2% !important;
+            margin-right: 58% !important;
+         }
+         .fl{
+            margin-top: 6% !important;
+            width:  100% !important;
+            {% comment %} margin-bottom: -11% !important; {% endcomment %}
+        }.flex-wrap{
+            right: 55px !important;
+            left: -34% !important;
+            top: 36%;
+         }
+          #example_length{
+            margin-bottom: -2% !important;
+         }
+         #example_filter{
+            margin-top: 0% !important;
+            left: 46%;
+         }
+    }
+    @media (min-width: 1158px) and (max-width: 1213px) {
+        .jvbut{
+            {% comment %} width:40% {% endcomment %}
+            margin-top: -10px;
+            top: 55px !important; 
+            left: 82px !important;
+            {% comment %} width: 21%; {% endcomment %}
+        }
+        .AB{
+            margin-right: 37px !important;
+            width:  183px !important;
+        }
+        .fixed-section{
+            margin-bottom: 49px !important;
+            left: 14%;
+            width:  182px !important;
+                    margin-top: 42px;
+        }
+        .flex-wrap {
+            left: 36% !important;
+        }
+        .CDTAB{
+            margin-bottom: 0% !important;
+            margin-right: 56% !important;
+         }
+         .flex-wrap{
+            right: 55px !important;
+            left: -34% !important;
+            top: 36%;
+         }.fl{
+            margin-top: 6% !important;
+            width:  100% !important;
+            {% comment %} margin-bottom: -11% !important; {% endcomment %}
+        }
+    }
+    @media (min-width: 1137px) and (max-width: 1157px) {
+        .jvbut{
+            {% comment %} width:40% {% endcomment %}
+            margin-top: -10px;
+            top: 55px !important; 
+            left: 82px !important;
+            {% comment %} width: 21%; {% endcomment %}
+        }
+        .AB{
+            margin-right: 37px !important;
+            width:  183px !important;
+        }
+        .fixed-section{
+            margin-bottom: 49px !important;
+            left: 14%;
+            width:  182px !important;
+                    margin-top: 42px;
+        }
+        .flex-wrap {
+            left: 36% !important;
+        }
+        .CDTAB{
+            margin-bottom: 0% !important;
+            margin-right: 56% !important;
+         }
+         .flex-wrap{
+            right: 55px !important;
+            left: -34% !important;
+            top: 36%;
+         }
+         .fl{
+            margin-top: 6% !important;
+            width:  100% !important;
+            {% comment %} margin-bottom: -11% !important; {% endcomment %}
+        }
+    }
+    @media (min-width: 1074px) and (max-width: 1136px) {
+        .flex-wrap {
+            left: 36% !important;
+        }
+        .CDTAB{
+            margin-bottom: 0% !important;
+            margin-right: 56% !important;
+         }
+        #example_filter{
+            left: 50% !important;
+        }
+        .fl{
+            margin-top: 6% !important;
+            width:  100% !important;
+            {% comment %} margin-bottom: -11% !important; {% endcomment %}
+        }
+        .jvbut{
+            {% comment %} width:40% {% endcomment %}
+            margin-top: -10px;
+            top: 55px !important; 
+            left: 82px !important;
+            {% comment %} width: 21%; {% endcomment %}
+        }
+        .CD{
+            right: 15px !important;
+            {% comment %} margin-right: 180px !important; {% endcomment %}
+        }
+        .AB{
+            margin-right: 37px !important;
+            width:  183px !important;
+        }
+        .fixed-section{
+            margin-bottom: 49px !important;
+            left: 14%;
+            width:  182px !important;
+                    margin-top: 42px;
+        }
+        .slr{
+            margin-bottom: 89px !important;
+            margin-left: 1% !important;
+         }
+         .flex-wrap{
+            right: 55px !important;
+            left: -34% !important;
+            top: 36%;
+         }
+         #example_length{
+            margin-bottom: -2% !important;
+         }
+         
+    }
+    @media (min-width: 977px) and (max-width: 1073px) {
+        .fl{
+            margin-top: 6% !important;
+            width:  100% !important;
+            {% comment %} margin-bottom: -11% !important; {% endcomment %}
+        }
+        .jvbut{
+            {% comment %} width:33%; {% endcomment %}
+            top: 61px !important;
+            left: 6% !important;
+         }
+        .CD{
+            right: 15px !important;
+            {% comment %} margin-right: 180px !important; {% endcomment %}
+        }
+        .slr{
+            margin-bottom: 89px !important;
+            margin-left: 1% !important;
+         }
+        .AB{
+            margin-right: 37px !important;
+            width:  183px !important;
+        }
+        .flex-wrap{
+            right: 55px !important;
+            left: -34% !important;
+            top: 36%;
+         }
+        .CDTAB{
+            margin-bottom: 0% !important;
+            margin-right: 56% !important;
+         }
+        #example_filter{
+            margin-top: 0% !important;
+            left: 46%;
+         }
+        .fixed-section{
+            margin-bottom: 49px !important;
+            margin-top: 22% !important;
+            width:  182px !important;
+        }
+        {% comment %} .align-items-end{
+            margin-left: 82px !important;
+        } {% endcomment %}
+         #example_length{
+            margin-bottom: -2% !important;
+         }
+        
+        
+    }
+    @media (min-width: 956px) and (max-width: 976px) {
+        .AB{
+            bottom: 47px !important;
+            margin-right: 37px !important;
+            margin-left: 107px !important;
+        }
+        .fixed-section{
+            margin-bottom: 49px !important;
+            margin-top: -29px;
+            left: 14%;
+            margin-left: 107px !important;
+        }
+        .flex-wrap{
+            right: 55px !important;
+            left: -102% !important;
+            top: 80%;
+         }
+        #example_filter{
+            margin-top: 0% !important;
+            left: 1%;
+         }
+        {% comment %} .bc{
+            bottom: -85px !important;
+            right: 15px !important;
+        } {% endcomment %}
+         .CD{
+            right: 15px !important;
+            margin-right: 180px !important;
+         }
+         .slr{
+            margin-bottom: 60px !important;
+         }
+         .div.dt-buttons{
+            margin-bottom: 60px !important;
+            right: 55px !important;
+         }
+         .CDTAB{
+            margin-bottom: 2% !important;
+            margin-right: 2% !important;
+         }
+         #example_length{
+            margin-top:1% !important;
+         }
+         .cw{
+            left: -3px !important;
+         }
+         .fl{
+            margin-top: 8% !important;
+            width:  100% !important;
+            {% comment %} margin-bottom: -11% !important; {% endcomment %}
+        }
+        .jvbut{
+            {% comment %} width:33%; {% endcomment %}
+            top: 108px !important;
+            {% comment %} margin-left: 62% !important; {% endcomment %}
+         }
+    }
+    @media (min-width: 916px) and (max-width: 955px) {
+        .AB{
+            bottom: 47px !important;
+            margin-right: 37px !important;
+            margin-left: 63px !important;
+        }
+        .fixed-section{
+            margin-bottom: 49px !important;
+            margin-top: -29px;
+            left: 14%;
+            margin-left: 63px !important;
+        }
+        .flex-wrap{
+            right: 55px !important;
+            left: -102% !important;
+            top: 80%;
+         }
+        #example_filter{
+            margin-top: 0% !important;
+            left: 1%;
+         }
+        {% comment %} .bc{
+            bottom: -85px !important;
+            right: 15px !important;
+        } {% endcomment %}
+         .CD{
+            right: 15px !important;
+            margin-right: 180px !important;
+         }
+         .slr{
+            margin-bottom: 60px !important;
+         }
+         .div.dt-buttons{
+            margin-bottom: 60px !important;
+            right: 55px !important;
+         }
+         .CDTAB{
+            margin-bottom: 2% !important;
+            margin-right: 2% !important;
+         }
+         #example_length{
+            margin-top:1% !important;
+         }
+         .cw{
+            left: -3px !important;
+         }
+         .CDTAB{
+            margin-bottom: 2% !important;
+            margin-right: 2% !important;
+         }
+         .fl{
+            margin-top: 8% !important;
+            width:  100% !important;
+            {% comment %} margin-bottom: -11% !important; {% endcomment %}
+        }
+        .jvbut{
+            {% comment %} width:33%; {% endcomment %}
+            top: 108px !important;
+            {% comment %} margin-left: 62% !important; {% endcomment %}
+         }
+        
+    }
+    @media (min-width: 893px) and (max-width: 915px) {
+       .AB{
+            bottom: 47px !important;
+            margin-right: 37px !important;
+            margin-left: 63px !important;
+        }
+        .fixed-section{
+            margin-bottom: 49px !important;
+            margin-top: -29px;
+            left: 14%;
+            margin-left: 63px !important;
+        }
+        .flex-wrap{
+            right: 55px !important;
+            left: -102% !important;
+            top: 80%;
+         }
+        #example_filter{
+            margin-top: 0% !important;
+            left: 1%;
+         }
+        {% comment %} .bc{
+            bottom: -85px !important;
+            right: 15px !important;
+        } {% endcomment %}
+         .CD{
+            right: 15px !important;
+            margin-right: 180px !important;
+         }
+         .slr{
+            margin-bottom: 50px !important;
+         }
+         .div.dt-buttons{
+            margin-bottom: 60px !important;
+            right: 55px !important;
+         }
+         .CDTAB{
+            margin-bottom: 2% !important;
+            margin-right: 2% !important;
+         }
+         #example_length{
+            margin-top:1% !important;
+         }
+         .cw{
+            left: -3px !important;
+         }
+         .CDTAB{
+            margin-top: 5% !important;
+            right: 15px !important;
+         }
+         .tab{
+            left: 14% !important;
+            margin-left: 49% !important;
+        }
+        .fl{
+            margin-top: 8% !important;
+            width:  100% !important;
+            {% comment %} margin-bottom: -11% !important; {% endcomment %}
+        }
+        .jvbut{
+            {% comment %} width:33%; {% endcomment %}
+            top: 108px !important;
+            {% comment %} margin-left: 62% !important; {% endcomment %}
+         }
+    }
+    @media (min-width: 851px) and (max-width: 892px) {
+        .AB{
+            bottom: 47px !important;
+            margin-right: 37px !important;
+            margin-left: 63px !important;
+        }
+        .fixed-section{
+            margin-bottom: 49px !important;
+            margin-top: -29px;
+            left: 14%;
+            margin-left: 63px !important;
+        }
+        .flex-wrap{
+            right: 55px !important;
+            left: -102% !important;
+            top: 80%;
+         }
+        #example_filter{
+            margin-top: 0% !important;
+            left: 1%;
+         }
+        {% comment %} .bc{
+            bottom: -85px !important;
+            right: 15px !important;
+        } {% endcomment %}
+         .CD{
+            right: 15px !important;
+            margin-right: 180px !important;
+         }
+         .slr{
+            margin-bottom: 60px !important;
+         }
+         .div.dt-buttons{
+            margin-bottom: 60px !important;
+            right: 55px !important;
+         }
+         .CDTAB{
+            margin-bottom: 3% !important;
+            margin-right: 3% !important;
+         }
+         #example_length{
+            margin-top:1% !important;
+         }
+         .cw{
+            left: -3px !important;
+         }
+         
+         .fl{
+            margin-top: 8% !important;
+            width:  100% !important;
+            {% comment %} margin-bottom: -11% !important; {% endcomment %}
+        }
+        .jvbut{
+            {% comment %} width:33%; {% endcomment %}
+            top: 108px !important;
+            {% comment %} margin-left: 62% !important; {% endcomment %}
+         }
+         
+         
+    }
+    @media (min-width: 768px) and (max-width: 850px) {
+        .AB{
+            bottom: 3% !important;
+            {% comment %} margin-right: 37px !important; {% endcomment %}
+        }
+        #navbarNavAltMarkup{
+            font-size: 97% !important;
+        }
+        .fixed-section{
+            {% comment %} margin-top: -72px;
+            left: 14%; {% endcomment %}
+        }
+        {% comment %} .bc{
+            bottom: -85px !important;
+            right: 15px !important;
+        } {% endcomment %}
+         
+         .fd{
+            margin-top: -2% !important;
+         }
+         .slr{
+            {% comment %} margin-bottom: 2% !important;
+            margin-right: 78% !important; {% endcomment %}
+            margin-left: 5% !important;
+         }
+         .div.dt-buttons{
+            margin-bottom: 60px !important;
+            right: 55px !important;
+         }
+         .CDTAB{
+            margin-bottom: 2% !important;
+            margin-right: 2% !important;
+         }
+         #example_length{
+            margin-top:1% !important;
+         }
+         .cw{
+            left: -3px !important;
+         }
+         .drop-f{
+            width:100%
+         }
+         .jvbut{
+            {% comment %} width:33%; {% endcomment %}
+            top: 108px !important;
+            {% comment %} margin-left: 62% !important; {% endcomment %}
+         }
+         #example_filter{
+            margin-top: 0% !important;
+            left: 1%;
+         }
+         .flex-wrap{
+            right: 55px !important;
+            left: -102% !important;
+            top: 80%;
+         }
+         .fl{
+            margin-top: 10% !important;
+            width:  85% !important;
+            {% comment %} margin-bottom: -11% !important; {% endcomment %}
+        }
+        {% comment %} .d-grid {
+            display: flex !important;
+            flex-direction: row; /* stack vertically */
+            gap: 10px; /* optional spacing */
+            justify-content: space-between;
+        }
+        .d-grid button {
+            flex: 1;          /* make both grow equally */
+            max-width: 80%;   /* keep them from stretching too much */
+        } {% endcomment %}
+         
+    }   
+    @media (min-width: 699px) and (max-width: 767px) {
+       .AB{
+            bottom: 82px !important;
+            margin-right: 37px !important;
+        }
+        .fixed-section{
+            margin-bottom: 49px !important;
+            margin-top: -67px;
+            left: 14%;
+        }
+        {% comment %} .bc{
+            bottom: -85px !important;
+            right: 15px !important;
+        } {% endcomment %}
+         .CD{
+            right: 15px !important;
+            margin-right: 180px !important;
+         }
+         .slr{
+            margin-bottom: 2% !important;
+            margin-right: 78% !important;
+         }
+         .div.dt-buttons{
+            margin-bottom: 60px !important;
+            right: 55px !important;
+         }
+         .CDTAB{
+            margin-bottom: 2% !important;
+            margin-right: 2% !important;
+         }
+         #example_length{
+            margin-top:1% !important;
+         }
+         .cw{
+            left: -3px !important;
+         }
+         .drop-f{
+            width:100%
+         }
+         .jvbut{
+            width:40%
+            top: 65px !important;
+         }
+         #example_filter{
+            margin-top: -1% !important;
+            left: 46%;
+         }
+         .flex-wrap{
+            right: 55px !important;
+            left: 0% !important;
+            top: 39%;
+         }
+         .fl{
+            margin-top: 17% !important;
+        }
+        .d-grid {
+            display: flex !important;
+            flex-direction: column; /* stack vertically */
+            gap: 10px; /* optional spacing */
+        }
+
+    }
+    @media (min-width: 660px) and (max-width: 698px) {
+        .AB{
+            bottom: 82px !important;
+            margin-right: 37px !important;
+        }
+        .fixed-section{
+            margin-bottom: 49px !important;
+            margin-top: -67px;
+            left: 14%;
+        }
+        {% comment %} .bc{
+            bottom: -85px !important;
+            right: 15px !important;
+        } {% endcomment %}
+         .CD{
+            right: 15px !important;
+            margin-right: 180px !important;
+         }
+         .slr{
+            margin-bottom: 2% !important;
+            margin-right: 78% !important;
+         }
+         .div.dt-buttons{
+            margin-bottom: 60px !important;
+            right: 55px !important;
+         }
+         .CDTAB{
+            margin-bottom: 2% !important;
+            margin-right: 2% !important;
+         }
+         #example_length{
+            margin-top:1% !important;
+         }
+         .cw{
+            left: -3px !important;
+         }
+         .drop-f{
+            width:100%
+         }
+         .jvbut{
+            width:40%
+            top: 65px !important;
+         }
+         #example_filter{
+            margin-top: -1% !important;
+            left: 46%;
+         }
+         .flex-wrap{
+            right: 55px !important;
+            left: 0% !important;
+            top: 39%;
+         }
+         .fl{
+            margin-top: 17% !important;
+        }
+    }
+    @media (min-width: 576px) and (max-width: 659px) {
+        .AB{
+            bottom: 82px !important;
+            margin-right: 37px !important;
+        }
+        .fixed-section{
+            margin-bottom: 49px !important;
+            margin-top: -67px;
+            left: 14%;
+        }
+        {% comment %} .bc{
+            bottom: -85px !important;
+            right: 15px !important;
+        } {% endcomment %}
+         .CD{
+            right: 15px !important;
+            margin-right: 180px !important;
+         }
+         .slr{
+            margin-bottom: 2% !important;
+            margin-right: 73% !important;
+         }
+         .div.dt-buttons{
+            margin-bottom: 60px !important;
+            right: 55px !important;
+         }
+         .CDTAB{
+            margin-bottom: 2% !important;
+            margin-right: 2% !important;
+         }
+         #example_length{
+            margin-top:1% !important;
+         }
+         .cw{
+            left: -3px !important;
+         }
+         .drop-f{
+            width:100%
+         }
+         .jvbut{
+            width:40%
+            top: 65px !important;
+         }
+         #example_filter{
+            margin-top: -1% !important;
+            left: 46%;
+         }
+         .flex-wrap{
+            right: 55px !important;
+            left: 0% !important;
+            top: 39%;
+         }
+         .fl{
+            margin-top: 11% !important;
+        }
+    }
+    @media (min-width: 485px) and (max-width:575px) {
+        .AB{
+            bottom: 82px !important;
+        }
+        .fixed-section{
+            margin-bottom: 49px !important;
+            margin-top: -67px;
+            left: 14%;
+        }
+        .tab{
+            float: right !important;
+            margin-right: 71% !important;
+        }
+        {% comment %} .bc{
+            bottom: -85px !important;
+            right: 15px !important;
+        } {% endcomment %}
+         .CD{
+            right: 15px !important;
+            margin-right: 37px !important;
+         }
+         .slr{
+            margin-bottom: 13% !important;
+            margin-right: 65% !important;
+         }
+         .div.dt-buttons{
+            margin-bottom: 60px !important;
+            right: 55px !important;
+         }
+         .CDTAB{
+            margin-bottom: 2% !important;
+            margin-right: 2% !important;
+         }
+         #example_length{
+            margin-top:1% !important;
+         }
+         .cw{
+            left: -3px !important;
+         }
+         #example_filter{
+            margin-top: -10% !important;
+            left: 0%;
+         }
+         .flex-wrap{
+            right: 55px !important;
+            left: 0% !important;
+            top: 39%;
+         }
+         .fl{
+            margin-top: 9% !important;
+            width:  100% !important;
+            {% comment %} margin-bottom: -11% !important; {% endcomment %}
+        }
+    }
+    @media (min-width: 440px) and (max-width:484px) {
+        .AB{
+            bottom: 82px !important;
+        }
+        .fixed-section{
+            margin-bottom: 49px !important;
+            margin-top: -67px;
+            left: 14%;
+        }
+        .tab{
+            left: 14% !important;
+            margin-left: -64% !important;
+        }
+        {% comment %} .bc{
+            bottom: -85px !important;
+            right: 15px !important;
+        } {% endcomment %}
+         .CD{
+            right: 15px !important;
+            margin-right: 37px !important;
+         }
+         .slr{
+            margin-bottom: 89px !important;
+            margin-left: -14% !important;
+         }
+         .div.dt-buttons{
+            margin-bottom: 60px !important;
+            right: 55px !important;
+         }
+         .CDTAB{
+            margin-top: -22px !important;
+            margin-right: 3% !important;
+         }
+         #example_length{
+            margin-top:1% !important;
+         }
+         .cw{
+            left: -3px !important;
+         }
+         #example_filter{
+            margin-top: -21% !important;
+            left: 21%;
+         }
+         .flex-wrap{
+            right: 55px !important;
+            left: 20%!important;
+            top: 3%;
+         }
+         .fl{
+            margin-top: 12% !important;
+            width:  100% !important;
+            {% comment %} margin-bottom: -11% !important; {% endcomment %}
+        }
+    }
+    @media (min-width: 398px) and (max-width: 439px) {
+        .AB{
+            bottom: 82px !important;
+        }
+        .fixed-section{
+            margin-bottom: 49px !important;
+            margin-top: -67px;
+            left: 14%;
+        }
+        {% comment %} .bc{
+            bottom: -85px !important;
+            right: 15px !important;
+        } {% endcomment %}
+         .CD{
+            right: 15px !important;
+            margin-right: 37px !important;
+         }
+         .slr{
+            margin-bottom: 15% !important;
+            margin-right: 65% !important;
+         }
+         .div.dt-buttons{
+            margin-bottom: 60px !important;
+            right: 55px !important;
+         }
+         .CDTAB{
+            margin-bottom: 2% !important;
+            margin-right: 3% !important;
+         }
+         #example_length{
+            margin-top:1% !important;
+         }
+         .cw{
+            left: -3px !important;
+         }
+         #example_filter{
+            margin-top: -13% !important;
+            left: 1%;
+         }
+        .tab{
+            left: 14% !important;
+            margin-left: 4% !important;
+        }
+        .flex-wrap{
+            right: 55px !important;
+            left: 0% !important;
+            top: 39%;
+         }
+         .fl{
+            margin-top: 14% !important;
+            width:  100% !important;
+            {% comment %} margin-bottom: -11% !important; {% endcomment %}
+        }
+    }
+    @media (min-width: 365px) and (max-width: 397px) {
+        .AB{
+            bottom: 56% !important;
+            right: 0% !important;  
+        }
+        .fixed-section{
+            margin-bottom: 13% !important;
+            margin-top: -15%;
+        }
+        {% comment %} .bc{
+            bottom: -85px !important;
+            right: 15px !important;
+        } {% endcomment %}
+         .CD{
+            right: 15px !important;
+            margin-right: 37px !important;
+         }
+         .slr{
+            margin-bottom: 15% !important;
+            margin-right: 61% !important;
+         }
+         .div.dt-buttons{
+            margin-bottom: 60px !important;
+            right: 55px !important;
+         }
+         .CDTAB{
+            margin-bottom: 2% !important;
+            margin-right: 4% !important;
+         }
+         #example_length{
+            margin-top:1% !important;
+         }
+         .cw{
+            left: -3px !important;
+         }
+         #example_filter{
+            margin-top: -13% !important;
+            left: 1%;
+         }
+        .tab{
+            left: 14% !important;
+            margin-left: -33% !important;
+        }
+        .flex-wrap{
+            right: 55px !important;
+            left: 0% !important;
+            top: 39%;
+         }
+
+    } 
+    @media (min-width: 335px) and (max-width: 364px) {
+        .AB{
+            bottom: 85px !important;
+            right: 0% !important;  
+        }
+        .fixed-section{
+            margin-bottom: 15% !important;
+            margin-top: -22%;
+        }
+        {% comment %} .bc{
+            bottom: -85px !important;
+            right: 15px !important;
+        } {% endcomment %}
+         .CD{
+            right: 15px !important;
+            margin-right: 37px !important;
+         }
+         .slr{
+            margin-bottom: 114px !important;
+            margin-right: 52% !important;
+         }
+         .div.dt-buttons{
+            margin-bottom: 60px !important;
+            right: 55px !important;
+         }
+         .CDTAB{
+            margin-top: -22px !important;
+            margin-right: 4% !important;
+         }
+         .tab{
+            left: 14% !important;
+            margin-left: -32% !important;
+        }
+        .flex-wrap{
+            right: 55px !important;
+            left: 1% !important;
+            top: -3%;
+         }
+         #example_filter{
+            margin-top: -32% !important;
+            left: 2%;
+         }
+
+    } 
+    @media (min-width: 280px) and (max-width: 334px) {
+        .AB{
+            bottom: 85px !important;
+            right: -2px !important;  
+        }
+        
+        .flex-wrap{
+            right: 5% !important;
+            left: 2% !important;
+         }
+        .fixed-section{
+            margin-bottom: 85px !important;
+            margin-top: -65px;
+        }
+        {% comment %} .bc{
+            bottom: -85px !important;
+            right: 15px !important;
+        } {% endcomment %}
+         .CD{
+            right: 15px !important;
+            margin-right: 37px !important;
+         }
+         .slr{
+            margin-bottom: 34% !important;
+            margin-right: 54% !important;
+         }
+         .div.dt-buttons{
+            margin-bottom: 60px !important;
+            right: 55px !important;
+         }
+         .CDTAB{
+            margin-bottom: 4% !important;
+            margin-right: 4% !important;
+            margin-top: -14px !important;
+         }
+         #example_filter{
+            margin-top: -30% !important;
+            left: 1%;
+         }
+         .fl{
+            margin-top: 19% !important;
+            width:  100% !important;
+            {% comment %} margin-bottom: -11% !important; {% endcomment %}
+        }
+    } 
+    
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid fc">
+
+    <!-- Filters -->
+    {% comment %} <div class="container-fluid mt-4 filters"> {% endcomment %}
+
+        {% comment %} <div class="container-fluid"> {% endcomment %}
+            <!-- Filter Form -->
+            <div class="row fd">
+                <div class="col-sm-8 float:left;">
+                    <form method="get" action="">
+                        <div class="row g-3">                        
+                            <div class="row g-3 mb-3 fl ">
+                                
+                                <!-- IPO Dropdown (default) -->
+                                <div class="col-md-6 dropdown-set normal-dropdowns d-none drop-f">
+                                    <label class="form-label">IPO (Deleted)</label>
+                                    <select name="ipo_name" class="form-select">
+                                        <option value="">All IPOs</option>
+                                        {% for ipo in ipos %}
+                                            <option value="{{ ipo }}" >{{ ipo }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <!-- IPO Dropdown (alternate) -->
+                                <div class="col-md-6 dropdown-set alternate-dropdowns drop-f">
+                                    <label class="form-label">IPO </label>
+                                    <select name="ipo_name" class="form-select">
+                                        <option value="">All IPOs</option>
+                                        {% for ipo in ipos1 %}
+                                            <option value="{{ ipo }}" {% if selected_ipo == ipo.IPOName %}selected{% endif %}>{{ ipo }}</option>
+                                        {% endfor %}
+                                        <option value="JV">JV</option>
+                                    </select>
+                                </div>
+
+                                <!-- Group Dropdown (default) -->
+                                <div class="col-md-6 dropdown-set normal-dropdowns d-none drop-f" >
+                                    <label class="form-label">Group (Deleted)</label>
+                                    <select name="group_name" class="form-select">
+                                        <option value="">All Groups</option>
+                                        {% for group in groups %}
+                                            <option value="{{ group }}" >{{ group }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <!-- Group Dropdown (alternate) -->
+                                <div class="col-md-6 dropdown-set alternate-dropdowns drop-f ">
+                                    <label class="form-label">Group </label>
+                                    <select name="group_name" class="form-select">
+                                        <option value="">All Groups</option>
+                                        {% for group in groups1 %}
+                                            <option value="{{ group }}" {% if selected_group == group.GroupName %}selected{% endif %}>{{ group }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <div class="col-sm-6 drop-f">
+                                    <label class="form-label">From Date</label>
+                                    {% comment %} <input type="date" name="date_from" value="{{ date_from|default:'' }}" class="form-control"> {% endcomment %}
+                                    <input tabindex="-1" type="date" style="width: 100%;" class="form-control width" step="1" name="date_from" id="date_from" value="{{ date_from|default:'' }}" min="2020-01-01T00:00:00" max="2035-12-31T23:59:59" >
+                                </div>
+                                <div class="col-md-6 drop-f">
+                                    <label class="form-label">To Date</label>
+                                    {% comment %} <input type="date" name="date_to" value="{{ date_to|default:'' }}" class="form-control"> {% endcomment %}
+                                    <input tabindex="-1" type="date" style="width: 100%;" class="form-control width" step="1" name="date_to" id="date_to" value="{{ date_to|default:'' }}" min="2020-01-01T00:00:00" max="2035-12-31T23:59:59" >
+                                </div>
+                                
+                                <div class="col-md-12 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary me-2 col-md-4">Apply</button>
+                                    <a href="{% url 'accounting' %}" class="btn btn-secondary col-md-4">Clear</a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                
+                <script>
+                    document.addEventListener("DOMContentLoaded", function() {
+                        const toggle = document.getElementById("toggleDropdowns");
+                        const normalContainers = document.querySelectorAll(".normal-dropdowns");
+                        const alternateContainers = document.querySelectorAll(".alternate-dropdowns");
+                        const normalSelects = document.querySelectorAll(".normal-dropdowns select");
+                        const alternateSelects = document.querySelectorAll(".alternate-dropdowns select");
+
+                        function applyToggle() {
+                            if (toggle.checked) {
+                                // show normal, hide alternate
+                                normalContainers.forEach(el => el.classList.remove("d-none"));
+                                alternateContainers.forEach(el => el.classList.add("d-none"));
+                                normalSelects.forEach(el => el.disabled = false);
+                                alternateSelects.forEach(el => el.disabled = true);
+                            } else {
+                                // show alternate, hide normal
+                                alternateContainers.forEach(el => el.classList.remove("d-none"));
+                                normalContainers.forEach(el => el.classList.add("d-none"));
+                                alternateSelects.forEach(el => el.disabled = false);
+                                normalSelects.forEach(el => el.disabled = true);
+                            }
+                        }
+
+                        // run on load
+                        applyToggle();
+
+                        // run when checkbox changes
+                        toggle.addEventListener("change", applyToggle);
+                    });
+                </script>
+
+                    
+                <div class="col-md-2 jvbut" >
+                    {% comment %} <div class="d-flex align-items-center BC"> {% endcomment %}
+                        <div class="form-check AB" >
+                            <input class="form-check-input" type="checkbox" id="toggleDropdowns" >
+                            <label class="form-check-label" for="toggleDropdowns">
+                                Deleted IPOs (History)&nbsp<i class="fas fa-trash"></i>
+                            </label>
+                        </div>
+                    {% comment %} </div> {% endcomment %}
+                    <div class="fixed-section">
+                        <div class="d-grid gap-2 mt-2 CD">
+                            <button type="button" class="btn btn-sm btn-outline-secondary mb-2" data-toggle="modal" data-target="#transactionModal">
+                                Payment
+                            </button>
+                        
+                            <!-- Add Transaction Modal Button -->
+                            <button type="button" class="btn btn-sm btn-outline-secondary mb-2" data-bs-toggle="modal" data-bs-target="#transactionModal1">
+                                JV Payment 
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary mb-2" data-bs-toggle="modal" data-bs-target="#transactionModal2" title="IPO to IPO Amount Transfer">
+                                IPO To IPO Payment 
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% comment %} <div class="col-md-4" style="float: left;left: 68%;margin-top: -57px;">
+                    <table class="table table-hover table-bordered table-striped">
+                        <tr>
+                            <td>Total Credit</td>
+                            <td>{{ credit_amount }}</td>
+                            <td>Total Debit</td>
+                            <td>{{ debit_amount }}</td>
+                            
+                        </tr>
+                    </table>
+                </div> {% endcomment %}
+                <div class="modal fade" id="transactionModal1" tabindex="-1" role="dialog">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <form id="nonJVForm" method="post" action="{% url 'save_transaction' %}">
+                                {% csrf_token %}
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Add Payment (Non-JV)</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div> 
+                                
+                                        
+                                        
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <!-- Left Side (User fills) -->
+                                        <div class="col-md-6">
+                                            <label>Group Name</label>
+                                            <select name="group_id" id="group_id" class="form-select" required>
+                                                <option value="" selected disabled>All</option>
+                                                {% for group in groups1 %}
+                                                    <option value="{{ group.id }}">{{ group.GroupName }}</option>
+                                                    {% comment %} <option value="{{ group.id }}" {% if forloop.first %}selected{% endif %}>{{ group.GroupName }}</option> {% endcomment %}
+                                                {% endfor %}
+                                            </select>
+
+                                            <label>IPO Name</label>
+                                            <select name="ipo_id" id="ipo_id" class="form-select" required>
+                                                <option value="" selected disabled>All</option>
+                                                {% for ipo in ipos1 %}
+                                                    <option value="{{ ipo.id }}">{{ ipo.IPOName }}</option>
+                                                    {% comment %} <option value="{{ ipo.id }}" {% if forloop.first %}selected{% endif %}>{{ ipo.IPOName }}</option> {% endcomment %}
+                                                {% endfor %}
+                                            </select>
+
+                                            
+
+                                            <label>Amount</label>
+                                            <input type="number" name="amount" id="amount" step="0.01" class="form-control" oninput="this.value = this.value.replace(/[^0-9.]/g,'';if ((this.value.match(/\./g) || []).length > 1) {this.value = this.value.slice(0, -1);});" required>
+                                            {% comment %} <input type="text" name="amount" id="amount" step="0.01" class="form-control" oninput="this.value=this.value.replace(/[^0-9.]/g,'');if((this.value.match(/\./g)||[]).length>1)this.value=this.value.slice(0,-1);if(this.value.includes('.')){let p=this.value.split('.');if(p[1].length>2)this.value=p[0]+'.'+p[1].slice(0,2);}" required> {% endcomment %}
+
+                                            <label>Amount Type</label>
+                                            <select name="amount_type" id="amount_type" class="form-select" required>
+                                                <option value="credit">Credit</option>
+                                                <option value="debit">Debit</option>
+                                            </select>
+
+                                            {% comment %} <label>Remark</label>
+                                            <input type="text" name="remark" id="remark" class="form-control"> {% endcomment %}
+                                            <label for="remark">Remark</label>
+                                            <input type="text" name="remark" id="remark" class="form-control">
+                                            <div id="remark_error" class="text-danger small" style="display:none; margin-top:2px;">
+                                                Maximum 250 characters allowed!
+                                            </div>
+
+
+                                            <label>Date & Time</label>
+                                            {% comment %} <input type="datetime-local" id="date_time" name="date_time"
+                                                class="form-control"
+                                                value="{{ now|date:'Y-m-d\\TH:i' }}"> {% endcomment %}
+                                            <input tabindex="-1" type="datetime-local" style="width: 100%;" class="form-control width" step="1" name="date_time" id="date_time" value='{% now "Y-m-d H:i:s" %}' min="2020-01-01T00:00:00" max="2035-12-31T23:59:59" required>
+                                        </div>
+
+                                        <!-- Right Side (Auto JV) -->
+                                        <div class="col-md-6">
+                                            <label>Group Name</label>
+                                            
+                                            <select id="jv_group" name="jv_group_id" class="form-select" required>
+                                                <option value="" selected disabled>All</option>
+                                                {% for group in groups1 %}
+                                                    <option value="{{ group.id }}">{{ group.GroupName }}</option>
+                                                    {% comment %} <option value="{{ group.id }}">{{ group.GroupName }}</option> {% endcomment %}
+                                                {% endfor %}
+                                            </select>
+
+                                            <h6> </h6></br>
+
+                                            
+                                            <input class="form-check-input" type="checkbox" id="jv_checkbox" name="jv_checkbox" checked disabled>
+                                            <label class="form" for="jv_checkbox">
+                                                JV Entry 
+                                            </label></br>&nbsp;&nbsp;
+                                            
+
+                                            
+                                            
+
+                                            <label>Amount</label>
+                                            <input type="number" id="jv_amount_display" name="jv_amount" step="0.01" class="form-control" oninput="this.value = this.value.replace(/[^0-9.]/g,'');" readonly>
+                                            <input type="hidden" id="jv_amount" name="jv_amount">
+
+                                            <label>Amount Type</label>
+                                            <input type="text" id="jv_amount_type_display" name="jv_amount_type" class="form-control" readonly>
+                                            <input type="hidden" id="jv_amount_type" name="jv_amount_type">
+
+                                            {% comment %} <label>Remark</label>
+                                            <input type="text" id="jv_remark_display" name="jv_remark" class="form-control" >
+                                            <input type="hidden" id="jv_remark" name="jv_remark">  {% endcomment %}
+                                            <label>Remark</label>
+                                            <input type="text" id="jv_remark_display" name="jv_remark" class="form-control">
+                                            <input type="hidden" id="jv_remark" name="jv_remark">
+                                            <div id="jv_remark_error" class="text-danger small" style="display:none; margin-top:2px;">
+                                                Maximum 250 characters allowed!
+                                            </div>
+
+                                            <label>Date & Time</label>
+                                            
+                                            <input tabindex="-1" type="datetime-local" style="width: 100%;" class="form-control width" step="1" name="date_time" id="jv_date_time" value='{% now "Y-m-d H:i:s" %}' min="2020-01-01T00:00:00" max="2035-12-31T23:59:59" readonly>
+
+
+                                            <!-- Flag to tell Django this is JV mode -->
+                                            <input type="hidden" name="jv_entry" value="true">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary" id="saveBtn">Save</button>
+                                </div>
+                            </form>
+                            
+                            <script>
+                                // Default JV remark template
+                                function getDefaultJVRemark() {
+                                    const amount = document.getElementById('amount').value;
+                                    const amountType = document.getElementById('amount_type').value;
+                                    const groupName = document.getElementById('group_id').selectedOptions[0].text;
+                                    const ipoName = document.getElementById('ipo_id').selectedOptions[0].text;
+
+                                    // Build your default remark string
+                                    return `JV from ${groupName} for ${ipoName}`;
+                                }
+                                function getDefaultRemark() {
+                                    const groupName = document.getElementById('jv_group').selectedOptions[0].text;
+                                    const ipoName = document.getElementById('ipo_id').selectedOptions[0].text;
+                                    return `JV To ${groupName} for ${ipoName}`;
+                                }
+
+                                function updateJVDisplay() {
+                                    // Update amount
+                                    const amount = document.getElementById('amount').value;
+                                    document.getElementById('jv_amount_display').value = amount;
+                                    document.getElementById('jv_amount').value = amount;
+
+                                    // Update amount type (opposite of selected)
+                                    const amountType = document.getElementById('amount_type').value;
+                                    const jvAmountType = amountType === 'credit' ? 'debit' : 'credit';
+                                    document.getElementById('jv_amount_type_display').value = jvAmountType.charAt(0).toUpperCase() + jvAmountType.slice(1);
+                                    document.getElementById('jv_amount_type').value = jvAmountType;
+                                    
+
+                                    // Update remark
+                                    const jvRemarkInput = document.getElementById('jv_remark_display');
+                                    const jvHiddenRemark = document.getElementById('jv_remark');
+
+                                    const defaultRemark = getDefaultJVRemark();
+
+                                    if (!jvRemarkInput.dataset.edited) {
+                                        // Set default remark if user hasn't edited manually
+                                        jvRemarkInput.value = defaultRemark;
+                                        jvHiddenRemark.value = defaultRemark;
+                                    } else {
+                                        // If user edited, append default remark at the end
+                                        jvHiddenRemark.value = jvRemarkInput.value ;
+                                    }
+                                    const mainRemarkInput = document.getElementById('remark');
+                                    if (!mainRemarkInput.dataset.edited) {
+                                        mainRemarkInput.value = getDefaultRemark();
+                                    }
+                                }
+
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    updateJVDisplay();
+
+                                    document.getElementById('amount').addEventListener('input', updateJVDisplay);
+                                    document.getElementById('amount_type').addEventListener('change', updateJVDisplay);
+                                    document.getElementById('group_id').addEventListener('change', updateJVDisplay);
+                                    document.getElementById('jv_group').addEventListener('change', updateJVDisplay);
+                                    document.getElementById('ipo_id').addEventListener('change', updateJVDisplay);
+
+                                    const jvRemarkInput = document.getElementById('jv_remark_display');
+                                    jvRemarkInput.addEventListener('input', function() {
+                                        jvRemarkInput.dataset.edited = true;
+                                        document.getElementById('jv_remark').value = jvRemarkInput.value;
+                                    });
+
+                                    const modal = document.getElementById('transactionModal1');
+                                    if (modal) {
+                                        modal.addEventListener('shown.bs.modal', function() {
+                                            updateJVDisplay();
+                                        });
+                                    }
+                                    document.getElementById('remark').addEventListener('input', function() {
+                                        this.dataset.edited = true;
+                                    });
+
+                                });
+                            </script>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transaction Modal -->
+                <div class="modal fade" id="transactionModal" tabindex="-1" role="dialog">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                        
+                            <form action="{% url 'add_transaction' %}" method="post">
+                                {% csrf_token %}
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Add Payment</h5>
+                                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                                </div>
+
+                                <div class="modal-body">
+
+                                    <div class="form-group">
+                                        <label for="trans_group">Group Name</label>
+                                        <select id="trans_group" name="group_id" class="form-control" required>
+                                            <option value="" selected disabled>All</option>
+                                            {% for group in groups1 %}
+                                            <option value="{{ group.id }}">{{ group.GroupName }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                        
+                                    {% comment %} <div class="form-group" id="ipoFieldContainer">
+                                        <div class="col-md-8">
+                                            <label for="trans_ipo">IPO Name</label>
+                                            <select id="trans_ipo" name="ipo_id" class="form-control" required>
+                                                <option value="" selected disabled>All</option>
+                                                {% for ipo in ipos1 %}
+                                                <option value="{{ ipo.id }}">{{ ipo.IPOName }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="form-check col-md-3">
+                                            <input type="checkbox" id="trans_jv" name="jv" class="form-check-input" value="1" onchange="toggleIpoField()">
+                                            <label class="form-check-label" for="trans_jv">JV Transaction</label>
+                                        </div>
+                                    </div> {% endcomment %}
+                                        <div class="row align-items-center">
+                                            <div class="col-12 col-md-6" id="ipoCol">
+                                                <label for="trans_ipo">IPO Name</label>
+                                                <select id="trans_ipo" name="ipo_id" class="form-control" required>
+                                                <option value="" selected disabled>All</option>
+                                                {% for ipo in ipos1 %}
+                                                <option value="{{ ipo.id }}">{{ ipo.IPOName }}</option>
+                                                {% endfor %}
+                                                </select>
+                                            </div>
+
+                                            <div class="col-12 col-md-6 d-flex align-items-center">
+                                                <div class="form-check">
+                                                <input type="checkbox" id="trans_jv" name="jv" class="form-check-input" value="1">
+                                                <label class="form-check-label" for="trans_jv" style="margin-left: 5px;">JV Transaction</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    
+
+                                    <div class="form-group">
+                                        <label for="trans_amount_type">Amount Type</label>
+                                        <select id="trans_amount_type" name="amount_type" class="form-control" required>
+                                            <option value="credit">Credit</option>
+                                            <option value="debit">Debit</option>
+                                        </select>
+                                    </div>
+                                
+                                    <div class="form-group">
+                                        <label for="trans_amount">Amount</label>
+                                        <input type="number" step="0.01" id="trans_amount" name="amount" class="form-control" oninput="this.value = this.value.replace(/[^0-9.]/g,'');if ((this.value.match(/\./g) || []).length > 1) {this.value = this.value.slice(0, -1);})" required>
+                                        {% comment %} <input type="text" step="0.01" id="trans_amount" name="amount" class="form-control" oninput="this.value=this.value.replace(/[^0-9.]/g,'');if((this.value.match(/\./g)||[]).length>1)this.value=this.value.slice(0,-1);if(this.value.includes('.')){let p=this.value.split('.');if(p[1].length>2)this.value=p[0]+'.'+p[1].slice(0,2);}" required> {% endcomment %}
+                                    </div>
+
+                                    {% comment %} <div class="form-group">
+                                        <label for="trans_remark">Remark</label>
+                                        <input type="text" id="trans_remark" name="remark" class="form-control">
+                                    </div> {% endcomment %}
+                                    <div class="form-group">
+                                        <label for="trans_remark">Remark</label>
+                                        <input type="text" id="trans_remark" name="remark" class="form-control">
+                                        <div id="trans_remark_error" class="text-danger small" style="display:none; margin-top:2px;">
+                                            Maximum 250 characters allowed!
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-group">
+                                        <label for="add_date_time">Date & Time</label>
+                                        {% comment %} <input type="datetime-local" id="add_date_time" name="date_time" class="form-control" required> {% endcomment %}
+                                        <input tabindex="-1" type="datetime-local" style="width: 100%;" class="form-control width" step="1" name="date_time" id="add_date_time" value='{% now "Y-m-d H:i:s" %}'  min="2020-01-01T00:00" max="2035-12-31T23:59:59" required>
+                                    </div>
+
+                                    {% comment %} <div class="form-check mb-3">
+                                        <input type="checkbox" id="trans_jv" name="jv" class="form-check-input" value="1">
+                                        <label class="form-check-label" for="trans_jv">JV Transaction</label>
+                                    </div> {% endcomment %}
+                                    
+                                    
+                                    
+                                    <!-- <script>
+                                        function toggleIpoField() {
+                                            const ipoField = document.getElementById('trans_ipo').parentElement;
+                                            const jvCheckbox = document.getElementById('trans_jv');
+                                            if (jvCheckbox.checked) {
+                                                ipoField.style.display = 'none';
+                                            } else {
+                                                ipoField.style.display = 'block';
+                                            }
+                                        }
+                                        // Initialize on page load
+                                        document.addEventListener('DOMContentLoaded', toggleIpoField);
+                                    </script> -->
+                                    
+                                        
+                                    
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary" id="saveBtn5">Save</button>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal fade" id="transactionModal2" tabindex="-1" role="dialog">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <form id="IPOForm" method="post" action="{% url 'ipo_transaction' %}">
+                                {% csrf_token %}
+                                <div class="modal-header">
+                                <h5 class="modal-title">Add Payment</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div> 
+
+                                <div class="modal-body">
+                                    <div class="row">
+
+                                        <!-- Left Side -->
+                                        <div class="col-md-6">
+                                        <label>Group Name</label>
+                                        <select name="group_id_left" id="group_id_left" class="form-select" required>
+                                            <option value="" selected disabled>All</option>
+                                            {% for group in groups1  %}
+                                            <option value="{{ group.id }}">{{ group.GroupName }}</option>
+                                            {% endfor %}
+                                        </select>
+
+                                        <label>IPO Name</label>
+                                        <select name="ipo_id_left" id="ipo_id_left" class="form-select" required>
+                                            <option value="" selected disabled>All</option>
+                                            {% for ipo in ipos1  %}
+                                            <option value="{{ ipo.id }}">{{ ipo.IPOName }}</option>
+                                            {% endfor %}
+                                        </select>
+
+                                        
+                                        <label>Amount</label>
+                                        <input type="number" name="amount" id="amount_left" step="0.01" class="form-control" oninput="this.value = this.value.replace(/[^0-9.]/g,'');if ((this.value.match(/\./g) || []).length > 1) {this.value = this.value.slice(0, -1);})" required>
+                                        {% comment %} <input type="text" name="amount" id="amount_left" step="0.01" class="form-control" oninput="this.value=this.value.replace(/[^0-9.]/g,'');if((this.value.match(/\./g)||[]).length>1)this.value=this.value.slice(0,-1);if(this.value.includes('.')){let p=this.value.split('.');if(p[1].length>2)this.value=p[0]+'.'+p[1].slice(0,2);}" required> {% endcomment %}
+
+                                        <label>Amount Type</label>
+                                        <select name="amount_type" id="amount_type_left" class="form-select" required>
+                                            <option value="credit">Credit</option>
+                                            <option value="debit">Debit</option>
+                                        </select>
+
+                                        {% comment %} <label>Remark</label>
+                                        <textarea name="remark_left" id="remark_left" class="form-control" rows="3" maxlength="20"></textarea> {% endcomment %}
+
+                                        <label>Remark</label>
+                                        <textarea name="remark_left" id="remark_left" class="form-control" rows="3"></textarea>
+                                        <div id="remark_left_error" class="text-danger small" style="display:none; margin-top:2px;">
+                                            Maximum 250 characters allowed!
+                                        </div>
+
+                                        <label>Date & Time</label>
+                                        <input type="datetime-local" class="form-control" step="1" name="date_time" id="date_time_left" value='{% now "Y-m-d H:i:s" %}' required>
+                                        </div>
+
+                                        <!-- Right Side -->
+                                        <div class="col-md-6">
+                                        <label>Group Name</label>
+                                        <select id="group_id_right" name="group_id_right" class="form-select" required>
+                                            <option value="" selected disabled>All</option>
+                                            {% for group in groups1 %}
+                                            <option value="{{ group.id }}">{{ group.GroupName }}</option>
+                                            {% endfor %}
+                                        </select>
+
+                                        <label>IPO Name</label>
+                                        <select name="ipo_id_right" id="ipo_id_right" class="form-select" required>
+                                            <option value="" selected disabled>All</option>
+                                            {% for ipo in ipos1 %}
+                                            <option value="{{ ipo.id }}">{{ ipo.IPOName }}</option>
+                                            {% endfor %}
+                                        </select>
+
+                                        
+                                        <label>Amount</label>
+                                        <input type="number" id="amount_right_display" class="form-control" readonly>
+                                        <input type="hidden" id="amount_right" name="amount_right">
+
+                                        <label>Amount Type</label>
+                                        <input type="text" id="amount_type_right_display" class="form-control" readonly>
+                                        <input type="hidden" id="amount_type_right" name="amount_type_right">
+
+                                        {% comment %} <label>Remark</label>
+                                        <textarea id="remark_right_display" name="remark_right" class="form-control" rows="3" maxlength="20"></textarea>
+                                        <input type="hidden" id="remark_right" name="remark_right"> {% endcomment %}
+                                        <label>Remark</label>
+                                        <textarea id="remark_right_display" name="remark_right" class="form-control" rows="3"></textarea>
+                                        <input type="hidden" id="remark_right" name="remark_right">
+                                        <div id="remark_right_error" class="text-danger small" style="display:none; margin-top:2px;">
+                                            Maximum 250 characters allowed!
+                                        </div>
+
+
+                                        <label>Date & Time</label>
+                                        <input type="datetime-local" class="form-control" step="1" name="date_time_right" id="date_time_right" value='{% now "Y-m-d H:i:s" %}' readonly>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary" id="saveBtn6">Save</button> 
+                                </div>
+                            </form>
+
+                            <script>
+                                function getDefaultLeftRemark() {
+                                    const amountType = document.getElementById('amount_type_left').value;
+                                    const rightGroup = document.getElementById('group_id_right').selectedOptions[0]?.text || "";
+                                    const leftIPO = document.getElementById('ipo_id_left').selectedOptions[0]?.text || "";
+                                    const rightIPO = document.getElementById('ipo_id_right').selectedOptions[0]?.text || "";
+
+                                    if(amountType === 'credit') return `Given to ${rightGroup} for ${rightIPO}`;
+                                    if(amountType === 'debit') return `Received from ${rightGroup} for ${rightIPO}`;
+                                    return '';
+                                }
+
+                                function getDefaultRightRemark() {
+                                    const amountType = document.getElementById('amount_type_left').value; // opposite of left
+                                    const leftGroup = document.getElementById('group_id_left').selectedOptions[0]?.text || "";
+                                    const leftIPO = document.getElementById('ipo_id_left').selectedOptions[0]?.text || "";
+
+                                    if(amountType === 'credit') return `Received from ${leftGroup} for ${leftIPO}`;
+                                    if(amountType === 'debit') return `Given to ${leftGroup} for ${leftIPO}`;
+                                    return '';
+                                }
+
+                                function updateRemarksAndAmount() {
+                                    // Mirror Amount to right side
+                                    const amount = document.getElementById('amount_left').value;
+                                    document.getElementById('amount_right_display').value = amount;
+                                    document.getElementById('amount_right').value = amount;
+
+                                    // Mirror Amount Type to right side (opposite)
+                                    const leftType = document.getElementById('amount_type_left').value;
+                                    const rightType = leftType === 'credit' ? 'debit' : 'credit';
+                                    document.getElementById('amount_type_right_display').value = rightType.charAt(0).toUpperCase() + rightType.slice(1);
+                                    document.getElementById('amount_type_right').value = rightType;
+
+                                    // Left Remark
+                                    const leftRemarkInput = document.getElementById('remark_left');
+                                    const defaultLeft = getDefaultLeftRemark();
+                                    if(!leftRemarkInput.dataset.edited){
+                                        leftRemarkInput.value = defaultLeft.substring(0,250);
+                                    } 
+
+                                    // Right Remark
+                                    const rightRemarkInput = document.getElementById('remark_right_display');
+                                    const rightRemarkHidden = document.getElementById('remark_right');
+                                    const defaultRight = getDefaultRightRemark();
+                                    if(!rightRemarkInput.dataset.edited){
+                                        rightRemarkInput.value = defaultRight.substring(0,250);
+                                        rightRemarkHidden.value = defaultRight.substring(0,250);
+                                    } 
+                                }
+
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    updateRemarksAndAmount();
+
+                                    // Update whenever relevant fields change
+                                    ['amount_left','amount_type_left','group_id_left','ipo_id_left','group_id_right','ipo_id_right'].forEach(id=>{
+                                        const el = document.getElementById(id);
+                                        if(el){
+                                            el.addEventListener('input', updateRemarksAndAmount);
+                                            el.addEventListener('change', updateRemarksAndAmount);
+                                        }
+                                    });
+
+                                    // Track edits for left remark
+                                    const leftRemarkInput = document.getElementById('remark_left');
+                                    leftRemarkInput.addEventListener('input', function(){
+                                        this.dataset.edited = true;
+                                        {% comment %} this.value = this.value.substring(0,250); {% endcomment %}
+                                    });
+
+                                    // Track edits for right remark
+                                    const rightRemarkInput = document.getElementById('remark_right_display');
+                                    rightRemarkInput.addEventListener('input', function(){
+                                        this.dataset.edited = true;
+                                        document.getElementById('remark_right').value = this.value;
+                                    });
+                                });
+
+                            </script>
+                            <script>
+                                document.addEventListener("DOMContentLoaded", function(){
+                                    const saveBtn = document.getElementById("saveBtn6");
+
+                                    // Elements
+                                    const leftInput = document.getElementById("remark_left");
+                                    const leftError = document.getElementById("remark_left_error");
+
+                                    const rightInput = document.getElementById("remark_right_display");
+                                    const rightHidden = document.getElementById("remark_right");
+                                    const rightError = document.getElementById("remark_right_error");
+
+                                    function validateInputs() {
+                                        let leftValid = true, rightValid = true;
+
+                                        // Validate left
+                                        if(leftInput.value.length > 250){
+                                            {% comment %} leftInput.value = leftInput.value.substring(0, 250); {% endcomment %}
+                                            leftError.style.display = "block";
+                                            leftValid = false;
+                                        } else {
+                                            leftError.style.display = "none";
+                                        }
+
+                                        // Validate right
+                                        let rightValue = rightInput.value;
+                                        if(rightValue.length > 250){
+                                            {% comment %} rightValue = rightValue.substring(0, 250); {% endcomment %}
+                                            rightError.style.display = "block";
+                                            rightValid = false;
+                                        } else {
+                                            rightError.style.display = "none";
+                                        }
+
+                                        // Update right hidden input
+                                        rightInput.value = rightValue;
+                                        rightHidden.value = rightValue;
+
+                                        // Disable submit if either invalid
+                                        saveBtn.disabled = !(leftValid && rightValid);
+                                    }
+
+                                    // Bind events
+                                    leftInput.addEventListener("input", validateInputs);
+                                    rightInput.addEventListener("input", validateInputs);
+
+                                    // Initial validation
+                                    validateInputs();
+                                });
+                            </script>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        {% comment %} </div> {% endcomment %}
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const toggle = document.getElementById("toggleDropdowns");
+                const normalContainers = document.querySelectorAll(".normal-dropdowns");
+                const alternateContainers = document.querySelectorAll(".alternate-dropdowns");
+                const normalSelects = document.querySelectorAll(".normal-dropdowns select");
+                const alternateSelects = document.querySelectorAll(".alternate-dropdowns select");
+
+                function applyToggle() {
+                    if (toggle.checked) {
+                        // show normal, hide alternate
+                        normalContainers.forEach(el => el.classList.remove("d-none"));
+                        alternateContainers.forEach(el => el.classList.add("d-none"));
+                        normalSelects.forEach(el => el.disabled = false);
+                        alternateSelects.forEach(el => el.disabled = true);
+                    } else {
+                        // show alternate, hide normal
+                        alternateContainers.forEach(el => el.classList.remove("d-none"));
+                        normalContainers.forEach(el => el.classList.add("d-none"));
+                        alternateSelects.forEach(el => el.disabled = false);
+                        normalSelects.forEach(el => el.disabled = true);
+                    }
+                }
+
+                // run on load
+                applyToggle();
+
+                // run when checkbox changes
+                toggle.addEventListener("change", applyToggle);
+            });
+            document.addEventListener("DOMContentLoaded", function(){
+                const remarkInput = document.getElementById("trans_remark");
+                const errorBox    = document.getElementById("trans_remark_error");
+                const submitBtn = document.getElementById("saveBtn5");
+
+
+                remarkInput.addEventListener("input", function(){
+                    let value = remarkInput.value;
+
+                    if(value.length > 240){
+                        // Truncate extra characters
+                        remarkInput.value = value.substring(0, 250);
+                        errorBox.style.display = "block";
+                        submitBtn.disabled = true;
+                    } else {
+                        {% comment %} errorBox.style.display = "none"; {% endcomment %}
+                        submitBtn.disabled = false;
+                    }
+                });
+            });
+        </script>   
+
+        <!-- Non-JV Transaction Modal -->
+        
+        <hr>
+            <!-- Render Table -->
+        <div class="table-responsive text-nowrap table-wrapper-scroll-x my-custom-scrollbar" >
+            <table id="example" class="table table-bordered table-hover table-striped" style='width:100%'>
+                {{ html_table|safe }}
+            </table> 
+        </div>
+            
+            
+    {% comment %} </div> {% endcomment %}
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Double-click IPO
+        document.querySelectorAll(".filter-ipo").forEach(function(cell) {
+            cell.addEventListener("dblclick", function() {
+                let ipoName = this.getAttribute("data-ipo");
+                if (ipoName) {
+                    window.location.href = "?ipo_name=" + encodeURIComponent(ipoName);
+                }
+            });
+        });
+
+        // Double-click Group
+        document.querySelectorAll(".filter-group").forEach(function(cell) {
+            cell.addEventListener("dblclick", function() {
+                let groupName = this.getAttribute("data-group");
+                if (groupName) {
+                    window.location.href = "?group_name=" + encodeURIComponent(groupName);
+                }
+            });
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+        const submitBtn = document.getElementById("saveBtn");
+
+        // Remark input
+        const remarkInput = document.getElementById("remark");
+        const remarkError = document.getElementById("remark_error");
+
+        remarkInput.addEventListener("input", function(){
+            if(remarkInput.value.length > 250){
+                remarkInput.value = remarkInput.value.substring(0,250); // truncate
+                remarkError.style.display = "block";
+                submitBtn.disabled = true;
+            } else {
+                remarkError.style.display = "none";
+                submitBtn.disabled = false;
+            }
+        });
+
+        // JV Remark input
+        const jvDisplay = document.getElementById("jv_remark_display");
+        const jvHidden  = document.getElementById("jv_remark");
+        const jvError   = document.getElementById("jv_remark_error");
+
+        jvDisplay.addEventListener("input", function(){
+            let value = jvDisplay.value;
+
+            if(value.length > 250){
+                value = value.substring(0,250); // truncate
+                jvError.style.display = "block";
+                submitBtn.disabled = true;
+            } else {
+                jvError.style.display = "none";
+                submitBtn.disabled = false;
+            }
+
+            // Always update hidden input for form submission
+            jvHidden.value = value;
+            jvDisplay.value = value;
+        });
+    });
+</script>
+
+<script>
+    $(function () {
+        function toggleIPOField() {
+        const isJV = $('#trans_jv').is(':checked');
+        if (isJV) {
+            // Hide only the IPO field column, keep JV checkbox visible
+            $('#ipoCol').hide();
+            // Prevent validation and submission
+            $('#trans_ipo')
+            .prop('required', false)
+            .prop('disabled', true)
+            .val('');
+        } else {
+            $('#ipoCol').show();
+            $('#trans_ipo')
+            .prop('disabled', false)
+            .prop('required', true);
+        }
+        }
+
+        // Initialize on page load
+        toggleIPOField();
+
+        // Toggle on checkbox change
+        $(document).on('change', '#trans_jv', toggleIPOField);
+
+        // Re-apply when modal opens
+        $('#transactionModal').on('shown.bs.modal', toggleIPOField);
+
+        // Reset when modal closes (optional)
+        $('#transactionModal').on('hidden.bs.modal', function () {
+        $('#trans_jv').prop('checked', false);
+        toggleIPOField();
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        // Initialize DataTables instance
+        // Remove the existing rows selection dropdown and pagination if needed
+        $('.slr').remove();
+        $('#example_paginate').remove();
+        
+        // Create the new form HTML for rows per page selection
+        var formHtml = `
+            <label class='slr A1' for="page_size">
+            <form method="POST" action="/GroupWiseDashboard"> 
+                {% csrf_token %}
+                Show 
+                <select name="GWD_page_size" id="GWD_page_size" onchange="this.form.submit()">
+                    <option value="{{GWD_page_size}}" style='display:None;'{% if GWD_page_size|default_if_none:50 == 50 %}selected{% endif %}>{{GWD_page_size}}</option>
+                    <option value="50" {% if GWD_page_size == 50 %}selected{% endif %}>50</option>
+                    <option value="100" {% if GWD_page_size == 100 %}selected{% endif %}>100</option>
+                    <option value="200" {% if GWD_page_size == 200 %}selected{% endif %}>200</option>
+                    <option value="250" {% if GWD_page_size == 250 %}selected{% endif %}>250</option>
+                    <option value="All" {% if GWD_page_size == 'All' %}selected{% endif %}>All</option>
+                </select>
+                Rows
+                <input type="hidden" name="page" value="{{ page_obj.number }}">
+            </form>
+            </label>
+        `;
+    
+        // Append the form to a specific element
+        $('.dataTables_length').append(formHtml);
+
+        // Update page length when selection is changed
+        {% comment %} $('#GWD_page_size').on('change', function() {
+            var pageSize = $(this).val();
+            if (pageSize === 'All') {
+                table.page.len(-1).draw(); // Show all rows if "All" is selected
+            } else {
+                table.page.len(parseInt(pageSize)).draw(); // Set to selected page length
+            }
+        });
+
+        // Set the initial page length when the page loads (from the server-side)
+        table.page.len({{ GWD_page_size|default:50 }}).draw(); {% endcomment %}
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        // Initialize DataTables instance
+        // Remove the existing rows selection dropdown and pagination if needed
+        $('.slr').remove();
+        $('#example_paginate').remove();
+        const wrapper = document.getElementById("example_wrapper");
+        if (wrapper) {
+            const rows = wrapper.querySelectorAll(".row");
+            if (rows.length >= 3) {
+                rows[2].remove(); // Removes the third '.row' div (index 2)
+            }
+        }
+
+        
+        // Create the new form HTML for rows per page selection
+        var formHtml = `
+        <label class='slr A1' for="page_size">
+            <form method="POST" {% if IPOName.IPOType == "MAINBOARD" %} action="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/{{InvestorTypeFilter}}" {%else%} action="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/All" {% endif %}> 
+                {% csrf_token %}
+                Show 
+                <select name="Billing_page_size" id="Billing_page_size" onchange="this.form.submit()">
+                    <option value="{{Billing_page_size}}" style='display:None;' {% if Billing_page_size|default_if_none:50 == 50 %}selected{% endif %}>{{Billing_page_size}}</option>
+                    <option value="50" {% if Billing_page_size == 50 %}selected{% endif %}>50</option>
+                    <option value="100" {% if Billing_page_size == 100 %}selected{% endif %}>100</option>
+                    <option value="200" {% if Billing_page_size == 200 %}selected{% endif %}>200</option>
+                    <option value="250" {% if Billing_page_size == 250 %}selected{% endif %}>250</option>
+                    <option value="All" {% if Billing_page_size == 'All' %}selected{% endif %}>All</option>
+                </select>
+                Rows
+                <input type="hidden" name="page" value="{{ page_obj.number }}">
+            </form></label>
+        `;
+    
+        // Append the form to a specific element
+        $('.dataTables_length').append(formHtml);
+
+        // Update page length when selection is changed
+        {% comment %} $('#Billing_page_size').on('change', function() {
+            var pageSize = $(this).val();
+            if (pageSize === 'All') {
+                table.page.len(-1).draw(); // Show all rows if "All" is selected
+            } else {
+                table.page.len(parseInt(pageSize)).draw(); // Set to selected page length
+            }
+        }); {% endcomment %}
+
+        // Set the initial page length when the page loads (from the server-side)
+    });
+</script>
+{% comment %} <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const jvCheckbox = document.getElementById("trans_jv");
+        const ipoContainer = document.getElementById("ipoFieldContainer");
+        const ipoSelect = document.getElementById("trans_ipo");
+
+        function toggleIPOField() {
+            if (jvCheckbox.checked) {
+                ipoContainer.style.display = "none"; // hide
+                ipoSelect.removeAttribute("required"); // remove required
+                ipoSelect.value = ""; // clear selection
+            } else {
+                ipoContainer.style.display = "block"; // show
+                ipoSelect.setAttribute("required", "required"); // add required back
+            }
+        }
+
+        // Run on page load
+        toggleIPOField();
+
+        // Run when checkbox changes
+        jvCheckbox.addEventListener("change", toggleIPOField);
+    });
+</script> {% endcomment %}
+<script>
+    $(document).ready(function () {
+            var pageLength = "{{ Billing_page_size|default:'50' }}";
+            pageLength = pageLength === "All" ? -1 : parseInt(pageLength, 10);
+
+        var table = $('#example').DataTable({
+            orderCellsTop: true,
+            fixedHeader: true,
+            {% comment %} lengthMenu: [50, 100, 150, 200,-1], {% endcomment %}
+            lengthChange: true,
+            info:true,
+            "pageLength": pageLength,
+            
+            order: [[5, "desc"]],
+            buttons: [ {
+                text: 'Columns', 
+                extend: 'colvis',
+                columns: ':not(:first-child)',
+            },
+            {   
+                extend: 'collection',
+                text: 'Download',
+                buttons:[
+                    {
+                        extend: 'excel',
+                        text: 'Excel',
+                        footer: true,
+                        exportOptions: {
+                            columns: ':visible'
+                            
+                        },
+                        customize: function(xlsx) {
+                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                            
+                            {% comment %} $('row:first', sheet).remove(); {% endcomment %}
+                            var totalCredit = "{{ credit_amount }}";
+                            var totalDebit = "{{ debit_amount }}";
+                            var netAmount = "{{ Net_amount }}";
+
+                            // Append new row at the end
+                            var lastRow = $('sheetData row:last', sheet);
+                            var rowIndex = parseInt(lastRow.attr('r')) + 1;
+
+                            function addCell(ref, val, bold) {
+                                if (bold) {
+                                    // apply style index "2" which is usually bold in DataTables Excel export
+                                    return '<c t="inlineStr" s="2" r="' + ref + rowIndex + '"><is><t>' + val + '</t></is></c>';
+                                } else {
+                                    return '<c t="inlineStr" r="' + ref + rowIndex + '"><is><t>' + val + '</t></is></c>';
+                                }
+                            }
+                            var blankRow = '<row r="' + rowIndex + '"></row>';
+                            rowIndex++;
+
+                            var newRow =
+                                '<row r="' + rowIndex + '">' +
+                                
+                                addCell('A', 'Total CREDIT',true) + addCell('B', totalCredit,false) +
+                                addCell('C', 'Total DEBIT',true) + addCell('D', totalDebit,false) +
+                                addCell('E', 'Total Amount',true) + addCell('F', netAmount,false) +
+                                '</row>';
+
+                            sheet.childNodes[0].childNodes[1].innerHTML +=blankRow += newRow;
+                        
+                        }
+                    },
+                    {
+                        extend: 'pdf',
+                        text: 'PDF',
+                        footer: true,
+                        exportOptions: {
+                            columns: ':visible',
+                            rows: ':visible',
+                            modifier: {
+                                page: 'current'
+                            }
+                        },
+                        customize: function(doc) {
+                            doc.styles.tableHeader = {
+                                fillColor: 'grey',
+                                color: 'whitesmoke',
+                                bold: true,
+                                alignment: 'center',
+                            };
+                            doc.styles.tableBodyEven = {
+                                alignment: 'center',
+                                fillColor: 'bisque',
+                            };
+                            doc.styles.tableBodyOdd = {
+                                alignment: 'center',
+                                fillColor: 'bisque',
+                            };
+                            doc.styles.tableFooter = {
+                                fillColor: 'grey',
+                                color: 'whitesmoke',
+                                bold: true,
+                                alignment: 'center',
+                            };
+                            
+                            doc.pageSize = 'A4'; 
+
+                            doc.content[1].layout = {
+                                hLineWidth: function(i, node) {
+                                    return 1; 
+                                },
+                                vLineWidth: function(i, node) {
+                                    return 1; 
+                                },
+                                hLineColor: function(i, node) {
+                                    return 'black'; 
+                                },
+                                vLineColor: function(i, node) {
+                                    return 'black'; 
+                                },
+                            };
+                            // 🔹 Add a blank row + totals row
+                            var totalCredit = "Total CREDIT: {{ credit_amount }}";
+                            var totalDebit = "Total DEBIT: {{ debit_amount }}";
+                            var netAmount  = "Net Amount: {{ Net_amount }}";
+
+                            // Add empty row
+                            doc.content[1].table.body.push([
+                                { text: '', colSpan: doc.content[1].table.body[0].length, alignment: 'center', border: [false, false, false, false] }
+                            ]);
+
+                            // Add totals row (merged into one row)
+                            doc.content[1].table.body.push([
+                                { 
+                                    text: totalCredit + "   |   " + totalDebit + "   |   " + netAmount, 
+                                    colSpan: doc.content[1].table.body[0].length, 
+                                    alignment: 'center', 
+                                    bold: true 
+                                }
+                            ]);
+                        }
+                    }
+                ]
+            },                
+                
+            ],
+            initComplete: function () {
+                var api = this.api();
+                
+                api
+                    .columns('')
+                    .eq(0)
+                    .each(function (colIdx) {
+                        
+                        var cell = $('.filters th').eq(
+                            $(api.column(colIdx).header()).index()
+                        );
+                        var title = $(cell).text();
+                        {% comment %} $(cell).html('<input type="text" placeholder="' + title + '" style="text-align: center ; width: 100%;" />'); {% endcomment %}
+                        $(cell).html(title); 
+                        
+                        $(
+                            'input',
+                            $('.filters th').eq($(api.column(colIdx).header()).index())
+                        )
+                            .off('keyup change')
+                            .on('change', function (e) {
+                                
+                                $(this).attr('title', $(this).val());
+                                var regexr = '({search})'; //$(this).parents('th').find('select').val();
+    
+                                var cursorPosition = this.selectionStart;
+                                
+                                api
+                                    .column(colIdx)
+                                    .search(
+                                        this.value != ''
+                                            ? regexr.replace('{search}', '(((' + this.value + ')))')
+                                            : '',
+                                        this.value != '',
+                                        this.value == ''
+                                    )
+                                    .draw();
+                            })
+                            .on('keyup', function (e) {
+                                e.stopPropagation();
+    
+                                $(this).trigger('change');
+                                $(this)
+                                    .focus()[0]
+                                    .setSelectionRange(cursorPosition, cursorPosition);
+                            });
+                    });
+                    /*var lastCell = $('.filters th').eq(
+                    $(api.column(':last-child').header()).index()
+                    );
+                    $(lastCell).html('');*/
+            },
+            language: {
+                info: 'Showing _START_ to _END_ of _TOTAL_ Rows',
+                infoFiltered: '(filtered from _MAX_ total Rows)',
+                emptyTable: "No data available",
+                lengthMenu: 'Show <select>' +
+                            '<option value="50">50</option>' +
+                            '<option value="100">100</option>' +
+                            '<option value="150">150</option>' +
+                            '<option value="200">200</option>' +
+                            '<option value="-1">All</option>' +
+                            '</select> Rows',
+                search: 'Search:',
+                paginate: {
+                    first: 'First',
+                    last: 'Last',
+                    next: 'Next',
+                    previous: 'Previous'
+                }
+            },
+        });
+
+
+        {% comment %} $('select[name="example_length"] option[value="-1"]').text('All'); {% endcomment %}
+        
+        table.buttons().container()
+            .appendTo( '#example_wrapper .col-md-6:eq(-1)' );
+        $('#example_wrapper .col-md-6:eq(-1)').append(`
+            <div class="CDTAB table-responsive">
+                <table class="table table-hover table-bordered table-striped">
+                    <tr>
+                        <td>Total Credit</td>
+                        <td>{{ credit_amount }}</td>
+                        <td class="2tr">Total Debit</td>
+                        <td>{{ debit_amount }}</td>
+                        <td>Total Amount</td>
+                        <td>{{ Net_amount }}</td>
+                    </tr>
+                </table>
+            </div>
+        `);
+        
+
+        var dataTableLengthDiv = document.getElementById('example_length');
+
+        
+        if (dataTableLengthDiv) {
+            var firstLabel = dataTableLengthDiv.querySelector('label');
+            if (firstLabel) {
+                firstLabel.classList.add('slr');
+            }
+        }
+
+        {% comment %} table.page.len({{ Billing_page_size|default:50 }}).draw(); {% endcomment %}
+
+    } );
+    
+</script>
+<script>
+    $(document).ready(function() {
+        // Function to show/hide IPO field
+        function toggleIPOField() {
+            const ipoField = $('#trans_ipo').closest('.form-group');
+            if ($('#trans_jv').is(':checked')) {
+                ipoField.hide();
+            } else {
+                ipoField.show();
+            }
+        }
+
+        // Initialize on page load
+        toggleIPOField();
+
+        // Toggle on checkbox change
+        $('#trans_jv').on('change', toggleIPOField);
+
+        // Format date time on page load
+        function formatDateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+        
+        // Set initial datetime value
+        $('#add_date_time').val(formatDateTime());
+    });
+</script>
+    
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dtInput = document.getElementById('add_date_time');
+        if (dtInput && !dtInput.value) {
+            const now = new Date();
+            const offset = now.getTimezoneOffset() * 60000; // in ms
+            const localISOTime = new Date(now - offset).toISOString().slice(0, 19);
+            dtInput.value = localISOTime;
+        }
+    });
+</script>
+
+
+<script>
+    $(document).ready(function () {
+
+        function syncRightToLeft() {
+            // Copy IPO if you want both sides same
+            $('#left_ipo').val($('#right_ipo').val());
+
+            // Copy Group
+            $('#left_group').val($('#right_group').val());
+
+            // Copy Amount
+            $('#left_amount').val($('#right_amount').val());
+
+            // Copy Transaction Type (exactly same, not inverted)
+            $('#left_amount_type').val($('#right_amount_type').val());
+
+            // Copy Remark
+            $('#left_remark').val($('#right_remark').val());
+        }
+
+        // Right → Left live sync
+        $('#right_group, #right_amount, #right_amount_type, #right_remark')
+            .on('input change keyup', syncRightToLeft);
+
+        // Sync when modal opens (in case right already has values)
+        $('#transactionModal').on('shown.bs.modal', function () {
+            syncRightToLeft();
+        });
+        
+
+    });
+</script>
+
+<script>
+    // Set current date and time when modal is shown
+    $('#transactionModal').on('show.bs.modal', function () {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        
+        const datetimeLocal = `${year}-${month}-${day}T${hours}:${minutes}`;
+        document.getElementById('add_date_time').value = datetimeLocal;
+    });
+
+    // Set current date and time when modal is shown
+    $('#transactionModal').on('show.bs.modal', function () {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        
+        const datetimeLocal = `${year}-${month}-${day}T${hours}:${minutes}`;
+        document.getElementById('add_date_time').value = datetimeLocal;
+    });
+</script>
+
+<script>
+
+    {% comment %} $(document).ready(function() {
+        // Function to show/hide IPO field based on JV checkbox
+        function toggleIPOField() {
+            if ($('#trans_jv').is(':checked')) {
+                $('#ipoFieldContainer').hide();
+            } else {
+                $('#ipoFieldContainer').show();
+            }
+        }
+
+        // Initialize on page load
+        toggleIPOField();
+
+        // Toggle on checkbox change
+        $(document).on('change', '#trans_jv', toggleIPOField);
+
+        // Reset form when modal is closed
+        $('#transactionModal').on('hidden.bs.modal', function () {
+            $('#trans_jv').prop('checked', false);
+            toggleIPOField();
+        });
+    }); {% endcomment %}
+
+    // Existing datetime formatting code
+    function formatDateTime() {
+        const now = new Date();
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = now.getFullYear();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateTimeInput = document.getElementById('add_date_time');
+        if (dateTimeInput) {
+            dateTimeInput.value = formatDateTime();
+        }
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        $(".col-sm-12.col-md-12:first ").addClass("custom-width");
+        $(".col-sm-6.col-md-6 ").addClass("cw");
+        $(".dataTables_filter").addClass("ff");
+        $(".dt-row").addClass("table-responsive");
+        if ($("#example_wrapper").length) {
+            if ($("#example_wrapper").is(":visible")) {
+                
+            } else {
+            }
+        } else {
+        }
+        $(".buttons-collection").addClass("d-flex justify-content-center align-items-center");
+        // Wrap Add Transaction + Add JV Transaction in a div
+        var transactionButtons = `'<div class="btn-group bi d-flex" style="float:right; margin: 12px 16px; gap: 5px;">'+
+            
+            '<button type="button" class="btn btn-sm btn-outline-secondary d-flex justify-content-center align-items-center" ' +
+            'style="width: 140px;" data-toggle="modal" data-target="#transactionModal">' +
+            'Payment' +
+            '</button>' +
+            // Add JV Transaction button
+            '<button type="button" class="btn btn-sm btn-outline-secondary d-flex justify-content-center align-items-center" ' +
+            'style="width: 160px;" data-toggle="modal" data-target="#transactionModal1">' +
+            'Add JV Transaction' +
+            '</button>' +
+            '</div>';
+        `;
+
+       
+    });
+    
+</script>
+
+{% comment %} <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> {% endcomment %}
+
+<script src="{% static 'JS/jquery.min.js' %}"></script>
+
+<script src="{% static 'DataTables/js/jquery-3.7.0.js' %}"></script>
+<script src="{% static 'DataTables/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.bootstrap5.min.js' %}"></script>
+<script src="{% static 'JS/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.fixedHeader.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.bootstrap5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.bootstrap5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/jszip.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.colVis.min.js' %}"></script>
+<script src="{% static 'DataTables/js/pdfmake.min.js' %}"></script>
+<script src="{% static 'DataTables/js/vfs_fonts.js' %}"></script>
+{% endblock %}
