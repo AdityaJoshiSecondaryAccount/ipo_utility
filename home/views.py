@@ -4108,9 +4108,11 @@ def BUY(request, IPOid, selectgroup=None):
 
                 # Order_Details_update_sync(KostakQTY, uid, order.id, PreOpenPrice)
                 
-                for i in range(0, int(KostakQTY)):
-                    orderdetail = OrderDetail( user=uid, Order_id=order.id , PreOpenPrice = PreOpenPrice)
-                    orderdetail.save()
+                orderdetails = [
+                    OrderDetail(user=uid, Order_id=order.id, PreOpenPrice=PreOpenPrice)
+                    for _ in range(int(KostakQTY))
+                ]
+                OrderDetail.objects.bulk_create(orderdetails)
             except:
                 a==0
                 
@@ -4131,11 +4133,11 @@ def BUY(request, IPOid, selectgroup=None):
                 order.save()
                 a = 1
                 
-                # Order_Details_update_sync(KostakQTYSHNI, uid, order.id, PreOpenPrice)
-
-                for i in range(0, int(KostakQTYSHNI)):
-                    orderdetail = OrderDetail( user=uid, Order_id=order.id, PreOpenPrice=PreOpenPrice)
-                    orderdetail.save()
+                orderdetails = [
+                    OrderDetail(user=uid, Order_id=order.id, PreOpenPrice=PreOpenPrice)
+                    for _ in range(int(KostakQTYSHNI))
+                ]
+                OrderDetail.objects.bulk_create(orderdetails)
             except:
                 a==0
                 
@@ -4156,11 +4158,11 @@ def BUY(request, IPOid, selectgroup=None):
                 order.save()
                 a = 1
 
-                # Order_Details_update_sync(KostakQTYBHNI, uid, order.id, PreOpenPrice)
-                
-                for i in range(0, int(KostakQTYBHNI)):
-                    orderdetail = OrderDetail( user=uid, Order_id=order.id ,PreOpenPrice=PreOpenPrice)
-                    orderdetail.save()
+                orderdetails = [
+                    OrderDetail(user=uid, Order_id=order.id, PreOpenPrice=PreOpenPrice)
+                    for _ in range(int(KostakQTYBHNI))
+                ]
+                OrderDetail.objects.bulk_create(orderdetails)
             except:
                 a==0
         
@@ -4184,11 +4186,11 @@ def BUY(request, IPOid, selectgroup=None):
             try:
                 order.save()
                 a = 1
-                # Order_Details_update_sync(SubjectToQTY, uid, order.id, PreOpenPrice)
-                for i in range(0, int(SubjectToQTY)):
-                    orderdetail = OrderDetail(
-                        user=uid, Order_id=order.id, PreOpenPrice=PreOpenPrice)
-                    orderdetail.save()
+                orderdetails = [
+                    OrderDetail(user=uid, Order_id=order.id, PreOpenPrice=PreOpenPrice)
+                    for _ in range(int(SubjectToQTY))
+                ]
+                OrderDetail.objects.bulk_create(orderdetails)
             except:
                 a==0
         if SubjectToQTYSHNI != '' and SubjectToQTYSHNI != "0" and SubjectToRateSHNI != '':
@@ -4211,12 +4213,11 @@ def BUY(request, IPOid, selectgroup=None):
             try:
                 order.save()
                 a = 1
-                # Order_Details_update_sync(SubjectToQTYSHNI, uid, order.id, PreOpenPrice)
-                
-                for i in range(0, int(SubjectToQTYSHNI)):
-                    orderdetail = OrderDetail(
-                        user=uid, Order_id=order.id, PreOpenPrice=PreOpenPrice )
-                    orderdetail.save()
+                orderdetails = [
+                    OrderDetail(user=uid, Order_id=order.id, PreOpenPrice=PreOpenPrice)
+                    for _ in range(int(SubjectToQTYSHNI))
+                ]
+                OrderDetail.objects.bulk_create(orderdetails)
             except:
                 a==0
         if SubjectToQTYBHNI != '' and SubjectToQTYBHNI != "0" and SubjectToRateBHNI != '':
@@ -4239,12 +4240,11 @@ def BUY(request, IPOid, selectgroup=None):
             try:
                 order.save()
                 a = 1
-                # Order_Details_update_sync(SubjectToQTYBHNI, uid, order.id, PreOpenPrice)
-                
-                for i in range(0, int(SubjectToQTYBHNI)):
-                    orderdetail = OrderDetail(
-                        user=uid, Order_id=order.id , PreOpenPrice=PreOpenPrice)
-                    orderdetail.save()
+                orderdetails = [
+                    OrderDetail(user=uid, Order_id=order.id, PreOpenPrice=PreOpenPrice)
+                    for _ in range(int(SubjectToQTYBHNI))
+                ]
+                OrderDetail.objects.bulk_create(orderdetails)
             except:
                 a==0
 
@@ -11098,9 +11098,11 @@ def sell(request, IPOid,selectgroup=None):
                 # sync_to_async(Order_Details_update_sync)(KostakQTY, uid, order.id, PreOpenPrice)
                 # asyncio.create_task(Order_Details_update(KostakQTY,uid,order.id,PreOpenPrice))
 
-                for i in range(0, int(KostakQTY)):
-                    orderdetail = OrderDetail(user=uid, Order_id=order.id, PreOpenPrice=PreOpenPrice)
-                    orderdetail.save()
+                orderdetails = [
+                    OrderDetail(user=uid, Order_id=order.id, PreOpenPrice=PreOpenPrice)
+                    for _ in range(int(KostakQTY))
+                ]
+                OrderDetail.objects.bulk_create(orderdetails)
             except:
                 a=0
             
@@ -11122,11 +11124,11 @@ def sell(request, IPOid,selectgroup=None):
                 order.save()
                 a = 1
                 
-                # Order_Details_update_sync(KostakQTYSHNI, uid, order.id, PreOpenPrice)
-
-                for i in range(0, int(KostakQTYSHNI)):
-                    orderdetail = OrderDetail( user=uid, Order_id=order.id, PreOpenPrice=PreOpenPrice)
-                    orderdetail.save()
+                orderdetails = [
+                    OrderDetail(user=uid, Order_id=order.id, PreOpenPrice=PreOpenPrice)
+                    for _ in range(int(KostakQTYSHNI))
+                ]
+                OrderDetail.objects.bulk_create(orderdetails)
             except:
                 a=0
         
@@ -11147,22 +11149,22 @@ def sell(request, IPOid,selectgroup=None):
             try:
                 order.save()
                 a = 1
-                # Order_Details_update_sync(KostakQTYBHNI, uid, order.id, PreOpenPrice)
-                
-                for i in range(0, int(KostakQTYBHNI)):
-                    orderdetail = OrderDetail( user=uid, Order_id=order.id, PreOpenPrice=PreOpenPrice)
-                    orderdetail.save()
+                orderdetails = [
+                    OrderDetail(user=uid, Order_id=order.id, PreOpenPrice=PreOpenPrice)
+                    for _ in range(int(KostakQTYBHNI))
+                ]
+                OrderDetail.objects.bulk_create(orderdetails)
             except:
                 a=0
         
         if SubjectToQTY != '' and SubjectToQTY != "0" and SubjectToRate!= '':
             if request.POST.get('subjectToIsPremiumRetail', '') != None and request.POST.get('subjectToIsPremiumRetail', '') != '' and request.POST.get('subjectToIsPremiumRetail', '') == 'on':
                 order = Order(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType = 'RETAIL',
-                            OrderCategory='Subject To', OrderType="SELL", Quantity=SubjectToQTY, Rate=SubjectToRate, OrderDate=OrderDate, OrderTime = OrderTime,Method = 'Premium', remark=remark_json)
+                             OrderCategory='Subject To', OrderType="SELL", Quantity=SubjectToQTY, Rate=SubjectToRate, OrderDate=OrderDate, OrderTime = OrderTime,Method = 'Premium', remark=remark_json)
             else:
                 order = Order(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType = 'RETAIL',
-                            OrderCategory='Subject To', OrderType="SELL", Quantity=SubjectToQTY, Rate=SubjectToRate, OrderDate=OrderDate, OrderTime = OrderTime, remark=remark_json)
-                
+                             OrderCategory='Subject To', OrderType="SELL", Quantity=SubjectToQTY, Rate=SubjectToRate, OrderDate=OrderDate, OrderTime = OrderTime, remark=remark_json)
+                 
             O_limit  = CustomUser.objects.get( username = user)
         
             if O_limit.Order_limit is not None :
@@ -11176,21 +11178,21 @@ def sell(request, IPOid,selectgroup=None):
             try:
                 order.save()
                 a = 1
-                # Order_Details_update_sync(SubjectToQTY, uid, order.id, PreOpenPrice)
-                for i in range(0, int(SubjectToQTY)):
-                    orderdetail = OrderDetail(
-                        user=uid, Order_id=order.id, PreOpenPrice=PreOpenPrice)
-                    orderdetail.save()
+                orderdetails = [
+                    OrderDetail(user=uid, Order_id=order.id, PreOpenPrice=PreOpenPrice)
+                    for _ in range(int(SubjectToQTY))
+                ]
+                OrderDetail.objects.bulk_create(orderdetails)
             except:
                 a=0
         
         if SubjectToQTYSHNI != '' and SubjectToQTYSHNI != "0" and SubjectToRateSHNI != '':
             if request.POST.get("subjectToIsPremiumSHNI",'') !=None and request.POST.get("subjectToIsPremiumSHNI",'') != '' and request.POST.get("subjectToIsPremiumSHNI",'') == 'on':
                 order = Order(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType = 'SHNI',
-                            OrderCategory='Subject To', OrderType="SELL", Quantity=SubjectToQTYSHNI, Rate=SubjectToRateSHNI, OrderDate=OrderDate, OrderTime = OrderTime,Method = 'Premium', remark=remark_json)
+                             OrderCategory='Subject To', OrderType="SELL", Quantity=SubjectToQTYSHNI, Rate=SubjectToRateSHNI, OrderDate=OrderDate, OrderTime = OrderTime,Method = 'Premium', remark=remark_json)
             else:
                 order = Order(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType = 'SHNI',
-                            OrderCategory='Subject To', OrderType="SELL", Quantity=SubjectToQTYSHNI, Rate=SubjectToRateSHNI, OrderDate=OrderDate, OrderTime = OrderTime, remark=remark_json)
+                             OrderCategory='Subject To', OrderType="SELL", Quantity=SubjectToQTYSHNI, Rate=SubjectToRateSHNI, OrderDate=OrderDate, OrderTime = OrderTime, remark=remark_json)
             
             O_limit  = CustomUser.objects.get( username = user)
         
@@ -11205,21 +11207,21 @@ def sell(request, IPOid,selectgroup=None):
             try:
                 order.save()
                 a = 1
-                # Order_Details_update_sync(SubjectToQTYSHNI, uid, order.id, PreOpenPrice)
-                for i in range(0, int(SubjectToQTYSHNI)):
-                    orderdetail = OrderDetail(
-                        user=uid, Order_id=order.id, PreOpenPrice=PreOpenPrice)
-                    orderdetail.save()
+                orderdetails = [
+                    OrderDetail(user=uid, Order_id=order.id, PreOpenPrice=PreOpenPrice)
+                    for _ in range(int(SubjectToQTYSHNI))
+                ]
+                OrderDetail.objects.bulk_create(orderdetails)
             except:
                 a=0
         
         if SubjectToQTYBHNI != '' and SubjectToQTYBHNI != "0" and SubjectToRateBHNI != '':
             if request.POST.get("subjectToIsPremiumBHNI",'') !=None and request.POST.get("subjectToIsPremiumBHNI",'') != '' and request.POST.get("subjectToIsPremiumBHNI",'') == 'on':
                 order = Order(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType = 'BHNI',
-                            OrderCategory='Subject To', OrderType="SELL", Quantity=SubjectToQTYBHNI, Rate=SubjectToRateBHNI, OrderDate=OrderDate, OrderTime = OrderTime,Method = 'Premium', remark=remark_json)
+                             OrderCategory='Subject To', OrderType="SELL", Quantity=SubjectToQTYBHNI, Rate=SubjectToRateBHNI, OrderDate=OrderDate, OrderTime = OrderTime,Method = 'Premium', remark=remark_json)
             else:
                 order = Order(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType = 'BHNI',
-                        OrderCategory='Subject To', OrderType="SELL", Quantity=SubjectToQTYBHNI, Rate=SubjectToRateBHNI, OrderDate=OrderDate, OrderTime = OrderTime, remark=remark_json)
+                         OrderCategory='Subject To', OrderType="SELL", Quantity=SubjectToQTYBHNI, Rate=SubjectToRateBHNI, OrderDate=OrderDate, OrderTime = OrderTime, remark=remark_json)
             
             O_limit  = CustomUser.objects.get( username = user)
         
@@ -11234,12 +11236,11 @@ def sell(request, IPOid,selectgroup=None):
             try:
                 order.save()
                 a = 1
-                # Order_Details_update_sync(SubjectToQTYBHNI, uid, order.id, PreOpenPrice)
-                
-                for i in range(0, int(SubjectToQTYBHNI)):
-                    orderdetail = OrderDetail(
-                        user=uid, Order_id=order.id, PreOpenPrice=PreOpenPrice)
-                    orderdetail.save()
+                orderdetails = [
+                    OrderDetail(user=uid, Order_id=order.id, PreOpenPrice=PreOpenPrice)
+                    for _ in range(int(SubjectToQTYBHNI))
+                ]
+                OrderDetail.objects.bulk_create(orderdetails)
             except:
                 a=0
         
