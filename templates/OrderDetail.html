@@ -2490,7 +2490,7 @@
                     }
                 </script>
                 <script>
-                    window.addEventListener("load", () => {
+                    document.addEventListener("DOMContentLoaded", () => {
                         const loader = document.querySelector(".loader");
                         if (loader) {
                             loader.classList.add("loader-hidden");
@@ -2593,22 +2593,25 @@
 
                             let excelBlobs = [];
 
-                            for (let i = 0; i < pancardsChunks.length; i++) {
-                                let chunk = pancardsChunks[i];
-                                formData.append('pancards', JSON.stringify(chunk));
+                            let fetchPromises = pancardsChunks.map(async (chunk) => {
+                                let chunkFormData = new FormData();
+                                for (let [key, value] of formData.entries()) {
+                                    chunkFormData.append(key, value);
+                                }
+                                chunkFormData.append('pancards', JSON.stringify(chunk));
+
                                 // Send the POST request using fetch
                                 try {
                                     let response = await fetch(actionUrl, {
                                         method: 'POST',
-                                        body: formData
+                                        body: chunkFormData
                                     });
                         
                                     if (!response.ok) {
                                         throw new Error('Network response was not ok');
                                     }
                         
-                                    let blob = await response.blob();
-                                    excelBlobs.push(blob);
+                                    return await response.blob();
                         
                                 } catch (error) {
                                     console.error('Error:', error);
@@ -2624,58 +2627,13 @@
                                     XLSX.utils.book_append_sheet(wb, ws, "Errors");
 
                                     let buffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-                                    let errorBlob = new Blob([buffer], {
+                                    return new Blob([buffer], {
                                         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
                                     });
-
-                                    // Push errorBlob into excelBlobs array so it's merged later
-                                    excelBlobs.push(errorBlob);
                                 }
+                            });
 
-                                /* fetch(actionUrl, {
-                                    method: 'POST',
-                                    body: formData,
-                                })
-                                .then(response => {
-                                    if (!response.ok) {
-                                        throw new Error('Network response was not ok');
-                                    }
-                                    return response.blob(); // Convert the response to a Blob
-                                })
-                                .then(blob => {
-                                    // Create a URL for the blob object
-                                    const url = window.URL.createObjectURL(blob);
-                                    const a = document.createElement('a');
-                                    a.style.display = 'none';
-                                    a.href = url;
-                                    a.download = `${firstWord}_${secondWord}_IPO_Allotment.xlsx`; // Set the file name
-                                    document.body.appendChild(a);
-                                    a.click();
-                                    window.URL.revokeObjectURL(url);
-                                    
-                                    // Hide the loader and show the submit button again
-                                    if (loader) {
-                                        loader.style.display = 'none';
-                                    }
-                                    if (submitButton) {
-                                        submitButton.style.display = 'block';
-                                    }
-
-                                    window.location.reload();
-                                })
-                                .catch(error => {
-                                    console.error('Error:', error);
-                        
-                                    // Hide the loader and show the submit button again in case of error
-                                    if (loader) {
-                                        loader.style.display = 'none';
-                                    }
-                                    if (submitButton) {
-                                        submitButton.style.display = 'block';
-                                    }
-                                }); */
-
-                            }
+                            excelBlobs = await Promise.all(fetchPromises);
 
                             if (excelBlobs.length > 0) {
                                 mergeAndDownloadExcel(excelBlobs, firstWord, secondWord);
