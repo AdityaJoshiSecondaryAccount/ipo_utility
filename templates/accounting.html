@@ -2231,6 +2231,72 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Edit Transaction Modal -->
+                <div class="modal fade" id="editTransactionModal" tabindex="-1" role="dialog">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <form action="{% url 'update_accounting' %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="entry_id" id="edit_entry_id">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Edit Transaction</h5>
+                                    <button type="button" class="btn-close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <label for="edit_group">Group Name</label>
+                                        <select id="edit_group" name="group_id" class="form-control" required>
+                                            <option value="" selected disabled>Select Group</option>
+                                            {% for group in groups1 %}
+                                            <option value="{{ group.id }}">{{ group.GroupName }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                        
+                                    <div class="form-group" id="editIpoCol">
+                                        <label for="edit_ipo">IPO Name</label>
+                                        <select id="edit_ipo" name="ipo_id" class="form-control">
+                                            <option value="">No IPO (JV / Adjustment)</option>
+                                            {% for ipo in ipos1 %}
+                                            <option value="{{ ipo.id }}">{{ ipo.IPOName }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="edit_amount_type">Amount Type</label>
+                                        <select id="edit_amount_type" name="amount_type" class="form-control" required>
+                                            <option value="credit">Credit</option>
+                                            <option value="debit">Debit</option>
+                                        </select>
+                                    </div>
+                                
+                                    <div class="form-group">
+                                        <label for="edit_amount">Amount</label>
+                                        <input type="number" step="0.01" id="edit_amount" name="amount" class="form-control" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="edit_remark">Remark</label>
+                                        <input type="text" id="edit_remark" name="remark" class="form-control" maxlength="250">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="edit_date_time">Date & Time</label>
+                                        <input type="datetime-local" style="width: 100%;" class="form-control" step="1" name="date_time" id="edit_date_time" required>
+                                    </div>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
                 
                 <div class="modal fade" id="transactionModal2" tabindex="-1" role="dialog">
                     <div class="modal-dialog modal-lg" role="document">
@@ -2789,8 +2855,7 @@
                         text: 'Excel',
                         footer: true,
                         exportOptions: {
-                            columns: ':visible'
-                            
+                            columns: ':visible:not(.no-export)'
                         },
                         customize: function(xlsx) {
                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
@@ -2832,7 +2897,7 @@
                         text: 'PDF',
                         footer: true,
                         exportOptions: {
-                            columns: ':visible',
+                            columns: ':visible:not(.no-export)',
                             rows: ':visible',
                             modifier: {
                                 page: 'current'
@@ -3193,7 +3258,28 @@
             '</div>';
         `;
 
-       
+        // Handle edit transaction button click
+        $(document).on('click', '.edit-btn', function() {
+            $('#edit_entry_id').val($(this).data('id'));
+            $('#edit_group').val($(this).data('group-id'));
+            
+            // Handle optional ipo_id
+            let ipoId = $(this).data('ipo-id');
+            $('#edit_ipo').val(ipoId ? ipoId : "");
+            
+            $('#edit_amount_type').val($(this).data('amount-type'));
+            $('#edit_amount').val($(this).data('amount'));
+            $('#edit_remark').val($(this).data('remark'));
+            
+            // Format datetime (YYYY-MM-DDTHH:MM:SS)
+            let rawDt = $(this).data('datetime');
+            if (rawDt) {
+                let formattedDt = rawDt.replace(' ', 'T');
+                $('#edit_date_time').val(formattedDt);
+            }
+            
+            $('#editTransactionModal').modal('show');
+        });
     });
     
 </script>

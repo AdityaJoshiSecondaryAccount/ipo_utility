@@ -13380,6 +13380,12 @@ def accounting_view(request):
         else:
             group_name1 = f"{e.group_name}(Deleted)" or ""
         group_jv_total = jv_sum_dict.get(group_name1, 0)  # Only sum for jv=True
+        # Prepare attributes for edit button
+        ipo_id_val = e.ipo.id if e.ipo else ""
+        group_id_val = e.group.id if e.group else ""
+        dt_local = timezone.localtime(e.date_time).strftime("%Y-%m-%dT%H:%M:%S")
+        safe_remark = e.remark.replace("'", "\\'").replace('"', '&quot;') if e.remark else ""
+        
         rows += f"""
         <tr>
             <td class="filter-ipo" data-ipo="{ipo_display}">{ipo_display}</td>
@@ -13391,7 +13397,18 @@ def accounting_view(request):
             <td data-order="{timezone.localtime(e.date_time).strftime('%Y-%m-%d %H:%M:%S')}">
                 {timezone.localtime(e.date_time).strftime("%d-%m-%y %H:%M:%S")}
             </td>
-            
+            <td class="no-export">
+                <button type="button" class="btn btn-sm btn-outline-primary edit-btn" 
+                        data-id="{e.id}" 
+                        data-ipo-id="{ipo_id_val}" 
+                        data-group-id="{group_id_val}" 
+                        data-amount="{e.amount}" 
+                        data-amount-type="{e.amount_type}" 
+                        data-remark="{safe_remark}" 
+                        data-datetime="{dt_local}">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+            </td>
         </tr>
         """
         
@@ -13404,6 +13421,7 @@ def accounting_view(request):
     html_table += "<th>Amount</th>"
     html_table += "<th>Remark</th>"
     html_table += "<th>Date Time</th>"
+    html_table += "<th class='no-export'>Action</th>"
     html_table += "</tr></thead>\n"
     html_table += f"<tbody style='text-align: center;white-space: nowrap;'> {rows} </tbody>\n"
     html_table += "</table>"
@@ -13758,6 +13776,63 @@ def save_transaction_group(request):
         except Exception as e:
             traceback.print_exc()
             return JsonResponse({"status": "error", "message": str(e)})
+
+    return JsonResponse({"status": "error", "message": "Invalid request"})
+
+
+@login_required
+def update_accounting(request):
+    if request.method == "POST":
+        entry_id = request.POST.get("entry_id")
+        entry = get_object_or_404(Accounting, id=entry_id, user=request.user)
+
+        ipo_id = request.POST.get("ipo_id")
+        group_id = request.POST.get("group_id")
+        amount = request.POST.get("amount")
+        amount_type = request.POST.get("amount_type")
+        remark = request.POST.get("remark") or ""
+        date_time_str = request.POST.get("date_time")
+
+        if date_time_str:
+            if "T" in date_time_str:
+                date_time_str = date_time_str.replace("T", " ")
+            if len(date_time_str) == 16:  # YYYY-MM-DD HH:MM
+                date_time_str += ":00"
+            date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M:%S")
+            date_time = timezone.make_aware(date_time, timezone.get_current_timezone())
+        else:
+            date_time = timezone.now()
+
+        # Save original values for JV finding
+        orig_amount = entry.amount
+        orig_amount_type = entry.amount_type
+        orig_date_time = entry.date_time
+
+        # Update current entry
+        entry.ipo_id = ipo_id if ipo_id else None
+        entry.group_id = group_id if group_id else None
+        entry.amount = amount
+        entry.amount_type = amount_type
+        entry.remark = remark
+        entry.date_time = date_time
+        entry.save()
+
+        # Update JV sibling if exists
+        siblings = Accounting.objects.filter(
+            user=request.user,
+            date_time=orig_date_time,
+            amount=orig_amount
+        ).exclude(id=entry.id)
+        
+        if siblings.exists() and siblings.count() == 1:
+            sibling = siblings.first()
+            if sibling.amount_type != orig_amount_type:
+                sibling.amount = amount
+                sibling.amount_type = "debit" if amount_type == "credit" else "credit"
+                sibling.date_time = date_time
+                sibling.save()
+
+        return redirect("accounting")
 
     return JsonResponse({"status": "error", "message": "Invalid request"})
 

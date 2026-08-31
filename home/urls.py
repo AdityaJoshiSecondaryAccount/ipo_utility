@@ -95,6 +95,7 @@ urlpatterns = [
     path("get-accounting-entries/", views.get_accounting_entries, name="get_accounting_entries"),
     path("save_transaction/", views.save_transaction, name="save_transaction"),
     path("save_transaction_group/", views.save_transaction_group, name="save_transaction_group"),
+    path("update-accounting/", views.update_accounting, name="update_accounting"),
     path("add-transaction/", views.add_transaction, name="add_transaction"),
     path("add_transaction_group/", views.add_transaction_group, name="add_transaction_group"),
     # path('download-Accounting',views.exportAccountiong, name='exportAccountingFilter'),
