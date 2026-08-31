@@ -2,11 +2,12 @@
     height: 100%;
     width: 100%;
     position: fixed;
-    
-    background: #5e5555 url(loader.gif) no-repeat center center  ;
-    background-size: 100%;
-    z-index:99; 
-    opacity:0.7;
+    top: 0;
+    left: 0;
+    background: #5e5555 url(loader.gif) no-repeat center center;
+    background-size: cover;
+    z-index: 99; 
+    opacity: 0.4;
     transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 .loader-hidden{
