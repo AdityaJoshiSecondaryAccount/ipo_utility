@@ -151,21 +151,12 @@
         // Sync visibility on page load using localStorage
         var showArchived = localStorage.getItem('showArchivedIpos') === 'true';
         $('#showArchivedToggle').prop('checked', showArchived);
-        
-        if (showArchived) {
-            $('.archived-ipo').show();
-        }
 
         // Toggle global visibility of archived IPOs
         $('#showArchivedToggle').on('change', function() {
             var isChecked = $(this).is(':checked');
             localStorage.setItem('showArchivedIpos', isChecked);
-            
-            if (isChecked) {
-                $('.archived-ipo').show();
-            } else {
-                $('.archived-ipo').hide();
-            }
+            // DataTables api.draw() will handle showing/hiding via the custom search filter
         });
 
         // Handle individual checkbox clicks
@@ -238,12 +229,6 @@
             var table = $('#' + tableId);
             if(table.length == 0) return;
             
-            // Add a clone of the last header row for inputs
-            var thead = table.find('thead');
-            var lastHeaderRow = thead.find('tr').last();
-            var filterRow = lastHeaderRow.clone().addClass('filters');
-            thead.append(filterRow);
-            
             var dt = table.DataTable({
                 "language": {
                     "info": "Showing _START_ - _END_ of _TOTAL_ entries",
@@ -273,32 +258,6 @@
                 ],
                 initComplete: function () {
                     var api = this.api();
-                    
-                    // For each column
-                    api.columns().eq(0).each(function (colIdx) {
-                        var cell = $('.filters th', table).eq(
-                            $(api.column(colIdx).header()).index()
-                        );
-                        var title = $(cell).text().trim();
-                        $(cell).html('<input class="Input" type="text" placeholder="Search ' + title + '" style="text-align: center;" />');
-                        
-                        // Handle filter input changes
-                        $('input', $('.filters th', table).eq($(api.column(colIdx).header()).index()))
-                            .off('keyup change')
-                            .on('change', function (e) {
-                                $(this).attr('title', $(this).val());
-                                var regexr = '({search})';
-                                api.column(colIdx).search(
-                                    this.value != '' ? regexr.replace('{search}', '(((' + this.value + ')))') : '',
-                                    this.value != '',
-                                    this.value == ''
-                                ).draw();
-                            })
-                            .on('keyup', function (e) {
-                                e.stopPropagation();
-                                $(this).trigger('change');
-                            });
-                    });
                     
                     // Trigger custom search to hide archived IPOs correctly
                     $.fn.dataTable.ext.search.push(
