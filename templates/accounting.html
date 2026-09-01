@@ -1867,21 +1867,23 @@
                     
                 <div class="col-md-2 jvbut" >
                     {% comment %} <div class="d-flex align-items-center BC"> {% endcomment %}
-                        <div class="form-check AB" >
-                            <input class="form-check-input" type="checkbox" id="toggleDropdowns" >
-                            <label class="form-check-label" for="toggleDropdowns">
-                                Deleted IPOs (History)&nbsp<i class="fas fa-trash"></i>
-                            </label>
-                        </div>
-                        <div class="form-check mt-2">
-                            <input class="form-check-input" type="checkbox" name="show_deleted" id="showDeletedCheck" value="1" form="filterForm" onchange="this.form.submit()" {% if show_deleted %}checked{% endif %}>
-                            <label class="form-check-label text-danger fw-bold" for="showDeletedCheck" style="font-size: 0.85em;">
-                                Show Soft Deleted Entries
-                            </label>
+                        <div style="display: flex; flex-direction: column; gap: 2px; white-space: nowrap; margin-bottom: 10px;">
+                            <div class="form-check m-0">
+                                <input class="form-check-input" type="checkbox" id="toggleDropdowns" >
+                                <label class="form-check-label" for="toggleDropdowns">
+                                    Deleted IPOs (History)&nbsp<i class="fas fa-trash"></i>
+                                </label>
+                            </div>
+                            <div class="form-check m-0">
+                                <input class="form-check-input" type="checkbox" name="show_deleted" id="showDeletedCheck" value="1" form="filterForm" onchange="this.form.submit()" {% if show_deleted %}checked{% endif %}>
+                                <label class="form-check-label text-danger fw-bold" for="showDeletedCheck" style="font-size: 0.85em;">
+                                    Show Soft Deleted Entries
+                                </label>
+                            </div>
                         </div>
                     {% comment %} </div> {% endcomment %}
-                    <div class="fixed-section">
-                        <div class="d-grid gap-2 mt-2 CD">
+                    <div class="fixed-section" style="margin-top: 5px !important;">
+                        <div class="d-grid gap-2 mt-0 CD">
                             <button type="button" class="btn btn-sm btn-outline-secondary mb-2" data-toggle="modal" data-target="#transactionModal">
                                 Payment
                             </button>
@@ -1893,6 +1895,9 @@
                             <button type="button" class="btn btn-sm btn-outline-secondary mb-2" data-bs-toggle="modal" data-bs-target="#transactionModal2" title="IPO to IPO Amount Transfer">
                                 IPO To IPO Payment 
                             </button>
+                            <a href="{% url 'accounting_logs' %}" class="btn btn-sm btn-outline-info mb-2" title="View Activity Logs">
+                                <i class="fas fa-history"></i> Activity Logs
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -2607,15 +2612,7 @@
             </table> 
         </div>
 
-        {% if audit_log_html %}
-        <hr>
-        <div class="mt-4 mb-5">
-            <h5 class="text-secondary"><i class="fas fa-history"></i> Recent Activity Logs</h5>
-            <div class="table-responsive" style="max-height: 80vh; overflow-y: auto;">
-                {{ audit_log_html|safe }}
-            </div>
-        </div>
-        {% endif %}
+        {% comment %} Audit logs moved to separate page {% endcomment %}
             
     {% comment %} </div> {% endcomment %}
 </div>
@@ -2641,22 +2638,39 @@
             });
         });
 
+        // Add SweetAlert2 if not present
+        if (typeof Swal === 'undefined') {
+            var script = document.createElement('script');
+            script.src = "https://cdn.jsdelivr.net/npm/sweetalert2@11";
+            document.head.appendChild(script);
+        }
+
         // Delete Button handler
         document.querySelectorAll(".delete-btn").forEach(function(btn) {
             btn.addEventListener("click", function(e) {
                 e.preventDefault();
                 const id = this.getAttribute("data-id");
-                if(confirm("Are you sure you want to delete this entry?")) {
-                    fetch(`/soft-delete-accounting/${id}/`, {
-                        method: 'POST',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    }).then(res => res.json()).then(data => {
-                        if(data.success) location.reload();
-                        else alert("Failed to delete.");
-                    });
-                }
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you really want to delete this entry?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/soft-delete-accounting/${id}/`, {
+                            method: 'POST',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        }).then(res => res.json()).then(data => {
+                            if(data.success) location.reload();
+                            else Swal.fire('Error', 'Failed to delete.', 'error');
+                        });
+                    }
+                });
             });
         });
 
@@ -2665,17 +2679,27 @@
             btn.addEventListener("click", function(e) {
                 e.preventDefault();
                 const id = this.getAttribute("data-id");
-                if(confirm("Are you sure you want to restore this entry?")) {
-                    fetch(`/restore-accounting/${id}/`, {
-                        method: 'POST',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    }).then(res => res.json()).then(data => {
-                        if(data.success) location.reload();
-                        else alert("Failed to restore.");
-                    });
-                }
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you really want to restore this entry?",
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, restore it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/restore-accounting/${id}/`, {
+                            method: 'POST',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        }).then(res => res.json()).then(data => {
+                            if(data.success) location.reload();
+                            else Swal.fire('Error', 'Failed to restore.', 'error');
+                        });
+                    }
+                });
             });
         });
     });

@@ -102,6 +102,7 @@ urlpatterns = [
     path("restore-accounting/<int:entry_id>/", views.restore_accounting, name="restore_accounting"),
     path("add-transaction/", views.add_transaction, name="add_transaction"),
     path("add_transaction_group/", views.add_transaction_group, name="add_transaction_group"),
+    path("accounting-logs/", views.accounting_logs_view, name="accounting_logs"),
     # path('download-Accounting',views.exportAccountiong, name='exportAccountingFilter'),
     path("ipo_transaction/", views.ipo_transaction, name="ipo_transaction"),
     path("ipo_transaction1 /", views.ipo_transaction1, name="ipo_transaction1"),

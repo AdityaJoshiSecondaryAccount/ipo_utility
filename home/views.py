@@ -13821,8 +13821,31 @@ def accounting_view(request):
     html_table += f"<tbody style='text-align: center;white-space: nowrap;'> {rows} </tbody>\n"
     html_table += "</table>"
             
-    # --- Build Audit Log HTML ---
-    audit_logs = AccountingAuditLog.objects.filter(user=request.user).select_related('accounting').order_by('-timestamp')[:50]
+    ipos_master = CurrentIpoName.objects.filter(user=request.user)
+    groups_master = GroupDetail.objects.filter(user=request.user).order_by('GroupName')
+
+    return render(request, "accounting.html", {
+        "entries": entries,
+        "html_table": format_html(html_table),
+        "ipos": IPO_DropDown,
+        "groups": Group_DropDown,
+        "ipos1": ipos_master,
+        "groups1": groups_master, 
+        "selected_group": group_name,
+        "selected_ipo": ipo_name,
+        "date_from": date_from,
+        "date_to": date_to,
+        "debit_amount":debit_amount,
+        "credit_amount":credit_amount,
+        "Net_amount" : net_amount,
+        "order_by": order_by or "date_time",
+        "order_dir": order_dir or "desc",
+        "show_deleted": show_deleted,
+    })
+
+@login_required
+def accounting_logs_view(request):
+    audit_logs = AccountingAuditLog.objects.filter(user=request.user).select_related('accounting').order_by('-timestamp')[:100]
     audit_log_html = ""
     if audit_logs:
         audit_log_html = "<table id='auditLogTable' class='table table-bordered table-sm table-hover' style='font-size: 0.85rem;'>\n"
@@ -13876,26 +13899,7 @@ def accounting_view(request):
             audit_log_html += f"<tr><td>{ts}</td><td>{txn_ref}</td><td>{badge}</td><td style='text-align:left;'>{changes_str}</td></tr>\n"
         audit_log_html += "</tbody></table>"
 
-    ipos_master = CurrentIpoName.objects.filter(user=request.user)
-    groups_master = GroupDetail.objects.filter(user=request.user).order_by('GroupName')
-
-    return render(request, "accounting.html", {
-        "entries": entries,  # Pass the entries queryset to the template
-        "html_table": format_html(html_table),
-        "ipos": IPO_DropDown,
-        "groups": Group_DropDown,
-        "ipos1": ipos_master,          # For Add JV Transaction modal
-        "groups1": groups_master, 
-        "selected_group": group_name,
-        "selected_ipo": ipo_name,
-        "date_from": date_from,
-        "date_to": date_to,
-        "debit_amount":debit_amount,
-        "credit_amount":credit_amount,
-        "Net_amount" : net_amount,
-        "order_by": order_by or "date_time",
-        "order_dir": order_dir or "desc",
-        "show_deleted": show_deleted,
+    return render(request, "accounting_logs.html", {
         "audit_log_html": format_html(audit_log_html),
     })
 
