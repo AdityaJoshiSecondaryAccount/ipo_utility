@@ -6981,6 +6981,7 @@ def group_billing_details(request, group_id=None):
             sme_data.append({
                 'ipo_name': ipo.IPOName,
                 'ipo_id': ipo.id,
+                'is_hidden': ipo.is_hidden,
                 'kostak_count': kostak_count,
                 'kostak_alloted': kostak_alloted,
                 'kostak_billing': kostak_billing,
@@ -7024,8 +7025,11 @@ def group_billing_details(request, group_id=None):
             sme_html_table += "<th>Count</th><th>Billing</th>"
             sme_html_table += "</tr></thead><tbody>"
             for row in sme_data:
-                sme_html_table += "<tr>"
-                sme_html_table += f"<th><a href='/{row['ipo_id']}/Status' style='color:blue; text-decoration: underline;'>{row['ipo_name']}</a></th>"
+                tr_class = "archived-ipo" if row.get("is_hidden") else ""
+                tr_style = "display:none;" if row.get("is_hidden") else ""
+                checked = "checked" if row.get("is_hidden") else ""
+                sme_html_table += f"<tr class='{tr_class}' style='{tr_style}'>"
+                sme_html_table += f"<th style='display: flex; align-items: center; justify-content: flex-start; gap: 8px;'><input type='checkbox' class='ipo-archive-checkbox' style='cursor: pointer; margin:0;' data-id='{row['ipo_id']}' {checked} title='Archive/Hide this IPO'> <a href='/{row['ipo_id']}/Status' style='color:blue; text-decoration: underline;'>{row['ipo_name']}</a></th>"
                 sme_html_table += f"<td><a style='color:blue; text-decoration: underline;' href='/{row['ipo_id']}/Order/{selected_group.GroupName}/Kostak/All' title='BUY:{int(row['buy_kostak_qty'])} SELL:{int(row['sell_kostak_qty'])}'>{int(row['kostak_count'])}</a></td>"
                 sme_html_table += f"<td title='BUY:{row['buy_kostak_alloted']} SELL:{row['sell_kostak_alloted']}'>{int(row['kostak_alloted'])}</td>"
                 sme_html_table += f"<td title='BUY:{row['buy_kostak_amt']:.1f} SELL:{row['sell_kostak_amt']:.1f}'>{row['kostak_billing']:.1f}</td>"
@@ -7106,6 +7110,7 @@ def group_billing_details(request, group_id=None):
             mainboard_data.append({
                 'ipo_name': ipo.IPOName,
                 'ipo_id': ipo.id,
+                'is_hidden': ipo.is_hidden,
                 'k_retail': k_retail,
                 'k_shni': k_shni,
                 'k_bhni': k_bhni,
@@ -7144,8 +7149,11 @@ def group_billing_details(request, group_id=None):
             mainboard_html_table += "<th>Shares</th><th>Amount</th>"
             mainboard_html_table += "</tr></thead><tbody>"
             for row in mainboard_data:
-                mainboard_html_table += "<tr>"
-                mainboard_html_table += f"<th><a href='/{row['ipo_id']}/Status' style='color:blue; text-decoration: underline;'>{row['ipo_name']}</a></th>"
+                tr_class = "archived-ipo" if row.get("is_hidden") else ""
+                tr_style = "display:none;" if row.get("is_hidden") else ""
+                checked = "checked" if row.get("is_hidden") else ""
+                mainboard_html_table += f"<tr class='{tr_class}' style='{tr_style}'>"
+                mainboard_html_table += f"<th style='display: flex; align-items: center; justify-content: flex-start; gap: 8px;'><input type='checkbox' class='ipo-archive-checkbox' style='cursor: pointer; margin:0;' data-id='{row['ipo_id']}' {checked} title='Archive/Hide this IPO'> <a href='/{row['ipo_id']}/Status' style='color:blue; text-decoration: underline;'>{row['ipo_name']}</a></th>"
                 for k_type in ['k_retail', 'k_shni', 'k_bhni']:
                     k = row[k_type]
                     inv = k_type.split('_')[1].upper()
@@ -15401,3 +15409,11 @@ def update_link_status(request):
             }, status=400)
             
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+def toggle_ipo_hidden(request, ipo_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'error': 'Not logged in'})
+    ipo = get_object_or_404(CurrentIpoName, id=ipo_id, user=request.user)
+    ipo.is_hidden = not ipo.is_hidden
+    ipo.save()
+    return JsonResponse({'success': True, 'is_hidden': ipo.is_hidden})

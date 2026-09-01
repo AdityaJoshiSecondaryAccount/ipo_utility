@@ -38,6 +38,7 @@ class CurrentIpoName(models.Model):
     LotSizeBHNI = models.FloatField(null=True, default=None)    
     Remark = models.CharField(max_length=500, blank=True)
     TotalIPOSzie = models.CharField(max_length=100, blank=True)
+    is_hidden = models.BooleanField(default=False)
     RetailPercentage = models.CharField(max_length=100, blank=True)
     SHNIPercentage = models.CharField(max_length=100, blank=True)
     BHNIPercentage = models.CharField(max_length=100, blank=True)

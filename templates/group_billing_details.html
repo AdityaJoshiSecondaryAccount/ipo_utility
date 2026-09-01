@@ -48,6 +48,11 @@
     .btn-secondary {
         margin-bottom: 4px;
     }
+    .archived-ipo, 
+    .archived-ipo > td, 
+    .archived-ipo > th {
+        background-color: #cbd5e1 !important; /* Visible grey but light enough for blue text */
+    }
 </style>
 {% endblock %}
 
@@ -55,7 +60,11 @@
 <div class="container-fluid fc" style="margin-top: 50px;">
     <div class="row align-items-center mt-3">
         <div class="col-md-6">
-            <h3>Positions</h3>
+            <h3 style="display:inline-block; margin-right: 20px;">Positions</h3>
+            <div class="d-inline-block" style="position: relative; top: -4px;" title="Toggle to show or hide old/archived IPOs">
+                <input type="checkbox" id="showArchivedToggle" style="cursor: pointer; vertical-align: middle; transform: scale(1.2);">
+                <label for="showArchivedToggle" style="cursor:pointer; font-weight:bold; vertical-align: middle; margin-left: 5px; margin-bottom: 0;">Show Old/Hidden IPOs</label>
+            </div>
         </div>
         <div class="col-md-6" style="text-align: right;">
             <div class="fm d-inline-block">
@@ -116,6 +125,63 @@
         if (groupId) {
             window.location.href = '/group-billing-details/' + groupId + '/';
         }
+    });
+
+    $(document).ready(function() {
+        // Sync visibility on page load using localStorage
+        var showArchived = localStorage.getItem('showArchivedIpos') === 'true';
+        $('#showArchivedToggle').prop('checked', showArchived);
+        
+        if (showArchived) {
+            $('.archived-ipo').show();
+        }
+
+        // Toggle global visibility of archived IPOs
+        $('#showArchivedToggle').on('change', function() {
+            var isChecked = $(this).is(':checked');
+            localStorage.setItem('showArchivedIpos', isChecked);
+            
+            if (isChecked) {
+                $('.archived-ipo').show();
+            } else {
+                $('.archived-ipo').hide();
+            }
+        });
+
+        // Handle individual checkbox clicks
+        $('.ipo-archive-checkbox').on('change', function() {
+            var checkbox = $(this);
+            var ipoId = checkbox.data('id');
+            var tr = checkbox.closest('tr');
+            var isChecked = checkbox.is(':checked');
+
+            // Optimistic UI update
+            if (isChecked) {
+                tr.addClass('archived-ipo');
+                if (!$('#showArchivedToggle').is(':checked')) {
+                    tr.hide();
+                }
+            } else {
+                tr.removeClass('archived-ipo');
+                tr.show();
+            }
+
+            // AJAX call to save in database
+            $.ajax({
+                url: '/toggle-ipo-hidden/' + ipoId + '/',
+                type: 'GET',
+                success: function(response) {
+                    if (!response.success) {
+                        alert('Error: ' + response.error);
+                        // Revert UI if error
+                        checkbox.prop('checked', !isChecked).trigger('change');
+                    }
+                },
+                error: function() {
+                    alert('Network error while saving IPO status.');
+                }
+            });
+        });
     });
 </script>
 {% endblock %}
