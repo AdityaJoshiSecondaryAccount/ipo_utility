@@ -3,7 +3,6 @@ from django.urls import path,include
 from home import views
 
 urlpatterns = [
-    path('toggle-ipo-hidden/<int:ipo_id>/', views.toggle_ipo_hidden, name='toggle_ipo_hidden'),
     path('', views.index, name="home"),
     path('indexforCustomer', views.indexforCustomer, name="homeforcustomer"),
     path('<str:IPOid>/<str:OrderType>/update_pann/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>', views.Update_pann,name = "OrderDetail_update"),

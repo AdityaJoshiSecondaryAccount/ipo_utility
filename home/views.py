@@ -6926,6 +6926,8 @@ def group_billing_details(request, group_id=None):
             if not orders.exists():
                 continue
                 
+            is_tally = all(o.Telly == 'True' for o in orders)
+                
             orderdetails = OrderDetail.objects.filter(user=request.user, Order__OrderIPOName=ipo, Order__OrderGroup=selected_group)
             
             # Kostak
@@ -6973,15 +6975,13 @@ def group_billing_details(request, group_id=None):
             
             st_buy_alloted_qty = orderdetails.filter(~Q(AllotedQty=None), ~Q(AllotedQty=0), Order__OrderCategory="Subject To", Order__OrderType="BUY").aggregate(Sum('AllotedQty'))['AllotedQty__sum'] or 0
             st_sell_alloted_qty = orderdetails.filter(~Q(AllotedQty=None), ~Q(AllotedQty=0), Order__OrderCategory="Subject To", Order__OrderType="SELL").aggregate(Sum('AllotedQty'))['AllotedQty__sum'] or 0
-            total_st_alloted_shares = st_buy_alloted_qty - st_sell_alloted_qty
-            
-            total_share = premium_count + total_kostak_alloted_shares + total_st_alloted_shares
+        #     total_share = premium_count + total_kostak_alloted_shares + total_st_alloted_shares
             total_amount = kostak_billing + st_billing + premium_billing
             
             sme_data.append({
                 'ipo_name': ipo.IPOName,
                 'ipo_id': ipo.id,
-                'is_hidden': ipo.is_hidden,
+                'is_tally': is_tally,
                 'kostak_count': kostak_count,
                 'kostak_alloted': kostak_alloted,
                 'kostak_billing': kostak_billing,
@@ -7020,7 +7020,7 @@ def group_billing_details(request, group_id=None):
         if sme_data:
             sme_html_table = "<table id='smeBillingTable' class='table table-bordered table-hover table-striped' style=\"max-width: 97vw;\">\n"
             sme_html_table += "<thead><tr >"
-            sme_html_table += "<th rowspan='2' scope='col' class='tableline' style='text-align: center; vertical-align: middle;'>Archived &nbsp;</th>"
+            sme_html_table += "<th rowspan='2' scope='col' class='tableline' style='text-align: center; vertical-align: middle;'>Tally &nbsp;</th>"
             sme_html_table += "<th rowspan='2' scope='col' class='tableline' style='text-align: center; vertical-align: middle;'>IPO Name &nbsp;</th>"
             sme_html_table += "<th colspan='3' style='text-align: center; background-color: #d1ecf1;'>Kostak &nbsp;</th>"
             sme_html_table += "<th colspan='3' style='text-align: center; background-color: #d4edda;'>Subject To &nbsp;</th>"
@@ -7042,10 +7042,10 @@ def group_billing_details(request, group_id=None):
             float_format = "{:.1f}"
             sme_html_table += "<tbody style='text-align: center;white-space: nowrap;'>"
             for row in sme_data:
-                tr_class = "archived-ipo" if row.get("is_hidden") else ""
-                checked = "checked" if row.get("is_hidden") else ""
+                tr_class = "archived-ipo" if row.get("is_tally") else ""
+                checked = "checked" if row.get("is_tally") else ""
                 sme_html_table += f"<tr class='{tr_class}' style='text-align: center;'>"
-                sme_html_table += f"<th><input type='checkbox' class='ipo-archive-checkbox' style='cursor: pointer; margin:0; transform: scale(1.2);' data-id='{row['ipo_id']}' {checked} title='Archive/Hide this IPO'></th>"
+                sme_html_table += f"<th><input type='checkbox' class='ipo-archive-checkbox' style='cursor: pointer; margin:0; transform: scale(1.2);' data-id='{row['ipo_id']}' {checked} disabled title='Tally status (Read-only)'></th>"
                 sme_html_table += f"<th><a href='/{row['ipo_id']}/Status' style='color:blue; text-decoration: underline;'>{row['ipo_name']}</a></th>"
                 sme_html_table += f"<td>"
                 if row['kostak_count'] != 0:
@@ -7086,6 +7086,8 @@ def group_billing_details(request, group_id=None):
             orders = Order.objects.filter(user=request.user, OrderIPOName=ipo, OrderGroup=selected_group)
             if not orders.exists():
                 continue
+                
+            is_tally = all(o.Telly == 'True' for o in orders)
                 
             orderdetails = OrderDetail.objects.filter(user=request.user, Order__OrderIPOName=ipo, Order__OrderGroup=selected_group)
             
@@ -7150,7 +7152,7 @@ def group_billing_details(request, group_id=None):
             mainboard_data.append({
                 'ipo_name': ipo.IPOName,
                 'ipo_id': ipo.id,
-                'is_hidden': ipo.is_hidden,
+                'is_tally': is_tally,
                 'k_retail': k_retail,
                 'k_shni': k_shni,
                 'k_bhni': k_bhni,
@@ -7179,7 +7181,7 @@ def group_billing_details(request, group_id=None):
         if mainboard_data:
             mainboard_html_table = "<table id=\"mainboardBillingTable\" class=\"table table-bordered table-hover table-striped\" style=\"max-width: 100vw;\" >\n"
             mainboard_html_table += "<thead><tr >"
-            mainboard_html_table += "<th rowspan='3' scope='col' class='tableline' style='text-align: center; vertical-align: middle;'>Archived &nbsp;</th>"
+            mainboard_html_table += "<th rowspan='3' scope='col' class='tableline' style='text-align: center; vertical-align: middle;'>Tally &nbsp;</th>"
             mainboard_html_table += "<th rowspan='3' style='text-align: center; vertical-align: middle;'>IPO Name</th>"
             mainboard_html_table += "<th colspan='9' style='text-align: center; background-color: #d1ecf1;'>Kostak &nbsp;</th>"
             mainboard_html_table += "<th colspan='9' style='text-align: center; background-color: #d4edda;'>Subject To &nbsp;</th>"
@@ -7210,10 +7212,10 @@ def group_billing_details(request, group_id=None):
             float_format = "{:.1f}"
             mainboard_html_table += "<tbody style='text-align: center;white-space: nowrap;'>"
             for row in mainboard_data:
-                tr_class = "archived-ipo" if row.get("is_hidden") else ""
-                checked = "checked" if row.get("is_hidden") else ""
+                tr_class = "archived-ipo" if row.get("is_tally") else ""
+                checked = "checked" if row.get("is_tally") else ""
                 mainboard_html_table += f"<tr class='{tr_class}' style='text-align: center;'>"
-                mainboard_html_table += f"<th><input type='checkbox' class='ipo-archive-checkbox' style='cursor: pointer; margin:0; transform: scale(1.2);' data-id='{row['ipo_id']}' {checked} title='Archive/Hide this IPO'></th>"
+                mainboard_html_table += f"<th><input type='checkbox' class='ipo-archive-checkbox' style='cursor: pointer; margin:0; transform: scale(1.2);' data-id='{row['ipo_id']}' {checked} disabled title='Tally status (Read-only)'></th>"
                 mainboard_html_table += f"<th><a href='/{row['ipo_id']}/Status' style='color:blue; text-decoration: underline;'>{row['ipo_name']}</a></th>"
                 
                 for k_type in ['k_retail', 'k_shni', 'k_bhni']:
@@ -15495,11 +15497,3 @@ def update_link_status(request):
             }, status=400)
             
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
-
-def toggle_ipo_hidden(request, ipo_id):
-    if not request.user.is_authenticated:
-        return JsonResponse({'success': False, 'error': 'Not logged in'})
-    ipo = get_object_or_404(CurrentIpoName, id=ipo_id, user=request.user)
-    ipo.is_hidden = not ipo.is_hidden
-    ipo.save()
-    return JsonResponse({'success': True, 'is_hidden': ipo.is_hidden})
