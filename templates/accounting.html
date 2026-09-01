@@ -1763,7 +1763,7 @@
             <!-- Filter Form -->
             <div class="row fd">
                 <div class="col-sm-8 float:left;">
-                    <form method="get" action="">
+                    <form id="filterForm" method="get" action="">
                         <div class="row g-3">                        
                             <div class="row g-3 mb-3 fl ">
                                 
@@ -1823,13 +1823,7 @@
                                     <input tabindex="-1" type="date" style="width: 100%;" class="form-control width" step="1" name="date_to" id="date_to" value="{{ date_to|default:'' }}" min="2020-01-01T00:00:00" max="2035-12-31T23:59:59" >
                                 </div>
                                 
-                                <div class="col-md-12 d-flex align-items-center mt-3">
-                                    <div class="form-check me-3">
-                                        <input class="form-check-input" type="checkbox" name="show_deleted" id="showDeletedCheck" value="1" {% if show_deleted %}checked{% endif %}>
-                                        <label class="form-check-label text-danger fw-bold" for="showDeletedCheck">
-                                            Show Soft Deleted Entries
-                                        </label>
-                                    </div>
+                                <div class="col-md-12 d-flex justify-content-center mt-3">
                                     <button type="submit" class="btn btn-primary me-2 col-md-4">Apply</button>
                                     <a href="{% url 'accounting' %}" class="btn btn-secondary col-md-4">Clear</a>
                                 </div>
@@ -1877,6 +1871,12 @@
                             <input class="form-check-input" type="checkbox" id="toggleDropdowns" >
                             <label class="form-check-label" for="toggleDropdowns">
                                 Deleted IPOs (History)&nbsp<i class="fas fa-trash"></i>
+                            </label>
+                        </div>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" name="show_deleted" id="showDeletedCheck" value="1" form="filterForm" onchange="this.form.submit()" {% if show_deleted %}checked{% endif %}>
+                            <label class="form-check-label text-danger fw-bold" for="showDeletedCheck" style="font-size: 0.85em;">
+                                Show Soft Deleted Entries
                             </label>
                         </div>
                     {% comment %} </div> {% endcomment %}
@@ -2609,9 +2609,9 @@
 
         {% if audit_log_html %}
         <hr>
-        <div class="mt-4 mb-5 pb-5">
+        <div class="mt-4 mb-5">
             <h5 class="text-secondary"><i class="fas fa-history"></i> Recent Activity Logs</h5>
-            <div class="table-responsive">
+            <div class="table-responsive" style="max-height: 80vh; overflow-y: auto;">
                 {{ audit_log_html|safe }}
             </div>
         </div>
@@ -3213,7 +3213,7 @@
     // Set current date and time when modal is shown
     $('#transactionModal').on('show.bs.modal', function () {
         const now = new Date();
-        const year = now.getFullYear();
+        const year = now.getFullYear(); 
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const day = String(now.getDate()).padStart(2, '0');
         const hours = String(now.getHours()).padStart(2, '0');

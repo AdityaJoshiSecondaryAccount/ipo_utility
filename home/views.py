@@ -5892,7 +5892,7 @@ def Status(request, IPOid):
                 date_part, time_part = tally_time.split(" ", 1)
                 prefix = "" if is_tallied else "Last: "
                 time_html = f"<div style='font-size: 10px; font-weight: bold; color: #555; margin-top: 4px; line-height: 1.2;'>{prefix}{date_part}<br>{time_part}</div>"
-            html_table += f"<th style='text-align: center; vertical-align: middle; min-width: 80px;'><div style='display: flex; flex-direction: column; align-items: center; justify-content: center;'><input type='checkbox' name='selectGroup' value='{row.grpname}' class='group-checkbox' {checked_attr} onchange='updateTellyStatus(this)'>{time_html}</div></th>"
+            html_table += f"<th style='text-align: center; vertical-align: e; min-width: 80px;'><div style='display: flex; flex-direction: column; align-items: center; justify-content: center;'><input type='checkbox' name='selectGroup' value='{row.grpname}' class='group-checkbox' {checked_attr} onchange='updateTellyStatus(this)'>{time_html}</div></th>"
             html_table += f"<th>{row.grpname}</th>"
             html_table += f"<td>"
             if row.noofapp != 0:
@@ -13826,11 +13826,11 @@ def accounting_view(request):
     audit_log_html = ""
     if audit_logs:
         audit_log_html = "<table id='auditLogTable' class='table table-bordered table-sm table-hover' style='font-size: 0.85rem;'>\n"
-        audit_log_html += "<thead><tr style='text-align: center; background-color: #f8f9fa;'>"
-        audit_log_html += "<th>Timestamp</th>"
-        audit_log_html += "<th>Transaction</th>"
-        audit_log_html += "<th>Action</th>"
-        audit_log_html += "<th>Changes</th>"
+        audit_log_html += "<thead><tr style='text-align: center;'>"
+        audit_log_html += "<th style='position: sticky; top: 0; z-index: 1;'>Timestamp</th>"
+        audit_log_html += "<th style='position: sticky; top: 0; z-index: 1;'>Transaction</th>"
+        audit_log_html += "<th style='position: sticky; top: 0; z-index: 1;'>Action</th>"
+        audit_log_html += "<th style='position: sticky; top: 0; z-index: 1;'>Changes</th>"
         audit_log_html += "</tr></thead>\n"
         audit_log_html += "<tbody style='text-align: center;'>"
         for log in audit_logs:
@@ -13855,7 +13855,17 @@ def accounting_view(request):
             changes_parts = []
             for field, vals in changes.items():
                 if isinstance(vals, dict) and 'old' in vals and 'new' in vals:
-                    changes_parts.append(f"<b>{field}:</b> {vals['old']} → {vals['new']}")
+                    if field == 'Amount Type':
+                        def style_amt(amt):
+                            amt_str = str(amt).lower()
+                            if amt_str == 'debit':
+                                return f"<span class='badge rounded-pill bg-danger' style='font-size:0.75rem;'>{amt}</span>"
+                            elif amt_str == 'credit':
+                                return f"<span class='badge rounded-pill bg-success' style='font-size:0.75rem;'>{amt}</span>"
+                            return amt
+                        changes_parts.append(f"<b>{field}:</b> {style_amt(vals['old'])} → {style_amt(vals['new'])}")
+                    else:
+                        changes_parts.append(f"<b>{field}:</b> {vals['old']} → {vals['new']}")
                 elif field == 'note':
                     changes_parts.append(f"<i>{vals}</i>")
                 else:
@@ -14314,10 +14324,33 @@ def update_accounting(request):
         if siblings.exists() and siblings.count() == 1:
             sibling = siblings.first()
             if sibling.amount_type != orig_amount_type:
+                sibling_changes = {}
+                if orig_amount != new_amount:
+                    sibling_changes["Amount"] = {"old": str(orig_amount), "new": str(new_amount)}
+                if orig_amount_type != amount_type:
+                    old_sib_amt_type = sibling.amount_type
+                    new_sib_amt_type = "debit" if amount_type == "credit" else "credit"
+                    sibling_changes["Amount Type"] = {"old": old_sib_amt_type, "new": new_sib_amt_type}
+                if orig_date_time != date_time:
+                    sibling_changes["Date/Time"] = {
+                        "old": timezone.localtime(orig_date_time).strftime("%d-%m-%Y %H:%M:%S") if orig_date_time else "",
+                        "new": timezone.localtime(date_time).strftime("%d-%m-%Y %H:%M:%S") if date_time else ""
+                    }
+                
                 sibling.amount = amount
                 sibling.amount_type = "debit" if amount_type == "credit" else "credit"
                 sibling.date_time = date_time
                 sibling.save()
+
+                if sibling_changes:
+                    sibling_group = sibling.group.GroupName if sibling.group else (sibling.group_name or "")
+                    sibling_changes["note"] = f"JV sibling [ {sibling_group} ] auto-edited"
+                    AccountingAuditLog.objects.create(
+                        user=request.user,
+                        accounting=sibling,
+                        action='EDIT',
+                        changes=sibling_changes
+                    )
 
         return redirect("accounting")
 
@@ -14362,11 +14395,12 @@ def soft_delete_accounting(request, entry_id):
                 sibling.is_deleted = True
                 sibling.deleted_at = timezone.now()
                 sibling.save()
+                sibling_group = sibling.group.GroupName if sibling.group else (sibling.group_name or "")
                 AccountingAuditLog.objects.create(
                     user=request.user,
                     accounting=sibling,
                     action='SOFT_DELETE',
-                    changes={"note": "JV sibling auto-deleted"}
+                    changes={"note": f"JV sibling [ {sibling_group} ] auto-deleted"}
                 )
 
         return JsonResponse({"success": True})
@@ -14411,11 +14445,12 @@ def restore_accounting(request, entry_id):
                 sibling.is_deleted = False
                 sibling.deleted_at = None
                 sibling.save()
+                sibling_group = sibling.group.GroupName if sibling.group else (sibling.group_name or "")
                 AccountingAuditLog.objects.create(
                     user=request.user,
                     accounting=sibling,
                     action='RESTORE',
-                    changes={"note": "JV sibling auto-restored"}
+                    changes={"note": f"JV sibling [ {sibling_group} ] auto-restored"}
                 )
 
         return JsonResponse({"success": True})
