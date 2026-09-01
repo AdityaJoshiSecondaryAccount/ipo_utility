@@ -80,7 +80,7 @@ import tempfile
 from decimal import Decimal, ROUND_HALF_UP
 from asgiref.sync import async_to_sync
 from .models import CustomUser, CurrentIpoName, GroupDetail
-from .models import Accounting, CurrentIpoName, GroupDetail
+from .models import Accounting, AccountingAuditLog, CurrentIpoName, GroupDetail
 from django.db.models import Sum, Case, When, F, Value, DecimalField,FloatField , Q,Count
 from django.shortcuts import render, get_object_or_404
 
@@ -5533,7 +5533,10 @@ def update_telly_status(request):
                 if updateType == 'All':
                     Order_entry = Order.objects.filter(user=request.user,OrderIPOName=IPOId)
                     if Order_entry.exists():
-                        Order_entry.update(Telly=status)
+                        update_kwargs = {'Telly': status}
+                        if status is True or status == 'True' or status == 'true' or status == 1 or status == '1':
+                            update_kwargs['tally_timestamp'] = timezone.now()
+                        Order_entry.update(**update_kwargs)
                     return JsonResponse({'success': True})
                         
                 else:
@@ -5541,7 +5544,10 @@ def update_telly_status(request):
                     Group_entry =  GroupDetail.objects.get(user=request.user,GroupName =groupname)
                     Order_entry = Order.objects.filter(user=request.user,OrderGroup= Group_entry.id,OrderIPOName=IPOId)
                     if Order_entry.exists():
-                        Order_entry.update(Telly=status)
+                        update_kwargs = {'Telly': status}
+                        if status is True or status == 'True' or status == 'true' or status == 1 or status == '1':
+                            update_kwargs['tally_timestamp'] = timezone.now()
+                        Order_entry.update(**update_kwargs)
                         # messages.success(request, 'Tally Status updated successfully.')
                         return JsonResponse({'success': True})
                     else:
@@ -5648,10 +5654,12 @@ def Status(request, IPOid):
             entry = order.filter(
                 user=request.user, OrderGroup=GroupName)
             if entry.exists():
-                all_true = all(e.Telly == 'True' for e in entry)
-                Group_telly_status[GroupName] = all_true
+                all_true = all(str(e.Telly).lower() == 'true' or e.Telly == '1' or e.Telly == 1 for e in entry)
+                latest_tally_time = entry.aggregate(Max('tally_timestamp'))['tally_timestamp__max']
+                ts_str = timezone.localtime(latest_tally_time).strftime('%d-%m-%Y %H:%M:%S') if latest_tally_time else ''
+                Group_telly_status[GroupName] = (all_true, ts_str)
             else:
-                Group_telly_status[GroupName] = False
+                Group_telly_status[GroupName] = (False, '')
                 
             Kostakentry = entry.filter(OrderCategory="Kostak")
             NOBUYKostak = Kostakentry.filter(OrderType="BUY")
@@ -5877,8 +5885,14 @@ def Status(request, IPOid):
         html_table += "<tbody style='text-align: center;white-space: nowrap;'>"
         for i, row in df.iterrows():
             html_table += "<tr style='text-align: center;'>"
-            checked_attr = 'checked' if Group_telly_status.get(row.grpname, False) else ''
-            html_table += f"<th><input type='checkbox' name='selectGroup' value='{row.grpname}' class='group-checkbox' {checked_attr} onchange='updateTellyStatus(this)'></th>"
+            is_tallied, tally_time = Group_telly_status.get(row.grpname, (False, ''))
+            checked_attr = 'checked' if is_tallied else ''
+            time_html = ""
+            if tally_time:
+                date_part, time_part = tally_time.split(" ", 1)
+                prefix = "" if is_tallied else "Last: "
+                time_html = f"<div style='font-size: 10px; font-weight: bold; color: #555; margin-top: 4px; line-height: 1.2;'>{prefix}{date_part}<br>{time_part}</div>"
+            html_table += f"<th style='text-align: center; vertical-align: middle; min-width: 80px;'><div style='display: flex; flex-direction: column; align-items: center; justify-content: center;'><input type='checkbox' name='selectGroup' value='{row.grpname}' class='group-checkbox' {checked_attr} onchange='updateTellyStatus(this)'>{time_html}</div></th>"
             html_table += f"<th>{row.grpname}</th>"
             html_table += f"<td>"
             if row.noofapp != 0:
@@ -6162,27 +6176,22 @@ def Status(request, IPOid):
             for row in all_sums
         }
         
-        all_entries = order.filter(user=request.user, OrderGroup__in=page_obj).values("OrderGroup", "Telly")
+        all_entries = order.filter(user=request.user, OrderGroup__in=page_obj).values("OrderGroup", "Telly", "tally_timestamp")
         
         group_entries = defaultdict(list)
         for e in all_entries:
-            group_entries[e["OrderGroup"]].append(e["Telly"])
+            group_entries[e["OrderGroup"]].append(e)
         
         for GroupName in page_obj:
             GrpName.append(GroupName)
             telly_values = group_entries.get(GroupName.id, [])
-            # entry = order.filter(
-            #     user=request.user, OrderGroup=GroupName)
-            
-            # if entry.exists():
-            #     all_true = all(e.Telly == 'True' for e in entry)
-            #     Group_telly_status[GroupName] = all_true
-            # else:
-            #     Group_telly_status[GroupName] = False
             if telly_values:  # group exists
-                Group_telly_status[GroupName] = all(val == 'True' for val in telly_values)
+                all_true = all(str(val["Telly"]).lower() == 'true' or val["Telly"] == '1' or val["Telly"] == 1 for val in telly_values)
+                latest_tally_time = max((v["tally_timestamp"] for v in telly_values if v["tally_timestamp"]), default=None)
+                ts_str = timezone.localtime(latest_tally_time).strftime('%d-%m-%Y %H:%M:%S') if latest_tally_time else ''
+                Group_telly_status[GroupName] = (all_true, ts_str)
             else:  # no entries
-                Group_telly_status[GroupName] = False
+                Group_telly_status[GroupName] = (False, '')
 
             for Ordcat in OrderCategoryList: 
 
@@ -6385,7 +6394,7 @@ def Status(request, IPOid):
             'SubjectToRetailBilling':SubjectToRetailBilling,'SubjectToRetailBilling':SubjectToRetailBilling,'SubjectToSHNICount':SubjectToSHNICount,'SubjectToSHNIAlloted':SubjectToSHNIAlloted,'SubjectToSHNIBilling':SubjectToSHNIBilling,'SubjectToBHNICount':SubjectToBHNICount,'SubjectToBHNIAlloted':SubjectToBHNIAlloted,'SubjectToBHNIBilling':SubjectToBHNIBilling
             }
         
-        all_groups_checked = all(Group_telly_status.values()) if Group_telly_status else False
+        all_groups_checked = all(status[0] for status in Group_telly_status.values()) if Group_telly_status else False
         df = pd.DataFrame.from_records(Data)
         
         html_table = "<table id=\"example\" class=\"table table-bordered table-hover table-striped\" style=\"max-width: 100vw;\" >\n"
@@ -6442,8 +6451,14 @@ def Status(request, IPOid):
         html_table += "<tbody style='text-align: center;white-space: nowrap;'>"
         for i, row in df.iterrows():
             html_table += "<tr style='text-align: center;'>"
-            checked_attr = 'checked' if Group_telly_status.get(row.GrpName, False) else ''
-            html_table += f"<th><input type='checkbox' name='selectGroup' value='{row.GrpName}' class='group-checkbox' {checked_attr} onchange='updateTellyStatus(this)' ></th>"
+            is_tallied, tally_time = Group_telly_status.get(row.GrpName, (False, ''))
+            checked_attr = 'checked' if is_tallied else ''
+            time_html = ""
+            if tally_time:
+                date_part, time_part = tally_time.split(" ", 1)
+                prefix = "" if is_tallied else "Last: "
+                time_html = f"<div style='font-size: 10px; font-weight: bold; color: #555; margin-top: 4px; line-height: 1.2;'>{prefix}{date_part}<br>{time_part}</div>"
+            html_table += f"<th style='text-align: center; vertical-align: middle; min-width: 80px;'><div style='display: flex; flex-direction: column; align-items: center; justify-content: center;'><input type='checkbox' name='selectGroup' value='{row.GrpName}' class='group-checkbox' {checked_attr} onchange='updateTellyStatus(this)' >{time_html}</div></th>"
             html_table += f"<th>{row.GrpName}</th>"
             html_table += f"<td>"
             if row.KostakRetailCount != 0:
@@ -6926,7 +6941,7 @@ def group_billing_details(request, group_id=None):
             if not orders.exists():
                 continue
                 
-            is_tally = all(o.Telly == 'True' for o in orders)
+            is_tally = all(str(o.Telly).lower() == 'true' or o.Telly == '1' or o.Telly == 1 for o in orders)
                 
             orderdetails = OrderDetail.objects.filter(user=request.user, Order__OrderIPOName=ipo, Order__OrderGroup=selected_group)
             
@@ -7087,7 +7102,7 @@ def group_billing_details(request, group_id=None):
             if not orders.exists():
                 continue
                 
-            is_tally = all(o.Telly == 'True' for o in orders)
+            is_tally = all(str(o.Telly).lower() == 'true' or o.Telly == '1' or o.Telly == 1 for o in orders)
                 
             orderdetails = OrderDetail.objects.filter(user=request.user, Order__OrderIPOName=ipo, Order__OrderGroup=selected_group)
             
@@ -13618,8 +13633,14 @@ def send_status_to_telegram_image(request, IPOid):
 @login_required
 def accounting_view(request):
     show_all = request.GET.get("show_all")
-    entries = Accounting.objects.filter(user=request.user)
-    entries = ( Accounting.objects .filter(user=request.user).select_related("group", "ipo") )
+    show_deleted = request.GET.get("show_deleted", "0") == "1"
+    entries = Accounting.objects.filter(user=request.user).select_related("group", "ipo")
+    
+    # Filter by soft-delete status
+    if show_deleted:
+        entries = entries.filter(is_deleted=True)
+    else:
+        entries = entries.filter(is_deleted=False)
 
     IPO_DropDown = []
     for entry in entries:
@@ -13758,7 +13779,7 @@ def accounting_view(request):
         safe_remark = e.remark.replace("'", "\\'").replace('"', '&quot;') if e.remark else ""
         
         rows += f"""
-        <tr>
+        <tr style="{'opacity: 0.6; background-color: #ffe6e6;' if show_deleted else ''}">
             <td class="filter-ipo" data-ipo="{ipo_display}">{ipo_display}</td>
             <td class="filter-group" data-group="{group_name1}">{group_name1}</td>
             <td><span class="badge {'bg-success' if e.amount_type=='credit' else 'bg-danger'}">{e.amount_type.upper()}</span></td>
@@ -13769,7 +13790,7 @@ def accounting_view(request):
                 {timezone.localtime(e.date_time).strftime("%d-%m-%y %H:%M:%S")}
             </td>
             <td class="no-export">
-                <button type="button" class="btn btn-sm btn-outline-primary edit-btn" 
+                {f'''<button type="button" class="btn btn-sm btn-outline-success restore-btn" data-id="{e.id}" title="Restore this entry"><i class="fas fa-undo"></i> Restore</button>''' if show_deleted else f'''<button type="button" class="btn btn-sm btn-outline-primary edit-btn" 
                         data-id="{e.id}" 
                         data-ipo-id="{ipo_id_val}" 
                         data-group-id="{group_id_val}" 
@@ -13777,8 +13798,11 @@ def accounting_view(request):
                         data-amount-type="{e.amount_type}" 
                         data-remark="{safe_remark}" 
                         data-datetime="{dt_local}">
-                    <i class="fas fa-edit"></i> Edit
+                    <i class="fas fa-edit"></i>
                 </button>
+                <button type="button" class="btn btn-sm btn-outline-danger delete-btn ms-1" data-id="{e.id}" title="Delete this entry">
+                    <i class="fas fa-trash"></i>
+                </button>'''}
             </td>
         </tr>
         """
@@ -13797,9 +13821,54 @@ def accounting_view(request):
     html_table += f"<tbody style='text-align: center;white-space: nowrap;'> {rows} </tbody>\n"
     html_table += "</table>"
             
-    ipos_master = CurrentIpoName.objects.filter(user =request.user)
+    # --- Build Audit Log HTML ---
+    audit_logs = AccountingAuditLog.objects.filter(user=request.user).select_related('accounting').order_by('-timestamp')[:50]
+    audit_log_html = ""
+    if audit_logs:
+        audit_log_html = "<table id='auditLogTable' class='table table-bordered table-sm table-hover' style='font-size: 0.85rem;'>\n"
+        audit_log_html += "<thead><tr style='text-align: center; background-color: #f8f9fa;'>"
+        audit_log_html += "<th>Timestamp</th>"
+        audit_log_html += "<th>Transaction</th>"
+        audit_log_html += "<th>Action</th>"
+        audit_log_html += "<th>Changes</th>"
+        audit_log_html += "</tr></thead>\n"
+        audit_log_html += "<tbody style='text-align: center;'>"
+        for log in audit_logs:
+            # Action badge
+            if log.action == 'EDIT':
+                badge = "<span class='badge bg-warning text-dark'>Edited</span>"
+            elif log.action == 'SOFT_DELETE':
+                badge = "<span class='badge bg-danger'>Deleted</span>"
+            elif log.action == 'RESTORE':
+                badge = "<span class='badge bg-success'>Restored</span>"
+            else:
+                badge = f"<span class='badge bg-secondary'>{log.action}</span>"
+            
+            # Transaction ref
+            acc = log.accounting
+            ipo_ref = acc.ipo.IPOName if acc.ipo else (acc.ipo_name or 'JV')
+            grp_ref = acc.group.GroupName if acc.group else (acc.group_name or '')
+            txn_ref = f"{ipo_ref} / {grp_ref}" if grp_ref else ipo_ref
+            
+            # Changes summary
+            changes = log.changes or {}
+            changes_parts = []
+            for field, vals in changes.items():
+                if isinstance(vals, dict) and 'old' in vals and 'new' in vals:
+                    changes_parts.append(f"<b>{field}:</b> {vals['old']} → {vals['new']}")
+                elif field == 'note':
+                    changes_parts.append(f"<i>{vals}</i>")
+                else:
+                    changes_parts.append(f"<b>{field}:</b> {vals}")
+            changes_str = "<br>".join(changes_parts) if changes_parts else "-"
+            
+            ts = timezone.localtime(log.timestamp).strftime("%d-%m-%Y %H:%M:%S")
+            audit_log_html += f"<tr><td>{ts}</td><td>{txn_ref}</td><td>{badge}</td><td style='text-align:left;'>{changes_str}</td></tr>\n"
+        audit_log_html += "</tbody></table>"
+
+    ipos_master = CurrentIpoName.objects.filter(user=request.user)
     groups_master = GroupDetail.objects.filter(user=request.user).order_by('GroupName')
-   
+
     return render(request, "accounting.html", {
         "entries": entries,  # Pass the entries queryset to the template
         "html_table": format_html(html_table),
@@ -13815,7 +13884,9 @@ def accounting_view(request):
         "credit_amount":credit_amount,
         "Net_amount" : net_amount,
         "order_by": order_by or "date_time",
-        "order_dir": order_dir or "desc"
+        "order_dir": order_dir or "desc",
+        "show_deleted": show_deleted,
+        "audit_log_html": format_html(audit_log_html),
     })
 
 
@@ -14174,10 +14245,55 @@ def update_accounting(request):
         else:
             date_time = timezone.now()
 
-        # Save original values for JV finding
+        # Save original values for JV finding and audit log
         orig_amount = entry.amount
         orig_amount_type = entry.amount_type
         orig_date_time = entry.date_time
+        orig_ipo_id = entry.ipo_id
+        orig_group_id = entry.group_id
+        orig_remark = entry.remark or ""
+
+        # Build changes dict for audit log
+        changes = {}
+        new_ipo_id = int(ipo_id) if ipo_id else None
+        new_group_id = int(group_id) if group_id else None
+        new_amount = Decimal(str(amount))
+
+        if orig_ipo_id != new_ipo_id:
+            old_ipo_name = entry.ipo.IPOName if entry.ipo else str(orig_ipo_id or "None")
+            new_ipo_obj = CurrentIpoName.objects.filter(id=new_ipo_id).first() if new_ipo_id else None
+            new_ipo_name = new_ipo_obj.IPOName if new_ipo_obj else str(new_ipo_id or "None")
+            changes["IPO"] = {"old": old_ipo_name, "new": new_ipo_name}
+
+        if orig_group_id != new_group_id:
+            old_group_name = entry.group.GroupName if entry.group else str(orig_group_id or "None")
+            new_group_obj = GroupDetail.objects.filter(id=new_group_id).first() if new_group_id else None
+            new_group_name = new_group_obj.GroupName if new_group_obj else str(new_group_id or "None")
+            changes["Group"] = {"old": old_group_name, "new": new_group_name}
+
+        if orig_amount != new_amount:
+            changes["Amount"] = {"old": str(orig_amount), "new": str(new_amount)}
+
+        if orig_amount_type != amount_type:
+            changes["Amount Type"] = {"old": orig_amount_type, "new": amount_type}
+
+        if orig_remark != remark:
+            changes["Remark"] = {"old": orig_remark, "new": remark}
+
+        if orig_date_time != date_time:
+            changes["Date/Time"] = {
+                "old": timezone.localtime(orig_date_time).strftime("%d-%m-%Y %H:%M:%S") if orig_date_time else "",
+                "new": timezone.localtime(date_time).strftime("%d-%m-%Y %H:%M:%S") if date_time else ""
+            }
+
+        # Log audit entry if any changes detected
+        if changes:
+            AccountingAuditLog.objects.create(
+                user=request.user,
+                accounting=entry,
+                action='EDIT',
+                changes=changes
+            )
 
         # Update current entry
         entry.ipo_id = ipo_id if ipo_id else None
@@ -14206,6 +14322,104 @@ def update_accounting(request):
         return redirect("accounting")
 
     return JsonResponse({"status": "error", "message": "Invalid request"})
+
+
+@login_required
+@csrf_exempt
+def soft_delete_accounting(request, entry_id):
+    if request.method == "POST":
+        entry = get_object_or_404(Accounting, id=entry_id, user=request.user)
+        
+        # Soft delete the entry
+        entry.is_deleted = True
+        entry.deleted_at = timezone.now()
+        entry.save()
+
+        # Log audit
+        AccountingAuditLog.objects.create(
+            user=request.user,
+            accounting=entry,
+            action='SOFT_DELETE',
+            changes={
+                "IPO": entry.ipo.IPOName if entry.ipo else (entry.ipo_name or ""),
+                "Group": entry.group.GroupName if entry.group else (entry.group_name or ""),
+                "Amount": str(entry.amount),
+                "Amount Type": entry.amount_type,
+            }
+        )
+
+        # Also soft-delete JV sibling if exists
+        siblings = Accounting.objects.filter(
+            user=request.user,
+            date_time=entry.date_time,
+            amount=entry.amount,
+            is_deleted=False
+        ).exclude(id=entry.id)
+        
+        if siblings.exists() and siblings.count() == 1:
+            sibling = siblings.first()
+            if sibling.amount_type != entry.amount_type:
+                sibling.is_deleted = True
+                sibling.deleted_at = timezone.now()
+                sibling.save()
+                AccountingAuditLog.objects.create(
+                    user=request.user,
+                    accounting=sibling,
+                    action='SOFT_DELETE',
+                    changes={"note": "JV sibling auto-deleted"}
+                )
+
+        return JsonResponse({"success": True})
+    return JsonResponse({"success": False, "error": "Invalid request"})
+
+
+@login_required
+@csrf_exempt
+def restore_accounting(request, entry_id):
+    if request.method == "POST":
+        entry = get_object_or_404(Accounting, id=entry_id, user=request.user)
+        
+        # Restore the entry
+        entry.is_deleted = False
+        entry.deleted_at = None
+        entry.save()
+
+        # Log audit
+        AccountingAuditLog.objects.create(
+            user=request.user,
+            accounting=entry,
+            action='RESTORE',
+            changes={
+                "IPO": entry.ipo.IPOName if entry.ipo else (entry.ipo_name or ""),
+                "Group": entry.group.GroupName if entry.group else (entry.group_name or ""),
+                "Amount": str(entry.amount),
+                "Amount Type": entry.amount_type,
+            }
+        )
+
+        # Also restore JV sibling if exists
+        siblings = Accounting.objects.filter(
+            user=request.user,
+            date_time=entry.date_time,
+            amount=entry.amount,
+            is_deleted=True
+        ).exclude(id=entry.id)
+        
+        if siblings.exists() and siblings.count() == 1:
+            sibling = siblings.first()
+            if sibling.amount_type != entry.amount_type:
+                sibling.is_deleted = False
+                sibling.deleted_at = None
+                sibling.save()
+                AccountingAuditLog.objects.create(
+                    user=request.user,
+                    accounting=sibling,
+                    action='RESTORE',
+                    changes={"note": "JV sibling auto-restored"}
+                )
+
+        return JsonResponse({"success": True})
+    return JsonResponse({"success": False, "error": "Invalid request"})
 
 
 def add_transaction(request):

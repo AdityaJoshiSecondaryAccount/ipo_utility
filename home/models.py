@@ -124,10 +124,24 @@ class Accounting(models.Model):
     remark = models.TextField(blank=True, null=True)
     date_time = models.DateTimeField()
     jv = models.BooleanField( default='False') 
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
   
 
     def __str__(self):
          return f"{self.ipo} - {self.group} - {self.amount_type} - {self.amount}"
+
+class AccountingAuditLog(models.Model):
+    user = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, null=True)
+    accounting = models.ForeignKey(
+        Accounting, on_delete=models.CASCADE, related_name='audit_logs')
+    action = models.CharField(max_length=20)  # 'EDIT', 'SOFT_DELETE', 'RESTORE'
+    changes = models.JSONField(default=dict)
+    timestamp = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.action} on {self.accounting_id} at {self.timestamp}"
 
 class Order(models.Model):
     user = models.ForeignKey(
@@ -148,6 +162,7 @@ class Order(models.Model):
     InvestorType = models.CharField(max_length=100, default=None, null=True)
     Method = models.CharField(max_length=100, default=None, null=True)
     Telly = models.CharField(max_length=100, default='False', null=True)
+    tally_timestamp = models.DateTimeField(null=True, blank=True)
     remark = models.JSONField(null=True, blank=True, default=None)
     
     def save(self, *args, **kwargs):
