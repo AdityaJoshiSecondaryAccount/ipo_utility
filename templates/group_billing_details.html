@@ -164,6 +164,7 @@
         $('.ipo-archive-checkbox').on('change', function() {
             var checkbox = $(this);
             var ipoId = checkbox.data('id');
+            var groupName = checkbox.data('group');
             var tr = checkbox.closest('tr');
             var isChecked = checkbox.is(':checked');
 
@@ -177,20 +178,64 @@
                 tr.removeClass('archived-ipo');
                 tr.show();
             }
+            
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
 
             // AJAX call to save in database
             $.ajax({
-                url: '/toggle-ipo-hidden/' + ipoId + '/',
-                type: 'GET',
+                url: '/update-telly-status/',
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                data: JSON.stringify({
+                    updateType: 'One',
+                    groupname: groupName,
+                    status: isChecked,
+                    IPO_id: ipoId
+                }),
+                contentType: 'application/json',
                 success: function(response) {
                     if (!response.success) {
-                        alert('Error: ' + response.error);
+                        alert('Error updating status.');
                         // Revert UI if error
                         checkbox.prop('checked', !isChecked).trigger('change');
+                    } else {
+                        var span = checkbox.siblings('.tally-ts-span');
+                        if (span.length > 0) {
+                            if (isChecked) {
+                                var now = new Date();
+                                var formattedTime = ("0" + now.getDate()).slice(-2) + "-" + 
+                                                    ("0" + (now.getMonth() + 1)).slice(-2) + "-" + 
+                                                    now.getFullYear() + "<br>" + 
+                                                    ("0" + now.getHours()).slice(-2) + ":" + 
+                                                    ("0" + now.getMinutes()).slice(-2) + ":" + 
+                                                    ("0" + now.getSeconds()).slice(-2);
+                                span.html(formattedTime);
+                            } else {
+                                var currentText = span.html();
+                                if (currentText && currentText.indexOf("Last:") === -1) {
+                                    span.html("Last:<br>" + currentText);
+                                }
+                            }
+                        }
                     }
                 },
                 error: function() {
-                    alert('Network error while toggling visibility.');
+                    alert('Network error while updating status.');
                     // Revert UI if error
                     checkbox.prop('checked', !isChecked).trigger('change');
                 }

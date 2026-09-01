@@ -6951,6 +6951,15 @@ def group_billing_details(request, group_id=None):
             
             is_tally = all(str(o.Telly).lower() == 'true' or o.Telly == '1' or o.Telly == 1 for o in orders)
             
+            ts_str = ""
+            latest_tally_time = orders.aggregate(Max('tally_timestamp'))['tally_timestamp__max']
+            if latest_tally_time:
+                time_str = timezone.localtime(latest_tally_time).strftime('%d-%m-%Y<br>%H:%M:%S')
+                if is_tally:
+                    ts_str = time_str
+                else:
+                    ts_str = f"Last:<br>{time_str}"
+
             orderdetails = OrderDetail.objects.filter(user=request.user, Order__OrderIPOName=ipo, Order__OrderGroup=current_group)
         
             # Kostak
@@ -7005,6 +7014,7 @@ def group_billing_details(request, group_id=None):
                 'ipo_name': ipo.IPOName,
                 'ipo_id': ipo.id,
                 'is_tally': is_tally,
+                'ts_str': ts_str,
                 'kostak_count': kostak_count,
                 'kostak_alloted': kostak_alloted,
                 'kostak_billing': kostak_billing,
@@ -7068,7 +7078,9 @@ def group_billing_details(request, group_id=None):
                 tr_class = "archived-ipo" if row.get("is_tally") else ""
                 checked = "checked" if row.get("is_tally") else ""
                 sme_html_table += f"<tr class='{tr_class}' style='text-align: center;'>"
-                sme_html_table += f"<th><input type='checkbox' class='ipo-archive-checkbox' style='cursor: pointer; margin:0; transform: scale(1.2);' data-id='{row['ipo_id']}' {checked} disabled title='Tally status (Read-only)'></th>"
+                ts_val = row.get('ts_str', '')
+                ts_html = f"<br><span class='tally-ts-span' style='font-size: 0.65rem; font-weight: normal;'>{ts_val}</span>"
+                sme_html_table += f"<th><input type='checkbox' class='ipo-archive-checkbox' style='cursor: pointer; margin:0; transform: scale(1.2);' data-id='{row['ipo_id']}' data-group='{current_group.GroupName}' {checked} title='Tally status'>{ts_html}</th>"
                 sme_html_table += f"<th><a href='/{row['ipo_id']}/Status' style='color:blue; text-decoration: underline;'>{row['ipo_name']}</a></th>"
                 sme_html_table += f"<td>"
                 if row['kostak_count'] != 0:
@@ -7112,6 +7124,15 @@ def group_billing_details(request, group_id=None):
             
             is_tally = all(str(o.Telly).lower() == 'true' or o.Telly == '1' or o.Telly == 1 for o in orders)
             
+            ts_str = ""
+            latest_tally_time = orders.aggregate(Max('tally_timestamp'))['tally_timestamp__max']
+            if latest_tally_time:
+                time_str = timezone.localtime(latest_tally_time).strftime('%d-%m-%Y<br>%H:%M:%S')
+                if is_tally:
+                    ts_str = time_str
+                else:
+                    ts_str = f"Last:<br>{time_str}"
+
             orderdetails = OrderDetail.objects.filter(user=request.user, Order__OrderIPOName=ipo, Order__OrderGroup=current_group)
         
             def get_cat_stats(category, inv_type):
@@ -7176,6 +7197,7 @@ def group_billing_details(request, group_id=None):
                 'ipo_name': ipo.IPOName,
                 'ipo_id': ipo.id,
                 'is_tally': is_tally,
+                'ts_str': ts_str,
                 'k_retail': k_retail,
                 'k_shni': k_shni,
                 'k_bhni': k_bhni,
@@ -7238,7 +7260,9 @@ def group_billing_details(request, group_id=None):
                 tr_class = "archived-ipo" if row.get("is_tally") else ""
                 checked = "checked" if row.get("is_tally") else ""
                 mainboard_html_table += f"<tr class='{tr_class}' style='text-align: center;'>"
-                mainboard_html_table += f"<th><input type='checkbox' class='ipo-archive-checkbox' style='cursor: pointer; margin:0; transform: scale(1.2);' data-id='{row['ipo_id']}' {checked} disabled title='Tally status (Read-only)'></th>"
+                ts_val = row.get('ts_str', '')
+                ts_html = f"<br><span class='tally-ts-span' style='font-size: 0.65rem; font-weight: normal;'>{ts_val}</span>"
+                mainboard_html_table += f"<th><input type='checkbox' class='ipo-archive-checkbox' style='cursor: pointer; margin:0; transform: scale(1.2);' data-id='{row['ipo_id']}' data-group='{current_group.GroupName}' {checked} title='Tally status'>{ts_html}</th>"
                 mainboard_html_table += f"<th><a href='/{row['ipo_id']}/Status' style='color:blue; text-decoration: underline;'>{row['ipo_name']}</a></th>"
             
                 for k_type in ['k_retail', 'k_shni', 'k_bhni']:
