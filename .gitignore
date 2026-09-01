@@ -50,6 +50,8 @@ venv.bak/
 .settings/
 docs/
 
+**/migrations/
+
 # OS-specific
 .DS_Store
 Thumbs.db
