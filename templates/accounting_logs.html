@@ -1,27 +1,19 @@
 {% extends 'basic.html' %}
 {% block title %}Accounting Logs{% endblock %}
 
-{% block css %}
-<style>
-    .fc { padding: 20px; }
-    .table-wrapper {
-        background: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-</style>
-{% endblock %}
-
 {% block body %}
-<div class="container-fluid fc mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="text-secondary"><i class="fas fa-history"></i> Recent Activity Logs</h4>
-        <a href="{% url 'accounting' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Accounting</a>
+<div class="container-fluid" style="padding: 20px;">
+    
+    <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
+        <h4 style="margin: 0;">Recent Activity Logs :</h4>
+        <a href="{% url 'accounting' %}" class="btn btn-sm btn-secondary">Back to Accounting</a>
     </div>
     
-    <div class="table-wrapper table-responsive">
+    <hr>
+
+    <div class="table-responsive text-nowrap mt-4">
         {{ audit_log_html|safe }}
     </div>
+
 </div>
 {% endblock %}
