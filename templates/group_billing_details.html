@@ -4,7 +4,31 @@
 {% block title %}Positions{% endblock %}
 
 {% block css %}
+<link rel="stylesheet" href="{% static 'DataTables/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'DataTables/css/dataTables.bootstrap5.min.css' %}">
+<link rel="stylesheet" href="{% static 'DataTables/css/buttons.bootstrap5.min.css' %}">
 <style>
+    .dataTables_wrapper .d-flex {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .dataTables_filter input {
+        margin-left: 0.5em;
+        display: inline-block;
+        width: auto;
+    }
+    .dataTables_length select {
+        width: auto;
+        display: inline-block;
+        margin: 0 0.5em;
+    }
+    .Input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 2px;
+        font-size: 0.75rem;
+    }
     .container-fluid {
         margin-top: -31px;
         width: 100%;
@@ -90,18 +114,14 @@
         {% if sme_html_table %}
         <div class="mt-4" style="margin-top: 30px;">
             <h4>SME IPOs</h4>
-            <div class="table-wrapper-scroll-x my-custom-scrollbar"> 
-                {{ sme_html_table | safe }}
-            </div>
+            {{ sme_html_table | safe }}
         </div>
         {% endif %}
 
         {% if mainboard_html_table %}
         <div class="mt-4" style="margin-top: 30px;">
             <h4>Mainboard IPOs</h4>
-            <div class="table-wrapper-scroll-x my-custom-scrollbar"> 
-                {{ mainboard_html_table | safe }}
-            </div>
+            {{ mainboard_html_table | safe }}
         </div>
         {% endif %}
         
@@ -178,10 +198,139 @@
                     }
                 },
                 error: function() {
-                    alert('Network error while saving IPO status.');
+                    alert('Network error while toggling visibility.');
+                    // Revert UI if error
+                    checkbox.prop('checked', !isChecked).trigger('change');
                 }
             });
         });
+        
+        // DataTables numeric sorting for links and formatted numbers
+        jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+            "num-html-pre": function ( a ) {
+                // strip html tags
+                var x = String(a).replace( /<[\s\S]*?>/g, "" ).trim();
+                // replace non-numeric chars except minus, dot
+                var numStr = x.replace(/[^\d\.-]/g, '');
+                // fallback to string if no valid number found (e.g., IPO Names)
+                if (numStr === '' || numStr === '-' || numStr === '.') {
+                    return x.toLowerCase();
+                }
+                return parseFloat(numStr) || 0;
+            },
+            "num-html-asc": function ( a, b ) {
+                return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+            },
+            "num-html-desc": function ( a, b ) {
+                return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+            }
+        });
+        
+        // DataTables sorting for checkbox column
+        $.fn.dataTable.ext.order['dom-checkbox'] = function ( settings, col ) {
+            return this.api().column( col, {order:'index'} ).nodes().map( function ( td, i ) {
+                return $('input', td).prop('checked') ? '1' : '0';
+            });
+        }
+
+        // Initialize DataTable function
+        function initDataTable(tableId) {
+            var table = $('#' + tableId);
+            if(table.length == 0) return;
+            
+            // Add a clone of the last header row for inputs
+            var thead = table.find('thead');
+            var lastHeaderRow = thead.find('tr').last();
+            var filterRow = lastHeaderRow.clone().addClass('filters');
+            thead.append(filterRow);
+            
+            var dt = table.DataTable({
+                "language": {
+                    "info": "Showing _START_ - _END_ of _TOTAL_ entries",
+                    "infoEmpty": "Showing 0 - 0 of 0 entries",
+                    "infoFiltered": "(filtered from _MAX_ total entries)"
+                },
+                "dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                       "<'row'<'col-sm-12'<'table-responsive'tr>>>" +
+                       "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                "paging": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": false,
+                "scrollX": false,
+                "orderCellsTop": true,
+                "fixedHeader": true,
+                "columnDefs": [
+                    { "orderDataType": "dom-checkbox", "targets": 0 },
+                    { "type": 'num-html', "targets": '_all' }
+                ],
+                "lengthMenu": [
+                    [10, 25, 50, 100, -1],
+                    [10, 25, 50, 100, "All"]
+                ],
+                initComplete: function () {
+                    var api = this.api();
+                    
+                    // For each column
+                    api.columns().eq(0).each(function (colIdx) {
+                        var cell = $('.filters th', table).eq(
+                            $(api.column(colIdx).header()).index()
+                        );
+                        var title = $(cell).text().trim();
+                        $(cell).html('<input class="Input" type="text" placeholder="Search ' + title + '" style="text-align: center;" />');
+                        
+                        // Handle filter input changes
+                        $('input', $('.filters th', table).eq($(api.column(colIdx).header()).index()))
+                            .off('keyup change')
+                            .on('change', function (e) {
+                                $(this).attr('title', $(this).val());
+                                var regexr = '({search})';
+                                api.column(colIdx).search(
+                                    this.value != '' ? regexr.replace('{search}', '(((' + this.value + ')))') : '',
+                                    this.value != '',
+                                    this.value == ''
+                                ).draw();
+                            })
+                            .on('keyup', function (e) {
+                                e.stopPropagation();
+                                $(this).trigger('change');
+                            });
+                    });
+                    
+                    // Trigger custom search to hide archived IPOs correctly
+                    $.fn.dataTable.ext.search.push(
+                        function(settings, data, dataIndex, rowData, counter) {
+                            if (settings.nTable.id !== tableId) return true;
+                            var tr = $(settings.aoData[dataIndex].nTr);
+                            var showArchived = $('#showArchivedToggle').is(':checked');
+                            if (tr.hasClass('archived-ipo') && !showArchived) {
+                                return false; // Hide row if it's archived and toggle is off
+                            }
+                            return true;
+                        }
+                    );
+                    
+                    // Re-draw table when toggle changes
+                    $('#showArchivedToggle').on('change', function() {
+                        api.draw();
+                    });
+                    
+                    // Re-draw table when checkbox changes so search extension triggers
+                    table.on('change', '.ipo-archive-checkbox', function() {
+                        api.draw();
+                    });
+                }
+            });
+        }
+        
+        initDataTable('smeBillingTable');
+        initDataTable('mainboardBillingTable');
+        
     });
 </script>
+<script src="{% static 'DataTables/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.bootstrap5.min.js' %}"></script>
 {% endblock %}

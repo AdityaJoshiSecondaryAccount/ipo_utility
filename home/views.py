@@ -7012,7 +7012,8 @@ def group_billing_details(request, group_id=None):
             
         # Build SME HTML Table
         if sme_data:
-            sme_html_table = "<table class='table table-bordered table-hover table-striped'><thead><tr>"
+            sme_html_table = "<table id='smeBillingTable' class='table table-bordered table-hover table-striped'><thead><tr>"
+            sme_html_table += "<th rowspan='2'>Archived</th>"
             sme_html_table += "<th rowspan='2'>IPO Name</th>"
             sme_html_table += "<th colspan='3'>Kostak</th>"
             sme_html_table += "<th colspan='3'>Subject To</th>"
@@ -7029,7 +7030,8 @@ def group_billing_details(request, group_id=None):
                 tr_style = "display:none;" if row.get("is_hidden") else ""
                 checked = "checked" if row.get("is_hidden") else ""
                 sme_html_table += f"<tr class='{tr_class}' style='{tr_style}'>"
-                sme_html_table += f"<th style='display: flex; align-items: center; justify-content: flex-start; gap: 8px;'><input type='checkbox' class='ipo-archive-checkbox' style='cursor: pointer; margin:0;' data-id='{row['ipo_id']}' {checked} title='Archive/Hide this IPO'> <a href='/{row['ipo_id']}/Status' style='color:blue; text-decoration: underline;'>{row['ipo_name']}</a></th>"
+                sme_html_table += f"<td style='text-align: center; vertical-align: middle;'><input type='checkbox' class='ipo-archive-checkbox' style='cursor: pointer; margin:0; transform: scale(1.2);' data-id='{row['ipo_id']}' {checked} title='Archive/Hide this IPO'></td>"
+                sme_html_table += f"<th><a href='/{row['ipo_id']}/Status' style='color:blue; text-decoration: underline;'>{row['ipo_name']}</a></th>"
                 sme_html_table += f"<td><a style='color:blue; text-decoration: underline;' href='/{row['ipo_id']}/Order/{selected_group.GroupName}/Kostak/All' title='BUY:{int(row['buy_kostak_qty'])} SELL:{int(row['sell_kostak_qty'])}'>{int(row['kostak_count'])}</a></td>"
                 sme_html_table += f"<td title='BUY:{row['buy_kostak_alloted']} SELL:{row['sell_kostak_alloted']}'>{int(row['kostak_alloted'])}</td>"
                 sme_html_table += f"<td title='BUY:{row['buy_kostak_amt']:.1f} SELL:{row['sell_kostak_amt']:.1f}'>{row['kostak_billing']:.1f}</td>"
@@ -7131,7 +7133,8 @@ def group_billing_details(request, group_id=None):
             
         # Build Mainboard HTML Table
         if mainboard_data:
-            mainboard_html_table = "<table class='table table-bordered table-hover table-striped'><thead><tr>"
+            mainboard_html_table = "<table id='mainboardBillingTable' class='table table-bordered table-hover table-striped'><thead><tr>"
+            mainboard_html_table += "<th rowspan='3'>Archived</th>"
             mainboard_html_table += "<th rowspan='3'>IPO Name</th>"
             mainboard_html_table += "<th colspan='9'>Kostak</th>"
             mainboard_html_table += "<th colspan='9'>Subject To</th>"
@@ -7153,7 +7156,8 @@ def group_billing_details(request, group_id=None):
                 tr_style = "display:none;" if row.get("is_hidden") else ""
                 checked = "checked" if row.get("is_hidden") else ""
                 mainboard_html_table += f"<tr class='{tr_class}' style='{tr_style}'>"
-                mainboard_html_table += f"<th style='display: flex; align-items: center; justify-content: flex-start; gap: 8px;'><input type='checkbox' class='ipo-archive-checkbox' style='cursor: pointer; margin:0;' data-id='{row['ipo_id']}' {checked} title='Archive/Hide this IPO'> <a href='/{row['ipo_id']}/Status' style='color:blue; text-decoration: underline;'>{row['ipo_name']}</a></th>"
+                mainboard_html_table += f"<td style='text-align: center; vertical-align: middle;'><input type='checkbox' class='ipo-archive-checkbox' style='cursor: pointer; margin:0; transform: scale(1.2);' data-id='{row['ipo_id']}' {checked} title='Archive/Hide this IPO'></td>"
+                mainboard_html_table += f"<th><a href='/{row['ipo_id']}/Status' style='color:blue; text-decoration: underline;'>{row['ipo_name']}</a></th>"
                 for k_type in ['k_retail', 'k_shni', 'k_bhni']:
                     k = row[k_type]
                     inv = k_type.split('_')[1].upper()
