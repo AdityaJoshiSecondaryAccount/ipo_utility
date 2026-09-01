@@ -214,24 +214,7 @@
                         // Revert UI if error
                         checkbox.prop('checked', !isChecked).trigger('change');
                     } else {
-                        var span = checkbox.siblings('.tally-ts-span');
-                        if (span.length > 0) {
-                            if (isChecked) {
-                                var now = new Date();
-                                var formattedTime = ("0" + now.getDate()).slice(-2) + "-" + 
-                                                    ("0" + (now.getMonth() + 1)).slice(-2) + "-" + 
-                                                    now.getFullYear() + "<br>" + 
-                                                    ("0" + now.getHours()).slice(-2) + ":" + 
-                                                    ("0" + now.getMinutes()).slice(-2) + ":" + 
-                                                    ("0" + now.getSeconds()).slice(-2);
-                                span.html(formattedTime);
-                            } else {
-                                var currentText = span.html();
-                                if (currentText && currentText.indexOf("Last:") === -1) {
-                                    span.html("Last:<br>" + currentText);
-                                }
-                            }
-                        }
+                        window.location.reload();
                     }
                 },
                 error: function() {
@@ -317,6 +300,9 @@
                             return true;
                         }
                     );
+                    
+                    // Force an initial draw so the filter applies immediately on page load
+                    api.draw();
                     
                     // Re-draw table when toggle changes
                     $('#showArchivedToggle').on('change', function() {
