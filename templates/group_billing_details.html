@@ -94,7 +94,7 @@
             <div class="fm d-inline-block">
                 <label for="groupSelect" style="font-weight: bold; margin-right: 10px;">Active Group:</label>
                 <select id="groupSelect" class="form-control-sm custom-select" style="width: 250px;">
-                    <option value="" disabled {% if not selected_group %}selected{% endif %}>-- Choose a Group --</option>
+                    <option value="all" {% if not selected_group %}selected{% endif %}>All Groups</option>
                     {% for grp in groups %}
                     <option value="{{ grp.id }}" {% if selected_group and selected_group.id == grp.id %}selected{% endif %}>{{ grp.GroupName }}</option>
                     {% endfor %}
@@ -106,34 +106,33 @@
     
     <hr>
     
-    {% if selected_group %}
-        <div class="text-center mb-4" style="margin-top: 20px;">
-            <h4>Showing billing records for <b>{{ selected_group.GroupName }}</b></h4>
-        </div>
+    {% if group_tables or empty_groups %}
+        {% for table_data in group_tables %}
+        <div class="group-section" style="margin-bottom: 20px;">
+            {% if table_data.sme_html_table %}
+            <div class="mt-2">
+                <h4>{{ table_data.group.GroupName }} (SME IPOs)</h4>
+                {{ table_data.sme_html_table | safe }}
+            </div>
+            {% endif %}
 
-        {% if sme_html_table %}
-        <div class="mt-4" style="margin-top: 30px;">
-            <h4>SME IPOs</h4>
-            {{ sme_html_table | safe }}
+            {% if table_data.mainboard_html_table %}
+            <div class="mt-2">
+                <h4>{{ table_data.group.GroupName }}</h4>
+                {{ table_data.mainboard_html_table | safe }}
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
+        {% endfor %}
 
-        {% if mainboard_html_table %}
-        <div class="mt-4" style="margin-top: 30px;">
-            <h4>Mainboard IPOs</h4>
-            {{ mainboard_html_table | safe }}
+        {% if empty_groups %}
+        <div class="alert alert-info text-center mt-2">
+            <strong>No billing records found for:</strong> {{ empty_groups|join:", " }}
         </div>
         {% endif %}
-        
-        {% if not sme_html_table and not mainboard_html_table %}
-        <div class="alert alert-info text-center mt-4" style="margin-top: 30px;">
-            No billing records found for this group.
-        </div>
-        {% endif %}
-        
     {% else %}
         <div class="alert alert-warning text-center mt-4" style="margin-top: 30px;">
-            Please select a group from the dropdown to view positions.
+            No groups or billing records found.
         </div>
     {% endif %}
 </div>
@@ -142,8 +141,10 @@
 <script>
     document.getElementById('groupSelect').addEventListener('change', function() {
         var groupId = this.value;
-        if (groupId) {
+        if (groupId && groupId !== 'all') {
             window.location.href = '/group-billing-details/' + groupId + '/';
+        } else {
+            window.location.href = '/group-billing-details/';
         }
     });
 
@@ -284,9 +285,13 @@
                 }
             });
         }
-        
-        initDataTable('smeBillingTable');
-        initDataTable('mainboardBillingTable');
+        // Initialize all dynamically generated tables
+        $('table.table').each(function() {
+            var id = $(this).attr('id');
+            if(id) {
+                initDataTable(id);
+            }
+        });
         
     });
 </script>
