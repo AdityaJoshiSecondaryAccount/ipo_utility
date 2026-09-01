@@ -5887,11 +5887,12 @@ def Status(request, IPOid):
             html_table += "<tr style='text-align: center;'>"
             is_tallied, tally_time = Group_telly_status.get(row.grpname, (False, ''))
             checked_attr = 'checked' if is_tallied else ''
-            time_html = ""
+            content_html = ""
             if tally_time:
                 date_part, time_part = tally_time.split(" ", 1)
                 prefix = "" if is_tallied else "Last: "
-                time_html = f"<div style='font-size: 10px; font-weight: bold; color: #555; margin-top: 4px; line-height: 1.2;'>{prefix}{date_part}<br>{time_part}</div>"
+                content_html = f"{prefix}{date_part}<br>{time_part}"
+            time_html = f"<div class='tally-time-div' style='font-size: 10px; font-weight: bold; color: #555; margin-top: 4px; line-height: 1.2;'>{content_html}</div>"
             html_table += f"<th style='text-align: center; vertical-align: e; min-width: 80px;'><div style='display: flex; flex-direction: column; align-items: center; justify-content: center;'><input type='checkbox' name='selectGroup' value='{row.grpname}' class='group-checkbox' {checked_attr} onchange='updateTellyStatus(this)'>{time_html}</div></th>"
             html_table += f"<th>{row.grpname}</th>"
             html_table += f"<td>"
@@ -6453,11 +6454,12 @@ def Status(request, IPOid):
             html_table += "<tr style='text-align: center;'>"
             is_tallied, tally_time = Group_telly_status.get(row.GrpName, (False, ''))
             checked_attr = 'checked' if is_tallied else ''
-            time_html = ""
+            content_html = ""
             if tally_time:
                 date_part, time_part = tally_time.split(" ", 1)
                 prefix = "" if is_tallied else "Last: "
-                time_html = f"<div style='font-size: 10px; font-weight: bold; color: #555; margin-top: 4px; line-height: 1.2;'>{prefix}{date_part}<br>{time_part}</div>"
+                content_html = f"{prefix}{date_part}<br>{time_part}"
+            time_html = f"<div class='tally-time-div' style='font-size: 10px; font-weight: bold; color: #555; margin-top: 4px; line-height: 1.2;'>{content_html}</div>"
             html_table += f"<th style='text-align: center; vertical-align: middle; min-width: 80px;'><div style='display: flex; flex-direction: column; align-items: center; justify-content: center;'><input type='checkbox' name='selectGroup' value='{row.GrpName}' class='group-checkbox' {checked_attr} onchange='updateTellyStatus(this)' >{time_html}</div></th>"
             html_table += f"<th>{row.GrpName}</th>"
             html_table += f"<td>"

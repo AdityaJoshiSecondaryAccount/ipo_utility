@@ -1431,9 +1431,26 @@
         .then(response => response.json())
         .then(data => {
         if (data.success) {
-            window.location.reload();
+            var timeDiv = checkbox.nextElementSibling;
+            if (timeDiv && timeDiv.classList.contains('tally-time-div')) {
+                if (status) {
+                    var now = new Date();
+                    var formattedTime = ("0" + now.getDate()).slice(-2) + "-" + 
+                                        ("0" + (now.getMonth() + 1)).slice(-2) + "-" + 
+                                        now.getFullYear() + "<br>" + 
+                                        ("0" + now.getHours()).slice(-2) + ":" + 
+                                        ("0" + now.getMinutes()).slice(-2) + ":" + 
+                                        ("0" + now.getSeconds()).slice(-2);
+                    timeDiv.innerHTML = formattedTime;
+                } else {
+                    var currentText = timeDiv.innerHTML;
+                    if (currentText && currentText.indexOf("Last:") === -1) {
+                        timeDiv.innerHTML = "Last: " + currentText;
+                    }
+                }
+            }
         } else {
-            window.location.reload();
+            checkbox.checked = !status;
             alert('Failed to update!');
         }
         });
@@ -1466,7 +1483,26 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                window.location.reload();
+                var now = new Date();
+                var formattedTime = ("0" + now.getDate()).slice(-2) + "-" + 
+                                    ("0" + (now.getMonth() + 1)).slice(-2) + "-" + 
+                                    now.getFullYear() + "<br>" + 
+                                    ("0" + now.getHours()).slice(-2) + ":" + 
+                                    ("0" + now.getMinutes()).slice(-2) + ":" + 
+                                    ("0" + now.getSeconds()).slice(-2);
+                groupCheckboxes.forEach(checkbox => {
+                    var timeDiv = checkbox.nextElementSibling;
+                    if (timeDiv && timeDiv.classList.contains('tally-time-div')) {
+                        if (isChecked) {
+                            timeDiv.innerHTML = formattedTime;
+                        } else {
+                            var currentText = timeDiv.innerHTML;
+                            if (currentText && currentText.indexOf("Last:") === -1) {
+                                timeDiv.innerHTML = "Last: " + currentText;
+                            }
+                        }
+                    }
+                });
             } else {
                 alert('Failed to update all groups!');
                 // Revert master checkbox and individual checkboxes on failure
