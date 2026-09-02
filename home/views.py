@@ -4694,7 +4694,7 @@ def OrderDetailFunction(request, IPOid, Ordtyp, GrpName=None, OrderCategory=None
         if not any(g['group_name'] == group_name for g in group_names_list):
             group_names_list.append({'group_name':group_name,'Group_emial':Group_emial})
         
-    # unique_rates = entry.values_list('Order__Rate', flat=True).distinct().order_by('Order__Rate')
+    # unique_rates = entry.values_list('Order__Rate', flat=True).distinct().order_by('Order__Rate')z
     RateFilterValue = Rate
     Od_time = OrderTime
     Od_Date = OrderDate
@@ -8148,12 +8148,22 @@ def Billing(request, IPOid):
         else:
             html_table += f"<td>{pre_open_price}</td>"
         
-        html_table += f"<td>{float_format.format(row.AllotedQty)}</td>"
+        try:
+            qty_val = float(row.AllotedQty)
+            formatted_qty = float_format.format(qty_val)
+        except (ValueError, TypeError):
+            formatted_qty = row.AllotedQty
+        html_table += f"<td>{formatted_qty}</td>"
      
         safe_remark = row.Remark.replace("'", "\\'").replace('"', '&quot;') if row.Remark else ""
         html_table += f"<td style='white-space: nowrap; max-width: 300px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; outline: none;' tabindex='0' onclick=\"this.style.whiteSpace=this.style.whiteSpace==='normal'?'nowrap':'normal'\" onblur=\"this.style.whiteSpace='nowrap'\" title='{safe_remark}'>{row.Remark}</td>"
 
-        html_table += f"<td>{float_format.format(row.Amount)}</td>"
+        try:
+            amt_val = float(row.Amount)
+            formatted_amt = float_format.format(amt_val)
+        except (ValueError, TypeError):
+            formatted_amt = row.Amount
+        html_table += f"<td>{formatted_amt}</td>"
         html_table += "</tr>\n"
     
     html_table += "</tbody>"
