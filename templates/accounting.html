@@ -1905,9 +1905,9 @@
                     <table class="table table-hover table-bordered table-striped">
                         <tr>
                             <td>Total Credit</td>
-                            <td>{{ credit_amount }}</td>
+                            <td>{{ credit_amount|floatformat:"0" }}</td>
                             <td>Total Debit</td>
-                            <td>{{ debit_amount }}</td>
+                            <td>{{ debit_amount|floatformat:"0" }}</td>
                             
                         </tr>
                     </table>
@@ -2938,9 +2938,9 @@
                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
                             
                             {% comment %} $('row:first', sheet).remove(); {% endcomment %}
-                            var totalCredit = "{{ credit_amount }}";
-                            var totalDebit = "{{ debit_amount }}";
-                            var netAmount = "{{ Net_amount }}";
+                            var totalCredit = "{{ credit_amount|floatformat:"0" }}";
+                            var totalDebit = "{{ debit_amount|floatformat:"0" }}";
+                            var netAmount = "{{ Net_amount|floatformat:"0" }}";
 
                             // Append new row at the end
                             var lastRow = $('sheetData row:last', sheet);
@@ -3019,9 +3019,9 @@
                                 },
                             };
                             // 🔹 Add a blank row + totals row
-                            var totalCredit = "Total CREDIT: {{ credit_amount }}";
-                            var totalDebit = "Total DEBIT: {{ debit_amount }}";
-                            var netAmount  = "Net Amount: {{ Net_amount }}";
+                            var totalCredit = "Total CREDIT: {{ credit_amount|floatformat:"0" }}";
+                            var totalDebit = "Total DEBIT: {{ debit_amount|floatformat:"0" }}";
+                            var netAmount  = "Net Amount: {{ Net_amount|floatformat:"0" }}";
 
                             // Add empty row
                             doc.content[1].table.body.push([
@@ -3126,11 +3126,11 @@
                 <table class="table table-hover table-bordered table-striped">
                     <tr>
                         <td>Total Credit</td>
-                        <td>{{ credit_amount }}</td>
+                        <td>{{ credit_amount|floatformat:"0" }}</td>
                         <td class="2tr">Total Debit</td>
-                        <td>{{ debit_amount }}</td>
+                        <td>{{ debit_amount|floatformat:"0" }}</td>
                         <td>Total Amount</td>
-                        <td>{{ Net_amount }}</td>
+                        <td>{{ Net_amount|floatformat:"0" }}</td>
                     </tr>
                 </table>
             </div>

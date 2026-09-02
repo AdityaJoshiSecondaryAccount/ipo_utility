@@ -5881,7 +5881,7 @@ def Status(request, IPOid):
         # html_table += "<td></td>"
 
         html_table += "</tr></thead>"
-        float_format = "{:.1f}"
+        float_format = "{:.0f}"
         html_table += "<tbody style='text-align: center;white-space: nowrap;'>"
         for i, row in df.iterrows():
             html_table += "<tr style='text-align: center;'>"
@@ -6448,7 +6448,7 @@ def Status(request, IPOid):
         html_table += "<td>Amount</td>"
         html_table += "</tr></thead>"
         
-        float_format = "{:.1f}"
+        float_format = "{:.0f}"
         html_table += "<tbody style='text-align: center;white-space: nowrap;'>"
         for i, row in df.iterrows():
             html_table += "<tr style='text-align: center;'>"
@@ -6833,7 +6833,7 @@ def GroupWiseDashboard(request):
     html_table += "</tr></thead>\n" 
     
     html_table += "<tbody style='text-align: center;white-space: nowrap;'>"
-    float_format = "{:.1f}"
+    float_format = "{:.0f}"
     for index, row in df.iterrows():
         html_table += "<tr style='text-align: center;'>"
         html_table += f"<th>{index}</th>"
@@ -7074,7 +7074,7 @@ def group_billing_details(request, group_id=None):
             sme_html_table += "<th style='text-align: center; background-color: #fff8e1;'>Billing</th>"
             sme_html_table += "</tr></thead>"
         
-            float_format = "{:.1f}"
+            float_format = "{:.0f}"
             sme_html_table += "<tbody style='text-align: center;white-space: nowrap;'>"
             for row in sme_data:
                 tr_class = "archived-ipo" if row.get("is_tally") else ""
@@ -7111,7 +7111,7 @@ def group_billing_details(request, group_id=None):
                 sme_html_table += f"<td data-toggle='tooltip' data-placement='auto' title='BUY:{row['buy_premium_amt']:.1f}     SELL:{row['sell_premium_amt']:.1f}'>{row['premium_billing']:.1f}</td>"
             
                 sme_html_table += f"<td data-toggle='tooltip' data-placement='auto' title='Kostak:{row['total_kostak_alloted_shares']}     Subject To:{row['total_st_alloted_shares']}     Premium:{row['premium_count']}'>{int(row['total_share'])}</td>"
-                sme_html_table += f"<td data-toggle='tooltip' data-placement='auto'>{row['total_amount']:.1f}</td>"
+                sme_html_table += f"<td data-toggle='tooltip' data-placement='auto'>{row['total_amount']:.0f}</td>"
             
                 sme_html_table += "</tr>\n"
             sme_html_table += "</tbody></table>"
@@ -7256,7 +7256,7 @@ def group_billing_details(request, group_id=None):
             mainboard_html_table += "<th style='text-align: center; background-color: #f5f5f5;'>Shares</th><th style='text-align: center; background-color: #f5f5f5;'>Amount</th>"
             mainboard_html_table += "</tr></thead>"
         
-            float_format = "{:.1f}"
+            float_format = "{:.0f}"
             mainboard_html_table += "<tbody style='text-align: center;white-space: nowrap;'>"
             for row in mainboard_data:
                 tr_class = "archived-ipo" if row.get("is_tally") else ""
@@ -7308,7 +7308,7 @@ def group_billing_details(request, group_id=None):
                 mainboard_html_table += f"<td data-toggle='tooltip' data-placement='auto' title='BUY: {float_format.format(row['put_buy_amt'])}     SELL: {float_format.format(row['put_sell_amt'])}'>{row['put_billing']:.1f}</td>"
             
                 mainboard_html_table += f"<td data-toggle='tooltip' data-placement='auto' title='Kostak:{float_format.format(row['total_kostak_shares'])}     Subject To:{float_format.format(row['total_st_shares'])}     Premium:{float_format.format(row['p_shares'])}'>{int(row['total_shares'])}</td>"
-                mainboard_html_table += f"<td>{row['total_amount']:.1f}</td>"
+                mainboard_html_table += f"<td>{row['total_amount']:.0f}</td>"
                 mainboard_html_table += "</tr>\n"
             mainboard_html_table += "</tbody></table>"
 
@@ -8116,7 +8116,7 @@ def Billing(request, IPOid):
     html_table += "<th>Amount</th>"
     html_table += "</tr></thead>\n"
     # Add rows
-    float_format = "{:.1f}"
+    float_format = "{:.0f}"
     html_table += "<tbody style='text-align: center;white-space: nowrap;'>"
     for i, row in df.iterrows():
         html_table += "<tr style='text-align: center;'>"
@@ -8148,7 +8148,7 @@ def Billing(request, IPOid):
         else:
             html_table += f"<td>{pre_open_price}</td>"
         
-        html_table += f"<td>{row.AllotedQty}</td>"
+        html_table += f"<td>{float_format.format(row.AllotedQty)}</td>"
      
         safe_remark = row.Remark.replace("'", "\\'").replace('"', '&quot;') if row.Remark else ""
         html_table += f"<td style='white-space: nowrap; max-width: 300px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; outline: none;' tabindex='0' onclick=\"this.style.whiteSpace=this.style.whiteSpace==='normal'?'nowrap':'normal'\" onblur=\"this.style.whiteSpace='nowrap'\" title='{safe_remark}'>{row.Remark}</td>"
@@ -8217,8 +8217,8 @@ def Billing(request, IPOid):
     #             </div> 
     #         """
 
-    return render(request, 'Billing.html', {'Group': Group.order_by('GroupName'),'html_table':html_table,'select': IPOTypefilterList, 'select2': InvestorTypeFilterList,"total": "{:.2f}".format(total),'Groupfilter': Groupfilter, "IPOName": IPO, 'IPOTypefilter': IPOTypefilter, 'InvestorTypeFilter': InvestorTypeFilter,  "IPO": IPO, "IPOid": IPOid,'page_obj': page_obj,'Billing_page_size':page_size})
-    return render(request, 'Billing.html', {'Group': Group.order_by('GroupName'),'select': IPOTypefilterList, 'select2': InvestorTypeFilterList,"total": "{:.2f}".format(total),'Groupfilter': Groupfilter, "IPOName": IPO, 'IPOTypefilter': IPOTypefilter, 'InvestorTypeFilter': InvestorTypeFilter,  "IPO": IPO, "IPOid": IPOid,'page_obj': page_obj,'Billing_page_size':page_size})
+    return render(request, 'Billing.html', {'Group': Group.order_by('GroupName'),'html_table':html_table,'select': IPOTypefilterList, 'select2': InvestorTypeFilterList,"total": "{:.0f}".format(total),'Groupfilter': Groupfilter, "IPOName": IPO, 'IPOTypefilter': IPOTypefilter, 'InvestorTypeFilter': InvestorTypeFilter,  "IPO": IPO, "IPOid": IPOid,'page_obj': page_obj,'Billing_page_size':page_size})
+    return render(request, 'Billing.html', {'Group': Group.order_by('GroupName'),'select': IPOTypefilterList, 'select2': InvestorTypeFilterList,"total": "{:.0f}".format(total),'Groupfilter': Groupfilter, "IPOName": IPO, 'IPOTypefilter': IPOTypefilter, 'InvestorTypeFilter': InvestorTypeFilter,  "IPO": IPO, "IPOid": IPOid,'page_obj': page_obj,'Billing_page_size':page_size})
 
 def FileterBilling(request, IPOid ,group,IPOType,InvestType, Rate='All'):
     if request.user.groups.all()[0].name == 'Broker':
@@ -8426,7 +8426,7 @@ def FileterBilling(request, IPOid ,group,IPOType,InvestType, Rate='All'):
     html_table += "<th>Amount</th>"
     html_table += "</tr></thead>\n"
     # Add rows
-    float_format = "{:.1f}"
+    float_format = "{:.0f}"
     html_table += "<tbody style='text-align: center;white-space: nowrap;'>"
     if len(df) == 0:
         column_count = 10 + (1 if IPOName.IPOType == "MAINBOARD" else 0)
@@ -8461,7 +8461,7 @@ def FileterBilling(request, IPOid ,group,IPOType,InvestType, Rate='All'):
         else:
             html_table += f"<td>{pre_open_price}</td>"
         
-        html_table += f"<td>{row.AllotedQty}</td>"
+        html_table += f"<td>{float_format.format(row.AllotedQty)}</td>"
      
         safe_remark = row.Remark.replace("'", "\\'").replace('"', '&quot;') if row.Remark else ""
         html_table += f"<td style='white-space: nowrap; max-width: 300px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; outline: none;' tabindex='0' onclick=\"this.style.whiteSpace=this.style.whiteSpace==='normal'?'nowrap':'normal'\" onblur=\"this.style.whiteSpace='nowrap'\" title='{safe_remark}'>{row.Remark}</td>"
@@ -8529,8 +8529,8 @@ def FileterBilling(request, IPOid ,group,IPOType,InvestType, Rate='All'):
         #         </div> 
         #     """
 
-    return render(request, 'Billing.html', {'Group': Group,'html_table':html_table,'select': IPOTypefilterList, 'select2': InvestorTypeFilterList,"total": "{:.2f}".format(total),'Groupfilter': Groupfilter, "IPOName": IPO, 'IPOTypefilter': IPOTypefilter, 'InvestorTypeFilter': InvestorTypeFilter,  "IPO": IPO, "IPOid": IPOid,'page_obj': page_obj,'Billing_page_size':page_size})
-    # return render(request, 'Billing.html', {'entry': entry, 'order': order, 'Group': Group.order_by('GroupName'), 'select': IPOTypefilterList, 'select2': InvestorTypeFilterList, "total": "{:.2f}".format(total), 'Groupfilter': Groupfilter, "IPOName": IPO, 'IPOTypefilter': IPOTypefilter, 'InvestorTypeFilter': InvestorTypeFilter,  "IPO": IPO, "IPOid": IPOid})
+    return render(request, 'Billing.html', {'Group': Group,'html_table':html_table,'select': IPOTypefilterList, 'select2': InvestorTypeFilterList,"total": "{:.0f}".format(total),'Groupfilter': Groupfilter, "IPOName": IPO, 'IPOTypefilter': IPOTypefilter, 'InvestorTypeFilter': InvestorTypeFilter,  "IPO": IPO, "IPOid": IPOid,'page_obj': page_obj,'Billing_page_size':page_size})
+    # return render(request, 'Billing.html', {'entry': entry, 'order': order, 'Group': Group.order_by('GroupName'), 'select': IPOTypefilterList, 'select2': InvestorTypeFilterList, "total": "{:.0f}".format(total), 'Groupfilter': Groupfilter, "IPOName": IPO, 'IPOTypefilter': IPOTypefilter, 'InvestorTypeFilter': InvestorTypeFilter,  "IPO": IPO, "IPOid": IPOid})
 
 #client wise biling filter wise download fun
 @allowed_users(allowed_roles=['Broker'])
@@ -8693,7 +8693,7 @@ def exportBillingFilterpdf(request, IPOid, group=None, IPOType=None, InvestorTyp
     total = total + totalorder
 
     head = []   
-    head.append(['IPO PRICE',IpoPrice,'PRE OPEN PRICE',IpoPrePrice,'TOTAL',"{:.2f}".format(total)])
+    head.append(['IPO PRICE',IpoPrice,'PRE OPEN PRICE',IpoPrePrice,'TOTAL',"{:.0f}".format(total)])
 
     blank = ['']
  
@@ -13828,6 +13828,7 @@ def accounting_view(request):
             <td class="filter-group" data-group="{group_name1}">{group_name1}</td>
             <td><span class="badge {'bg-success' if e.amount_type=='credit' else 'bg-danger'}">{e.amount_type.upper()}</span></td>
             <td>{e.amount}</td>
+            # <td>{e.amount:.0f}</td>
             <td><textarea class="form-control form-control-sm" readonly>{e.remark or ''}</textarea></td>
             
             <td data-order="{timezone.localtime(e.date_time).strftime('%Y-%m-%d %H:%M:%S')}">
