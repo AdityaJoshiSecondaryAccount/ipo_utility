@@ -3345,13 +3345,13 @@ def calculate(IPOid,user,Orderid=None):
     
     if Orderid is None:
         entry = OrderDetail.objects.filter(
-            user=user, Order__OrderIPOName_id=IPOid)
+            user=user, Order__OrderIPOName_id=IPOid).select_related('Order')
         order = Order.objects.filter(
             user=user, OrderIPOName_id=IPOid )
  
     else:
         entry = OrderDetail.objects.filter(
-            user=user, Order__OrderIPOName_id=IPOid, Order_id = Orderid)
+            user=user, Order__OrderIPOName_id=IPOid, Order_id = Orderid).select_related('Order')
         order = Order.objects.filter(
             user=user, OrderIPOName_id=IPOid , id=Orderid)
     IPOName = CurrentIpoName.objects.get(id=IPOid, user=user)
@@ -3489,8 +3489,8 @@ def calculate(IPOid,user,Orderid=None):
             orders_to_update.append(i)
             
      
-    Order.objects.bulk_update(orders_to_update, ['Amount'])
-    OrderDetail.objects.bulk_update(entries_to_update, ['Amount'])
+    Order.objects.bulk_update(orders_to_update, ['Amount'], batch_size=1000)
+    OrderDetail.objects.bulk_update(entries_to_update, ['Amount'], batch_size=1000)
                 
 def panupload_calculate(IPOid, userid, Orderid=None):
     if Orderid is None or not isinstance(Orderid, list):
