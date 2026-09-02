@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="{% static  'CSS/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static  'CSS/font-awesome.min.css' %}">
     <link rel="stylesheet" href="{% static  'CSS/jquery-ui.css' %}">
-    <link rel="stylesheet" href="{% static  'CSS/loader.css' %}?v=2.0">
+    <link rel="stylesheet" href="{% static  'CSS/loader.css' %}">
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" /> -->
 
 
@@ -505,17 +505,7 @@
 
 
 <body style="max-width: 100vw;">
-    <div class="loader">
-        <div id="dynamic-loader" class=""></div>
-    </div>
-    <script>
-        // We'll use style 4 for the main frontend page load!
-        (function() {
-            var loaderDiv = document.getElementById("dynamic-loader");
-            var style = 4; // Hardcoded to 4 for the main frontend loading overlay
-            loaderDiv.className = "loader-style-" + style;
-        })();
-    </script>
+    <div class="loader"></div>
 
     <!-- NEW NAVBAR -->
 
@@ -812,7 +802,7 @@
                 style="background-color: whitesmoke; border: 1px solid white; border-radius: 29px;">
                 <div class="modal-body background">
                     <div class="modal-header"
-                        style="background: rgb(49, 183, 183) ; align-items:center;display:flex; justify-content: space-between; border: 4px solid rgb(0, 0, 0); border-top-right-radius: 22px; border-top-left-radius: 22px; border-bottom: 0px solid white;">
+                        style="background: rgb(49, 183, 183) ; align-item:center;display:flex; justify-content: space-between; border: 4px solid rgb(0, 0, 0); border-top-right-radius: 22px; border-top-left-radius: 22px; border-bottom: 0px solid white;">
                         <div style="flex: 1; text-align: center;">
                             <b>
                                 <h4> <span class="modal-title title" id="staticBackdroLabel"
@@ -913,63 +903,11 @@
     </script>
 
     <script>
-        // Global loader utility functions
-        window.showLoader = function() {
-            const loader = document.querySelector(".loader");
-            const loaderDiv = document.getElementById("dynamic-loader");
-            
-            if (loader && loaderDiv) {
-                // Only pick a new random style if the loader is currently hidden.
-                // This prevents the loader from changing style mid-animation if showLoader is called twice.
-                if (loader.classList.contains("loader-hidden") || loader.style.display === "none") {
-                    // Use style 4 for backend/AJAX operations
-                    loaderDiv.className = "loader-style-4";
-                }
-                
-                loader.classList.remove("loader-hidden");
-                loader.style.display = "flex";
-            }
-        };
-
-        window.hideLoader = function() {
+        document.addEventListener("DOMContentLoaded", () => {
             const loader = document.querySelector(".loader");
             if (loader) {
                 loader.classList.add("loader-hidden");
-                loader.style.display = "none";
             }
-        };
-
-        // Intercept fetch calls to show loader during backend operations
-        const originalFetch = window.fetch;
-        window.fetch = function(...args) {
-            window.showLoader();
-            return originalFetch.apply(this, args)
-                .then(response => {
-                    window.hideLoader();
-                    return response;
-                })
-                .catch(error => {
-                    window.hideLoader();
-                    throw error;
-                });
-        };
-
-        // Intercept form submissions to show loader
-        document.addEventListener('submit', function(event) {
-            const form = event.target;
-            if (form.tagName === 'FORM') {
-                window.showLoader();
-            }
-        });
-
-        // Hide loader when page is fully loaded
-        window.addEventListener("load", () => {
-            window.hideLoader();
-        });
-
-        // Show the loader whenever the user navigates away to a new page
-        window.addEventListener("beforeunload", function () {
-            window.showLoader();
         });
     </script>
 
