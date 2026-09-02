@@ -5894,7 +5894,7 @@ def Status(request, IPOid):
                 content_html = f"{prefix}{date_part}<br>{time_part}"
             time_html = f"<div class='tally-time-div' style='font-size: 10px; font-weight: bold; color: #555; margin-top: 4px; line-height: 1.2;'>{content_html}</div>"
             html_table += f"<th style='text-align: center; vertical-align: e; min-width: 80px;'><div style='display: flex; flex-direction: column; align-items: center; justify-content: center;'><input type='checkbox' name='selectGroup' value='{row.grpname}' class='group-checkbox' {checked_attr} onchange='updateTellyStatus(this)'>{time_html}</div></th>"
-            html_table += f"<th>{row.grpname}</th>"
+            html_table += f"<th><a href='/{IPOid}/Order/{row.grpname}/All/All' style='color:blue; text-decoration: underline;'>{row.grpname}</a></th>"
             html_table += f"<td>"
             if row.noofapp != 0:
                 html_table += f"<a style=\"color:blue; text-decoration-line: underline;\"   href=\"/{IPOid}/Order/{row.grpname}/Kostak/All\" data-toggle=\"tooltip\" data-placement=\"auto\" title=\"BUY:{row.BuyKostakApp}     SELL:{row.SellKostakApp}\">"
@@ -6461,7 +6461,7 @@ def Status(request, IPOid):
                 content_html = f"{prefix}{date_part}<br>{time_part}"
             time_html = f"<div class='tally-time-div' style='font-size: 10px; font-weight: bold; color: #555; margin-top: 4px; line-height: 1.2;'>{content_html}</div>"
             html_table += f"<th style='text-align: center; vertical-align: middle; min-width: 80px;'><div style='display: flex; flex-direction: column; align-items: center; justify-content: center;'><input type='checkbox' name='selectGroup' value='{row.GrpName}' class='group-checkbox' {checked_attr} onchange='updateTellyStatus(this)' >{time_html}</div></th>"
-            html_table += f"<th>{row.GrpName}</th>"
+            html_table += f"<th><a href='/{IPOid}/Order/{row.GrpName}/All/All' style='color:blue; text-decoration: underline;'>{row.GrpName}</a></th>"
             html_table += f"<td>"
             if row.KostakRetailCount != 0:
                 html_table += f"<a style='color:blue; text-decoration-line: underline;'   href=\"/{IPOid}/Order/{row.GrpName}/Kostak/RETAIL\" data-toggle=\"tooltip\" data-placement=\"auto\" title=\"BUY:{float_format.format(row.KostakRetailCountBuy)}     SELL:{float_format.format(row.KostakRetailCountSell)}\">"
