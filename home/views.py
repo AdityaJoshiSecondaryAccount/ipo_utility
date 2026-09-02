@@ -7865,12 +7865,13 @@ def FirmAllotment(request, IPOid, OrderType, GrpName, OrderCategory, InvestorTyp
                 gid = GroupDetail.objects.get(GroupName=Group, user=userid).id  
                 j = OrderDetail.objects.filter(user=userid, Order__OrderIPOName_id=IPOid, Order__OrderType=OrderType, Order__OrderGroup_id=gid, Order__InvestorType=InvestorTypeFilter)
 
-            if AllotedQtyv == '':
-                j.update(AllotedQty=None)  # clear the allotment
-            else:
-                j.update(AllotedQty=AllotedQtyv)
-        
-            calculate(IPOid, request.user)
+            if j.exists():
+                if AllotedQtyv == '':
+                    j.update(AllotedQty=None)  # clear the allotment
+                else:
+                    j.update(AllotedQty=AllotedQtyv)
+            
+                calculate(IPOid, request.user)
         
     if GrpName == 'None' and OrderCategory == 'None' and InvestorType == 'None':
         return redirect(f"/{IPOid}/OrderDetail/{OrderType}")
