@@ -13828,7 +13828,6 @@ def accounting_view(request):
             <td class="filter-group" data-group="{group_name1}">{group_name1}</td>
             <td><span class="badge {'bg-success' if e.amount_type=='credit' else 'bg-danger'}">{e.amount_type.upper()}</span></td>
             <td>{e.amount}</td>
-            # <td>{e.amount:.0f}</td>
             <td><textarea class="form-control form-control-sm" readonly>{e.remark or ''}</textarea></td>
             
             <td data-order="{timezone.localtime(e.date_time).strftime('%Y-%m-%d %H:%M:%S')}">
