@@ -108,17 +108,17 @@
     
     {% if group_tables or empty_groups %}
         {% for table_data in group_tables %}
-        <div class="group-section" style="margin-bottom: 20px;">
+        <div class="group-section" style="margin-bottom: 5px;">
             {% if table_data.sme_html_table %}
-            <div class="mt-2">
-                <h4>{{ table_data.group.GroupName }} (SME IPOs)</h4>
+            <div>
+                <h4 class="text-center">Group : {{ table_data.group.GroupName }} (SME IPOs)</h4>
                 {{ table_data.sme_html_table | safe }}
             </div>
             {% endif %}
 
             {% if table_data.mainboard_html_table %}
-            <div class="mt-2">
-                <h4>{{ table_data.group.GroupName }}</h4>
+            <div style="margin-top: 5px;">
+                <h4 class="text-center">Group : {{ table_data.group.GroupName }}</h4>
                 {{ table_data.mainboard_html_table | safe }}
             </div>
             {% endif %}
@@ -259,19 +259,12 @@
             if(table.length == 0) return;
             
             var dt = table.DataTable({
-                "language": {
-                    "info": "Showing _START_ - _END_ of _TOTAL_ entries",
-                    "infoEmpty": "Showing 0 - 0 of 0 entries",
-                    "infoFiltered": "(filtered from _MAX_ total entries)"
-                },
-                "dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
-                       "<'row'<'col-sm-12'<'table-responsive'tr>>>" +
-                       "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-                "paging": true,
-                "lengthChange": true,
+                "dom": "<'table-responsive'tr>",
+                "paging": false,
+                "lengthChange": false,
                 "searching": true,
-                "ordering": true,
-                "info": true,
+                "ordering": false,
+                "info": false,
                 "autoWidth": false,
                 "responsive": false,
                 "scrollX": false,
@@ -280,10 +273,6 @@
                 "columnDefs": [
                     { "orderDataType": "dom-checkbox", "targets": 0 },
                     { "type": 'num-html', "targets": '_all' }
-                ],
-                "lengthMenu": [
-                    [10, 25, 50, 100, -1],
-                    [10, 25, 50, 100, "All"]
                 ],
                 initComplete: function () {
                     var api = this.api();
