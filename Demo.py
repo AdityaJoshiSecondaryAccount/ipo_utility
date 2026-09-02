@@ -17,7 +17,7 @@ def fetch_free_proxies():
     except Exception as e:
         print(f"Failed to fetch proxy list: {e}")
     return []
-
+ 
 def PurvaDropDown():
     url = 'https://www.purvashare.com/investor-service/ipo-query'
     headers = {
