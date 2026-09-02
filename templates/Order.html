@@ -2597,6 +2597,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
+                        <button type="button" class="btn btn-info" style="margin-right: auto;" id="copyStatusImageBtn" onclick="copyStatusImage()">Copy as Image</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         <button type="button" class="btn btn-primary" id="sendToTelegramBtn" onclick="sendStatusToTelegram()">
                             Send to Telegram
@@ -2882,6 +2883,71 @@
 
 {% comment %} telegram message send  {% endcomment %}
 <script>
+    function showToast(message, isError = false) {
+        const toast = document.createElement('div');
+        toast.innerText = message;
+        toast.style.position = 'fixed';
+        toast.style.top = '20px';
+        toast.style.right = '20px';
+        toast.style.backgroundColor = isError ? '#dc3545' : '#28a745';
+        toast.style.color = '#fff';
+        toast.style.padding = '12px 20px';
+        toast.style.borderRadius = '4px';
+        toast.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+        toast.style.zIndex = '10000';
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease-in-out';
+        toast.style.fontSize = '14px';
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => toast.style.opacity = '1', 10);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => document.body.removeChild(toast), 300);
+        }, 3000);
+    }
+
+    function copyStatusImage() {
+        const button = document.getElementById('copyStatusImageBtn');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Copying...';
+        button.disabled = true;
+
+        const modalBody = document.querySelector('#exampleModal .modal-body');
+        const originalOverflow = modalBody.style.overflow;
+        modalBody.style.overflow = 'visible';
+
+        html2canvas(modalBody, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            width: modalBody.scrollWidth,
+            height: modalBody.scrollHeight
+        }).then(canvas => {
+            canvas.toBlob(async function(blob) {
+                try {
+                    const item = new ClipboardItem({ "image/png": blob });
+                    await navigator.clipboard.write([item]);
+                    showToast("Image copied to clipboard successfully!");
+                } catch (err) {
+                    console.error("Failed to copy image: ", err);
+                    showToast("Failed to copy image. Check browser permissions.", true);
+                } finally {
+                    modalBody.style.overflow = originalOverflow;
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }
+            }, 'image/png');
+        }).catch(err => {
+            console.error("html2canvas error: ", err);
+            modalBody.style.overflow = originalOverflow;
+            button.innerHTML = originalText;
+            button.disabled = false;
+        });
+    }
+
     function sendStatusToTelegram() {
         const button = document.getElementById('sendToTelegramBtn');
         const originalText = button.innerHTML;  
