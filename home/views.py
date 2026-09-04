@@ -8471,12 +8471,14 @@ def FileterBilling(request, IPOid ,group,IPOType,InvestType, Rate='All'):
         else:
             html_table += f"<td>{pre_open_price}</td>"
         
-        html_table += f"<td>{float_format.format(row.AllotedQty)}</td>"
+        safe_alloted_qty = float(row.AllotedQty) if pd.notna(row.AllotedQty) and row.AllotedQty != '' else 0.0
+        html_table += f"<td>{float_format.format(safe_alloted_qty)}</td>"
      
         safe_remark = row.Remark.replace("'", "\\'").replace('"', '&quot;') if row.Remark else ""
         html_table += f"<td style='white-space: nowrap; max-width: 300px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; outline: none;' tabindex='0' onclick=\"this.style.whiteSpace=this.style.whiteSpace==='normal'?'nowrap':'normal'\" onblur=\"this.style.whiteSpace='nowrap'\" title='{safe_remark}'>{row.Remark}</td>"
 
-        html_table += f"<td>{float_format.format(row.Amount)}</td>"
+        safe_amount = float(row.Amount) if pd.notna(row.Amount) and row.Amount != '' else 0.0
+        html_table += f"<td>{float_format.format(safe_amount)}</td>"
         html_table += "</tr>\n"
     html_table += "</tbody>"
     html_table += "<tfoot><tr>"
@@ -8492,7 +8494,8 @@ def FileterBilling(request, IPOid ,group,IPOType,InvestType, Rate='All'):
     html_table += "<td style='text-align: center;'></td>"
     html_table += "<td style='text-align: center;'></td>"
     html_table += "<td style='text-align: center;'></td>"
-    html_table += f"<th style='text-align: center;'>{float_format.format(entry_total_amount)}</th>"
+    safe_entry_total = float(entry_total_amount) if pd.notna(entry_total_amount) and entry_total_amount != '' else 0.0
+    html_table += f"<th style='text-align: center;'>{float_format.format(safe_entry_total)}</th>"
 
     html_table += "</tr></tfoot>"
     html_table += "</table>"

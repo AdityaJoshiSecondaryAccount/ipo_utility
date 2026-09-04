@@ -1812,7 +1812,9 @@
                         );
                         if (colIdx !== 0) {
                             var title = $(cell).text();
-                            $(cell).html('<input type="text" placeholder="' + title + '" style="text-align: center ; width: 100%;" />');
+                            var stateSearch = api.column(colIdx).search();
+                            var initialValue = stateSearch ? stateSearch.replace(/^\(\(\(\(/, '').replace(/\)\)\)\)$/, '') : '';
+                            $(cell).html('<input type="text" placeholder="' + title + '" value="' + initialValue + '" style="text-align: center ; width: 100%;" />');
         
                             
                             $(

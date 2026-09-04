@@ -2967,6 +2967,7 @@ function deleteIPO(ipoId, pageNumber, btn) {
         pageLength = pageLength === "All" ? -1 : parseInt(pageLength, 10);
 
         var table = $('#example').DataTable({
+            stateSave: true,
             "columnDefs": [
                 {
                     "targets": {{ IPOName|length }} + 3,
@@ -3066,7 +3067,9 @@ function deleteIPO(ipoId, pageNumber, btn) {
                             $(api.column(colIdx).header()).index()
                         );
                         var title = $(cell).text();
-                        $(cell).html('<input class="Input" type="text" placeholder="' + title + '" style="text-align: center ;  width: auto;" />');
+                        var stateSearch = api.column(colIdx).search();
+                        var initialValue = stateSearch ? stateSearch.replace(/^\(\(\(\(/, '').replace(/\)\)\)\)$/, '') : '';
+                        $(cell).html('<input class="Input" type="text" placeholder="' + title + '" value="' + initialValue + '" style="text-align: center ;  width: auto;" />');
                         
                         $(
                             'input',
