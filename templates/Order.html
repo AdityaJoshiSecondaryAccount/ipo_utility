@@ -2244,6 +2244,188 @@
         }
     } 
 
+    /* Responsive IPO Status modal */
+    #exampleModal {
+        padding-right: 0 !important;
+    }
+    #exampleModal .modal-dialog {
+        width: calc(100vw - 24px);
+        max-width: 900px;
+        margin: 12px auto;
+    }
+    #exampleModal .modal-content {
+        max-height: calc(100vh - 24px);
+        overflow: hidden;
+        white-space: normal;
+    }
+    #exampleModal .modal-header {
+        flex: 0 0 auto;
+    }
+    #exampleModal .modal-body {
+        min-width: 0;
+        min-height: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+    #status-datetime {
+        min-width: 0;
+        gap: 6px 16px;
+        flex-wrap: wrap;
+    }
+    #status-datetime h2 {
+        min-width: 0;
+        flex: 1 1 420px;
+        font-size: clamp(1.35rem, 3vw, 2rem);
+        line-height: 1.2;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+    #live-time-display {
+        flex: 0 1 auto;
+        max-width: 100%;
+        white-space: normal;
+        text-align: right;
+    }
+    #exampleModal .table-responsive {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+    #exampleModal table {
+        width: 100%;
+        margin-bottom: 0;
+    }
+    #exampleModal table thead th {
+        min-width: 64px;
+        max-width: 150px;
+        line-height: 1.2;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: normal;
+    }
+    #exampleModal table tbody th {
+        min-width: 44px;
+        white-space: nowrap;
+        overflow-wrap: normal;
+        word-break: normal;
+    }
+    #exampleModal table td {
+        white-space: nowrap;
+    }
+    #exampleModal .modal-footer {
+        flex: 0 0 auto;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    #exampleModal .modal-footer > .d-flex {
+        min-width: 0;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    @media (max-width: 575.98px) {
+        #exampleModal .modal-dialog {
+            width: calc(100vw - 12px);
+            max-width: calc(100vw - 12px);
+            margin: 6px auto;
+        }
+        #exampleModal .modal-content {
+            max-height: calc(100vh - 12px);
+        }
+        #exampleModal .modal-header {
+            padding: 8px 12px 0;
+        }
+        #exampleModal .modal-body {
+            padding: 0 12px 12px !important;
+        }
+        #status-datetime h2 {
+            flex-basis: 100%;
+            font-size: 1.3rem;
+        }
+        #live-time-display {
+            width: 100%;
+            font-size: 0.8rem !important;
+            text-align: left;
+        }
+        #exampleModal table th,
+        #exampleModal table td {
+            padding: 4px;
+            font-size: 0.8rem;
+        }
+        #exampleModal .modal-footer {
+            justify-content: flex-start;
+            padding: 10px 12px;
+        }
+        #exampleModal .modal-footer > .d-flex {
+            width: 100%;
+            margin-right: 0 !important;
+        }
+    }
+
+    /* A fixed desktop layout used only while generating the copied image. */
+    .status-image-capture {
+        position: fixed !important;
+        top: 0 !important;
+        left: -100000px !important;
+        z-index: -1 !important;
+        display: block !important;
+        width: 1100px !important;
+        max-width: none !important;
+        height: auto !important;
+        max-height: none !important;
+        min-height: 0 !important;
+        padding: 20px !important;
+        overflow: visible !important;
+        background: #fff !important;
+        white-space: normal !important;
+    }
+    .status-image-capture #status-datetime {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+    }
+    .status-image-capture #status-datetime h2 {
+        flex: 1 1 auto !important;
+        font-size: 2rem !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
+    }
+    .status-image-capture #live-time-display {
+        width: auto !important;
+        flex: 0 0 auto !important;
+        font-size: 1rem !important;
+        white-space: nowrap !important;
+        text-align: right !important;
+    }
+    .status-image-capture .table-responsive {
+        display: block !important;
+        width: 100% !important;
+        max-width: none !important;
+        overflow: visible !important;
+    }
+    .status-image-capture table {
+        width: 100% !important;
+        max-width: none !important;
+        table-layout: auto !important;
+    }
+    .status-image-capture table thead th {
+        min-width: 0 !important;
+        max-width: none !important;
+        white-space: normal !important;
+        overflow-wrap: normal !important;
+        word-break: normal !important;
+    }
+    .status-image-capture table tbody th {
+        min-width: 56px !important;
+        white-space: nowrap !important;
+    }
+    .status-image-capture table td {
+        white-space: nowrap !important;
+    }
+
     .export-only {
         display: none;
     }
@@ -2276,7 +2458,7 @@
     <br>
 
     <div class="text-nowrap">
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="ipoStatusModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header" style="border-bottom: none; padding-bottom: 0;">
@@ -2288,7 +2470,7 @@
                                         
                         <!-- Date and Time Display -->
                         <div id="status-datetime" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ddd; padding-bottom: 10px; margin-bottom: 15px;">
-                            <h2 style="margin: 0; font-weight: bold;">{{IPOName}} Ipo Status</h2>
+                            <h2 id="ipoStatusModalLabel" title="{{IPOName}} Ipo Status" style="margin: 0; font-weight: bold;">{{IPOName}} Ipo Status</h2>
                             <span id="live-time-display" class="text-muted" style="font-weight: bold; font-size: 16px;"></span>
                         </div>
 
@@ -3023,51 +3205,78 @@
         }
     }, 1000);
 
-    function copyStatusImage() {
+    function waitForStatusCaptureLayout() {
+        return new Promise(resolve => {
+            requestAnimationFrame(() => requestAnimationFrame(resolve));
+        });
+    }
+
+    async function renderFullStatusImage() {
+        const modalBody = document.querySelector('#exampleModal .modal-body');
+        if (!modalBody) {
+            throw new Error('IPO Status content was not found.');
+        }
+
+        const captureBody = modalBody.cloneNode(true);
+        captureBody.removeAttribute('style');
+        captureBody.classList.add('status-image-capture');
+        captureBody.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(captureBody);
+
+        try {
+            if (document.fonts && document.fonts.ready) {
+                await document.fonts.ready;
+            }
+            await waitForStatusCaptureLayout();
+
+            const captureWidth = Math.ceil(captureBody.scrollWidth);
+            const captureHeight = Math.ceil(captureBody.scrollHeight);
+
+            return await html2canvas(captureBody, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff',
+                width: captureWidth,
+                height: captureHeight,
+                windowWidth: captureWidth,
+                windowHeight: captureHeight,
+                scrollX: 0,
+                scrollY: 0
+            });
+        } finally {
+            captureBody.remove();
+        }
+    }
+
+    async function copyStatusImage() {
         const button = document.getElementById('copyStatusImageBtn');
         const originalText = button.innerHTML;
         button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Copying...';
         button.disabled = true;
 
-        const modalBody = document.querySelector('#exampleModal .modal-body');
-        const originalOverflow = modalBody.style.overflow;
-        
-        modalBody.style.overflow = 'visible';
+        try {
+            const canvas = await renderFullStatusImage();
+            const blob = await new Promise((resolve, reject) => {
+                canvas.toBlob(result => {
+                    if (result) {
+                        resolve(result);
+                    } else {
+                        reject(new Error('The status image could not be created.'));
+                    }
+                }, 'image/png');
+            });
 
-        html2canvas(modalBody, {
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: '#ffffff',
-            width: modalBody.scrollWidth,
-            // Calculate the actual content height instead of the scrollHeight which might include minHeight empty space
-            onclone: function(clonedDoc) {
-                const clonedBody = clonedDoc.querySelector('#exampleModal .modal-body');
-                if (clonedBody) {
-                    clonedBody.style.minHeight = 'auto';
-                }
-            }
-        }).then(canvas => {
-            canvas.toBlob(async function(blob) {
-                try {
-                    const item = new ClipboardItem({ "image/png": blob });
-                    await navigator.clipboard.write([item]);
-                    showToast("Image copied to clipboard successfully!");
-                } catch (err) {
-                    console.error("Failed to copy image: ", err);
-                    showToast("Failed to copy image. Check browser permissions.", true);
-                } finally {
-                    modalBody.style.overflow = originalOverflow;
-                    button.innerHTML = originalText;
-                    button.disabled = false;
-                }
-            }, 'image/png');
-        }).catch(err => {
-            console.error("html2canvas error: ", err);
-            modalBody.style.overflow = originalOverflow;
+            const item = new ClipboardItem({ "image/png": blob });
+            await navigator.clipboard.write([item]);
+            showToast("Full status image copied to clipboard successfully!");
+        } catch (err) {
+            console.error("Failed to copy full status image: ", err);
+            showToast("Failed to copy image. Check browser permissions.", true);
+        } finally {
             button.innerHTML = originalText;
             button.disabled = false;
-        });
+        }
     }
 
     function sendStatusToTelegram() {
