@@ -2960,6 +2960,57 @@
         });
     }
 
+    function autoHideEmptyTables() {
+        const tableClasses = ['kostak-table', 'subjectto-table', 'premium-table', 'strikeprice-table'];
+        const filterCheckboxes = {
+            'kostak-table': 'filterKostak',
+            'subjectto-table': 'filterSubjectTo',
+            'premium-table': 'filterPremium',
+            'strikeprice-table': 'filterStrikePrice'
+        };
+
+        tableClasses.forEach(tableClass => {
+            const tableDivs = document.querySelectorAll('#exampleModal .' + tableClass);
+            let hasData = false;
+
+            tableDivs.forEach(tableDiv => {
+                const tbody = tableDiv.querySelector('tbody');
+                if (!tbody) return;
+                
+                const cells = tbody.querySelectorAll('td');
+                cells.forEach(cell => {
+                    const text = cell.innerText.trim();
+                    if (text !== "") {
+                        const num = Number(text.replace(/,/g, ''));
+                        if (!isNaN(num) && num !== 0) {
+                            hasData = true;
+                        }
+                    }
+                });
+            });
+
+            if (!hasData && tableDivs.length > 0) {
+                const checkboxId = filterCheckboxes[tableClass];
+                const checkbox = document.getElementById(checkboxId);
+                if (checkbox && checkbox.checked) {
+                    checkbox.checked = false;
+                    tableDivs.forEach(tableDiv => {
+                        tableDiv.style.display = 'none';
+                        const nextSib = tableDiv.nextElementSibling;
+                        if (nextSib && nextSib.tagName === 'BR') {
+                            nextSib.style.display = 'none';
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        autoHideEmptyTables();
+    });
+
+
     setInterval(() => {
         const display = document.getElementById('live-time-display');
         if (display) {
