@@ -6960,7 +6960,7 @@ def group_billing_details(request, group_id=None):
                 if is_tally:
                     ts_str = time_str
                 else:
-                    ts_str = f"Last:<br>{time_str}"
+                    ts_str = f"Last: {time_str}"
 
             orderdetails = OrderDetail.objects.filter(user=request.user, Order__OrderIPOName=ipo, Order__OrderGroup=current_group)
         
@@ -7133,7 +7133,7 @@ def group_billing_details(request, group_id=None):
                 if is_tally:
                     ts_str = time_str
                 else:
-                    ts_str = f"Last:<br>{time_str}"
+                    ts_str = f"Last: {time_str}"
 
             orderdetails = OrderDetail.objects.filter(user=request.user, Order__OrderIPOName=ipo, Order__OrderGroup=current_group)
         
