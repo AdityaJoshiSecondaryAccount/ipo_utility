@@ -2288,8 +2288,21 @@
                     </div>
                     <div class="modal-body">
                                         
+                        <!-- Table selection controls -->
+                        <div id="table-selection-controls" class="mb-3 text-center" data-html2canvas-ignore="true" style="padding-bottom: 10px; border-bottom: 1px solid #ddd;">
+                            <label class="mr-3" style="cursor:pointer;"><input type="checkbox" checked onchange="toggleStatusTable('kostak-table', this.checked)"> Kostak</label>
+                            <label class="mr-3" style="cursor:pointer;"><input type="checkbox" checked onchange="toggleStatusTable('subjectto-table', this.checked)"> Subject To</label>
+                            <label class="mr-3" style="cursor:pointer;"><input type="checkbox" checked onchange="toggleStatusTable('premium-table', this.checked)"> Premium</label>
+                            <label style="cursor:pointer;"><input type="checkbox" checked onchange="toggleStatusTable('strikeprice-table', this.checked)"> Strike Price</label>
+                        </div>
+
+                        <!-- Date and Time Display -->
+                        <div id="status-datetime" class="text-muted small mb-2" style="font-weight: bold; font-size: 14px; text-align: right;">
+                            {{IPOName}} - <span id="live-time-display"></span>
+                        </div>
+
                         {% if IPOName.IPOType == "MAINBOARD" %}
-                        <div class="table-responsive text-nowrap">
+                        <div class="table-responsive text-nowrap kostak-table">
                             <table style="height: 20px; ">
                                 <thead>
                                     <tr style="border: 1px solid black; border-collapse: collapse;">
@@ -2358,7 +2371,7 @@
                         </div>
                             <br>
 
-                        <div class="table-responsive text-nowrap">
+                        <div class="table-responsive text-nowrap subjectto-table">
                             <table style="height: 20px;">
                                 <thead>
                                     <tr style="border: 1px solid black; border-collapse: collapse;">
@@ -2426,7 +2439,7 @@
                             <br>
                             {% else %}
                             
-                        <div class="table-responsive text-nowrap">
+                        <div class="table-responsive text-nowrap kostak-table">
                             <table style="height: 20px;">
                                 <thead>
                                     <tr style="border: 1px solid black; border-collapse: collapse;">
@@ -2467,7 +2480,7 @@
                         </div>
                             <br>
 
-                        <div class="table-responsive text-nowrap">
+                        <div class="table-responsive text-nowrap subjectto-table">
                             <table style="height: 20px;">
                                     <thead>
                                         <tr style="border: 1px solid black; border-collapse: collapse;">
@@ -2510,7 +2523,7 @@
                         <br>
                         {% endif %}
 
-                        <div class="table-responsive text-nowrap">
+                        <div class="table-responsive text-nowrap premium-table">
                             <table style="height: 20px;">
                                 <thead>
                                     <tr style="border: 1px solid black; border-collapse: collapse;">
@@ -2552,7 +2565,7 @@
                             </table>
                         </div>    
                         <br>
-                        <div class="table-responsive text-nowrap">
+                        <div class="table-responsive text-nowrap strikeprice-table">
                             <table style="border: 1px solid black; border-collapse: collapse; width:100%;">
                                 <thead>
                                     <tr>
@@ -2907,6 +2920,31 @@
             setTimeout(() => document.body.removeChild(toast), 300);
         }, 3000);
     }
+
+    // IPO Status Modal Enhancements
+    function toggleStatusTable(tableClass, isChecked) {
+        const tables = document.querySelectorAll('.' + tableClass);
+        tables.forEach(table => {
+            table.style.display = isChecked ? 'block' : 'none';
+            // Need to hide the <br> tag after the table as well
+            const nextSib = table.nextElementSibling;
+            if (nextSib && nextSib.tagName === 'BR') {
+                nextSib.style.display = isChecked ? 'inline' : 'none';
+            }
+        });
+    }
+
+    setInterval(() => {
+        const display = document.getElementById('live-time-display');
+        if (display) {
+            const now = new Date();
+            const options = { 
+                year: 'numeric', month: 'short', day: 'numeric', 
+                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true 
+            };
+            display.innerText = now.toLocaleString('en-IN', options);
+        }
+    }, 1000);
 
     function copyStatusImage() {
         const button = document.getElementById('copyStatusImageBtn');
