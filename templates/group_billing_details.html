@@ -77,21 +77,143 @@
     .archived-ipo > th {
         background-color: #cbd5e1 !important; /* Visible grey but light enough for blue text */
     }
+    .positions-toolbar {
+        position: sticky !important;
+        top: var(--positions-navbar-height, 40px);
+        z-index: 111;
+        margin-bottom: 16px;
+        padding-top: 15px;
+        background-color: #fff;
+    }
+    .positions-page {
+        margin-top: var(--positions-navbar-height, 40px);
+    }
+    .positions-title {
+        display: inline-block;
+        margin-right: 20px;
+    }
+    .positions-toggle {
+        position: relative;
+        top: -4px;
+    }
+    .positions-actions {
+        text-align: right;
+    }
+    .group-table-scroll,
+    .table-responsive,
+    .dataTables_wrapper {
+        width: 100%;
+        max-width: 100%;
+    }
+    .table-responsive {
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+    }
+    table[id^="mainboardBillingTable_"] {
+        min-width: 1500px;
+    }
+    table[id^="mainboardBillingTable_"] > thead > tr:first-child > th {
+        border-top: 1px solid #555 !important;
+    }
+    table[id^="mainboardBillingTable_"] > tbody > tr:last-child > th,
+    table[id^="mainboardBillingTable_"] > tbody > tr:last-child > td {
+        border-bottom: 1px solid #555 !important;
+    }
+    table[id^="smeBillingTable_"] {
+        min-width: 800px;
+    }
+
+    @media (max-width: 767.98px) {
+        .container-fluid {
+            padding-right: 10px;
+            padding-left: 10px;
+        }
+        .positions-toolbar {
+            margin-right: 0;
+            margin-left: 0;
+            margin-bottom: 12px;
+            padding: 8px 0 10px;
+        }
+        .positions-toolbar-left,
+        .positions-actions {
+            width: 100%;
+            max-width: 100%;
+            flex: 0 0 100%;
+            padding-right: 0;
+            padding-left: 0;
+        }
+        .positions-title {
+            display: block;
+            margin: 0 0 6px;
+            font-size: 1.6rem;
+        }
+        .positions-toggle {
+            display: flex !important;
+            align-items: center;
+            top: 0 !important;
+            margin-bottom: 10px;
+        }
+        .positions-toggle label {
+            line-height: 1.2;
+        }
+        .positions-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            text-align: left !important;
+        }
+        .positions-group-filter {
+            display: flex !important;
+            flex-direction: column;
+            width: 100%;
+            margin: 0 0 8px !important;
+        }
+        .positions-group-filter label {
+            margin: 0 0 4px !important;
+        }
+        .positions-group-filter select,
+        .positions-dashboard-button {
+            width: 100% !important;
+        }
+        .positions-dashboard-button {
+            margin: 0 !important;
+        }
+        .group-section {
+            margin-bottom: 12px !important;
+        }
+        .group-section > div {
+            margin-top: 0 !important;
+        }
+        .group-section h4 {
+            margin: 8px 0;
+            font-size: 1.35rem;
+        }
+        .group-section table {
+            margin-bottom: 0;
+        }
+        .table-responsive {
+            scrollbar-width: thin;
+        }
+        thead th {
+            position: static !important;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block body %}
-<div class="container-fluid fc" style="margin-top: 50px;">
-    <div class="row align-items-center mt-3">
-        <div class="col-md-6">
-            <h3 style="display:inline-block; margin-right: 20px;">Positions</h3>
-            <div class="d-inline-block" style="position: relative; top: -4px;" title="Toggle to show or hide old/archived IPOs">
+<div class="container-fluid fc positions-page">
+    <div id="positionsToolbar" class="row align-items-center border-bottom positions-toolbar">
+        <div class="col-md-6 positions-toolbar-left">
+            <h3 class="positions-title">Positions</h3>
+            <div class="d-inline-block positions-toggle" title="Toggle to show or hide old/archived IPOs">
                 <input type="checkbox" id="showArchivedToggle" style="cursor: pointer; vertical-align: middle; transform: scale(1.2);">
                 <label for="showArchivedToggle" style="cursor:pointer; font-weight:bold; vertical-align: middle; margin-left: 5px; margin-bottom: 0;">Show Tallied/Completed IPOs</label>
             </div>
         </div>
-        <div class="col-md-6" style="text-align: right;">
-            <div class="fm d-inline-block">
+        <div class="col-md-6 positions-actions">
+            <div class="fm d-inline-block positions-group-filter">
                 <label for="groupSelect" style="font-weight: bold; margin-right: 10px;">Active Group:</label>
                 <select id="groupSelect" class="form-control-sm custom-select" style="width: 250px;">
                     <option value="all" {% if not selected_group %}selected{% endif %}>All Groups</option>
@@ -100,11 +222,11 @@
                     {% endfor %}
                 </select>
             </div>
-            <a href="/" class="btn btn-secondary btn-sm" style="margin-left: 15px;">Back to Dashboard</a>
+            <a href="/" class="btn btn-secondary btn-sm positions-dashboard-button" style="margin-left: 15px;">Back to Dashboard</a>
         </div>
     </div>
     
-    <hr>
+    <!-- <hr> -->
     
     {% if group_tables or empty_groups %}
         {% for table_data in group_tables %}
@@ -139,6 +261,24 @@
 
 <script src="{% static 'JS/jquery.min.js' %}"></script>
 <script>
+    function updatePositionsNavbarOffset() {
+        var navbar = document.querySelector('.navbar.fixed-top');
+        var navbarHeight = navbar ? navbar.getBoundingClientRect().height : 0;
+        document.documentElement.style.setProperty('--positions-navbar-height', navbarHeight + 'px');
+    }
+
+    updatePositionsNavbarOffset();
+    window.addEventListener('load', updatePositionsNavbarOffset);
+    window.addEventListener('resize', updatePositionsNavbarOffset);
+
+    var responsiveNavbar = document.getElementById('navbarNavAltMarkup');
+    if (responsiveNavbar) {
+        new MutationObserver(updatePositionsNavbarOffset).observe(responsiveNavbar, {
+            attributes: true,
+            attributeFilter: ['class']
+        });
+    }
+
     document.getElementById('groupSelect').addEventListener('change', function() {
         var groupId = this.value;
         if (groupId && groupId !== 'all') {
