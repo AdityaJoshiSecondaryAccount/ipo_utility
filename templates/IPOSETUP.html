@@ -1498,6 +1498,7 @@ document.getElementById("deleteIpoBtn").addEventListener("click", function() {
         pageLength = pageLength === "All" ? -1 : parseInt(pageLength, 10);
     
         var table = $('#example').DataTable({
+            stateSave: true,
             orderCellsTop: true,
             order: [[0, 'desc']],
             {% comment %} fixedHeader: true, {% endcomment %}
