@@ -124,6 +124,48 @@
         min-width: 800px;
     }
 
+    /* Keep Tally and IPO Name visible while the remaining columns scroll. */
+    table[id^="mainboardBillingTable_"],
+    table[id^="smeBillingTable_"] {
+        --frozen-tally-width: 72px;
+    }
+    table[id^="mainboardBillingTable_"] > thead > tr:first-child > th:first-child,
+    table[id^="mainboardBillingTable_"] > tbody > tr > :first-child,
+    table[id^="smeBillingTable_"] > thead > tr:first-child > th:first-child,
+    table[id^="smeBillingTable_"] > tbody > tr > :first-child {
+        position: sticky !important;
+        left: 0;
+    }
+    table[id^="mainboardBillingTable_"] > thead > tr:first-child > th:nth-child(2),
+    table[id^="mainboardBillingTable_"] > tbody > tr > :nth-child(2),
+    table[id^="smeBillingTable_"] > thead > tr:first-child > th:nth-child(2),
+    table[id^="smeBillingTable_"] > tbody > tr > :nth-child(2) {
+        position: sticky !important;
+        left: var(--frozen-tally-width);
+    }
+    table[id^="mainboardBillingTable_"] > thead > tr:first-child > th:first-child,
+    table[id^="mainboardBillingTable_"] > thead > tr:first-child > th:nth-child(2),
+    table[id^="smeBillingTable_"] > thead > tr:first-child > th:first-child,
+    table[id^="smeBillingTable_"] > thead > tr:first-child > th:nth-child(2) {
+        z-index: 14;
+        background-color: #f1f1f1;
+        background-clip: padding-box;
+    }
+    table[id^="mainboardBillingTable_"] > tbody > tr > :first-child,
+    table[id^="mainboardBillingTable_"] > tbody > tr > :nth-child(2),
+    table[id^="smeBillingTable_"] > tbody > tr > :first-child,
+    table[id^="smeBillingTable_"] > tbody > tr > :nth-child(2) {
+        z-index: 4;
+        background-color: #fff;
+        background-clip: padding-box;
+    }
+    table[id^="mainboardBillingTable_"] > tbody > tr:nth-child(odd) > :first-child,
+    table[id^="mainboardBillingTable_"] > tbody > tr:nth-child(odd) > :nth-child(2),
+    table[id^="smeBillingTable_"] > tbody > tr:nth-child(odd) > :first-child,
+    table[id^="smeBillingTable_"] > tbody > tr:nth-child(odd) > :nth-child(2) {
+        background-color: #f2f2f2;
+    }
+
     @media (max-width: 767.98px) {
         .container-fluid {
             padding-right: 10px;
@@ -197,6 +239,12 @@
         }
         thead th {
             position: static !important;
+        }
+        table[id^="mainboardBillingTable_"] > thead > tr:first-child > th:first-child,
+        table[id^="mainboardBillingTable_"] > thead > tr:first-child > th:nth-child(2),
+        table[id^="smeBillingTable_"] > thead > tr:first-child > th:first-child,
+        table[id^="smeBillingTable_"] > thead > tr:first-child > th:nth-child(2) {
+            top: auto;
         }
     }
 </style>
@@ -397,6 +445,14 @@
         function initDataTable(tableId) {
             var table = $('#' + tableId);
             if(table.length == 0) return;
+
+            function syncFrozenColumnOffset() {
+                var tallyHeader = table.find('thead > tr:first-child > th:first-child');
+                var tallyWidth = tallyHeader.outerWidth();
+                if (tallyWidth) {
+                    table[0].style.setProperty('--frozen-tally-width', Math.ceil(tallyWidth) + 'px');
+                }
+            }
             
             var dt = table.DataTable({
                 "dom": "<'table-responsive'tr>",
@@ -445,6 +501,10 @@
                     });
                 }
             });
+
+            syncFrozenColumnOffset();
+            dt.on('draw.dt column-sizing.dt', syncFrozenColumnOffset);
+            $(window).on('resize.frozenColumns-' + tableId, syncFrozenColumnOffset);
         }
         // Initialize all dynamically generated tables
         $('table.table').each(function() {
