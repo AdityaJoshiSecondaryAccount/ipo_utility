@@ -7226,7 +7226,7 @@ def group_billing_details(request, group_id=None):
         
         # Build Mainboard HTML Table
         if mainboard_data:
-            mainboard_html_table = "<table id=\"mainboardBillingTable_{}\"".format(current_group.id) + " class=\"table table-bordered table-hover table-striped\" style=\"max-width: 100vw; border-collapse: collapse; border-top: 2px solid #555; border-bottom: 2px solid #555; border-left: 2px solid #555;\" >\n"
+            mainboard_html_table = "<table id=\"mainboardBillingTable_{}\"".format(current_group.id) + " class=\"table table-bordered table-hover table-striped\" style=\"max-width: 100vw; border-collapse: collapse; border-top: 1px solid #555; border-bottom: 1px solid #555; border-left: 1px solid #555;\" >\n"
             mainboard_html_table += "<thead><tr >"
             mainboard_html_table += "<th rowspan='3' scope='col' class='tableline' style='text-align: center; vertical-align: middle; border-left: 1px solid #555; border-right: 1px solid #555; border-bottom: 2px solid #555;'>Tally &nbsp;</th>"
             mainboard_html_table += "<th rowspan='3' style='text-align: center; vertical-align: middle; border-left: 1px solid #555; border-right: 1px solid #555; border-bottom: 2px solid #555;'>IPO Name</th>"
