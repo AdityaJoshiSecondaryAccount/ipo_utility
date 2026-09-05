@@ -7226,34 +7226,34 @@ def group_billing_details(request, group_id=None):
         
         # Build Mainboard HTML Table
         if mainboard_data:
-            mainboard_html_table = "<table id=\"mainboardBillingTable_{}\"".format(current_group.id) + " class=\"table table-bordered table-hover table-striped\" style=\"max-width: 100vw;\" >\n"
+            mainboard_html_table = "<table id=\"mainboardBillingTable_{}\"".format(current_group.id) + " class=\"table table-bordered table-hover table-striped\" style=\"max-width: 100vw; border-collapse: collapse; border-left: 1px solid #555;\" >\n"
             mainboard_html_table += "<thead><tr >"
-            mainboard_html_table += "<th rowspan='3' scope='col' class='tableline' style='text-align: center; vertical-align: middle;'>Tally &nbsp;</th>"
-            mainboard_html_table += "<th rowspan='3' style='text-align: center; vertical-align: middle;'>IPO Name</th>"
-            mainboard_html_table += "<th colspan='9' style='text-align: center; background-color: #d1ecf1;'>Kostak &nbsp;</th>"
-            mainboard_html_table += "<th colspan='9' style='text-align: center; background-color: #d4edda;'>Subject To &nbsp;</th>"
-            mainboard_html_table += "<th colspan='2' rowspan='2' style='text-align: center; vertical-align: middle; background-color: #fff3cd;'>Premium &nbsp;</th>"
-            mainboard_html_table += "<th colspan='2' rowspan='2' style='text-align: center; vertical-align: middle; background-color: #f8d7da;'>OPTIONS &nbsp;</th>"
-            mainboard_html_table += "<th colspan='2' rowspan='2' scope='col' class='tableline' style='text-align: center; vertical-align: middle; background-color: #e2e3e5;'>Total</th>"
+            mainboard_html_table += "<th rowspan='3' scope='col' class='tableline' style='text-align: center; vertical-align: middle; border-left: 1px solid #555; border-right: 1px solid #555; border-bottom: 2px solid #555;'>Tally &nbsp;</th>"
+            mainboard_html_table += "<th rowspan='3' style='text-align: center; vertical-align: middle; border-left: 1px solid #555; border-right: 1px solid #555; border-bottom: 2px solid #555;'>IPO Name</th>"
+            mainboard_html_table += "<th colspan='9' style='text-align: center; background-color: #d1ecf1; border-left: 1px solid #555; border-right: 1px solid #555; border-bottom: 1px solid #555;'>Kostak &nbsp;</th>"
+            mainboard_html_table += "<th colspan='9' style='text-align: center; background-color: #d4edda; border-left: 1px solid #555; border-right: 1px solid #555; border-bottom: 1px solid #555;'>Subject To &nbsp;</th>"
+            mainboard_html_table += "<th colspan='2' rowspan='2' style='text-align: center; vertical-align: middle; background-color: #fff3cd; border-left: 1px solid #555; border-right: 1px solid #555; border-bottom: 1px solid #555;'>Premium &nbsp;</th>"
+            mainboard_html_table += "<th colspan='2' rowspan='2' style='text-align: center; vertical-align: middle; background-color: #f8d7da; border-left: 1px solid #555; border-right: 1px solid #555; border-bottom: 1px solid #555;'>OPTIONS &nbsp;</th>"
+            mainboard_html_table += "<th colspan='2' rowspan='2' scope='col' class='tableline' style='text-align: center; vertical-align: middle; background-color: #e2e3e5; border-left: 1px solid #555; border-right: 1px solid #555; border-bottom: 1px solid #555;'>Total</th>"
             mainboard_html_table += "</tr>\n"
         
             mainboard_html_table += "<tr>"
-            mainboard_html_table += '<th colspan="3" data-sort-type="numeric" scope="col" style="text-align: center; background-color: #e3f2fd;">Retail</th>'
-            mainboard_html_table += '<th colspan="3" data-sort-type="numeric" scope="col" style="text-align: center; background-color: #e3f2fd;">SHNI</th>'
-            mainboard_html_table += '<th colspan="3" data-sort-type="numeric" scope="col" style="text-align: center; background-color: #e3f2fd;">BHNI</th>'
-            mainboard_html_table += '<th colspan="3" data-sort-type="numeric" scope="col" style="text-align: center; background-color: #e8f5e9;">Retail</th>'
-            mainboard_html_table += '<th colspan="3" data-sort-type="numeric" scope="col" style="text-align: center; background-color: #e8f5e9;">SHNI</th>'
-            mainboard_html_table += '<th colspan="3" data-sort-type="numeric" scope="col" style="text-align: center; background-color: #e8f5e9;">BHNI</th>'
+            mainboard_html_table += '<th colspan="3" data-sort-type="numeric" scope="col" style="text-align: center; background-color: #e3f2fd; border-left: 1px solid #555; border-right: 1px solid #555; border-bottom: 1px solid #555;">Retail</th>'
+            mainboard_html_table += '<th colspan="3" data-sort-type="numeric" scope="col" style="text-align: center; background-color: #e3f2fd; border-right: 1px solid #555; border-bottom: 1px solid #555;">SHNI</th>'
+            mainboard_html_table += '<th colspan="3" data-sort-type="numeric" scope="col" style="text-align: center; background-color: #e3f2fd; border-right: 1px solid #555; border-bottom: 1px solid #555;">BHNI</th>'
+            mainboard_html_table += '<th colspan="3" data-sort-type="numeric" scope="col" style="text-align: center; background-color: #e8f5e9; border-left: 1px solid #555; border-right: 1px solid #555; border-bottom: 1px solid #555;">Retail</th>'
+            mainboard_html_table += '<th colspan="3" data-sort-type="numeric" scope="col" style="text-align: center; background-color: #e8f5e9; border-right: 1px solid #555; border-bottom: 1px solid #555;">SHNI</th>'
+            mainboard_html_table += '<th colspan="3" data-sort-type="numeric" scope="col" style="text-align: center; background-color: #e8f5e9; border-right: 1px solid #555; border-bottom: 1px solid #555;">BHNI</th>'
             mainboard_html_table += "</tr>\n"
         
             mainboard_html_table += "<tr>"
-            k_sub = "<th style='text-align: center; background-color: #e3f2fd;'>Count</th><th style='text-align: center; background-color: #e3f2fd;'>Alloted</th><th style='text-align: center; background-color: #e3f2fd;'>Billing</th>"
-            st_sub = "<th style='text-align: center; background-color: #e8f5e9;'>Count</th><th style='text-align: center; background-color: #e8f5e9;'>Alloted</th><th style='text-align: center; background-color: #e8f5e9;'>Billing</th>"
+            k_sub = "<th style='text-align: center; background-color: #e3f2fd; border-left: 1px solid #555; border-bottom: 2px solid #555;'>Count</th><th style='text-align: center; background-color: #e3f2fd; border-bottom: 2px solid #555;'>Alloted</th><th style='text-align: center; background-color: #e3f2fd; border-right: 1px solid #555; border-bottom: 2px solid #555;'>Billing</th>"
+            st_sub = "<th style='text-align: center; background-color: #e8f5e9; border-left: 1px solid #555; border-bottom: 2px solid #555;'>Count</th><th style='text-align: center; background-color: #e8f5e9; border-bottom: 2px solid #555;'>Alloted</th><th style='text-align: center; background-color: #e8f5e9; border-right: 1px solid #555; border-bottom: 2px solid #555;'>Billing</th>"
             mainboard_html_table += k_sub * 3
             mainboard_html_table += st_sub * 3
-            mainboard_html_table += "<th style='text-align: center; background-color: #fff8e1;'>Shares</th><th style='text-align: center; background-color: #fff8e1;'>Billing</th>"
-            mainboard_html_table += "<th style='text-align: center; background-color: #ffebee;'>Call Amount</th><th style='text-align: center; background-color: #ffebee;'>Put Amount</th>"
-            mainboard_html_table += "<th style='text-align: center; background-color: #f5f5f5;'>Shares</th><th style='text-align: center; background-color: #f5f5f5;'>Amount</th>"
+            mainboard_html_table += "<th style='text-align: center; background-color: #fff8e1; border-left: 1px solid #555; border-bottom: 2px solid #555;'>Shares</th><th style='text-align: center; background-color: #fff8e1; border-right: 1px solid #555; border-bottom: 2px solid #555;'>Billing</th>"
+            mainboard_html_table += "<th style='text-align: center; background-color: #ffebee; border-left: 1px solid #555; border-bottom: 2px solid #555;'>Call Amount</th><th style='text-align: center; background-color: #ffebee; border-right: 1px solid #555; border-bottom: 2px solid #555;'>Put Amount</th>"
+            mainboard_html_table += "<th style='text-align: center; background-color: #f5f5f5; border-left: 1px solid #555; border-bottom: 2px solid #555;'>Shares</th><th style='text-align: center; background-color: #f5f5f5; border-right: 1px solid #555; border-bottom: 2px solid #555;'>Amount</th>"
             mainboard_html_table += "</tr></thead>"
         
             float_format = "{:.0f}"
@@ -7264,13 +7264,14 @@ def group_billing_details(request, group_id=None):
                 mainboard_html_table += f"<tr class='{tr_class}' style='text-align: center;'>"
                 ts_val = row.get('ts_str', '')
                 ts_html = f"<br><span class='tally-ts-span' style='font-size: 0.65rem; font-weight: normal;'>{ts_val}</span>"
-                mainboard_html_table += f"<th><input type='checkbox' class='ipo-archive-checkbox' style='cursor: pointer; margin:0; transform: scale(1.2);' data-id='{row['ipo_id']}' data-group='{current_group.GroupName}' {checked} title='Tally status'>{ts_html}</th>"
-                mainboard_html_table += f"<th><a href='/{row['ipo_id']}/Status' style='color:blue; text-decoration: underline;'>{row['ipo_name']}</a></th>"
+                mainboard_html_table += f"<th style='border-left: 1px solid #555; border-right: 1px solid #555;'><input type='checkbox' class='ipo-archive-checkbox' style='cursor: pointer; margin:0; transform: scale(1.2);' data-id='{row['ipo_id']}' data-group='{current_group.GroupName}' {checked} title='Tally status'>{ts_html}</th>"
+                mainboard_html_table += f"<th style='border-left: 1px solid #555; border-right: 1px solid #555;'><a href='/{row['ipo_id']}/Status' style='color:blue; text-decoration: underline;'>{row['ipo_name']}</a></th>"
             
                 for k_type in ['k_retail', 'k_shni', 'k_bhni']:
                     k = row[k_type]
                     inv = k_type.split('_')[1].upper()
-                    mainboard_html_table += f"<td>"
+                    k_left_border = " border-left: 1px solid #555;" if k_type == 'k_retail' else ""
+                    mainboard_html_table += f"<td style='{k_left_border}'>"
                     if k['count'] != 0:
                         mainboard_html_table += f"<a style='color:blue; text-decoration-line: underline;' href='/{row['ipo_id']}/Order/{current_group.GroupName}/Kostak/{inv}' data-toggle='tooltip' data-placement='auto' title='BUY:{float_format.format(k['buy_qty'])}     SELL:{float_format.format(k['sell_qty'])}'>{int(k['count'])}</a>"
                     else:
@@ -7279,12 +7280,14 @@ def group_billing_details(request, group_id=None):
                 
                     mainboard_html_table += f"<td data-toggle='tooltip' data-placement='auto' title='BUY-K: {k['buy_alloted']}     SELL-K: {k['sell_alloted']}  &#013;&#010;BUY-Sh:{float_format.format(k['buy_alloted_qty'])}    SELL-Sh:{float_format.format(k['sell_alloted_qty'])}'>{int(k['alloted'])}</td>"
                 
-                    mainboard_html_table += f"<td data-toggle='tooltip' data-placement='auto' title='BUY: {float_format.format(k['buy_amt'])}     SELL: {float_format.format(k['sell_amt'])}'>{k['billing']:.1f}</td>"
+                    k_right_border = " border-right: 1px solid #555;"
+                    mainboard_html_table += f"<td style='{k_right_border}' data-toggle='tooltip' data-placement='auto' title='BUY: {float_format.format(k['buy_amt'])}     SELL: {float_format.format(k['sell_amt'])}'>{k['billing']:.1f}</td>"
 
                 for st_type in ['st_retail', 'st_shni', 'st_bhni']:
                     st = row[st_type]
                     inv = st_type.split('_')[1].upper()
-                    mainboard_html_table += f"<td>"
+                    st_left_border = " border-left: 1px solid #555;" if st_type == 'st_retail' else ""
+                    mainboard_html_table += f"<td style='{st_left_border}'>"
                     if st['count'] != 0:
                         mainboard_html_table += f"<a style='color:blue; text-decoration-line: underline;' href='/{row['ipo_id']}/Order/{current_group.GroupName}/Subject To/{inv}' data-toggle='tooltip' data-placement='auto' title='BUY:{float_format.format(st['buy_qty'])}     SELL:{float_format.format(st['sell_qty'])}'>{int(st['count'])}</a>"
                     else:
@@ -7293,22 +7296,23 @@ def group_billing_details(request, group_id=None):
                 
                     mainboard_html_table += f"<td data-toggle='tooltip' data-placement='auto' title='BUY-S: {st['buy_alloted']}     SELL-S: {st['sell_alloted']}  &#013;&#010;BUY-Sh:{float_format.format(st['buy_alloted_qty'])}    SELL-Sh:{float_format.format(st['sell_alloted_qty'])}'>{int(st['alloted'])}</td>"
                 
-                    mainboard_html_table += f"<td data-toggle='tooltip' data-placement='auto' title='BUY: {float_format.format(st['buy_amt'])}     SELL: {float_format.format(st['sell_amt'])}'>{st['billing']:.1f}</td>"
+                    st_right_border = " border-right: 1px solid #555;"
+                    mainboard_html_table += f"<td style='{st_right_border}' data-toggle='tooltip' data-placement='auto' title='BUY: {float_format.format(st['buy_amt'])}     SELL: {float_format.format(st['sell_amt'])}'>{st['billing']:.1f}</td>"
 
-                mainboard_html_table += f"<td>"
+                mainboard_html_table += f"<td style='border-left: 1px solid #555;'>"
                 if row['p_shares'] != 0:
                     mainboard_html_table += f"<a style='color:blue; text-decoration-line: underline;' href='/{row['ipo_id']}/Order/{current_group.GroupName}/Premium/All' data-toggle='tooltip' data-placement='auto' title='BUY:{float_format.format(row['p_buy_qty'])}     SELL:{float_format.format(row['p_sell_qty'])}'>{int(row['p_shares'])}</a>"
                 else:
                     mainboard_html_table += f"{int(row['p_shares'])}"
                 mainboard_html_table += "</td>"
             
-                mainboard_html_table += f"<td data-toggle='tooltip' data-placement='auto' title='BUY: {float_format.format(row['p_buy_amt'])}     SELL: {float_format.format(row['p_sell_amt'])}'>{row['p_billing']:.1f}</td>"
+                mainboard_html_table += f"<td style='border-right: 1px solid #555;' data-toggle='tooltip' data-placement='auto' title='BUY: {float_format.format(row['p_buy_amt'])}     SELL: {float_format.format(row['p_sell_amt'])}'>{row['p_billing']:.1f}</td>"
             
-                mainboard_html_table += f"<td data-toggle='tooltip' data-placement='auto' title='BUY: {float_format.format(row['c_buy_amt'])}     SELL: {float_format.format(row['c_sell_amt'])}'>{row['call_billing']:.1f}</td>"
-                mainboard_html_table += f"<td data-toggle='tooltip' data-placement='auto' title='BUY: {float_format.format(row['put_buy_amt'])}     SELL: {float_format.format(row['put_sell_amt'])}'>{row['put_billing']:.1f}</td>"
+                mainboard_html_table += f"<td style='border-left: 1px solid #555;' data-toggle='tooltip' data-placement='auto' title='BUY: {float_format.format(row['c_buy_amt'])}     SELL: {float_format.format(row['c_sell_amt'])}'>{row['call_billing']:.1f}</td>"
+                mainboard_html_table += f"<td style='border-right: 1px solid #555;' data-toggle='tooltip' data-placement='auto' title='BUY: {float_format.format(row['put_buy_amt'])}     SELL: {float_format.format(row['put_sell_amt'])}'>{row['put_billing']:.1f}</td>"
             
-                mainboard_html_table += f"<td data-toggle='tooltip' data-placement='auto' title='Kostak:{float_format.format(row['total_kostak_shares'])}     Subject To:{float_format.format(row['total_st_shares'])}     Premium:{float_format.format(row['p_shares'])}'>{int(row['total_shares'])}</td>"
-                mainboard_html_table += f"<td>{row['total_amount']:.0f}</td>"
+                mainboard_html_table += f"<td style='border-left: 1px solid #555;' data-toggle='tooltip' data-placement='auto' title='Kostak:{float_format.format(row['total_kostak_shares'])}     Subject To:{float_format.format(row['total_st_shares'])}     Premium:{float_format.format(row['p_shares'])}'>{int(row['total_shares'])}</td>"
+                mainboard_html_table += f"<td style='border-right: 1px solid #555;'>{row['total_amount']:.0f}</td>"
                 mainboard_html_table += "</tr>\n"
             mainboard_html_table += "</tbody></table>"
 
