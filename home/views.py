@@ -14678,6 +14678,67 @@ def bulk_ipo_transactions(request):
     return JsonResponse({"status": "error", "message": "Invalid request method"})
 
 
+@login_required
+def get_group_dues(request, group_id):
+    """
+    API endpoint that returns the due amount for each IPO in a specific group.
+    Used by the Add Payment modal for bulk auto-allocation.
+    """
+    try:
+        from django.db.models import Sum, Case, When, F, DecimalField
+        from django.http import JsonResponse
+        from .models import GroupDetail, CurrentIpoName, Order, Accounting
+        
+        group = GroupDetail.objects.get(id=group_id, user=request.user)
+        ipos = CurrentIpoName.objects.filter(user=request.user)
+        
+        # 1. Fetch Order Totals (How much was billed)
+        order_totals = (
+            Order.objects.filter(user=request.user, OrderGroup=group)
+            .values("OrderIPOName_id")
+            .annotate(total=Sum("Amount"))
+        )
+        order_dict = {row["OrderIPOName_id"]: float(row["total"] or 0) for row in order_totals}
+        
+        # 2. Fetch Accounting Totals (How much was paid)
+        accounting_totals = (
+            Accounting.objects.filter(user=request.user, group=group)
+            .values("ipo_id")
+            .annotate(
+                total=Sum(
+                    Case(
+                        When(amount_type='credit', then=F('amount')),
+                        When(amount_type='debit', then=-F('amount')),
+                        output_field=DecimalField()
+                    )
+                )
+            )
+        )
+        accounting_dict = {row["ipo_id"]: float(row["total"] or 0) for row in accounting_totals}
+        
+        # 3. Calculate Dues
+        due_data = []
+        for ipo in ipos:
+            billed = order_dict.get(ipo.id, 0.0)
+            paid = accounting_dict.get(ipo.id, 0.0)
+            due = billed - paid
+            
+            # Only include IPOs with a non-zero balance (exactly like the old modal logic)
+            if abs(due) > 0.001:
+                due_data.append({
+                    "ipo_id": ipo.id,
+                    "ipo_name": ipo.IPOName,
+                    "due_amount": round(due, 2)
+                })
+                    
+        return JsonResponse({"status": "success", "data": due_data})
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+
 def send_group_email(request,group_data, IPOName, entry, record_type, user_email, user_app_pw, request_user,OrderType):
     try:
         group = unquote(group_data['name'])
