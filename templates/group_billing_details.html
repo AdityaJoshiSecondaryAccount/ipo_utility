@@ -281,14 +281,24 @@
         <div class="group-section" style="margin-bottom: 5px;">
             {% if table_data.sme_html_table %}
             <div>
-                <h4 class="text-center">Group : {{ table_data.group.GroupName }} (SME IPOs)</h4>
+                <h4 class="text-center">
+                    Group : {{ table_data.group.GroupName }} (SME IPOs)
+                    <button class="btn btn-sm btn-outline-primary ms-2" onclick="openGroupShareModal(this, '{{ table_data.group.GroupName }}', 'SME')" title="Share">
+                        <i class="fa fa-share-alt"></i> Share
+                    </button>
+                </h4>
                 {{ table_data.sme_html_table | safe }}
             </div>
             {% endif %}
 
             {% if table_data.mainboard_html_table %}
             <div style="margin-top: 5px;">
-                <h4 class="text-center">Group : {{ table_data.group.GroupName }}</h4>
+                <h4 class="text-center">
+                    Group : {{ table_data.group.GroupName }}
+                    <button class="btn btn-sm btn-outline-primary ms-2" onclick="openGroupShareModal(this, '{{ table_data.group.GroupName }}', 'Mainboard')" title="Share">
+                        <i class="fa fa-share-alt"></i> Share
+                    </button>
+                </h4>
                 {{ table_data.mainboard_html_table | safe }}
             </div>
             {% endif %}
@@ -307,8 +317,333 @@
     {% endif %}
 </div>
 
+<!-- Share Modal -->
+<div class="modal fade" id="shareGroupModal" tabindex="-1" aria-labelledby="shareGroupModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header align-items-center">
+        <h5 class="modal-title mb-0" id="shareGroupModalLabel">Share Group Details</h5>
+        <div class="d-flex align-items-center ml-auto">
+            
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin:-1rem -1rem -1rem auto;">
+              <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+      </div>
+      <div class="modal-body" id="shareGroupModalBody">
+          <!-- Table will be cloned here -->
+      </div>
+      <div class="modal-footer">
+        <div class="custom-control custom-checkbox mr-4" data-html2canvas-ignore="true">
+            <input type="checkbox" class="custom-control-input" id="hideEmptyRowsToggle" checked>
+            <label class="custom-control-label text-muted" style="cursor:pointer; margin-bottom:0;" for="hideEmptyRowsToggle">Hide Empty Rows/Tables</label>
+        </div>
+        <button type="button" class="btn btn-info" id="copyGroupImageBtn" onclick="copyGroupImage()">
+            <i class="fa fa-copy"></i> Copy Image
+        </button>
+        <button type="button" class="btn btn-primary" id="shareGroupImageBtn" onclick="shareGroupImage()">
+            <i class="fa fa-share-alt"></i> Share via System
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="{% static 'JS/jquery.min.js' %}"></script>
+<script src="{% static 'DataTables/js/html2canvas.min.js' %}"></script>
 <script>
+    function openGroupShareModal(buttonElement, groupName, type) {
+        const containerDiv = buttonElement.closest('div');
+        const tableToClone = containerDiv.querySelector('table');
+        
+        if (!tableToClone) return;
+
+        const modalBody = document.getElementById('shareGroupModalBody');
+        modalBody.innerHTML = ''; // Clear previous
+
+        const titleContainer = document.createElement('div');
+        titleContainer.style.display = 'flex';
+        titleContainer.style.justifyContent = 'space-between';
+        titleContainer.style.alignItems = 'center';
+        titleContainer.style.marginBottom = '1rem';
+        
+        const title = document.createElement('h3');
+        title.className = 'font-weight-bold m-0';
+        title.innerText = 'Group : ' + groupName + (type === 'SME' ? ' (SME IPOs)' : '');
+        
+        const timeDisplay = document.createElement('span');
+        timeDisplay.className = 'text-muted';
+        timeDisplay.style.fontWeight = 'bold';
+        const now = new Date();
+        const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+        timeDisplay.innerText = now.toLocaleString('en-IN', options);
+        titleContainer.appendChild(title);
+        titleContainer.appendChild(timeDisplay);
+        modalBody.appendChild(titleContainer);
+
+        const styleBlock = document.createElement('style');
+        styleBlock.innerHTML = `
+            #shareGroupModalBody th { position: static !important; }
+            #shareGroupModalBody thead tr.header-row th { background-color: #f8f9fa; }
+        `;
+        modalBody.appendChild(styleBlock);
+
+        const tablesContainer = document.createElement('div');
+        tablesContainer.id = 'shareGroupModalTablesContainer';
+        modalBody.appendChild(tablesContainer);
+
+        // Fetch all rows from DataTables, bypassing the search/hide filters
+        let rows = [];
+        if ($.fn.DataTable.isDataTable(tableToClone)) {
+            rows = Array.from($(tableToClone).DataTable().rows().nodes());
+        } else {
+            const tbody = tableToClone.querySelector('tbody');
+            rows = Array.from(tbody.querySelectorAll('tr'));
+        }
+
+        const extractText = (td) => {
+            if (!td) return '';
+            const a = td.querySelector('a');
+            return a ? a.innerText.trim() : td.textContent.trim();
+        };
+
+        const createTable = (title, headerHtml) => {
+            const table = document.createElement('table');
+            table.className = 'table table-bordered table-sm mt-3';
+            table.style.border = '1px solid #000';
+            table.style.width = '100%';
+            table.innerHTML = `
+                <thead>
+                    <tr><th colspan="100%" class="text-center font-weight-bold" style="border:1px solid #000; font-size:1.1rem; background-color: #fff;">${title}</th></tr>
+                    ${headerHtml}
+                </thead>
+                <tbody style="text-align: center;"></tbody>
+            `;
+            return table;
+        };
+
+        const renderTables = (hideEmpty) => {
+            tablesContainer.innerHTML = ''; // Clear existing tables
+
+            const kostakTable = createTable('Kostak', `
+                <tr class="header-row">
+                    <th style="text-align:center; vertical-align:bottom; border:1px solid #000; border-bottom:none !important; width: 250px;">IPO Name</th>
+                    <th colspan="3" style="text-align:center; border:1px solid #000;">Retail</th>
+                    <th colspan="3" style="text-align:center; border:1px solid #000;">SHNI</th>
+                    <th colspan="3" style="text-align:center; border:1px solid #000;">BHNI</th>
+                </tr>
+                <tr class="header-row">
+                    <th style="border:1px solid #000; border-top:none !important;"></th>
+                    <th style="border:1px solid #000;">Count</th><th style="border:1px solid #000;">Alloted</th><th style="border:1px solid #000;">Billing</th>
+                    <th style="border:1px solid #000;">Count</th><th style="border:1px solid #000;">Alloted</th><th style="border:1px solid #000;">Billing</th>
+                    <th style="border:1px solid #000;">Count</th><th style="border:1px solid #000;">Alloted</th><th style="border:1px solid #000;">Billing</th>
+                </tr>
+            `);
+
+            const stTable = createTable('Subject To', `
+                <tr class="header-row">
+                    <th style="text-align:center; vertical-align:bottom; border:1px solid #000; border-bottom:none !important; width: 250px;">IPO Name</th>
+                    <th colspan="3" style="text-align:center; border:1px solid #000;">Retail</th>
+                    <th colspan="3" style="text-align:center; border:1px solid #000;">SHNI</th>
+                    <th colspan="3" style="text-align:center; border:1px solid #000;">BHNI</th>
+                </tr>
+                <tr class="header-row">
+                    <th style="border:1px solid #000; border-top:none !important;"></th>
+                    <th style="border:1px solid #000;">Count</th><th style="border:1px solid #000;">Alloted</th><th style="border:1px solid #000;">Billing</th>
+                    <th style="border:1px solid #000;">Count</th><th style="border:1px solid #000;">Alloted</th><th style="border:1px solid #000;">Billing</th>
+                    <th style="border:1px solid #000;">Count</th><th style="border:1px solid #000;">Alloted</th><th style="border:1px solid #000;">Billing</th>
+                </tr>
+            `);
+
+            const premiumTable = createTable('Premium', `
+                <tr class="header-row">
+                    <th style="text-align:center; vertical-align:bottom; border:1px solid #000; border-bottom:none !important; width: 250px;">IPO Name</th>
+                    <th colspan="2" style="text-align:center; border:1px solid #000;">Premium</th>
+                </tr>
+                <tr class="header-row">
+                    <th style="border:1px solid #000; border-top:none !important;"></th>
+                    <th style="border:1px solid #000;">Shares</th><th style="border:1px solid #000;">Billing</th>
+                </tr>
+            `);
+
+            const optsTable = createTable('Options & Total', `
+                <tr class="header-row">
+                    <th style="text-align:center; vertical-align:bottom; border:1px solid #000; border-bottom:none !important; width: 250px;">IPO Name</th>
+                    <th colspan="2" style="text-align:center; border:1px solid #000;">OPTIONS</th>
+                    <th colspan="2" style="text-align:center; border:1px solid #000;">Total</th>
+                </tr>
+                <tr class="header-row">
+                    <th style="border:1px solid #000; border-top:none !important;"></th>
+                    <th style="border:1px solid #000;">Call Amount</th><th style="border:1px solid #000;">Put Amount</th>
+                    <th style="border:1px solid #000;">Shares</th><th style="border:1px solid #000;">Amount</th>
+                </tr>
+            `);
+
+            rows.forEach(tr => {
+                const cells = Array.from(tr.querySelectorAll('th, td'));
+                if (cells.length < 25) return;
+                
+                const ipoName = extractText(cells[1]);
+
+                const makeRowAndCheckEmpty = (tableObj, data) => {
+                    // Check if every data point is effectively 0
+                    const isAllZeros = data.every(val => {
+                        const v = val.replace(/,/g, ''); // handle commas if any
+                        return v === '0' || v === '0.0' || v === '-0.0' || v === '' || v === '-';
+                    });
+                    
+                    if (hideEmpty && isAllZeros) return; // Skip this row
+
+                    const trHTML = document.createElement('tr');
+                    trHTML.innerHTML = `<th style="text-align:center; border:1px solid #000; background-color:#fff;">${ipoName}</th>`;
+                    data.forEach(val => {
+                        trHTML.innerHTML += `<td style="text-align:center; border:1px solid #000; background-color:#fff;">${val}</td>`;
+                    });
+                    tableObj.querySelector('tbody').appendChild(trHTML);
+                };
+
+                makeRowAndCheckEmpty(kostakTable, [
+                    extractText(cells[2]), extractText(cells[3]), extractText(cells[4]),
+                    extractText(cells[5]), extractText(cells[6]), extractText(cells[7]),
+                    extractText(cells[8]), extractText(cells[9]), extractText(cells[10])
+                ]);
+
+                makeRowAndCheckEmpty(stTable, [
+                    extractText(cells[11]), extractText(cells[12]), extractText(cells[13]),
+                    extractText(cells[14]), extractText(cells[15]), extractText(cells[16]),
+                    extractText(cells[17]), extractText(cells[18]), extractText(cells[19])
+                ]);
+
+                makeRowAndCheckEmpty(premiumTable, [
+                    extractText(cells[20]), extractText(cells[21])
+                ]);
+
+                makeRowAndCheckEmpty(optsTable, [
+                    extractText(cells[22]), extractText(cells[23]),
+                    extractText(cells[24]), extractText(cells[25])
+                ]);
+            });
+
+            // Only append tables that have at least one row in the tbody
+            [kostakTable, stTable, premiumTable, optsTable].forEach(tbl => {
+                if (tbl.querySelector('tbody').children.length > 0) {
+                    tablesContainer.appendChild(tbl);
+                }
+            });
+        };
+
+        // Render initially with the current toggle state
+        const toggleEl = document.getElementById('hideEmptyRowsToggle');
+        renderTables(toggleEl.checked);
+        
+        // Listen to toggle changes (use onchange to avoid duplicate listeners)
+        toggleEl.onchange = function() {
+            renderTables(this.checked);
+        };
+
+        document.getElementById('shareGroupModalLabel').innerText = `Share Group Details - ${groupName}`;
+
+        var myModal = new bootstrap.Modal(document.getElementById('shareGroupModal'));
+        myModal.show();
+    }
+
+    async function renderGroupImage() {
+        const modalDialog = document.querySelector('#shareGroupModal .modal-dialog');
+        const modalBody = document.getElementById('shareGroupModalBody');
+        
+        // Save old styles to restore later
+        const oldDialogClass = modalDialog.className;
+        const oldBodyOverflow = modalBody.style.overflow;
+        const oldBodyMaxHeight = modalBody.style.maxHeight;
+
+        // Temporarily disable scrollable behavior so the element expands to its full height
+        modalDialog.classList.remove('modal-dialog-scrollable');
+        modalBody.style.overflow = 'visible';
+        modalBody.style.maxHeight = 'none';
+
+        // Brief delay to ensure browser repaints the expanded layout before capture
+        await new Promise(r => setTimeout(r, 100));
+
+        try {
+            return await html2canvas(modalBody, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff'
+            });
+        } finally {
+            // Restore everything perfectly
+            modalDialog.className = oldDialogClass;
+            modalBody.style.overflow = oldBodyOverflow;
+            modalBody.style.maxHeight = oldBodyMaxHeight;
+        }
+    }
+
+    async function copyGroupImage() {
+        const button = document.getElementById('copyGroupImageBtn');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Copying...';
+        button.disabled = true;
+
+        try {
+            const canvas = await renderGroupImage();
+            const blob = await new Promise((resolve, reject) => {
+                canvas.toBlob(result => {
+                    if (result) resolve(result);
+                    else reject(new Error('Image creation failed'));
+                }, 'image/png');
+            });
+
+            const item = new ClipboardItem({ "image/png": blob });
+            await navigator.clipboard.write([item]);
+            alert("Image copied to clipboard successfully!");
+        } catch (err) {
+            console.error("Failed to copy image: ", err);
+            alert("Failed to copy image. Check browser permissions.");
+        } finally {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    }
+
+    async function shareGroupImage() {
+        const button = document.getElementById('shareGroupImageBtn');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Sharing...';
+        button.disabled = true;
+
+        try {
+            const canvas = await renderGroupImage();
+            const blob = await new Promise((resolve, reject) => {
+                canvas.toBlob(result => {
+                    if (result) resolve(result);
+                    else reject(new Error('Image creation failed'));
+                }, 'image/png');
+            });
+
+            const file = new File([blob], 'group_details.png', { type: 'image/png' });
+            const titleText = document.getElementById('shareGroupModalLabel').innerText;
+
+            const shareData = {
+                title: titleText,
+                text: 'Here are the billing details for ' + titleText,
+                files: [file]
+            };
+
+            if (navigator.canShare && navigator.canShare(shareData)) {
+                await navigator.share(shareData);
+            } else {
+                alert("Sharing files is not supported on this browser. Use 'Copy Image' instead.");
+            }
+        } catch (err) {
+            if (err.name !== 'AbortError') {
+                console.error("Failed to share image: ", err);
+                alert("Failed to share image.");
+            }
+        } finally {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    }
     function updatePositionsNavbarOffset() {
         var navbar = document.querySelector('.navbar.fixed-top');
         var navbarHeight = navbar ? navbar.getBoundingClientRect().height : 0;
