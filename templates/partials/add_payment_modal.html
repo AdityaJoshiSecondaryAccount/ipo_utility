@@ -103,6 +103,22 @@
 
 <script>
 $(function () {
+    let amountTimer;
+    let duesRequest = null;
+    let requestSequence = 0;
+
+    function toMinorUnits(value) {
+        const number = Number(value);
+        return Number.isFinite(number) ? Math.round(number * 100) : 0;
+    }
+
+    function signedAmount(amount, amountType) {
+        return amountType === 'debit' ? -amount : amount;
+    }
+
+    function escapeHtml(value) {
+        return $('<div>').text(String(value == null ? '' : value)).html();
+    }
     // -------------------------------------------------------------------------
     // 1. UI Field Toggles
     // -------------------------------------------------------------------------
@@ -123,6 +139,12 @@ $(function () {
     // 2. Bulk Auto-Allocation Engine
     // -------------------------------------------------------------------------
     function updateBulkAllocation() {
+        const sequence = ++requestSequence;
+        if (duesRequest) {
+            duesRequest.abort();
+            duesRequest = null;
+        }
+
         const isJV = $('#trans_jv').is(':checked');
         const ipoVal = $('#trans_ipo').val();
         const groupId = $('#trans_group').val();
@@ -133,6 +155,7 @@ $(function () {
         // Hide container if conditions for Bulk Allocation are NOT met
         if (isJV || (ipoVal !== 'all' && ipoVal) || !groupId || amountVal <= 0) {
             container.empty().hide();
+            $('#saveBtn').prop('disabled', false);
             return;
         }
 
@@ -140,12 +163,17 @@ $(function () {
         container.html('<div class="text-center my-3"><i class="fas fa-spinner fa-spin"></i> Fetching IPO dues...</div>').show();
 
         // AJAX call to our new decoupled API endpoint
-        $.ajax({
-            url: `/api/get-group-dues/${groupId}/`,
+        duesRequest = $.ajax({
+            url: `/api/get-group-dues/${encodeURIComponent(groupId)}/`,
             method: 'GET',
             success: function(response) {
+                if (sequence !== requestSequence) return;
                 if (response.status !== 'success') {
-                    container.html(`<div class="alert alert-danger">Error fetching dues: ${response.message}</div>`);
+                    container.empty().append(
+                        $('<div>', {class: 'alert alert-danger'}).text(
+                            'Error fetching dues: ' + (response.message || 'Unknown error')
+                        )
+                    );
                     return;
                 }
 
@@ -158,13 +186,16 @@ $(function () {
                 
                 let remainingAmount = amountVal;
                 let allocatedIpos = [];
+                const masterType = $('#trans_amount_type').val() || 'credit';
                 
                 // Distribute payment sequentially across IPOs with outstanding dues
                 if (ipoData.length > 0) {
                     ipoData.forEach(ipo => {
-                        let absoluteDue = Math.abs(ipo.due_amount);
+                        const dueType = Number(ipo.due_amount) < 0 ? 'debit' : 'credit';
+                        let absoluteDue = Math.abs(Number(ipo.due_amount) || 0);
                         let allocate = 0;
-                        if (remainingAmount > 0) {
+                        // A payment only consumes balances in the same direction.
+                        if (remainingAmount > 0 && dueType === masterType) {
                             allocate = Math.min(absoluteDue, remainingAmount);
                             remainingAmount -= allocate;
                         }
@@ -215,11 +246,12 @@ $(function () {
                     
                     allocatedIpos.forEach((ipo, index) => {
                         const defaultAmountType = ipo.due < 0 ? 'debit' : 'credit';
+                        const safeIpoName = escapeHtml(ipo.ipo_name);
                         html += `
-                            <div class="row mb-3 bulk-ipo-row" data-ipo-id="${ipo.ipo_id}" data-ipo-name="${ipo.ipo_name}">
+                            <div class="row mb-3 bulk-ipo-row" data-ipo-id="${parseInt(ipo.ipo_id, 10)}" data-ipo-name="${safeIpoName}">
                                 <div class="col-md-4">
                                     <label>IPO Name</label>
-                                    <input type="text" class="form-control" value="${ipo.ipo_name}" readonly>
+                                    <input type="text" class="form-control" value="${safeIpoName}" readonly>
                                 </div>
                                 <div class="col-md-3">
                                     <label>Due Amount</label>
@@ -272,11 +304,16 @@ $(function () {
                 
                 // Finally, inject HTML into DOM and run initial calculation
                 container.html(html).fadeIn(200);
-                $('.bulk-ipo-amount').first().trigger('input');
+                recalculateAllocation(false);
                 
             },
-            error: function(xhr) {
-                container.html('<div class="alert alert-danger">Failed to connect to server.</div>');
+            error: function(xhr, status) {
+                if (status !== 'abort' && sequence === requestSequence) {
+                    container.html('<div class="alert alert-danger">Failed to connect to server.</div>');
+                }
+            },
+            complete: function() {
+                if (sequence === requestSequence) duesRequest = null;
             }
         });
     }
@@ -290,7 +327,6 @@ $(function () {
     $(document).on('change', '#trans_group, #trans_ipo', updateBulkAllocation);
     
     // Only update on debounced/keyups for amount to prevent excessive AJAX calls
-    let amountTimer;
     $(document).on('input', '#trans_amount', function() {
         clearTimeout(amountTimer);
         amountTimer = setTimeout(updateBulkAllocation, 400);
@@ -298,76 +334,109 @@ $(function () {
     
     // Sync Master Amount Type to JV Amount Type
     $(document).on('change', '#trans_amount_type', function() {
-        $('.bulk-jv-type').val($(this).val()).trigger('change');
+        updateBulkAllocation();
     });
     
     // Handle manual tweaks inside the Bulk Allocation Block
-    $(document).on('input change', '.bulk-ipo-amount, .bulk-ipo-include, .bulk-ipo-type, .bulk-jv-amount, .bulk-jv-include, .bulk-jv-type', function(e) {
-        // Recalculate the Excess JV if an IPO row is modified
-        if ($(e.target).hasClass('bulk-ipo-amount') || $(e.target).hasClass('bulk-ipo-include')) {
-            let sumIpo = 0;
+    function recalculateAllocation(adjustJV) {
+        if (adjustJV) {
+            let ipoNet = 0;
+            let ipoGross = 0;
             $('#bulkAllocationContainer .bulk-ipo-row').each(function() {
                 if ($(this).find('.bulk-ipo-include').is(':checked')) {
-                    sumIpo += parseFloat($(this).find('.bulk-ipo-amount').val()) || 0;
+                    const amount = toMinorUnits($(this).find('.bulk-ipo-amount').val());
+                    ipoGross += amount;
+                    ipoNet += signedAmount(amount, $(this).find('.bulk-ipo-type').val());
                 }
             });
-            
-            let masterAmt = parseFloat($('#trans_amount').val()) || 0;
-            let excess = Math.max(0, masterAmt - sumIpo);
-            
-            if (excess > 0) {
+
+            const masterAmount = toMinorUnits($('#trans_amount').val());
+            const expectedNet = signedAmount(masterAmount, $('#trans_amount_type').val());
+            const remainder = expectedNet - ipoNet;
+            const canBalanceWithJV = ipoGross + Math.abs(remainder) <= masterAmount;
+
+            if (remainder !== 0 && canBalanceWithJV) {
                 $('.bulk-jv-row').css('display', 'flex');
-                $('.bulk-jv-amount').val(excess.toFixed(2));
+                $('.bulk-jv-amount').val((Math.abs(remainder) / 100).toFixed(2));
+                $('.bulk-jv-type').val(remainder > 0 ? 'credit' : 'debit');
+                $('.bulk-jv-include').prop('checked', true);
             } else {
                 $('.bulk-jv-row').hide();
-                $('.bulk-jv-amount').val(0);
+                $('.bulk-jv-amount').val('0.00');
+                $('.bulk-jv-include').prop('checked', false);
             }
         }
-        
+
         // Recalculate Totals Footer
         let totalCredit = 0;
         let totalDebit = 0;
         
         if ($('.bulk-jv-include').is(':checked')) {
-            let jvAmt = parseFloat($('.bulk-jv-amount').val()) || 0;
+            let jvAmt = toMinorUnits($('.bulk-jv-amount').val());
             if ($('.bulk-jv-type').val() === 'credit') totalCredit += jvAmt;
             else totalDebit += jvAmt;
         }
         
         $('#bulkAllocationContainer .bulk-ipo-row').each(function() {
             if ($(this).find('.bulk-ipo-include').is(':checked')) {
-                let amt = parseFloat($(this).find('.bulk-ipo-amount').val()) || 0;
+                let amt = toMinorUnits($(this).find('.bulk-ipo-amount').val());
                 if ($(this).find('.bulk-ipo-type').val() === 'credit') totalCredit += amt;
                 else totalDebit += amt;
             }
         });
         
         let netAmount = totalCredit - totalDebit;
+        const grossAmount = totalCredit + totalDebit;
+        const masterAmount = toMinorUnits($('#trans_amount').val());
+        const expectedNet = signedAmount(
+            masterAmount,
+            $('#trans_amount_type').val()
+        );
+        const difference = expectedNet - netAmount;
+        const isValid = expectedNet !== 0 && difference === 0 && grossAmount <= masterAmount;
         
-        $('.bulk-total-amount').val(Math.abs(netAmount).toFixed(2));
-        $('.bulk-total-credit').text('Credit: ' + totalCredit.toFixed(2));
-        $('.bulk-total-debit').text('Debit: ' + totalDebit.toFixed(2));
-        $('.bulk-net-amount').text('Net Amount: ' + netAmount.toFixed(2));
+        $('.bulk-total-amount').val((Math.abs(netAmount) / 100).toFixed(2));
+        $('.bulk-total-credit').text('Credit: ' + (totalCredit / 100).toFixed(2));
+        $('.bulk-total-debit').text('Debit: ' + (totalDebit / 100).toFixed(2));
+        $('.bulk-net-amount').text('Net Amount: ' + (netAmount / 100).toFixed(2));
         
         let balanceBox = $('.bulk-balance-box');
-        if (netAmount > 0) {
-            balanceBox.css({'background-color': '#d4edda', 'color': '#155724'}).html('Credit Balance: ' + Math.abs(netAmount).toFixed(2));
-        } else if (netAmount < 0) {
-            balanceBox.css({'background-color': '#f8d7da', 'color': '#721c24'}).html('Debit Balance: ' + Math.abs(netAmount).toFixed(2));
+        if (isValid) {
+            balanceBox.css({'background-color': '#d4edda', 'color': '#155724'}).text('Allocation matched');
         } else {
-            balanceBox.css({'background-color': '#fff', 'color': '#000'}).html('Zero Balance');
+            balanceBox.css({'background-color': '#f8d7da', 'color': '#721c24'}).text(
+                grossAmount > masterAmount
+                    ? 'Allocated amount exceeds the payment amount'
+                    : 'Difference: ₹' + (difference / 100).toFixed(2)
+            );
         }
+        $('#saveBtn').prop('disabled', !isValid);
+        return isValid;
+    }
+
+    $(document).on('input change', '.bulk-ipo-amount, .bulk-ipo-include, .bulk-ipo-type, .bulk-jv-amount, .bulk-jv-include, .bulk-jv-type', function(e) {
+        const adjustJV = $(e.target).hasClass('bulk-ipo-amount') ||
+            $(e.target).hasClass('bulk-ipo-include') ||
+            $(e.target).hasClass('bulk-ipo-type');
+        recalculateAllocation(adjustJV);
     });
 
     // Reset when modal is reopened/closed
     $('#transactionModal').on('shown.bs.modal', function() {
         toggleIPOField();
-        updateBulkAllocation();
     });
     $('#transactionModal').on('hidden.bs.modal', function () {
-        $('#trans_jv').prop('checked', false);
+        clearTimeout(amountTimer);
+        requestSequence++;
+        if (duesRequest) {
+            duesRequest.abort();
+            duesRequest = null;
+        }
+        this.querySelector('form').reset();
+        $('#ipoCol').show();
+        $('#trans_ipo').prop('disabled', false).val('all');
         $('#bulkAllocationContainer').empty().hide();
-        toggleIPOField();
+        $('#saveBtn').prop('disabled', false);
     });
 
     // -------------------------------------------------------------------------
@@ -382,6 +451,11 @@ $(function () {
         // Only hijack submission if we are in Bulk Allocation Mode
         if (!isJV && (ipoVal === 'all' || !ipoVal) && groupId && amountVal > 0) {
             e.preventDefault();
+
+            if (!recalculateAllocation(false)) {
+                alert('The allocation net must equal the entered payment amount.');
+                return;
+            }
             
             let transactions = [];
             const remark = $('#trans_remark').val() || '';
@@ -440,6 +514,8 @@ $(function () {
                 method: 'POST',
                 data: {
                     'transactions': JSON.stringify(transactions),
+                    'master_amount': $('#trans_amount').val(),
+                    'master_amount_type': $('#trans_amount_type').val(),
                     'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
                 },
                 success: function(response) {
@@ -451,7 +527,10 @@ $(function () {
                     }
                 },
                 error: function(xhr, status, error) {
-                    alert('Error processing bulk allocation: ' + error);
+                    const message = xhr.responseJSON && xhr.responseJSON.message
+                        ? xhr.responseJSON.message
+                        : error;
+                    alert('Error processing bulk allocation: ' + message);
                     btn.prop('disabled', false).html(originalText);
                 }
             });

@@ -14522,47 +14522,92 @@ def restore_accounting(request, entry_id):
     return JsonResponse({"success": False, "error": "Invalid request"})
 
 
-def add_transaction(request):
-    user = request.user
-    if request.method == "POST":
-        if not request.user.is_authenticated:
-            return redirect("login") 
-        
-        jv = 1 if request.POST.get("jv") == "1" else 0
-        
-        ipo_id = request.POST.get("ipo_id")if jv == 0 else None
-        group_id = request.POST.get("group_id")
-        amount_type = request.POST.get("amount_type")
-        amount = request.POST.get("amount")
-        remark = request.POST.get("remark")
-        date_time_str  = request.POST.get("date_time")
+VALID_TRANSACTION_TYPES = {"credit", "debit"}
+MONEY_QUANTUM = Decimal("0.01")
 
-        # date_time = datetime.strptime(date_time_str, "%Y-%m-%dT%H:%M")
-        # date_time = timezone.make_aware(date_time)  # optional if using timezone-aware field
-        # date_time = parse_datetime(date_time_str) if date_time_str else timezone.now()
-        if date_time_str:
-            # Add seconds if missing
-            if len(date_time_str) == 16:  # "YYYY-MM-DDTHH:MM"
-                date_time_str += ":00"
-            date_time = datetime.strptime(date_time_str, "%Y-%m-%dT%H:%M:%S")
-            
-            # make timezone aware
-            if timezone.is_aware(date_time):
-                date_time = timezone.make_aware(date_time, timezone.get_current_timezone())
-        else:
-            date_time = timezone.localtime().replace(tzinfo=None)
+
+def _parse_transaction_amount(value):
+    try:
+        amount = Decimal(str(value)).quantize(MONEY_QUANTUM)
+    except (decimal.InvalidOperation, TypeError, ValueError):
+        raise ValidationError("Invalid amount.")
+    if not amount.is_finite() or amount <= 0:
+        raise ValidationError("Amount must be greater than zero.")
+    return amount
+
+
+def _parse_transaction_datetime(value):
+    if not value:
+        return timezone.now()
+    try:
+        parsed = parse_datetime(value)
+    except (TypeError, ValueError):
+        parsed = None
+    if parsed is None:
+        raise ValidationError("Invalid date and time.")
+    if timezone.is_naive(parsed):
+        parsed = timezone.make_aware(parsed, timezone.get_current_timezone())
+    return parsed
+
+
+def _get_owned_group(user, group_id):
+    try:
+        group = GroupDetail.objects.filter(id=group_id, user=user).first()
+    except (TypeError, ValueError):
+        group = None
+    if group is None:
+        raise ValidationError("Invalid group.")
+    return group
+
+
+def _get_owned_ipo(user, ipo_id):
+    try:
+        ipo = CurrentIpoName.objects.filter(id=ipo_id, user=user).first()
+    except (TypeError, ValueError):
+        ipo = None
+    if ipo is None:
+        raise ValidationError("Invalid IPO.")
+    return ipo
+
+
+def _create_single_transaction(request, redirect_name):
+    if request.method != "POST":
+        return redirect(redirect_name)
+
+    try:
+        group = _get_owned_group(request.user, request.POST.get("group_id"))
+        is_jv = request.POST.get("jv") == "1"
+        ipo = None
+        if not is_jv:
+            ipo_id = request.POST.get("ipo_id")
+            if not ipo_id or ipo_id == "all":
+                raise ValidationError("A valid IPO is required.")
+            ipo = _get_owned_ipo(request.user, ipo_id)
+
+        amount_type = request.POST.get("amount_type")
+        if amount_type not in VALID_TRANSACTION_TYPES:
+            raise ValidationError("Invalid amount type.")
 
         Accounting.objects.create(
-            user=user,
-            ipo_id=ipo_id,
-            group_id=group_id,
+            user=request.user,
+            ipo=ipo,
+            group=group,
             amount_type=amount_type,
-            amount=amount,
-            remark=remark,
-            date_time=date_time ,
-            jv=jv,
+            amount=_parse_transaction_amount(request.POST.get("amount")),
+            remark=(request.POST.get("remark") or "")[:250],
+            date_time=_parse_transaction_datetime(request.POST.get("date_time")),
+            jv=is_jv,
         )
-        return redirect("accounting")  # reload the same page after save
+    except ValidationError as exc:
+        messages.error(request, exc.messages[0])
+
+    return redirect(redirect_name)
+
+
+@login_required
+def add_transaction(request):
+    if request.method == "POST":
+        return _create_single_transaction(request, "accounting")
 
     # if GET request → render form
     from .models import IPO, Group
@@ -14571,47 +14616,10 @@ def add_transaction(request):
     groups = Group.objects.filter(user=request.user)
     return render(request, "accounting/Accounting.html", {"ipos": ipos, "groups": groups, "now":timezone.localtime()})
 
+@login_required
 def add_transaction_group(request):
-    user = request.user
     if request.method == "POST":
-        if not request.user.is_authenticated:
-            return redirect("login") 
-        
-        jv = 1 if request.POST.get("jv") == "1" else 0
-        
-        ipo_id = request.POST.get("ipo_id")if jv == 0 else None
-        group_id = request.POST.get("group_id")
-        amount_type = request.POST.get("amount_type")
-        amount = request.POST.get("amount")
-        remark = request.POST.get("remark")
-        date_time_str  = request.POST.get("date_time")
-
-        # date_time = datetime.strptime(date_time_str, "%Y-%m-%dT%H:%M")
-        # date_time = timezone.make_aware(date_time)  # optional if using timezone-aware field
-        # date_time = parse_datetime(date_time_str) if date_time_str else timezone.now()
-        if date_time_str:
-            # Add seconds if missing
-            if len(date_time_str) == 16:  # "YYYY-MM-DDTHH:MM"
-                date_time_str += ":00"
-            date_time = datetime.strptime(date_time_str, "%Y-%m-%dT%H:%M:%S")
-            
-            # make timezone aware
-            if timezone.is_aware(date_time):
-                date_time = timezone.make_aware(date_time, timezone.get_current_timezone())
-        else:
-            date_time = timezone.localtime().replace(tzinfo=None)
-
-        Accounting.objects.create(
-            user=user,
-            ipo_id=ipo_id,
-            group_id=group_id,
-            amount_type=amount_type,
-            amount=amount,
-            remark=remark,
-            date_time=date_time ,
-            jv=jv,
-        )
-        return redirect("GroupWiseDashboard")  # reload the same page after save
+        return _create_single_transaction(request, "GroupWiseDashboard")
 
     # if GET request → render form
     from .models import IPO, Group
@@ -14623,63 +14631,86 @@ def add_transaction_group(request):
 @login_required
 def bulk_ipo_transactions(request):
     """Handle bulk IPO transactions for multiple IPO entries from Total column"""
-    if request.method == "POST":
-        user = request.user
-        
-        try:
-            import json
-            transactions_json = request.POST.get("transactions")
-            transactions = json.loads(transactions_json)
-            
-            created_count = 0
-            
-            # Process each transaction
-            for transaction in transactions:
-                group_id = transaction.get("group_id")
-                ipo_id = transaction.get("ipo_id")
-                amount = transaction.get("amount")
-                amount_type = transaction.get("amount_type", "credit")
-                remark = transaction.get("remark", "")
-                date_time_str = transaction.get("date_time")
-                jv = transaction.get("jv", 0)  # Get JV flag from transaction data, default to 0
-                
-                # Parse date_time
-                if date_time_str:
-                    if len(date_time_str) == 16:  # "YYYY-MM-DDTHH:MM"
-                        date_time_str += ":00"
-                    date_time = datetime.strptime(date_time_str, "%Y-%m-%dT%H:%M:%S")
-                    if not timezone.is_aware(date_time):
-                        date_time = timezone.make_aware(date_time, timezone.get_current_timezone())
-                else:
-                    date_time = timezone.now()
-                
-                # Create accounting entry
-                Accounting.objects.create(
-                    user=user,
-                    ipo_id=ipo_id,
-                    group_id=group_id,
-                    amount_type=amount_type,
-                    amount=amount,
-                    remark=remark,
-                    date_time=date_time,
-                    jv=jv  # Use JV flag from transaction data (1 for JV, 0 for regular)
-                )
-                created_count += 1
-            messages.success(request, f'Successfully created {created_count} IPO-wise transactions.')
-            return JsonResponse({
-                "status": "success", 
-                "message": f"Successfully created {created_count} IPO-wise transactions"
-            })
-        
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
-            return JsonResponse({
-                "status": "error", 
-                "message": str(e)
-            })
-    messages.error(request, ' Invalid request method .' );
-    return JsonResponse({"status": "error", "message": "Invalid request method"})
+    if request.method != "POST":
+        return JsonResponse(
+            {"status": "error", "message": "POST required"}, status=405
+        )
+
+    try:
+        items = json.loads(request.POST.get("transactions", "[]"))
+        if not isinstance(items, list) or not items:
+            raise ValidationError("At least one transaction is required.")
+        if len(items) > 500:
+            raise ValidationError("Too many transactions.")
+
+        master_amount = _parse_transaction_amount(request.POST.get("master_amount"))
+        master_type = request.POST.get("master_amount_type")
+        if master_type not in VALID_TRANSACTION_TYPES:
+            raise ValidationError("Invalid master amount type.")
+        expected_total = master_amount if master_type == "credit" else -master_amount
+
+        records = []
+        signed_total = Decimal("0.00")
+        gross_total = Decimal("0.00")
+        submitted_group_id = None
+        for item in items:
+            if not isinstance(item, dict):
+                raise ValidationError("Invalid transaction entry.")
+
+            group = _get_owned_group(request.user, item.get("group_id"))
+            if submitted_group_id is None:
+                submitted_group_id = group.id
+            elif group.id != submitted_group_id:
+                raise ValidationError("All allocations must use the same group.")
+
+            is_jv = item.get("jv") in (1, True, "1")
+            ipo = None
+            if not is_jv:
+                ipo_id = item.get("ipo_id")
+                if not ipo_id:
+                    raise ValidationError("An IPO is required for non-JV entries.")
+                ipo = _get_owned_ipo(request.user, ipo_id)
+
+            amount_type = item.get("amount_type")
+            if amount_type not in VALID_TRANSACTION_TYPES:
+                raise ValidationError("Invalid amount type.")
+            amount = _parse_transaction_amount(item.get("amount"))
+            gross_total += amount
+            signed_total += amount if amount_type == "credit" else -amount
+
+            records.append(Accounting(
+                user=request.user,
+                ipo=ipo,
+                group=group,
+                amount=amount,
+                amount_type=amount_type,
+                remark=(item.get("remark") or "")[:250],
+                date_time=_parse_transaction_datetime(item.get("date_time")),
+                jv=is_jv,
+            ))
+
+        if gross_total > master_amount:
+            raise ValidationError("Allocated amount exceeds the payment amount.")
+        if signed_total.quantize(MONEY_QUANTUM) != expected_total:
+            raise ValidationError("Allocation total does not match the payment amount.")
+
+        with transaction.atomic():
+            Accounting.objects.bulk_create(records)
+
+        created_count = len(records)
+        messages.success(request, f'Successfully created {created_count} IPO-wise transactions.')
+        return JsonResponse({
+            "status": "success",
+            "message": f"Successfully created {created_count} IPO-wise transactions",
+        })
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {"status": "error", "message": "Invalid transaction data."}, status=400
+        )
+    except ValidationError as exc:
+        return JsonResponse(
+            {"status": "error", "message": exc.messages[0]}, status=400
+        )
 
 
 @login_required
