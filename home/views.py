@@ -13851,21 +13851,27 @@ def accounting_view(request):
                 for item in batch_entries
             ))
             group_display = " → ".join(group_names)
+            batch_key = str(e.transfer_batch_id)
             detail_rows = ""
             for item in batch_entries:
                 item_ipo = item.ipo.IPOName if item.ipo else "JV"
                 item_group = item.group.GroupName if item.group else (item.group_name or "Deleted")
-                detail_rows += (
-                    f"<tr><td>{escape(item_group)}</td><td>{escape(item_ipo)}</td>"
-                    f"<td>{escape(item.amount_type.upper())}</td><td>{item.amount}</td></tr>"
+                item_date = timezone.localtime(item.date_time)
+                detail_style = (
+                    "opacity: 0.6; background-color: #ffe6e6;"
+                    if show_deleted else "background-color: #f8f9fa;"
                 )
-
-            details = (
-                f"<details><summary>View {len(batch_entries)} entries</summary>"
-                "<table class='table table-sm mt-2 mb-0'>"
-                "<thead><tr><th>Group</th><th>IPO</th><th>Type</th><th>Amount</th></tr></thead>"
-                f"<tbody>{detail_rows}</tbody></table></details>"
-            )
+                detail_rows += f"""
+                <tr class="bulk-transfer-detail-row" data-transfer-batch="{batch_key}" style="display:none; {detail_style}">
+                    <td class="filter-ipo" data-ipo="{escape(item_ipo)}">↳ {escape(item_ipo)}</td>
+                    <td class="filter-group" data-group="{escape(item_group)}">{escape(item_group)}</td>
+                    <td><span class="badge {'bg-success' if item.amount_type == 'credit' else 'bg-danger'}">{escape(item.amount_type.upper())}</span></td>
+                    <td>{item.amount}</td>
+                    <td><textarea class="form-control form-control-sm" readonly>{escape(item.remark or '')}</textarea></td>
+                    <td data-order="{item_date.strftime('%Y-%m-%d %H:%M:%S')}">{item_date.strftime('%d-%m-%y %H:%M:%S')}</td>
+                    <td class="no-export"></td>
+                </tr>
+                """
             batch_date = batch_entries[0].date_time
             representative_id = batch_entries[0].id
             batch_action = (
@@ -13878,17 +13884,23 @@ def accounting_view(request):
                 "<i class='fas fa-trash'></i></button>"
             )
             rows += f"""
-            <tr class="bulk-transfer-row" style="{'opacity: 0.6; background-color: #ffe6e6;' if show_deleted else ''}">
+            <tr class="bulk-transfer-row" data-transfer-batch="{batch_key}" style="{'opacity: 0.6; background-color: #ffe6e6;' if show_deleted else ''}">
                 <td><strong>Bulk Transfer</strong></td>
                 <td>{escape(group_display)}</td>
                 <td><span class="badge bg-primary">TRANSFER</span></td>
                 <td>{transfer_amount}</td>
-                <td>{details}</td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-outline-secondary bulk-transfer-toggle"
+                            data-transfer-batch="{batch_key}" aria-expanded="false">
+                        View {len(batch_entries)} entries
+                    </button>
+                </td>
                 <td data-order="{timezone.localtime(batch_date).strftime('%Y-%m-%d %H:%M:%S')}">
                     {timezone.localtime(batch_date).strftime("%d-%m-%y %H:%M:%S")}
                 </td>
                 <td class="no-export">{batch_action}</td>
             </tr>
+            {detail_rows}
             """
             continue
 

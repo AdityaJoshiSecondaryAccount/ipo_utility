@@ -2527,7 +2527,44 @@
         jvCheckbox.addEventListener("change", toggleIPOField);
     });
 </script> {% endcomment %}
+<style>
+    #example tr.bulk-transfer-group-open > td:first-child,
+    #example tr.bulk-transfer-detail-open > td:first-child {
+        border-left: 3px solid #343a40 !important;
+    }
+    #example tr.bulk-transfer-group-open > td:last-child,
+    #example tr.bulk-transfer-detail-open > td:last-child {
+        border-right: 3px solid #343a40 !important;
+    }
+    #example tr.bulk-transfer-group-open > td {
+        border-top: 3px solid #343a40 !important;
+    }
+    #example tr.bulk-transfer-detail-last > td {
+        border-bottom: 3px solid #343a40 !important;
+    }
+</style>
 <script>
+    document.addEventListener('click', function (event) {
+        const button = event.target.closest('.bulk-transfer-toggle');
+        if (!button) return;
+
+        const batchId = button.getAttribute('data-transfer-batch');
+        const rows = document.querySelectorAll(
+            '.bulk-transfer-detail-row[data-transfer-batch="' + batchId + '"]'
+        );
+        const parentRow = button.closest('.bulk-transfer-row');
+        const willOpen = button.getAttribute('aria-expanded') !== 'true';
+
+        rows.forEach(function (row, index) {
+            row.style.display = willOpen ? 'table-row' : 'none';
+            row.classList.toggle('bulk-transfer-detail-open', willOpen);
+            row.classList.toggle('bulk-transfer-detail-last', willOpen && index === rows.length - 1);
+        });
+        if (parentRow) parentRow.classList.toggle('bulk-transfer-group-open', willOpen);
+        button.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+        button.textContent = (willOpen ? 'Hide ' : 'View ') + rows.length + ' entries';
+    });
+
     $(document).ready(function () {
             var pageLength = "{{ Billing_page_size|default:'50' }}";
             pageLength = pageLength === "All" ? -1 : parseInt(pageLength, 10);
