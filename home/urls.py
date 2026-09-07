@@ -117,6 +117,8 @@ urlpatterns = [
     path('<str:IPOid>/send-status-telegram/', views.send_status_to_telegram, name='send_status_to_telegram'),
     path('<int:IPOid>/DeleteAllOrders/', views.DeleteAllOrders, name='delete_all_orders'),
     path("bulk_ipo_transactions/", views.bulk_ipo_transactions, name="bulk_ipo_transactions"),
+    path("bulk-transfer-transactions/", views.bulk_transfer_transactions, name="bulk_transfer_transactions"),
+    path("api/transfer-group-ipos/<int:group_id>/", views.get_transfer_group_ipos, name="get_transfer_group_ipos"),
     path("api/get-group-dues/<int:group_id>/", views.get_group_dues, name="get_group_dues"),
     path('<int:IPOid>/get-all-groups/', views.get_all_groups, name='get_all_groups'),
     

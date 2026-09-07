@@ -126,6 +126,7 @@ class Accounting(models.Model):
     jv = models.BooleanField( default='False') 
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
+    transfer_batch_id = models.UUIDField(null=True, blank=True, db_index=True)
   
 
     def __str__(self):

@@ -1,0 +1,568 @@
+<div class="modal fade" id="combinedTransferModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <form id="combinedTransferForm">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Multiple IPO Transfer</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" id="ct_mode" value="ipo">
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Source</h6>
+                            <div class="form-group">
+                                <label for="ct_source_group">Group Name</label>
+                                <select id="ct_source_group" class="form-control" required>
+                                    <option value="" selected disabled>Select group</option>
+                                    {% if groups1 %}
+                                        {% for group in groups1 %}<option value="{{ group.id }}">{{ group.GroupName }}</option>{% endfor %}
+                                    {% else %}
+                                        {% for group in groups %}<option value="{{ group.id }}">{{ group.GroupName }}</option>{% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <div class="text-muted">IPOs will be selected automatically from this group.</div>
+                                <select id="ct_source_ipos" multiple hidden disabled></select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h6>Destination</h6>
+                            <div class="form-group">
+                                <label for="ct_destination_group">Group Name</label>
+                                <select id="ct_destination_group" class="form-control" required>
+                                    <option value="" selected disabled>Select group</option>
+                                    {% if groups1 %}
+                                        {% for group in groups1 %}<option value="{{ group.id }}">{{ group.GroupName }}</option>{% endfor %}
+                                    {% else %}
+                                        {% for group in groups %}<option value="{{ group.id }}">{{ group.GroupName }}</option>{% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                            <div class="form-group" id="ct_destination_ipo_group">
+                                <div class="text-muted">IPOs will be selected automatically from this group.</div>
+                                <select id="ct_destination_ipos" multiple hidden disabled></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-2 align-items-end">
+                        <div class="col-md-4 form-group">
+                            <label for="ct_source_type">Source Amount Type</label>
+                            <select id="ct_source_type" class="form-control">
+                                <option value="credit">Credit</option>
+                                <option value="debit">Debit</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label for="ct_amount">Transfer Amount</label>
+                            <input type="number" id="ct_amount" class="form-control" min="0.01" step="0.01" required>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>Destination Amount Type</label>
+                            <input type="text" id="ct_destination_type" class="form-control" value="Debit" readonly>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-8 form-group">
+                            <label for="ct_remark">Remark</label>
+                            <input type="text" id="ct_remark" class="form-control" maxlength="250">
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label for="ct_date_time">Date &amp; Time</label>
+                            <input type="datetime-local" id="ct_date_time" class="form-control" step="1" required>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <h6>Source Allocation</h6>
+                            <div id="ct_source_allocations" class="table-responsive"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Destination Allocation</h6>
+                            <div id="ct_destination_allocations" class="table-responsive"></div>
+                        </div>
+                    </div>
+
+                    <div id="ct_validation_message" class="alert alert-danger mt-3 mb-0" role="alert" style="display:none;"></div>
+
+                    <div class="row mt-3 p-3" style="background:#e9ecef; border:1px solid #dee2e6;">
+                        <div class="col-md-3">Master: <strong id="ct_master_total">0.00</strong></div>
+                        <div class="col-md-3">Source: <strong id="ct_source_total">0.00</strong></div>
+                        <div class="col-md-3">Destination: <strong id="ct_destination_total">0.00</strong></div>
+                        <div class="col-md-3"><span id="ct_status" class="text-danger">Select transfer details</span></div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" id="ct_save" disabled>Save Transfer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+$(function () {
+    const modal = $('#combinedTransferModal');
+    const form = $('#combinedTransferForm');
+    const ipoRequests = {source: null, destination: null};
+    let allocationInputError = '';
+
+    function toMinorUnits(value) {
+        const number = Number(value);
+        return Number.isFinite(number) ? Math.round(number * 100) : 0;
+    }
+
+    function getCookie(name) {
+        const prefix = name + '=';
+        const cookie = document.cookie.split(';').map(function (value) {
+            return value.trim();
+        }).find(function (value) {
+            return value.indexOf(prefix) === 0;
+        });
+        return cookie ? decodeURIComponent(cookie.substring(prefix.length)) : null;
+    }
+
+    function selectedIPOs(selector) {
+        return $(selector).find('option:selected').map(function () {
+            return {
+                id: String(this.value),
+                name: $(this).text(),
+                due: Number($(this).attr('data-due')) || 0
+            };
+        }).get();
+    }
+
+    function dueType(item) {
+        return item.due < 0 ? 'debit' : 'credit';
+    }
+
+    function matchingIPOs(selector, amountType) {
+        return selectedIPOs(selector).filter(function (item) {
+            return dueType(item) === amountType;
+        });
+    }
+
+    function showValidation(message) {
+        $('#ct_validation_message').text(message || '').toggle(!!message);
+    }
+
+    function loadGroupIPOs(side) {
+        const groupSelector = side === 'source' ? '#ct_source_group' : '#ct_destination_group';
+        const ipoSelector = side === 'source' ? '#ct_source_ipos' : '#ct_destination_ipos';
+        const groupId = $(groupSelector).val();
+        const select = $(ipoSelector);
+
+        if (ipoRequests[side]) ipoRequests[side].abort();
+        select.empty().prop('disabled', true);
+        renderAllocations();
+        if (!groupId) return;
+
+        select.append($('<option>', {disabled: true}).text('Loading IPOs...'));
+        const url = "{% url 'get_transfer_group_ipos' 0 %}".replace('/0/', '/' + encodeURIComponent(groupId) + '/');
+        const request = $.ajax({
+            url: url,
+            method: 'GET',
+            success: function (response) {
+                select.empty();
+                (response.data || []).forEach(function (ipo) {
+                    select.append($('<option>', {
+                        value: ipo.ipo_id,
+                        'data-due': ipo.due_amount,
+                        selected: true
+                    }).text(ipo.ipo_name));
+                });
+                if (!response.data || !response.data.length) {
+                    select.append($('<option>', {disabled: true}).text('No IPOs found for this group'));
+                }
+                select.prop('disabled', true);
+                renderAllocations();
+            },
+            error: function (xhr, status) {
+                if (status !== 'abort') {
+                    select.empty().append(
+                        $('<option>', {disabled: true}).text('Unable to load IPOs')
+                    );
+                }
+            },
+            complete: function () {
+                if (ipoRequests[side] === request) ipoRequests[side] = null;
+            }
+        });
+        ipoRequests[side] = request;
+    }
+
+    function allocateByDue(total, items, expectedType) {
+        let remaining = total;
+        return items.map(function (item) {
+            const dueType = item.due < 0 ? 'debit' : 'credit';
+            let amount = 0;
+            if (remaining > 0 && dueType === expectedType) {
+                amount = Math.min(Math.abs(toMinorUnits(item.due)), remaining);
+                remaining -= amount;
+            }
+            return {amount: amount, type: dueType};
+        });
+    }
+
+    function allocationTable(side, items, allocations) {
+        const table = $('<table>', {class: 'table table-sm table-bordered mb-0'});
+        table.append('<thead><tr><th>IPO</th><th>Original</th><th>Amount</th><th>Type</th><th>Include</th></tr></thead>');
+        const body = $('<tbody>');
+
+        if (!items.length) {
+            body.append(
+                $('<tr>').append(
+                    $('<td>', {colspan: 5, class: 'text-center text-muted'}).text(
+                        'No ' + expectedTypeLabel(side) + ' IPO balances found for this group. The transfer amount will be added as JV.'
+                    )
+                )
+            );
+        }
+
+        items.forEach(function (item, index) {
+            const allocation = allocations[index];
+            const row = $('<tr>', {
+                class: 'ct-entry-row',
+                'data-side': side,
+                'data-ipo-id': item.id
+            });
+            row.append($('<td>').text(item.name));
+            row.append($('<td>').text('₹' + item.due.toFixed(2)));
+            row.append($('<td>').append($('<input>', {
+                type: 'number',
+                min: '0.01',
+                max: Math.abs(item.due).toFixed(2),
+                step: '0.01',
+                class: 'form-control form-control-sm ct-allocation',
+                'data-side': side,
+                'data-original-limit': Math.abs(item.due).toFixed(2),
+                value: (allocation.amount / 100).toFixed(2)
+            })));
+            const typeSelect = $('<select>', {
+                class: 'form-control form-control-sm ct-allocation-type',
+                'data-side': side
+            });
+            typeSelect.append($('<option>', {value: allocation.type}).text(
+                allocation.type.charAt(0).toUpperCase() + allocation.type.slice(1)
+            ));
+            typeSelect.prop('disabled', true);
+            row.append($('<td>').append(typeSelect));
+            row.append($('<td>').append($('<input>', {
+                type: 'checkbox',
+                class: 'ct-allocation-include',
+                'data-side': side,
+                checked: allocation.amount > 0
+            })));
+            body.append(row);
+        });
+
+        const allocated = allocations.reduce(function (sum, item) {
+            return sum + item.amount;
+        }, 0);
+        const expectedType = side === 'source'
+            ? $('#ct_source_type').val()
+            : ($('#ct_source_type').val() === 'credit' ? 'debit' : 'credit');
+        body.append(jvRow(side, Math.max(0, toMinorUnits($('#ct_amount').val()) - allocated), expectedType));
+
+        table.append(body);
+        return table;
+    }
+
+    function expectedTypeLabel(side) {
+        const sourceType = $('#ct_source_type').val() || 'credit';
+        const type = side === 'source'
+            ? sourceType
+            : (sourceType === 'credit' ? 'debit' : 'credit');
+        return type.charAt(0).toUpperCase() + type.slice(1);
+    }
+
+    function jvRow(side, amount, amountType) {
+        const row = $('<tr>', {
+            class: 'ct-entry-row ct-jv-row',
+            'data-side': side,
+            'data-jv': '1'
+        });
+        row.append($('<td>').append($('<strong>').text('JV Entry')));
+        row.append($('<td>').text('Excess'));
+        row.append($('<td>').append($('<input>', {
+            type: 'number',
+            class: 'form-control form-control-sm ct-jv-amount',
+            value: (amount / 100).toFixed(2),
+            readonly: true
+        })));
+        row.append($('<td>').append($('<input>', {
+            type: 'text',
+            class: 'form-control form-control-sm ct-jv-type',
+            value: amountType.charAt(0).toUpperCase() + amountType.slice(1),
+            'data-value': amountType,
+            readonly: true
+        })));
+        row.append($('<td>').append($('<input>', {
+            type: 'checkbox',
+            class: 'ct-allocation-include',
+            checked: amount > 0,
+            disabled: true
+        })));
+        row.toggle(amount > 0);
+        return row;
+    }
+
+    function renderAllocations() {
+        allocationInputError = '';
+        const master = toMinorUnits($('#ct_amount').val());
+        const sourceType = $('#ct_source_type').val();
+        const destinationType = sourceType === 'credit' ? 'debit' : 'credit';
+        const sourceItems = matchingIPOs('#ct_source_ipos', sourceType);
+        const sourceAllocations = allocateByDue(master, sourceItems, sourceType);
+        $('#ct_source_allocations').empty().append(
+            allocationTable('source', sourceItems, sourceAllocations)
+        );
+
+        const destinationItems = matchingIPOs('#ct_destination_ipos', destinationType);
+        const destinationAllocations = allocateByDue(master, destinationItems, destinationType);
+        $('#ct_destination_allocations').empty().append(
+            allocationTable('destination', destinationItems, destinationAllocations)
+        );
+        calculateTotals();
+    }
+
+    function sideTotals(side) {
+        let credit = 0;
+        let debit = 0;
+        $(`#combinedTransferModal .ct-entry-row[data-side="${side}"]`).each(function () {
+            if (!$(this).find('.ct-allocation-include').is(':checked')) return;
+            const isJV = $(this).attr('data-jv') === '1';
+            const amount = toMinorUnits($(this).find(isJV ? '.ct-jv-amount' : '.ct-allocation').val());
+            const type = isJV
+                ? $(this).find('.ct-jv-type').attr('data-value')
+                : $(this).find('.ct-allocation-type').val();
+            if (type === 'credit') credit += amount;
+            else debit += amount;
+        });
+        return {credit: credit, debit: debit, gross: credit + debit, net: credit - debit};
+    }
+
+    function recalculateSideJV(side) {
+        const master = toMinorUnits($('#ct_amount').val());
+        const expectedType = side === 'source'
+            ? $('#ct_source_type').val()
+            : ($('#ct_source_type').val() === 'credit' ? 'debit' : 'credit');
+        const expectedNet = expectedType === 'credit' ? master : -master;
+        let ipoCredit = 0;
+        let ipoDebit = 0;
+
+        $(`#combinedTransferModal .ct-entry-row[data-side="${side}"]:not(.ct-jv-row)`).each(function () {
+            if (!$(this).find('.ct-allocation-include').is(':checked')) return;
+            const amount = toMinorUnits($(this).find('.ct-allocation').val());
+            if ($(this).find('.ct-allocation-type').val() === 'credit') ipoCredit += amount;
+            else ipoDebit += amount;
+        });
+
+        const ipoNet = ipoCredit - ipoDebit;
+        const ipoGross = ipoCredit + ipoDebit;
+        const remainder = expectedNet - ipoNet;
+        const row = $(`#combinedTransferModal .ct-jv-row[data-side="${side}"]`);
+        const canBalance = ipoGross + Math.abs(remainder) <= master;
+
+        if (remainder !== 0 && canBalance) {
+            const jvType = remainder > 0 ? 'credit' : 'debit';
+            row.show();
+            row.find('.ct-jv-amount').val((Math.abs(remainder) / 100).toFixed(2));
+            row.find('.ct-jv-type')
+                .val(jvType.charAt(0).toUpperCase() + jvType.slice(1))
+                .attr('data-value', jvType);
+            row.find('.ct-allocation-include').prop('checked', true);
+        } else {
+            row.hide();
+            row.find('.ct-jv-amount').val('0.00');
+            row.find('.ct-allocation-include').prop('checked', false);
+        }
+    }
+
+    function calculateTotals() {
+        const master = toMinorUnits($('#ct_amount').val());
+        const source = sideTotals('source');
+        const destination = sideTotals('destination');
+        const sourceCount = $('#ct_source_allocations .ct-allocation-include:checked').length;
+        const destinationCount = $('#ct_destination_allocations .ct-allocation-include:checked').length;
+        const groupsSelected = $('#ct_source_group').val() && $('#ct_destination_group').val();
+        const expectedSourceNet = $('#ct_source_type').val() === 'credit' ? master : -master;
+        const balanced = !allocationInputError && master > 0 && sourceCount > 0 && destinationCount > 0 &&
+            groupsSelected && source.gross <= master && destination.gross <= master &&
+            source.net === expectedSourceNet && destination.net === -expectedSourceNet;
+
+        let validationMessage = '';
+        if (allocationInputError) {
+            validationMessage = allocationInputError;
+        } else if (!$('#ct_source_group').val()) {
+            validationMessage = 'Select a source group.';
+        } else if (!$('#ct_destination_group').val()) {
+            validationMessage = 'Select a destination group.';
+        } else if (master <= 0) {
+            validationMessage = 'Enter a transfer amount greater than zero.';
+        } else if (!$('#ct_date_time').val()) {
+            validationMessage = 'Select the transfer date and time.';
+        } else if (!sourceCount) {
+            validationMessage = 'No source allocation is available.';
+        } else if (!destinationCount) {
+            validationMessage = 'No destination allocation is available.';
+        } else if (source.gross > master) {
+            validationMessage = 'Source allocation exceeds the transfer amount.';
+        } else if (destination.gross > master) {
+            validationMessage = 'Destination allocation exceeds the transfer amount.';
+        } else if (source.net !== expectedSourceNet) {
+            validationMessage = 'Source allocation must equal the transfer amount.';
+        } else if (destination.net !== -expectedSourceNet) {
+            validationMessage = 'Destination allocation must equal the transfer amount.';
+        }
+
+        $('#ct_master_total').text((master / 100).toFixed(2));
+        $('#ct_source_total').text((Math.abs(source.net) / 100).toFixed(2));
+        $('#ct_destination_total').text((Math.abs(destination.net) / 100).toFixed(2));
+        $('#ct_status')
+            .toggleClass('text-success', !!balanced)
+            .toggleClass('text-danger', !balanced)
+            .text(balanced ? 'Allocation matched' : validationMessage || 'Allocation must match');
+        showValidation(balanced ? '' : validationMessage);
+        $('#ct_save').prop('disabled', !balanced);
+        return !!balanced;
+    }
+
+    function updateMode() {
+        $('#ct_destination_ipo_group').show();
+        $('#ct_destination_ipos').prop('required', true);
+        if ($('#ct_destination_group').val()) {
+            loadGroupIPOs('destination');
+        } else {
+            renderAllocations();
+        }
+    }
+
+    function updateTypes() {
+        $('#ct_destination_type').val(
+            $('#ct_source_type').val() === 'credit' ? 'Debit' : 'Credit'
+        );
+        renderAllocations();
+    }
+
+    function currentLocalDateTime() {
+        const now = new Date();
+        const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+        return local.toISOString().slice(0, 19);
+    }
+
+    function collectAllocations(side) {
+        return $(`#combinedTransferModal tr:has(.ct-allocation[data-side="${side}"])`).map(function () {
+            if (!$(this).find('.ct-allocation-include').is(':checked')) return null;
+            return {
+                ipo_id: $(this).attr('data-ipo-id'),
+                amount: Number($(this).find('.ct-allocation').val()).toFixed(2),
+                amount_type: $(this).find('.ct-allocation-type').val()
+            };
+        }).get();
+    }
+
+    function collectJV(side) {
+        const row = $(`#combinedTransferModal .ct-jv-row[data-side="${side}"]:visible`);
+        if (!row.length) return null;
+        return {
+            amount: Number(row.find('.ct-jv-amount').val()).toFixed(2),
+            amount_type: row.find('.ct-jv-type').attr('data-value')
+        };
+    }
+
+    $('#ct_source_type').on('change', updateTypes);
+    $('#ct_amount, #ct_source_ipos, #ct_destination_ipos').on('input change', renderAllocations);
+    $('#ct_source_group').on('change', function () { loadGroupIPOs('source'); });
+    $('#ct_destination_group').on('change', function () { loadGroupIPOs('destination'); });
+    $(document).on('input change', '#combinedTransferModal .ct-allocation, #combinedTransferModal .ct-allocation-type, #combinedTransferModal .ct-allocation-include', function () {
+        if ($(this).hasClass('ct-allocation')) {
+            const limit = Number($(this).attr('data-original-limit')) || 0;
+            const entered = Number($(this).val()) || 0;
+            allocationInputError = '';
+            if (entered > limit) {
+                $(this).val(limit.toFixed(2));
+                allocationInputError = 'IPO allocation cannot exceed its original balance of ₹' + limit.toFixed(2) + '.';
+            } else if (entered < 0) {
+                $(this).val('0.00');
+                allocationInputError = 'IPO allocation cannot be negative.';
+            }
+        } else {
+            allocationInputError = '';
+        }
+        recalculateSideJV($(this).closest('.ct-entry-row').attr('data-side'));
+        calculateTotals();
+    });
+
+    modal.on('shown.bs.modal', function () {
+        if (!$('#ct_date_time').val()) $('#ct_date_time').val(currentLocalDateTime());
+        updateMode();
+        updateTypes();
+    });
+
+    modal.on('hidden.bs.modal', function () {
+        if (ipoRequests.source) ipoRequests.source.abort();
+        if (ipoRequests.destination) ipoRequests.destination.abort();
+        form[0].reset();
+        $('#ct_source_ipos, #ct_destination_ipos').empty().prop('disabled', true);
+        $('#ct_source_allocations, #ct_destination_allocations').empty();
+        $('#ct_date_time').val('');
+        allocationInputError = '';
+        showValidation('');
+        updateMode();
+        updateTypes();
+    });
+
+    form.on('submit', function (event) {
+        event.preventDefault();
+        if (!calculateTotals()) return;
+
+        const payload = {
+            mode: $('#ct_mode').val(),
+            master_amount: $('#ct_amount').val(),
+            source_group_id: $('#ct_source_group').val(),
+            destination_group_id: $('#ct_destination_group').val(),
+            source_type: $('#ct_source_type').val(),
+            date_time: $('#ct_date_time').val(),
+            remark: $('#ct_remark').val(),
+            source_allocations: collectAllocations('source'),
+            destination_allocations: collectAllocations('destination'),
+            source_jv: collectJV('source'),
+            destination_jv: collectJV('destination')
+        };
+
+        const button = $('#ct_save');
+        const csrfToken = form.find('[name=csrfmiddlewaretoken]').val() ||
+            getCookie('csrftoken') || "{{ csrf_token|escapejs }}";
+        button.prop('disabled', true).text('Saving...');
+        $.ajax({
+            url: "{% url 'bulk_transfer_transactions' %}",
+            method: 'POST',
+            data: JSON.stringify(payload),
+            contentType: 'application/json',
+            headers: {'X-CSRFToken': csrfToken},
+            success: function () { window.location.reload(); },
+            error: function (xhr) {
+                const message = xhr.responseJSON && xhr.responseJSON.message
+                    ? xhr.responseJSON.message
+                    : 'Unable to save transfer (HTTP ' + xhr.status + '). Restart the Django server and try again.';
+                showValidation(message);
+                button.prop('disabled', false).text('Save Transfer');
+            }
+        });
+    });
+
+    updateMode();
+    updateTypes();
+});
+</script>

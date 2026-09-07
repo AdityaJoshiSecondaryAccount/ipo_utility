@@ -1888,12 +1888,8 @@
                                 Payment
                             </button>
                         
-                            <!-- Add Transaction Modal Button -->
-                            <button type="button" class="btn btn-sm btn-outline-secondary mb-2" data-bs-toggle="modal" data-bs-target="#transactionModal1">
-                                JV Payment 
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary mb-2" data-bs-toggle="modal" data-bs-target="#transactionModal2" title="IPO to IPO Amount Transfer">
-                                IPO To IPO Payment 
+                            <button type="button" class="btn btn-sm btn-outline-primary mb-2" data-toggle="modal" data-target="#combinedTransferModal" data-bs-toggle="modal" data-bs-target="#combinedTransferModal">
+                                Combined Transfer
                             </button>
                             <a href="{% url 'accounting_logs' %}" class="btn btn-sm btn-outline-info mb-2" title="View Activity Logs">
                                 <i class="fas fa-history"></i> Activity Logs
@@ -2117,6 +2113,7 @@
 
                 <!-- Transaction Modal -->
             {% include "partials/add_payment_modal.html" %}
+            {% include "partials/transfer_payment_modal.html" %}
                             <script>
                                 document.addEventListener("DOMContentLoaded", function(){
                                     const saveBtn = document.getElementById("saveBtn6");
@@ -2274,9 +2271,10 @@
             btn.addEventListener("click", function(e) {
                 e.preventDefault();
                 const id = this.getAttribute("data-id");
+                const isBulkTransfer = !!this.closest('.bulk-transfer-row');
                 Swal.fire({
                     title: 'Are you sure?',
-                    text: "Do you really want to delete this entry?",
+                    text: isBulkTransfer ? "Do you really want to delete this complete bulk transfer?" : "Do you really want to delete this entry?",
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
@@ -2303,9 +2301,10 @@
             btn.addEventListener("click", function(e) {
                 e.preventDefault();
                 const id = this.getAttribute("data-id");
+                const isBulkTransfer = !!this.closest('.bulk-transfer-row');
                 Swal.fire({
                     title: 'Are you sure?',
-                    text: "Do you really want to restore this entry?",
+                    text: isBulkTransfer ? "Do you really want to restore this complete bulk transfer?" : "Do you really want to restore this entry?",
                     icon: 'info',
                     showCancelButton: true,
                     confirmButtonColor: '#28a745',
