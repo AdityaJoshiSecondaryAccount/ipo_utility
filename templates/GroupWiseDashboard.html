@@ -7,6 +7,10 @@
 <link rel="stylesheet" href="{% static  'DataTables/css/buttons.bootstrap5.min.css' %}">
 <link rel="stylesheet" href="{% static  'DataTables/css/dataTables.bootstrap5.min.css' %}">
 <style>
+    .custom-green-switch:checked {
+        background-color: #28a745 !important;
+        border-color: #28a745 !important;
+    }
     #example_wrapper{
         margin-top: 4% !important;
     }
@@ -2823,6 +2827,26 @@ function deleteIPO(ipoId, pageNumber, btn) {
             buttons: [ {
                 text: 'Columns', 
                 extend: 'colvis',
+                prefixButtons: [
+                    {
+                        text: '<div class="d-flex justify-content-between align-items-center w-100" style="pointer-events: none;"><span>Toggle All IPOs</span><div class="form-check form-switch ms-3 mb-0" style="pointer-events: none;"><input class="form-check-input custom-green-switch" type="checkbox" id="toggleAllIposSwitch" checked></div></div>',
+                        action: function ( e, dt, node, config ) {
+                            var numIPOs = {{ IPOName|length }};
+                            var cols = [];
+                            for (var i = 1; i <= numIPOs; i++) cols.push(i);
+                            
+                            var anyHidden = false;
+                            dt.columns(cols).every(function() {
+                                if (!this.visible()) anyHidden = true;
+                            });
+                            
+                            dt.columns(cols).visible(anyHidden);
+                            
+                            var cb = document.getElementById('toggleAllIposSwitch');
+                            if (cb) cb.checked = anyHidden;
+                        }
+                    }
+                ]
             },
             {   
                 extend: 'collection',
@@ -2894,6 +2918,20 @@ function deleteIPO(ipoId, pageNumber, btn) {
             initComplete: function () {
                 var api = this.api();
     
+                api.on('column-visibility.dt', function(e, settings, column, state) {
+                    var numIPOs = {{ IPOName|length }};
+                    if (column >= 1 && column <= numIPOs) {
+                        var allVisible = true;
+                        for (var i = 1; i <= numIPOs; i++) {
+                            if (!api.column(i).visible()) {
+                                allVisible = false;
+                                break;
+                            }
+                        }
+                        var cb = document.getElementById('toggleAllIposSwitch');
+                        if (cb) cb.checked = allVisible;
+                    }
+                });
                 
                 api
                     .columns('')
