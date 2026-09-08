@@ -3760,7 +3760,9 @@ def destroy(request, IPOid):
         
         ipo = CurrentIpoName.objects.get(id=IPOid, user=user)
         orders = Order.objects.filter(user=user, OrderIPOName=IPOid)
-        transactions = Accounting.objects.filter(user=user, ipo=IPOid)
+        transactions = Accounting.objects.filter(
+            user=user, ipo=IPOid, is_deleted=False
+        )
         # 🟢 Step 2: Group by user group name and SUM Amount
         grouped_sums = []
         # total_amount = orders.aggregate(total=Sum('Amount'))['total'] or 0
@@ -6598,7 +6600,12 @@ def GroupWiseDashboard(request):
         
     
     jv_qs = (
-        Accounting.objects.filter(user=request.user, group__in=page_obj, jv=True)
+        Accounting.objects.filter(
+            user=request.user,
+            group__in=page_obj,
+            jv=True,
+            is_deleted=False,
+        )
         .values('group_id')
         .annotate(
             total=Coalesce(
@@ -6650,7 +6657,12 @@ def GroupWiseDashboard(request):
     all_groups = GroupDetail.objects.filter(user=request.user)
     
     accounting_qs = (
-        Accounting.objects.filter(user=request.user, group__in=all_groups, ipo__in=IPOName)
+        Accounting.objects.filter(
+            user=request.user,
+            group__in=all_groups,
+            ipo__in=IPOName,
+            is_deleted=False,
+        )
         .values('group_id', 'ipo_id')
         .annotate(
             total=Sum(
@@ -13793,7 +13805,11 @@ def accounting_view(request):
         entries = entries.order_by("-date_time", "-id")
     
     # Calculate total credit, debit, and net per group (JV=True)
-    jv_sums = Accounting.objects.filter(jv=True).values('group__GroupName').annotate(
+    jv_sums = Accounting.objects.filter(
+        user=request.user,
+        jv=True,
+        is_deleted=False,
+    ).values('group__GroupName').annotate(
         total_credit=Sum(Case(When(amount_type='credit', then=F('amount')), default=0, output_field=FloatField())),
         total_debit=Sum(Case(When(amount_type='debit', then=F('amount')), default=0, output_field=FloatField())),
         net=Sum(Case(
@@ -13875,7 +13891,7 @@ def accounting_view(request):
             batch_date = batch_entries[0].date_time
             representative_id = batch_entries[0].id
             batch_action = (
-                f"<button type='button' class='btn btn-sm btn-outline-success restore-btn' "
+                f"<button type='button' disabled='true' class='btn btn-sm btn-outline-success restore-btn' "
                 f"data-id='{representative_id}' title='Restore this bulk transfer'>"
                 "<i class='fas fa-undo'></i> Restore</button>"
                 if show_deleted else
@@ -13934,7 +13950,7 @@ def accounting_view(request):
                 {timezone.localtime(e.date_time).strftime("%d-%m-%y %H:%M:%S")}
             </td>
             <td class="no-export">
-                {f'''<button type="button" class="btn btn-sm btn-outline-success restore-btn" data-id="{e.id}" title="Restore this entry"><i class="fas fa-undo"></i> Restore</button>''' if show_deleted else f'''<button type="button" class="btn btn-sm btn-outline-primary edit-btn" 
+                {f'''<button type="button" disabled='true' class="btn btn-sm btn-outline-success restore-btn" data-id="{e.id}" title="Restore this entry"><i class="fas fa-undo"></i> Restore</button>''' if show_deleted else f'''<button type="button" class="btn btn-sm btn-outline-primary edit-btn" 
                         data-id="{e.id}" 
                         data-ipo-id="{ipo_id_val}" 
                         data-group-id="{group_id_val}" 
@@ -14886,7 +14902,7 @@ def bulk_transfer_transactions(request):
                     user=request.user, OrderGroup=selected_group, OrderIPOName=ipo
                 ).exists()
                 has_accounting = Accounting.objects.filter(
-                    user=request.user, group=selected_group, ipo=ipo
+                    user=request.user, group=selected_group, ipo=ipo, is_deleted=False
                 ).exists()
                 if not (has_order or has_accounting):
                     raise ValidationError(
@@ -14909,6 +14925,7 @@ def bulk_transfer_transactions(request):
                     user=request.user,
                     group=selected_group,
                     ipo=ipo,
+                    is_deleted=False,
                 ).aggregate(
                     total=Sum(Case(
                         When(amount_type="credit", then=F("amount")),
@@ -15079,6 +15096,7 @@ def get_transfer_group_ipos(request, group_id):
             user=request.user,
             group=group,
             ipo_id__isnull=False,
+            is_deleted=False,
         ).values_list("ipo_id", flat=True).distinct()
         ipo_ids = set(order_ipo_ids) | set(accounting_ipo_ids)
         ipos = CurrentIpoName.objects.filter(
@@ -15093,7 +15111,7 @@ def get_transfer_group_ipos(request, group_id):
             for row in order_totals
         }
         accounting_totals = Accounting.objects.filter(
-            user=request.user, group=group, ipo_id__in=ipo_ids
+            user=request.user, group=group, ipo_id__in=ipo_ids, is_deleted=False
         ).values("ipo_id").annotate(
             total=Sum(Case(
                 When(amount_type="credit", then=F("amount")),
@@ -15150,7 +15168,7 @@ def get_group_dues(request, group_id):
         
         # 2. Fetch Accounting Totals (How much was paid)
         accounting_totals = (
-            Accounting.objects.filter(user=request.user, group=group)
+            Accounting.objects.filter(user=request.user, group=group, is_deleted=False)
             .values("ipo_id")
             .annotate(
                 total=Sum(
