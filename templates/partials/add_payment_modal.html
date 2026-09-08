@@ -67,15 +67,14 @@
                     <!-- Amount Input -->
                     <div class="form-group">
                         <label for="trans_amount">Amount</label>
-                        <input type="number" step="0.01" id="trans_amount" name="amount" class="form-control" 
-                               oninput="this.value = this.value.replace(/[^0-9.]/g,'');if ((this.value.match(/\./g) || []).length > 1) {this.value = this.value.slice(0, -1);}this.value = Math.abs(this.value);" 
+                        <input type="number" min="0.01" max="9999999999.99" step="0.01" id="trans_amount" name="amount" class="form-control"
                                onkeydown="if (event.key === '-' || event.key === 'e' || event.key === 'E'|| event.key === '+') event.preventDefault();" required>
                     </div>
 
                     <!-- Remark -->
                     <div class="form-group">
                         <label for="trans_remark">Remark</label>
-                        <input type="text" id="trans_remark" name="remark" class="form-control">
+                        <input type="text" id="trans_remark" name="remark" class="form-control" maxlength="250">
                         <div id="trans_remark_error" class="text-danger small" style="display:none; margin-top:2px;">
                             Maximum 250 characters allowed!
                         </div>
@@ -89,6 +88,7 @@
 
                     <!-- Container for Dynamically Generated Bulk Auto-Allocation UI -->
                     <div id="bulkAllocationContainer" style="display:none;" class="mb-3 mt-3"></div>
+                    <div id="trans_validation_message" class="alert alert-danger mb-0" role="alert" style="display:none;"></div>
 
                 </div>
 
@@ -106,6 +106,11 @@ $(function () {
     let amountTimer;
     let duesRequest = null;
     let requestSequence = 0;
+    let allocationError = '';
+
+    function showValidation(message) {
+        $('#trans_validation_message').text(message || '').toggle(!!message);
+    }
 
     function toMinorUnits(value) {
         const number = Number(value);
@@ -139,6 +144,8 @@ $(function () {
     // 2. Bulk Auto-Allocation Engine
     // -------------------------------------------------------------------------
     function updateBulkAllocation() {
+        allocationError = '';
+        showValidation('');
         const sequence = ++requestSequence;
         if (duesRequest) {
             duesRequest.abort();
@@ -221,7 +228,7 @@ $(function () {
                         </div>
                         <div class="col-md-3">
                             <label>Amount</label>
-                            <input type="number" step="0.01" class="form-control bulk-jv-amount" value="${remainingAmount}">
+                            <input type="number" min="0.01" max="${amountVal.toFixed(2)}" step="0.01" class="form-control bulk-jv-amount" value="${remainingAmount.toFixed(2)}">
                             <small class="text-muted">Excess JV</small>
                         </div>
                         <div class="col-md-3">
@@ -255,7 +262,9 @@ $(function () {
                                 </div>
                                 <div class="col-md-3">
                                     <label>Due Amount</label>
-                                    <input type="number" step="0.01" class="form-control bulk-ipo-amount" value="${ipo.allocated}">
+                                    <input type="number" min="0" max="${Math.abs(Number(ipo.due)).toFixed(2)}" step="0.01"
+                                           data-original-limit="${Math.abs(Number(ipo.due)).toFixed(2)}"
+                                           class="form-control bulk-ipo-amount" value="${Number(ipo.allocated).toFixed(2)}">
                                     <small class="text-muted">Original: ₹${ipo.due}</small>
                                 </div>
                                 <div class="col-md-3">
@@ -396,7 +405,7 @@ $(function () {
             $('#trans_amount_type').val()
         );
         const difference = expectedNet - netAmount;
-        const isValid = expectedNet !== 0 && difference === 0 && grossAmount <= masterAmount;
+        const isValid = !allocationError && expectedNet !== 0 && difference === 0 && grossAmount <= masterAmount;
         
         $('.bulk-total-amount').val((Math.abs(netAmount) / 100).toFixed(2));
         $('.bulk-total-credit').text('Credit: ' + (totalCredit / 100).toFixed(2));
@@ -404,8 +413,12 @@ $(function () {
         $('.bulk-net-amount').text('Net Amount: ' + (netAmount / 100).toFixed(2));
         
         let balanceBox = $('.bulk-balance-box');
-        if (isValid) {
+        if (allocationError) {
+            balanceBox.css({'background-color': '#f8d7da', 'color': '#721c24'}).text(allocationError);
+            showValidation(allocationError);
+        } else if (isValid) {
             balanceBox.css({'background-color': '#d4edda', 'color': '#155724'}).text('Allocation matched');
+            showValidation('');
         } else {
             balanceBox.css({'background-color': '#f8d7da', 'color': '#721c24'}).text(
                 grossAmount > masterAmount
@@ -418,6 +431,18 @@ $(function () {
     }
 
     $(document).on('input change', '.bulk-ipo-amount, .bulk-ipo-include, .bulk-ipo-type, .bulk-jv-amount, .bulk-jv-include, .bulk-jv-type', function(e) {
+        allocationError = '';
+        if ($(e.target).hasClass('bulk-ipo-amount')) {
+            const limit = Number($(e.target).attr('data-original-limit')) || 0;
+            const entered = Number($(e.target).val()) || 0;
+            if (entered > limit) {
+                $(e.target).val(limit.toFixed(2));
+                allocationError = 'IPO allocation cannot exceed its outstanding balance of ₹' + limit.toFixed(2) + '.';
+            } else if (entered < 0) {
+                $(e.target).val('0.00');
+                allocationError = 'IPO allocation cannot be negative.';
+            }
+        }
         const adjustJV = $(e.target).hasClass('bulk-ipo-amount') ||
             $(e.target).hasClass('bulk-ipo-include') ||
             $(e.target).hasClass('bulk-ipo-type');
@@ -439,6 +464,8 @@ $(function () {
         $('#ipoCol').show();
         $('#trans_ipo').prop('disabled', false).val('all');
         $('#bulkAllocationContainer').empty().hide();
+        allocationError = '';
+        showValidation('');
         $('#saveBtn').prop('disabled', false);
     });
 
@@ -446,6 +473,17 @@ $(function () {
     // 4. Form Submission Interceptor
     // -------------------------------------------------------------------------
     $('#transactionModal form').on('submit', function(e) {
+        if (!this.checkValidity()) {
+            e.preventDefault();
+            this.reportValidity();
+            showValidation('Complete all required fields with valid values.');
+            return;
+        }
+        if (($('#trans_remark').val() || '').length > 250) {
+            e.preventDefault();
+            showValidation('Remark cannot exceed 250 characters.');
+            return;
+        }
         const isJV = $('#trans_jv').is(':checked');
         const ipoVal = $('#trans_ipo').val();
         const groupId = $('#trans_group').val();
@@ -456,7 +494,7 @@ $(function () {
             e.preventDefault();
 
             if (!recalculateAllocation(false)) {
-                alert('The allocation net must equal the entered payment amount.');
+                showValidation(allocationError || 'The allocation must equal the entered payment amount.');
                 return;
             }
             
@@ -478,7 +516,7 @@ $(function () {
                             ipo_id: ipoId,
                             amount: amt,
                             amount_type: amtType,
-                            remark: `Bulk Payment: ${ipoName}` + (remark ? ` - ${remark}` : ''),
+                            remark: (`Bulk Payment: ${ipoName}` + (remark ? ` - ${remark}` : '')).slice(0, 250),
                             date_time: dateTime,
                             jv: 0
                         });
@@ -496,7 +534,7 @@ $(function () {
                         ipo_id: null,
                         amount: jvAmt,
                         amount_type: jvType,
-                        remark: 'Bulk Excess JV Credit' + (remark ? ` - ${remark}` : ''),
+                        remark: ('Bulk Excess JV ' + ($('#trans_amount_type').val() || 'credit') + (remark ? ` - ${remark}` : '')).slice(0, 250),
                         date_time: dateTime,
                         jv: 1
                     });
@@ -504,7 +542,7 @@ $(function () {
             }
             
             if (transactions.length === 0) {
-                alert('No valid allocations to process.');
+                showValidation('No valid allocations to process.');
                 return;
             }
             
@@ -525,7 +563,7 @@ $(function () {
                     if (response.status === 'success') {
                         location.reload();
                     } else {
-                        alert('Error: ' + response.message);
+                        showValidation(response.message || 'Unable to save payment.');
                         btn.prop('disabled', false).html(originalText);
                     }
                 },
@@ -533,7 +571,7 @@ $(function () {
                     const message = xhr.responseJSON && xhr.responseJSON.message
                         ? xhr.responseJSON.message
                         : error;
-                    alert('Error processing bulk allocation: ' + message);
+                    showValidation('Unable to save payment: ' + message);
                     btn.prop('disabled', false).html(originalText);
                 }
             });

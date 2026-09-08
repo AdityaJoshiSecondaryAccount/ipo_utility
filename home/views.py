@@ -14671,12 +14671,14 @@ def _parse_transaction_amount(value):
         raise ValidationError("Invalid amount.")
     if not amount.is_finite() or amount <= 0:
         raise ValidationError("Amount must be greater than zero.")
+    if amount > Decimal("9999999999.99"):
+        raise ValidationError("Amount is too large.")
     return amount
 
 
 def _parse_transaction_datetime(value):
     if not value:
-        return timezone.now()
+        raise ValidationError("Date and time is required.")
     try:
         parsed = parse_datetime(value)
     except (TypeError, ValueError):
@@ -14685,6 +14687,8 @@ def _parse_transaction_datetime(value):
         raise ValidationError("Invalid date and time.")
     if timezone.is_naive(parsed):
         parsed = timezone.make_aware(parsed, timezone.get_current_timezone())
+    if parsed.year < 2020 or parsed.year > 2035:
+        raise ValidationError("Date and time must be between 2020 and 2035.")
     return parsed
 
 
@@ -14708,6 +14712,54 @@ def _get_owned_ipo(user, ipo_id):
     return ipo
 
 
+def _validate_transaction_remark(value):
+    remark = str(value or "").strip()
+    if len(remark) > 250:
+        raise ValidationError("Remark cannot exceed 250 characters.")
+    return remark
+
+
+def _get_group_ipo_outstanding(user, group, ipo):
+    order_total = Order.objects.filter(
+        user=user,
+        OrderGroup=group,
+        OrderIPOName=ipo,
+    ).aggregate(total=Sum("Amount"))["total"] or Decimal("0.00")
+    accounting_total = Accounting.objects.filter(
+        user=user,
+        group=group,
+        ipo=ipo,
+        is_deleted=False,
+    ).aggregate(
+        total=Sum(Case(
+            When(amount_type="credit", then=F("amount")),
+            When(amount_type="debit", then=-F("amount")),
+            output_field=DecimalField(),
+        ))
+    )["total"] or Decimal("0.00")
+    return (
+        Decimal(str(order_total)) - Decimal(str(accounting_total))
+    ).quantize(MONEY_QUANTUM)
+
+
+def _validate_ipo_payment(user, group, ipo, amount, amount_type):
+    outstanding = _get_group_ipo_outstanding(user, group, ipo)
+    if outstanding == Decimal("0.00"):
+        raise ValidationError(
+            f"{ipo.IPOName} has no outstanding balance for {group.GroupName}."
+        )
+    required_type = "debit" if outstanding < 0 else "credit"
+    if amount_type != required_type:
+        raise ValidationError(
+            f"{ipo.IPOName} requires a {required_type.title()} payment."
+        )
+    if amount > abs(outstanding):
+        raise ValidationError(
+            f"{ipo.IPOName} payment cannot exceed its outstanding balance of ₹{abs(outstanding):.2f}."
+        )
+    return outstanding
+
+
 def _create_single_transaction(request, redirect_name):
     if request.method != "POST":
         return redirect(redirect_name)
@@ -14726,13 +14778,17 @@ def _create_single_transaction(request, redirect_name):
         if amount_type not in VALID_TRANSACTION_TYPES:
             raise ValidationError("Invalid amount type.")
 
+        amount = _parse_transaction_amount(request.POST.get("amount"))
+        if ipo is not None:
+            _validate_ipo_payment(request.user, group, ipo, amount, amount_type)
+
         Accounting.objects.create(
             user=request.user,
             ipo=ipo,
             group=group,
             amount_type=amount_type,
-            amount=_parse_transaction_amount(request.POST.get("amount")),
-            remark=(request.POST.get("remark") or "")[:250],
+            amount=amount,
+            remark=_validate_transaction_remark(request.POST.get("remark")),
             date_time=_parse_transaction_datetime(request.POST.get("date_time")),
             jv=is_jv,
         )
@@ -14791,6 +14847,9 @@ def bulk_ipo_transactions(request):
         signed_total = Decimal("0.00")
         gross_total = Decimal("0.00")
         submitted_group_id = None
+        submitted_date = None
+        seen_ipo_ids = set()
+        jv_count = 0
         for item in items:
             if not isinstance(item, dict):
                 raise ValidationError("Invalid transaction entry.")
@@ -14803,18 +14862,34 @@ def bulk_ipo_transactions(request):
 
             is_jv = item.get("jv") in (1, True, "1")
             ipo = None
-            if not is_jv:
+            if is_jv:
+                jv_count += 1
+                if jv_count > 1:
+                    raise ValidationError("Only one JV allocation is allowed.")
+            else:
                 ipo_id = item.get("ipo_id")
                 if not ipo_id:
                     raise ValidationError("An IPO is required for non-JV entries.")
                 ipo = _get_owned_ipo(request.user, ipo_id)
+                if ipo.id in seen_ipo_ids:
+                    raise ValidationError("Duplicate IPO allocation is not allowed.")
+                seen_ipo_ids.add(ipo.id)
 
             amount_type = item.get("amount_type")
             if amount_type not in VALID_TRANSACTION_TYPES:
                 raise ValidationError("Invalid amount type.")
             amount = _parse_transaction_amount(item.get("amount"))
+            if amount_type != master_type:
+                raise ValidationError("Every allocation must use the selected amount type.")
+            if ipo is not None:
+                _validate_ipo_payment(request.user, group, ipo, amount, amount_type)
             gross_total += amount
             signed_total += amount if amount_type == "credit" else -amount
+            item_date = _parse_transaction_datetime(item.get("date_time"))
+            if submitted_date is None:
+                submitted_date = item_date
+            elif item_date != submitted_date:
+                raise ValidationError("All allocations must use the same date and time.")
 
             records.append(Accounting(
                 user=request.user,
@@ -14822,8 +14897,8 @@ def bulk_ipo_transactions(request):
                 group=group,
                 amount=amount,
                 amount_type=amount_type,
-                remark=(item.get("remark") or "")[:250],
-                date_time=_parse_transaction_datetime(item.get("date_time")),
+                remark=_validate_transaction_remark(item.get("remark")),
+                date_time=item_date,
                 jv=is_jv,
             ))
 
@@ -14849,6 +14924,10 @@ def bulk_ipo_transactions(request):
         return JsonResponse(
             {"status": "error", "message": exc.messages[0]}, status=400
         )
+    except Exception as exc:
+        traceback.print_exc()
+        message = str(exc) if settings.DEBUG else "Server error while saving payment."
+        return JsonResponse({"status": "error", "message": message}, status=500)
 @login_required
 def bulk_transfer_transactions(request):
     """Create a balanced multi-IPO transfer without changing legacy handlers."""
