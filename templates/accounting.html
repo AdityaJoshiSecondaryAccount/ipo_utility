@@ -1877,7 +1877,7 @@
                             <div class="form-check m-0">
                                 <input class="form-check-input" type="checkbox" name="show_deleted" id="showDeletedCheck" value="1" form="filterForm" onchange="this.form.submit()" {% if show_deleted %}checked{% endif %}>
                                 <label class="form-check-label text-danger fw-bold" for="showDeletedCheck" style="font-size: 0.85em;">
-                                    Show Soft Deleted Entries
+                                    Show Deleted Entries
                                 </label>
                             </div>
                         </div>
@@ -2157,6 +2157,11 @@
                                     <label for="edit_remark">Remark</label>
                                     <input type="text" id="edit_remark" name="remark" class="form-control" maxlength="250">
                                 </div>
+                                <div class="form-group mb-3">
+                                    <label for="edit_reason">Reason for editing <span class="text-danger">*</span></label>
+                                    <textarea id="edit_reason" name="edit_reason" class="form-control" maxlength="250" rows="2" required></textarea>
+                                    <small class="text-muted">This reason will be saved in the accounting activity log.</small>
+                                </div>
                                 <div class="form-group">
                                     <label for="edit_date_time">Date &amp; Time</label>
                                     <input type="datetime-local" id="edit_date_time" name="date_time" class="form-control" min="2020-01-01T00:00" max="2035-12-31T23:59:59" step="1" required>
@@ -2329,9 +2334,16 @@
                 const id = this.getAttribute("data-id");
                 const isBulkTransfer = !!this.closest('.bulk-transfer-row');
                 Swal.fire({
-                    title: 'Are you sure?',
-                    text: isBulkTransfer ? "Do you really want to delete this complete bulk transfer?" : "Do you really want to delete this entry?",
+                    title: isBulkTransfer ? 'Delete bulk transfer?' : 'Delete entry?',
+                    text: 'Enter the reason for deleting this record.',
                     icon: 'warning',
+                    input: 'textarea',
+                    inputLabel: 'Reason for deletion',
+                    inputPlaceholder: 'Enter reason (required)',
+                    inputAttributes: { maxlength: 250 },
+                    inputValidator: (value) => {
+                        if (!value || !value.trim()) return 'Please enter a reason.';
+                    },
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
                     cancelButtonColor: '#6c757d',
@@ -2341,11 +2353,13 @@
                         fetch(`/soft-delete-accounting/${id}/`, {
                             method: 'POST',
                             headers: {
-                                'X-Requested-With': 'XMLHttpRequest'
-                            }
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ reason: result.value.trim() })
                         }).then(res => res.json()).then(data => {
                             if(data.success) location.reload();
-                            else Swal.fire('Error', 'Failed to delete.', 'error');
+                            else Swal.fire('Error', data.error || 'Failed to delete.', 'error');
                         });
                     }
                 });
@@ -2584,6 +2598,36 @@
     });
 </script> {% endcomment %}
 <style>
+    #example .bulk-transfer-label {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    #example .bulk-transfer-toggle {
+        display: inline-flex;
+        width: 24px;
+        height: 24px;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border: 1px solid #6c757d;
+        border-radius: 3px;
+        color: #343a40;
+        background: #fff;
+        cursor: pointer;
+    }
+    #example .bulk-transfer-toggle:hover {
+        color: #fff;
+        background: #6c757d;
+    }
+    #example .bulk-transfer-toggle i {
+        font-size: 0.7rem;
+        transition: transform 0.15s ease;
+    }
+    #example .bulk-transfer-toggle[aria-expanded="true"] i {
+        transform: rotate(90deg);
+    }
     #example tr.bulk-transfer-group-open > td:first-child,
     #example tr.bulk-transfer-detail-open > td:first-child {
         border-left: 3px solid #343a40 !important;
@@ -2635,7 +2679,8 @@
         if (parentRow) placeBulkTransferDetails(parentRow, rows, willOpen);
         if (parentRow) parentRow.classList.toggle('bulk-transfer-group-open', willOpen);
         button.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
-        button.textContent = (willOpen ? 'Hide ' : 'View ') + rows.length + ' entries';
+        button.setAttribute('aria-label', (willOpen ? 'Hide ' : 'View ') + rows.length + ' transfer entries');
+        button.setAttribute('title', (willOpen ? 'Hide ' : 'View ') + rows.length + ' entries');
     });
 
     $(document).ready(function () {
@@ -3106,6 +3151,7 @@
             $('#edit_amount_type').val($(this).data('amount-type'));
             $('#edit_amount').val($(this).data('amount'));
             $('#edit_remark').val($(this).data('remark'));
+            $('#edit_reason').val('');
             
             // Format datetime (YYYY-MM-DDTHH:MM:SS)
             let rawDt = $(this).data('datetime');

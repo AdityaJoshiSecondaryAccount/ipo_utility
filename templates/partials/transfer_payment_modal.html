@@ -205,6 +205,12 @@
                         </div>
                     </div>
 
+                    <div id="ct_edit_reason_group" class="form-group" style="display:none;">
+                        <label for="ct_edit_reason">Reason for editing <span class="text-danger">*</span></label>
+                        <textarea id="ct_edit_reason" class="form-control" maxlength="250" rows="2"></textarea>
+                        <small class="text-muted">This reason will be saved in the accounting activity log.</small>
+                    </div>
+
                     <div class="text-muted ct-allocation-help">
                         Review the automatic allocation below. Uncheck an IPO to skip it; the amount moves to the next available IPO and then to JV if needed.
                     </div>
@@ -824,6 +830,8 @@ $(function () {
         $('#ct_source_ipos, #ct_destination_ipos').empty().prop('disabled', true);
         $('#ct_source_allocations, #ct_destination_allocations').empty();
         $('#ct_date_time').val('');
+        $('#ct_edit_reason').val('');
+        $('#ct_edit_reason_group').hide();
         allocationInputError = '';
         editingBatchId = null;
         editState = null;
@@ -847,12 +855,18 @@ $(function () {
             source_type: $('#ct_source_type').val(),
             date_time: $('#ct_date_time').val(),
             remark: $('#ct_remark').val(),
+            edit_reason: editingBatchId ? $('#ct_edit_reason').val().trim() : '',
             source_allocations: collectAllocations('source'),
             destination_allocations: collectAllocations('destination'),
             source_jv: collectJV('source'),
             destination_jv: collectJV('destination')
         };
         if (editingBatchId) payload.transfer_batch_id = editingBatchId;
+        if (editingBatchId && !payload.edit_reason) {
+            showValidation('Please enter a reason for editing this transfer.');
+            $('#ct_edit_reason').trigger('focus');
+            return;
+        }
 
         const button = $('#ct_save');
         const csrfToken = form.find('[name=csrfmiddlewaretoken]').val() ||
@@ -893,6 +907,8 @@ $(function () {
                 $('#ct_destination_type').val(data.source_type === 'credit' ? 'Debit' : 'Credit');
                 $('#ct_amount').val(Number(data.master_amount).toFixed(2));
                 $('#ct_remark').val(data.remark || '');
+                $('#ct_edit_reason').val('');
+                $('#ct_edit_reason_group').show();
                 $('#ct_date_time').val(data.date_time);
                 modal.find('.modal-title').text('Edit Transfer Between Groups');
                 $('#ct_save').text('Update Transfer');

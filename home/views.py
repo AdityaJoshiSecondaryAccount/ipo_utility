@@ -13868,6 +13868,25 @@ def accounting_view(request):
             ))
             group_display = " → ".join(group_names)
             batch_key = str(e.transfer_batch_id)
+            batch_user_remark = ""
+            source_name = group_names[0] if group_names else ""
+            destination_name = group_names[1] if len(group_names) > 1 else ""
+            generated_prefixes = (
+                f"Transfer to {destination_name}",
+                f"Transfer excess to {destination_name}",
+                f"Transfer from {source_name}",
+                f"JV transfer from {source_name}",
+            )
+            for batch_entry in batch_entries:
+                entry_remark = batch_entry.remark or ""
+                for prefix in generated_prefixes:
+                    if prefix and entry_remark.startswith(prefix):
+                        remainder = entry_remark[len(prefix):]
+                        if remainder.startswith(" - "):
+                            batch_user_remark = remainder[3:]
+                        break
+                if batch_user_remark:
+                    break
             detail_rows = ""
             for item in batch_entries:
                 item_ipo = item.ipo.IPOName if item.ipo else "JV"
@@ -13904,16 +13923,21 @@ def accounting_view(request):
             )
             rows += f"""
             <tr class="bulk-transfer-row" data-transfer-batch="{batch_key}" style="{'opacity: 0.6; background-color: #ffe6e6;' if show_deleted else ''}">
-                <td><strong>Bulk Transfer</strong></td>
+                <td>
+                    <span class="bulk-transfer-label">
+                        <strong>Bulk Transfer</strong>
+                        <button type="button" class="bulk-transfer-toggle"
+                                data-transfer-batch="{batch_key}" aria-expanded="false"
+                                aria-label="View {len(batch_entries)} transfer entries"
+                                title="View {len(batch_entries)} entries">
+                            <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                        </button>
+                    </span>
+                </td>
                 <td>{escape(group_display)}</td>
                 <td><span class="badge bg-primary">TRANSFER</span></td>
                 <td>{transfer_amount}</td>
-                <td>
-                    <button type="button" class="btn btn-sm btn-outline-secondary bulk-transfer-toggle"
-                            data-transfer-batch="{batch_key}" aria-expanded="false">
-                        View {len(batch_entries)} entries
-                    </button>
-                </td>
+                <td><textarea class="form-control form-control-sm" readonly>{escape(batch_user_remark)}</textarea></td>
                 <td data-order="{timezone.localtime(batch_date).strftime('%Y-%m-%d %H:%M:%S')}">
                     {timezone.localtime(batch_date).strftime("%d-%m-%y %H:%M:%S")}
                 </td>
@@ -14034,9 +14058,9 @@ def accounting_logs_view(request):
             if log.action == 'EDIT':
                 badge = "<span class='badge bg-warning text-dark'>Edited</span>"
             elif log.action == 'SOFT_DELETE':
-                badge = "<span class='badge bg-danger'>Deleted</span>"
+                badge = "<span class='badge bg-danger text-white'>Deleted</span>"
             elif log.action == 'RESTORE':
-                badge = "<span class='badge bg-success'>Restored</span>"
+                badge = "<span class='badge bg-success text-white'>Restored</span>"
             else:
                 badge = f"<span class='badge bg-secondary'>{escape(log.action)}</span>"
             
@@ -14087,6 +14111,9 @@ def accounting_logs_view(request):
                     f"<div><b>Amount:</b> ₹{transfer_amount:.2f}</div>",
                     f"<div><b>Entries:</b> {len(operation_entries)}</div>",
                 ]
+                audit_reason = (log.changes or {}).get("reason")
+                if audit_reason:
+                    details.append(f"<div><b>Reason:</b> {escape(audit_reason)}</div>")
                 if log.action == 'EDIT':
                     changed_fields = []
                     for field, values in (log.changes or {}).items():
@@ -14120,9 +14147,9 @@ def accounting_logs_view(request):
                         def style_amt(amt):
                             amt_str = str(amt).lower()
                             if amt_str == 'debit':
-                                return f"<span class='badge rounded-pill bg-danger'>{escape(amt)}</span>"
+                                return f"<span class='badge rounded-pill bg-danger text-white'>{escape(amt)}</span>"
                             elif amt_str == 'credit':
-                                return f"<span class='badge rounded-pill bg-success'>{escape(amt)}</span>"
+                                return f"<span class='badge rounded-pill bg-success text-white'>{escape(amt)}</span>"
                             return escape(amt)
                         changes_parts.append(f"<b>{escape(field)}:</b> {style_amt(vals['old'])} → {style_amt(vals['new'])}")
                     else:
@@ -14501,6 +14528,7 @@ def update_accounting(request):
                 raise ValidationError("Invalid amount type.")
             amount = _parse_transaction_amount(request.POST.get("amount"))
             remark = _validate_transaction_remark(request.POST.get("remark"))
+            edit_reason = _validate_audit_reason(request.POST.get("edit_reason"))
             date_time = _parse_transaction_datetime(request.POST.get("date_time"))
             if ipo is not None:
                 _validate_ipo_payment(
@@ -14556,7 +14584,9 @@ def update_accounting(request):
                 "new": timezone.localtime(date_time).strftime("%d-%m-%Y %H:%M:%S") if date_time else ""
             }
 
-        # Log audit entry if any changes detected
+        changes["reason"] = edit_reason
+
+        # Log the edit and its reason.
         if changes:
             AccountingAuditLog.objects.create(
                 user=request.user,
@@ -14608,6 +14638,7 @@ def update_accounting(request):
                 if sibling_changes:
                     sibling_group = sibling.group.GroupName if sibling.group else (sibling.group_name or "")
                     sibling_changes["note"] = f"JV sibling [ {sibling_group} ] auto-edited"
+                    sibling_changes["reason"] = edit_reason
                     AccountingAuditLog.objects.create(
                         user=request.user,
                         accounting=sibling,
@@ -14625,6 +14656,13 @@ def update_accounting(request):
 def soft_delete_accounting(request, entry_id):
     if request.method == "POST":
         entry = get_object_or_404(Accounting, id=entry_id, user=request.user)
+        try:
+            payload = json.loads(request.body or "{}")
+            reason = _validate_audit_reason(payload.get("reason"))
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "error": "Invalid delete request."}, status=400)
+        except ValidationError as exc:
+            return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
 
         if entry.transfer_batch_id:
             batch_entries = Accounting.objects.filter(
@@ -14642,7 +14680,10 @@ def soft_delete_accounting(request, entry_id):
                         user=request.user,
                         accounting=batch_entry,
                         action="SOFT_DELETE",
-                        changes={"note": f"Bulk transfer {entry.transfer_batch_id} deleted"},
+                        changes={
+                            "note": f"Bulk transfer {entry.transfer_batch_id} deleted",
+                            "reason": reason,
+                        },
                     )
             return JsonResponse({"success": True})
         
@@ -14661,6 +14702,7 @@ def soft_delete_accounting(request, entry_id):
                 "Group": entry.group.GroupName if entry.group else (entry.group_name or ""),
                 "Amount": str(entry.amount),
                 "Amount Type": entry.amount_type,
+                "reason": reason,
             }
         )
 
@@ -14683,7 +14725,10 @@ def soft_delete_accounting(request, entry_id):
                     user=request.user,
                     accounting=sibling,
                     action='SOFT_DELETE',
-                    changes={"note": f"JV sibling [ {sibling_group} ] auto-deleted"}
+                    changes={
+                        "note": f"JV sibling [ {sibling_group} ] auto-deleted",
+                        "reason": reason,
+                    }
                 )
 
         return JsonResponse({"success": True})
@@ -14816,6 +14861,15 @@ def _validate_transaction_remark(value):
     if len(remark) > 250:
         raise ValidationError("Remark cannot exceed 250 characters.")
     return remark
+
+
+def _validate_audit_reason(value):
+    reason = str(value or "").strip()
+    if not reason:
+        raise ValidationError("Please enter a reason.")
+    if len(reason) > 250:
+        raise ValidationError("Reason cannot exceed 250 characters.")
+    return reason
 
 
 def _get_group_ipo_outstanding(user, group, ipo, exclude_entry_id=None):
@@ -15077,6 +15131,7 @@ def bulk_transfer_transactions(request):
             )
             if not existing_batch.exists():
                 raise ValidationError("Transfer batch was not found.")
+            edit_reason = _validate_audit_reason(payload.get("edit_reason"))
             existing_entries = list(
                 existing_batch.select_related("group", "ipo").order_by("id")
             )
@@ -15285,6 +15340,7 @@ def bulk_transfer_transactions(request):
                         + int(bool(destination_jv))
                     ),
                 },
+                "reason": edit_reason,
             }
         records = []
         for ipo, amount, amount_type in source_allocations:
