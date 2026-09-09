@@ -13868,6 +13868,19 @@ def accounting_view(request):
             ))
             group_display = " → ".join(group_names)
             batch_key = str(e.transfer_batch_id)
+            batch_user_remark = ""
+            first_batch_remark = batch_entries[0].remark or ""
+            if len(group_names) > 1:
+                summary_prefixes = (
+                    f"Transfer to {group_names[1]}",
+                    f"Transfer excess to {group_names[1]}",
+                )
+                for prefix in summary_prefixes:
+                    if first_batch_remark.startswith(prefix):
+                        batch_user_remark = first_batch_remark[len(prefix):]
+                        if batch_user_remark.startswith(" - "):
+                            batch_user_remark = batch_user_remark[3:]
+                        break
             detail_rows = ""
             for item in batch_entries:
                 item_ipo = item.ipo.IPOName if item.ipo else "JV"
@@ -13909,6 +13922,7 @@ def accounting_view(request):
                 <td><span class="badge bg-primary">TRANSFER</span></td>
                 <td>{transfer_amount}</td>
                 <td>
+                    {f'<div style="white-space: normal; margin-bottom: 6px;" title="{escape(batch_user_remark)}">{escape(batch_user_remark)}</div>' if batch_user_remark else ''}
                     <button type="button" class="btn btn-sm btn-outline-secondary bulk-transfer-toggle"
                             data-transfer-batch="{batch_key}" aria-expanded="false">
                         View {len(batch_entries)} entries

@@ -73,6 +73,23 @@
     #combinedTransferModal input[type="checkbox"]:not(:disabled) {
         cursor: pointer;
     }
+    #combinedTransferModal .ct-entry-type-help {
+        display: block;
+        margin-top: -0.5rem;
+        margin-bottom: 1rem;
+    }
+    #combinedTransferModal .ct-allocation-help {
+        margin-top: 0.5rem;
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+    #combinedTransferModal .ct-allocation-heading {
+        margin-bottom: 0.5rem;
+    }
+    #combinedTransferModal .ct-summary-row {
+        align-items: center;
+        min-height: 3.75rem;
+    }
     #combinedTransferModal table.table .form-control {
         min-height: 2rem !important;
         padding: 0.25rem 0.35rem !important;
@@ -111,7 +128,7 @@
             <form id="combinedTransferForm">
                 {% csrf_token %}
                 <div class="modal-header">
-                    <h5 class="modal-title">Multiple IPO Transfer</h5>
+                    <h5 class="modal-title">Transfer Between Groups</h5>
                     <button type="button" class="btn-close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
@@ -120,9 +137,9 @@
 
                     <div class="row">
                         <div class="col-md-6">
-                            <h6>Source</h6>
+                            <h6>Money taken from</h6>
                             <div class="form-group">
-                                <label for="ct_source_group">Group Name</label>
+                                <label for="ct_source_group">From Group</label>
                                 <select id="ct_source_group" class="form-control" required>
                                     <option value="" selected disabled>Select group</option>
                                     {% if groups1 %}
@@ -133,15 +150,15 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <div class="text-muted">IPOs will be selected automatically from this group.</div>
+                                <div class="text-muted">Eligible IPO balances are selected automatically.</div>
                                 <select id="ct_source_ipos" multiple hidden disabled></select>
                             </div>
                         </div>
 
                         <div class="col-md-6">
-                            <h6>Destination</h6>
+                            <h6>Money given to</h6>
                             <div class="form-group">
-                                <label for="ct_destination_group">Group Name</label>
+                                <label for="ct_destination_group">To Group</label>
                                 <select id="ct_destination_group" class="form-control" required>
                                     <option value="" selected disabled>Select group</option>
                                     {% if groups1 %}
@@ -152,15 +169,15 @@
                                 </select>
                             </div>
                             <div class="form-group" id="ct_destination_ipo_group">
-                                <div class="text-muted">IPOs will be selected automatically from this group.</div>
+                                <div class="text-muted">Eligible IPO balances are selected automatically.</div>
                                 <select id="ct_destination_ipos" multiple hidden disabled></select>
                             </div>
                         </div>
                     </div>
 
-                    <div class="row mt-2 align-items-end">
+                    <div class="row mt-2">
                         <div class="col-md-4 form-group">
-                            <label for="ct_source_type">Source Amount Type</label>
+                            <label for="ct_source_type">From Group Entry Type</label>
                             <select id="ct_source_type" class="form-control">
                                 <option value="credit">Credit</option>
                                 <option value="debit">Debit</option>
@@ -171,10 +188,11 @@
                             <input type="number" id="ct_amount" class="form-control" min="1" step="1" required>
                         </div>
                         <div class="col-md-4 form-group">
-                            <label>Destination Amount Type</label>
+                            <label>To Group Entry Type</label>
                             <input type="text" id="ct_destination_type" class="form-control" value="Debit" readonly>
                         </div>
                     </div>
+                    <small class="text-muted ct-entry-type-help">The To Group uses the opposite entry type automatically.</small>
 
                     <div class="row">
                         <div class="col-md-8 form-group">
@@ -187,24 +205,28 @@
                         </div>
                     </div>
 
-                    <div class="row mt-3">
+                    <div class="text-muted ct-allocation-help">
+                        Review the automatic allocation below. Uncheck an IPO to skip it; the amount moves to the next available IPO and then to JV if needed.
+                    </div>
+
+                    <div class="row">
                         <div class="col-md-6">
-                            <h6>Source Allocation</h6>
+                            <h6 class="ct-allocation-heading">From Group Allocation</h6>
                             <div id="ct_source_allocations" class="table-responsive"></div>
                         </div>
                         <div class="col-md-6">
-                            <h6>Destination Allocation</h6>
+                            <h6 class="ct-allocation-heading">To Group Allocation</h6>
                             <div id="ct_destination_allocations" class="table-responsive"></div>
                         </div>
                     </div>
 
                     <div id="ct_validation_message" class="ct-validation-banner" role="alert"></div>
 
-                    <div class="row mt-3 p-3" style="background:#e9ecef; border:1px solid #dee2e6;">
-                        <div class="col-md-3">Master: <strong id="ct_master_total">0.00</strong></div>
-                        <div class="col-md-3">Source: <strong id="ct_source_total">0.00</strong></div>
-                        <div class="col-md-3">Destination: <strong id="ct_destination_total">0.00</strong></div>
-                        <div class="col-md-3"><span id="ct_status" class="text-danger">Select transfer details</span></div>
+                    <div class="row mt-3 p-3 ct-summary-row" style="background:#e9ecef; border:1px solid #dee2e6;">
+                        <div class="col-md-3">Transfer: <strong id="ct_master_total">0.00</strong></div>
+                        <div class="col-md-3">From Group: <strong id="ct_source_total">0.00</strong></div>
+                        <div class="col-md-3">To Group: <strong id="ct_destination_total">0.00</strong></div>
+                        <div class="col-md-3"><span id="ct_status" class="text-muted">Select the From Group to begin.</span></div>
                     </div>
                 </div>
 
@@ -336,14 +358,25 @@ $(function () {
 
     function allocationTable(side, items, allocations) {
         const table = $('<table>', {class: 'table table-sm table-bordered mb-0'});
-        table.append('<thead><tr><th>IPO</th><th>Original</th><th>Amount</th><th>Type</th><th>Include</th></tr></thead>');
+        table.append('<thead><tr><th>IPO</th><th>Available</th><th>Amount</th><th>Type</th><th>Use</th></tr></thead>');
         const body = $('<tbody>');
 
         if (!items.length) {
+            const groupSelected = side === 'source'
+                ? !!$('#ct_source_group').val()
+                : !!$('#ct_destination_group').val();
+            const masterEntered = toMinorUnits($('#ct_amount').val()) > 0;
+            let emptyMessage = 'Select a group to view allocation details.';
+            if (groupSelected && !masterEntered) {
+                emptyMessage = 'Enter the transfer amount to calculate allocations.';
+            } else if (groupSelected && masterEntered) {
+                emptyMessage = 'No ' + expectedTypeLabel(side) +
+                    ' IPO balance is available. The remaining amount will be recorded as JV.';
+            }
             body.append(
                 $('<tr>').append(
                     $('<td>', {colspan: 5, class: 'text-center text-muted'}).text(
-                        'No ' + expectedTypeLabel(side) + ' IPO balances found for this group. The transfer amount will be added as JV.'
+                        emptyMessage
                     )
                 )
             );
@@ -619,7 +652,9 @@ $(function () {
         const destination = sideTotals('destination');
         const sourceCount = $('#ct_source_allocations .ct-allocation-include:checked').length;
         const destinationCount = $('#ct_destination_allocations .ct-allocation-include:checked').length;
-        const groupsSelected = $('#ct_source_group').val() && $('#ct_destination_group').val();
+        const sourceGroupSelected = !!$('#ct_source_group').val();
+        const destinationGroupSelected = !!$('#ct_destination_group').val();
+        const groupsSelected = sourceGroupSelected && destinationGroupSelected;
         const groupsAreDifferent = $('#ct_source_group').val() !== $('#ct_destination_group').val();
         const expectedSourceNet = $('#ct_source_type').val() === 'credit' ? master : -master;
         const balanced = master > 0 && sourceCount > 0 && destinationCount > 0 &&
@@ -627,38 +662,50 @@ $(function () {
             source.net === expectedSourceNet && destination.net === -expectedSourceNet;
 
         let validationMessage = '';
-        if (!$('#ct_source_group').val()) {
-            validationMessage = 'Select a source group.';
-        } else if (!$('#ct_destination_group').val()) {
-            validationMessage = 'Select a destination group.';
+        if (!sourceGroupSelected) {
+            validationMessage = 'Select the From Group.';
+        } else if (!destinationGroupSelected) {
+            validationMessage = 'Select the To Group.';
         } else if (!groupsAreDifferent) {
-            validationMessage = 'Source and destination groups must be different.';
+            validationMessage = 'The From Group and To Group must be different.';
         } else if (master <= 0) {
             validationMessage = 'Enter a transfer amount greater than zero.';
         } else if (!$('#ct_date_time').val()) {
             validationMessage = 'Select the transfer date and time.';
         } else if (!sourceCount) {
-            validationMessage = 'No source allocation is available.';
+            validationMessage = 'No From Group allocation is available.';
         } else if (!destinationCount) {
-            validationMessage = 'No destination allocation is available.';
+            validationMessage = 'No To Group allocation is available.';
         } else if (source.gross > master) {
-            validationMessage = 'Source allocation exceeds the transfer amount.';
+            validationMessage = 'From Group allocation exceeds the transfer amount.';
         } else if (destination.gross > master) {
-            validationMessage = 'Destination allocation exceeds the transfer amount.';
+            validationMessage = 'To Group allocation exceeds the transfer amount.';
         } else if (source.net !== expectedSourceNet) {
-            validationMessage = 'Source allocation must equal the transfer amount.';
+            validationMessage = 'From Group allocation must equal the transfer amount.';
         } else if (destination.net !== -expectedSourceNet) {
-            validationMessage = 'Destination allocation must equal the transfer amount.';
+            validationMessage = 'To Group allocation must equal the transfer amount.';
         }
+
+        let guidanceMessage = 'Review the allocation and save the transfer.';
+        if (!sourceGroupSelected) {
+            guidanceMessage = 'Select the From Group to begin.';
+        } else if (!destinationGroupSelected) {
+            guidanceMessage = 'Select the To Group.';
+        } else if (master <= 0) {
+            guidanceMessage = 'Enter the amount to transfer.';
+        }
+        const prerequisitesComplete = groupsSelected && master > 0;
+        const displayAsError = !balanced && prerequisitesComplete;
 
         $('#ct_master_total').text((master / 100).toFixed(2));
         $('#ct_source_total').text((Math.abs(source.net) / 100).toFixed(2));
         $('#ct_destination_total').text((Math.abs(destination.net) / 100).toFixed(2));
         $('#ct_status')
             .toggleClass('text-success', !!balanced)
-            .toggleClass('text-danger', !balanced)
-            .text(balanced ? 'Allocation matched' : validationMessage || 'Allocation must match');
-        showValidation(balanced ? allocationInputError : validationMessage);
+            .toggleClass('text-danger', displayAsError)
+            .toggleClass('text-muted', !balanced && !displayAsError)
+            .text(balanced ? 'Ready to save' : (displayAsError ? validationMessage : guidanceMessage));
+        showValidation(balanced ? allocationInputError : (displayAsError ? validationMessage : ''));
         $('#ct_save').prop('disabled', !balanced);
         return !!balanced;
     }
@@ -781,7 +828,7 @@ $(function () {
         editingBatchId = null;
         editState = null;
         pendingEditSides.clear();
-        modal.find('.modal-title').text('Multiple IPO Transfer');
+        modal.find('.modal-title').text('Transfer Between Groups');
         $('#ct_save').text('Save Transfer');
         showValidation('');
         updateMode();
@@ -847,7 +894,7 @@ $(function () {
                 $('#ct_amount').val(Number(data.master_amount).toFixed(2));
                 $('#ct_remark').val(data.remark || '');
                 $('#ct_date_time').val(data.date_time);
-                modal.find('.modal-title').text('Edit Multiple IPO Transfer');
+                modal.find('.modal-title').text('Edit Transfer Between Groups');
                 $('#ct_save').text('Update Transfer');
                 loadGroupIPOs('source');
                 loadGroupIPOs('destination');
