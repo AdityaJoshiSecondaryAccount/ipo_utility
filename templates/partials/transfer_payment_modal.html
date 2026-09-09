@@ -622,14 +622,12 @@ $(function () {
         const groupsSelected = $('#ct_source_group').val() && $('#ct_destination_group').val();
         const groupsAreDifferent = $('#ct_source_group').val() !== $('#ct_destination_group').val();
         const expectedSourceNet = $('#ct_source_type').val() === 'credit' ? master : -master;
-        const balanced = !allocationInputError && master > 0 && sourceCount > 0 && destinationCount > 0 &&
+        const balanced = master > 0 && sourceCount > 0 && destinationCount > 0 &&
             groupsSelected && groupsAreDifferent && source.gross <= master && destination.gross <= master &&
             source.net === expectedSourceNet && destination.net === -expectedSourceNet;
 
         let validationMessage = '';
-        if (allocationInputError) {
-            validationMessage = allocationInputError;
-        } else if (!$('#ct_source_group').val()) {
+        if (!$('#ct_source_group').val()) {
             validationMessage = 'Select a source group.';
         } else if (!$('#ct_destination_group').val()) {
             validationMessage = 'Select a destination group.';
@@ -660,7 +658,7 @@ $(function () {
             .toggleClass('text-success', !!balanced)
             .toggleClass('text-danger', !balanced)
             .text(balanced ? 'Allocation matched' : validationMessage || 'Allocation must match');
-        showValidation(balanced ? '' : validationMessage);
+        showValidation(balanced ? allocationInputError : validationMessage);
         $('#ct_save').prop('disabled', !balanced);
         return !!balanced;
     }
