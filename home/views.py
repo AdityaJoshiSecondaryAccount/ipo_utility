@@ -13895,6 +13895,9 @@ def accounting_view(request):
                 f"data-id='{representative_id}' title='Restore this bulk transfer'>"
                 "<i class='fas fa-undo'></i> Restore</button>"
                 if show_deleted else
+                f"<button type='button' class='btn btn-sm btn-outline-primary bulk-transfer-edit-btn' "
+                f"data-transfer-batch='{batch_key}' title='Edit this bulk transfer'>"
+                "<i class='fas fa-edit'></i></button> "
                 f"<button type='button' class='btn btn-sm btn-outline-danger delete-btn' "
                 f"data-id='{representative_id}' title='Delete this bulk transfer'>"
                 "<i class='fas fa-trash'></i></button>"
@@ -13936,7 +13939,7 @@ def accounting_view(request):
         ipo_id_val = e.ipo.id if e.ipo else ""
         group_id_val = e.group.id if e.group else ""
         dt_local = timezone.localtime(e.date_time).strftime("%Y-%m-%dT%H:%M:%S")
-        safe_remark = e.remark.replace("'", "\\'").replace('"', '&quot;') if e.remark else ""
+        safe_remark = escape(e.remark or "")
         
         rows += f"""
         <tr style="{'opacity: 0.6; background-color: #ffe6e6;' if show_deleted else ''}">
@@ -13956,6 +13959,7 @@ def accounting_view(request):
                         data-group-id="{group_id_val}" 
                         data-amount="{e.amount}" 
                         data-amount-type="{e.amount_type}" 
+                        data-jv="{'1' if e.jv else '0'}"
                         data-remark="{safe_remark}" 
                         data-datetime="{dt_local}">
                     <i class="fas fa-edit"></i>
@@ -14399,25 +14403,42 @@ def save_transaction_group(request):
 @login_required
 def update_accounting(request):
     if request.method == "POST":
-        entry_id = request.POST.get("entry_id")
-        entry = get_object_or_404(Accounting, id=entry_id, user=request.user)
+        try:
+            entry_id = request.POST.get("entry_id")
+            entry = get_object_or_404(Accounting, id=entry_id, user=request.user)
+            if entry.transfer_batch_id:
+                raise ValidationError(
+                    "Use the Bulk Transfer edit button to edit this entry."
+                )
 
-        ipo_id = request.POST.get("ipo_id")
-        group_id = request.POST.get("group_id")
-        amount = request.POST.get("amount")
-        amount_type = request.POST.get("amount_type")
-        remark = request.POST.get("remark") or ""
-        date_time_str = request.POST.get("date_time")
+            group = _get_owned_group(request.user, request.POST.get("group_id"))
+            ipo_id = request.POST.get("ipo_id")
+            ipo = None
+            if entry.jv:
+                ipo_id = None
+            else:
+                if not ipo_id:
+                    raise ValidationError("A valid IPO is required.")
+                ipo = _get_owned_ipo(request.user, ipo_id)
 
-        if date_time_str:
-            if "T" in date_time_str:
-                date_time_str = date_time_str.replace("T", " ")
-            if len(date_time_str) == 16:  # YYYY-MM-DD HH:MM
-                date_time_str += ":00"
-            date_time = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M:%S")
-            date_time = timezone.make_aware(date_time, timezone.get_current_timezone())
-        else:
-            date_time = timezone.now()
+            amount_type = request.POST.get("amount_type")
+            if amount_type not in VALID_TRANSACTION_TYPES:
+                raise ValidationError("Invalid amount type.")
+            amount = _parse_transaction_amount(request.POST.get("amount"))
+            remark = _validate_transaction_remark(request.POST.get("remark"))
+            date_time = _parse_transaction_datetime(request.POST.get("date_time"))
+            if ipo is not None:
+                _validate_ipo_payment(
+                    request.user,
+                    group,
+                    ipo,
+                    amount,
+                    amount_type,
+                    exclude_entry_id=entry.id,
+                )
+        except ValidationError as exc:
+            messages.error(request, exc.messages[0])
+            return redirect("accounting")
 
         # Save original values for JV finding and audit log
         orig_amount = entry.amount
@@ -14429,19 +14450,19 @@ def update_accounting(request):
 
         # Build changes dict for audit log
         changes = {}
-        new_ipo_id = int(ipo_id) if ipo_id else None
-        new_group_id = int(group_id) if group_id else None
-        new_amount = Decimal(str(amount))
+        new_ipo_id = ipo.id if ipo else None
+        new_group_id = group.id
+        new_amount = amount
 
         if orig_ipo_id != new_ipo_id:
             old_ipo_name = entry.ipo.IPOName if entry.ipo else str(orig_ipo_id or "None")
-            new_ipo_obj = CurrentIpoName.objects.filter(id=new_ipo_id).first() if new_ipo_id else None
+            new_ipo_obj = ipo
             new_ipo_name = new_ipo_obj.IPOName if new_ipo_obj else str(new_ipo_id or "None")
             changes["IPO"] = {"old": old_ipo_name, "new": new_ipo_name}
 
         if orig_group_id != new_group_id:
             old_group_name = entry.group.GroupName if entry.group else str(orig_group_id or "None")
-            new_group_obj = GroupDetail.objects.filter(id=new_group_id).first() if new_group_id else None
+            new_group_obj = group
             new_group_name = new_group_obj.GroupName if new_group_obj else str(new_group_id or "None")
             changes["Group"] = {"old": old_group_name, "new": new_group_name}
 
@@ -14470,8 +14491,8 @@ def update_accounting(request):
             )
 
         # Update current entry
-        entry.ipo_id = ipo_id if ipo_id else None
-        entry.group_id = group_id if group_id else None
+        entry.ipo = ipo
+        entry.group = group
         entry.amount = amount
         entry.amount_type = amount_type
         entry.remark = remark
@@ -14482,7 +14503,10 @@ def update_accounting(request):
         siblings = Accounting.objects.filter(
             user=request.user,
             date_time=orig_date_time,
-            amount=orig_amount
+            amount=orig_amount,
+            jv=not entry.jv,
+            is_deleted=False,
+            transfer_batch_id__isnull=True,
         ).exclude(id=entry.id)
         
         if siblings.exists() and siblings.count() == 1:
@@ -14719,18 +14743,21 @@ def _validate_transaction_remark(value):
     return remark
 
 
-def _get_group_ipo_outstanding(user, group, ipo):
+def _get_group_ipo_outstanding(user, group, ipo, exclude_entry_id=None):
     order_total = Order.objects.filter(
         user=user,
         OrderGroup=group,
         OrderIPOName=ipo,
     ).aggregate(total=Sum("Amount"))["total"] or Decimal("0.00")
-    accounting_total = Accounting.objects.filter(
+    accounting_query = Accounting.objects.filter(
         user=user,
         group=group,
         ipo=ipo,
         is_deleted=False,
-    ).aggregate(
+    )
+    if exclude_entry_id is not None:
+        accounting_query = accounting_query.exclude(id=exclude_entry_id)
+    accounting_total = accounting_query.aggregate(
         total=Sum(Case(
             When(amount_type="credit", then=F("amount")),
             When(amount_type="debit", then=-F("amount")),
@@ -14742,8 +14769,12 @@ def _get_group_ipo_outstanding(user, group, ipo):
     ).quantize(MONEY_QUANTUM)
 
 
-def _validate_ipo_payment(user, group, ipo, amount, amount_type):
-    outstanding = _get_group_ipo_outstanding(user, group, ipo)
+def _validate_ipo_payment(
+    user, group, ipo, amount, amount_type, exclude_entry_id=None
+):
+    outstanding = _get_group_ipo_outstanding(
+        user, group, ipo, exclude_entry_id=exclude_entry_id
+    )
     if outstanding == Decimal("0.00"):
         raise ValidationError(
             f"{ipo.IPOName} has no outstanding balance for {group.GroupName}."
@@ -14945,6 +14976,21 @@ def bulk_transfer_transactions(request):
         if mode != "ipo":
             raise ValidationError("Only IPO to IPO transfers are supported.")
 
+        edit_batch_id = None
+        existing_batch = Accounting.objects.none()
+        if payload.get("transfer_batch_id"):
+            try:
+                edit_batch_id = uuid.UUID(str(payload.get("transfer_batch_id")))
+            except (ValueError, TypeError, AttributeError):
+                raise ValidationError("Invalid transfer batch.")
+            existing_batch = Accounting.objects.filter(
+                user=request.user,
+                transfer_batch_id=edit_batch_id,
+                is_deleted=False,
+            )
+            if not existing_batch.exists():
+                raise ValidationError("Transfer batch was not found.")
+
         source_type = payload.get("source_type")
         if source_type not in VALID_TRANSACTION_TYPES:
             raise ValidationError("Invalid source amount type.")
@@ -14957,6 +15003,8 @@ def bulk_transfer_transactions(request):
         destination_group = _get_owned_group(
             request.user, payload.get("destination_group_id")
         )
+        if source_group.id == destination_group.id:
+            raise ValidationError("Source and destination groups must be different.")
         transfer_date = _parse_transaction_datetime(payload.get("date_time"))
         user_remark = str(payload.get("remark") or "").strip()[:250]
 
@@ -14980,9 +15028,10 @@ def bulk_transfer_transactions(request):
                 has_order = Order.objects.filter(
                     user=request.user, OrderGroup=selected_group, OrderIPOName=ipo
                 ).exists()
-                has_accounting = Accounting.objects.filter(
+                accounting_membership = Accounting.objects.filter(
                     user=request.user, group=selected_group, ipo=ipo, is_deleted=False
-                ).exists()
+                )
+                has_accounting = accounting_membership.exists()
                 if not (has_order or has_accounting):
                     raise ValidationError(
                         f"{ipo.IPOName} is not available for {selected_group.GroupName}."
@@ -15000,12 +15049,17 @@ def bulk_transfer_transactions(request):
                     OrderGroup=selected_group,
                     OrderIPOName=ipo,
                 ).aggregate(total=Sum("Amount"))["total"] or Decimal("0.00")
-                accounting_total = Accounting.objects.filter(
+                accounting_query = Accounting.objects.filter(
                     user=request.user,
                     group=selected_group,
                     ipo=ipo,
                     is_deleted=False,
-                ).aggregate(
+                )
+                if edit_batch_id:
+                    accounting_query = accounting_query.exclude(
+                        transfer_batch_id=edit_batch_id
+                    )
+                accounting_total = accounting_query.aggregate(
                     total=Sum(Case(
                         When(amount_type="credit", then=F("amount")),
                         When(amount_type="debit", then=-F("amount")),
@@ -15083,7 +15137,7 @@ def bulk_transfer_transactions(request):
         source_label = source_group.GroupName
         destination_label = destination_group.GroupName
         suffix = f" - {user_remark}" if user_remark else ""
-        transfer_batch_id = uuid.uuid4()
+        transfer_batch_id = edit_batch_id or uuid.uuid4()
         records = []
         for ipo, amount, amount_type in source_allocations:
             records.append(Accounting(
@@ -15140,11 +15194,17 @@ def bulk_transfer_transactions(request):
             ))
 
         with transaction.atomic():
+            if edit_batch_id:
+                existing_batch.delete()
             Accounting.objects.bulk_create(records)
 
         return JsonResponse({
             "status": "success",
-            "message": f"Created {len(records)} balanced transfer entries.",
+            "message": (
+                f"Updated {len(records)} balanced transfer entries."
+                if edit_batch_id else
+                f"Created {len(records)} balanced transfer entries."
+            ),
         })
     except json.JSONDecodeError:
         return JsonResponse(
@@ -15163,21 +15223,119 @@ def bulk_transfer_transactions(request):
 
 
 @login_required
+def get_transfer_batch(request, batch_id):
+    entries = list(Accounting.objects.filter(
+        user=request.user,
+        transfer_batch_id=batch_id,
+        is_deleted=False,
+    ).select_related("group", "ipo").order_by("id"))
+    if not entries:
+        return JsonResponse(
+            {"status": "error", "message": "Transfer batch was not found."},
+            status=404,
+        )
+
+    group_ids = list(dict.fromkeys(
+        entry.group_id for entry in entries if entry.group_id is not None
+    ))
+    if len(group_ids) != 2:
+        return JsonResponse(
+            {"status": "error", "message": "This transfer cannot be edited because its groups are incomplete."},
+            status=400,
+        )
+
+    source_group_id, destination_group_id = group_ids
+    source_entries = [entry for entry in entries if entry.group_id == source_group_id]
+    destination_entries = [entry for entry in entries if entry.group_id == destination_group_id]
+    source_type = source_entries[0].amount_type
+    master_amount = sum((entry.amount for entry in source_entries), Decimal("0.00"))
+    source_group = source_entries[0].group
+    destination_group = destination_entries[0].group
+
+    remark = ""
+    first_remark = source_entries[0].remark or ""
+    prefixes = (
+        f"Transfer to {destination_group.GroupName}",
+        f"Transfer excess to {destination_group.GroupName}",
+    )
+    for prefix in prefixes:
+        if first_remark.startswith(prefix):
+            remark = first_remark[len(prefix):]
+            if remark.startswith(" - "):
+                remark = remark[3:]
+            break
+
+    def serialize_allocations(batch_entries):
+        return [
+            {
+                "ipo_id": entry.ipo_id,
+                "amount": str(entry.amount),
+                "amount_type": entry.amount_type,
+            }
+            for entry in batch_entries if entry.ipo_id is not None
+        ]
+
+    return JsonResponse({
+        "status": "success",
+        "data": {
+            "transfer_batch_id": str(batch_id),
+            "source_group_id": source_group_id,
+            "destination_group_id": destination_group_id,
+            "source_type": source_type,
+            "master_amount": str(master_amount),
+            "remark": remark,
+            "date_time": timezone.localtime(entries[0].date_time).strftime("%Y-%m-%dT%H:%M:%S"),
+            "source_allocations": serialize_allocations(source_entries),
+            "destination_allocations": serialize_allocations(destination_entries),
+        },
+    })
+
+
+@login_required
 def get_transfer_group_ipos(request, group_id):
     """Return IPOs with an outstanding balance for the selected group."""
     try:
         group = _get_owned_group(request.user, group_id)
+        exclude_batch_id = request.GET.get("exclude_batch")
+        if exclude_batch_id:
+            try:
+                exclude_batch_id = uuid.UUID(str(exclude_batch_id))
+            except (ValueError, TypeError, AttributeError):
+                raise ValidationError("Invalid transfer batch.")
+            if not Accounting.objects.filter(
+                user=request.user, transfer_batch_id=exclude_batch_id
+            ).exists():
+                raise ValidationError("Transfer batch was not found.")
         order_ipo_ids = Order.objects.filter(
             user=request.user,
             OrderGroup=group,
         ).values_list("OrderIPOName_id", flat=True).distinct()
-        accounting_ipo_ids = Accounting.objects.filter(
+        accounting_membership = Accounting.objects.filter(
             user=request.user,
             group=group,
             ipo_id__isnull=False,
             is_deleted=False,
-        ).values_list("ipo_id", flat=True).distinct()
-        ipo_ids = set(order_ipo_ids) | set(accounting_ipo_ids)
+        )
+        if exclude_batch_id:
+            accounting_membership = accounting_membership.exclude(
+                transfer_batch_id=exclude_batch_id
+            )
+        accounting_ipo_ids = accounting_membership.values_list(
+            "ipo_id", flat=True
+        ).distinct()
+        edited_batch_ipo_ids = []
+        if exclude_batch_id:
+            edited_batch_ipo_ids = Accounting.objects.filter(
+                user=request.user,
+                group=group,
+                transfer_batch_id=exclude_batch_id,
+                ipo_id__isnull=False,
+            ).values_list("ipo_id", flat=True).distinct()
+        ipo_ids = (
+            set(order_ipo_ids) |
+            set(accounting_ipo_ids) |
+            set(edited_batch_ipo_ids)
+        )
         ipos = CurrentIpoName.objects.filter(
             user=request.user,
             id__in=ipo_ids,
@@ -15189,9 +15347,14 @@ def get_transfer_group_ipos(request, group_id):
             row["OrderIPOName_id"]: Decimal(str(row["total"] or 0))
             for row in order_totals
         }
-        accounting_totals = Accounting.objects.filter(
+        accounting_totals_query = Accounting.objects.filter(
             user=request.user, group=group, ipo_id__in=ipo_ids, is_deleted=False
-        ).values("ipo_id").annotate(
+        )
+        if exclude_batch_id:
+            accounting_totals_query = accounting_totals_query.exclude(
+                transfer_batch_id=exclude_batch_id
+            )
+        accounting_totals = accounting_totals_query.values("ipo_id").annotate(
             total=Sum(Case(
                 When(amount_type="credit", then=F("amount")),
                 When(amount_type="debit", then=-F("amount")),

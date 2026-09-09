@@ -1884,7 +1884,7 @@
                     {% comment %} </div> {% endcomment %}
                     <div class="fixed-section" style="margin-top: 5px !important;">
                         <div class="d-grid gap-2 mt-0 CD">
-                            <button type="button" class="btn btn-sm btn-outline-secondary mb-2" data-toggle="modal" data-target="#transactionModal">
+                            <button type="button" class="btn btn-sm btn-outline-secondary mb-2" data-toggle="modal" data-target="#transactionModal" data-bs-toggle="modal" data-bs-target="#transactionModal">
                                 Payment
                             </button>
                         
@@ -2114,6 +2114,62 @@
                 <!-- Transaction Modal -->
             {% include "partials/add_payment_modal.html" %}
             {% include "partials/transfer_payment_modal.html" %}
+
+            <div class="modal fade" id="editTransactionModal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <form method="post" action="{% url 'update_accounting' %}">
+                            {% csrf_token %}
+                            <input type="hidden" id="edit_entry_id" name="entry_id">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Edit Accounting Entry</h5>
+                                <button type="button" class="btn-close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="form-group mb-3">
+                                    <label for="edit_group">Group Name</label>
+                                    <select id="edit_group" name="group_id" class="form-control" required>
+                                        <option value="" disabled>Select group</option>
+                                        {% for group in groups1 %}<option value="{{ group.id }}">{{ group.GroupName }}</option>{% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="edit_ipo">IPO Name</label>
+                                    <select id="edit_ipo" name="ipo_id" class="form-control">
+                                        <option value="">JV Entry</option>
+                                        {% for ipo in ipos1 %}<option value="{{ ipo.id }}">{{ ipo.IPOName }}</option>{% endfor %}
+                                    </select>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 form-group mb-3">
+                                        <label for="edit_amount_type">Amount Type</label>
+                                        <select id="edit_amount_type" name="amount_type" class="form-control" required>
+                                            <option value="credit">Credit</option>
+                                            <option value="debit">Debit</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 form-group mb-3">
+                                        <label for="edit_amount">Amount</label>
+                                        <input type="number" id="edit_amount" name="amount" class="form-control" min="0.01" max="9999999999.99" step="0.01" required>
+                                    </div>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="edit_remark">Remark</label>
+                                    <input type="text" id="edit_remark" name="remark" class="form-control" maxlength="250">
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit_date_time">Date &amp; Time</label>
+                                    <input type="datetime-local" id="edit_date_time" name="date_time" class="form-control" min="2020-01-01T00:00" max="2035-12-31T23:59:59" step="1" required>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Update Entry</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
                             <script>
                                 document.addEventListener("DOMContentLoaded", function(){
                                     const saveBtn = document.getElementById("saveBtn6");
@@ -2984,7 +3040,7 @@
         var transactionButtons = `'<div class="btn-group bi d-flex" style="float:right; margin: 12px 16px; gap: 5px;">'+
             
             '<button type="button" class="btn btn-sm btn-outline-secondary d-flex justify-content-center align-items-center" ' +
-            'style="width: 140px;" data-toggle="modal" data-target="#transactionModal">' +
+            'style="width: 140px;" data-toggle="modal" data-target="#transactionModal" data-bs-toggle="modal" data-bs-target="#transactionModal">' +
             'Payment' +
             '</button>' +
             // Add JV Transaction button
@@ -3003,6 +3059,8 @@
             // Handle optional ipo_id
             let ipoId = $(this).data('ipo-id');
             $('#edit_ipo').val(ipoId ? ipoId : "");
+            const isJV = String($(this).data('jv')) === '1';
+            $('#edit_ipo').prop('disabled', isJV).prop('required', !isJV);
             
             $('#edit_amount_type').val($(this).data('amount-type'));
             $('#edit_amount').val($(this).data('amount'));
@@ -3015,7 +3073,12 @@
                 $('#edit_date_time').val(formattedDt);
             }
             
-            $('#editTransactionModal').modal('show');
+            const editModalElement = document.getElementById('editTransactionModal');
+            if (window.bootstrap && bootstrap.Modal) {
+                bootstrap.Modal.getOrCreateInstance(editModalElement).show();
+            } else {
+                $('#editTransactionModal').modal('show');
+            }
         });
     });
     

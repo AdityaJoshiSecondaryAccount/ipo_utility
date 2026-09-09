@@ -1,3 +1,107 @@
+<style>
+    /* Keep this shared modal identical across pages with different Bootstrap CSS. */
+    #combinedTransferModal .modal-dialog {
+        width: 90% !important;
+        max-width: 90% !important;
+        margin: 1.75rem auto !important;
+    }
+    #combinedTransferModal .modal-body {
+        padding: 1rem !important;
+        overflow-x: hidden !important;
+    }
+    #combinedTransferModal .table-responsive {
+        margin-top: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+        white-space: normal !important;
+    }
+    #combinedTransferModal table.table {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        border-collapse: collapse !important;
+        table-layout: fixed !important;
+        white-space: normal !important;
+    }
+    #combinedTransferModal table.table th,
+    #combinedTransferModal table.table td {
+        padding: 0.45rem 0.5rem !important;
+        border: 1px solid #dee2e6 !important;
+        text-align: left !important;
+        vertical-align: middle !important;
+        color: #212529 !important;
+        font-size: 0.875rem !important;
+    }
+    #combinedTransferModal table.table th {
+        white-space: nowrap !important;
+    }
+    #combinedTransferModal table.table td {
+        white-space: nowrap !important;
+    }
+    #combinedTransferModal table.table td:first-child {
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
+    }
+    #combinedTransferModal table.table th:nth-child(1) { width: 22% !important; }
+    #combinedTransferModal table.table th:nth-child(2) { width: 22% !important; }
+    #combinedTransferModal table.table th:nth-child(3) { width: 27% !important; }
+    #combinedTransferModal table.table th:nth-child(4) { width: 17% !important; }
+    #combinedTransferModal table.table th:nth-child(5) { width: 12% !important; }
+    #combinedTransferModal table.table thead th {
+        background-color: rgb(182, 182, 158) !important;
+        font-weight: 700 !important;
+    }
+    #combinedTransferModal table.table tbody td {
+        background-color: #fff !important;
+        font-weight: 400 !important;
+    }
+    #combinedTransferModal .form-control {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        height: auto !important;
+        border: 1px solid #d1d3e2 !important;
+        border-radius: 0.35rem !important;
+        padding: 0.375rem 0.75rem !important;
+        font-size: 0.9rem !important;
+        background-clip: padding-box !important;
+    }
+    #combinedTransferModal input[type="checkbox"] {
+        accent-color: #0d6efd;
+    }
+    #combinedTransferModal table.table .form-control {
+        min-height: 2rem !important;
+        padding: 0.25rem 0.35rem !important;
+        font-size: 0.82rem !important;
+        line-height: 1.35 !important;
+    }
+    #combinedTransferModal table.table th:last-child,
+    #combinedTransferModal table.table td:last-child {
+        padding-left: 0.3rem !important;
+        padding-right: 0.3rem !important;
+        text-align: center !important;
+    }
+    #combinedTransferModal .ct-validation-banner {
+        display: none;
+        margin-top: 1rem;
+        margin-bottom: 0;
+        padding: 0.75rem 1rem;
+        border: 1px solid #f5c2c7;
+        border-radius: 0.35rem;
+        background-color: #f8d7da;
+        color: #842029;
+        white-space: normal !important;
+    }
+    @media (max-width: 767.98px) {
+        #combinedTransferModal .modal-dialog {
+            width: calc(100% - 1rem) !important;
+            max-width: calc(100% - 1rem) !important;
+            margin: 0.5rem auto !important;
+        }
+    }
+</style>
+
 <div class="modal fade" id="combinedTransferModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
@@ -91,7 +195,7 @@
                         </div>
                     </div>
 
-                    <div id="ct_validation_message" class="alert alert-danger mt-3 mb-0" role="alert" style="display:none;"></div>
+                    <div id="ct_validation_message" class="ct-validation-banner" role="alert"></div>
 
                     <div class="row mt-3 p-3" style="background:#e9ecef; border:1px solid #dee2e6;">
                         <div class="col-md-3">Master: <strong id="ct_master_total">0.00</strong></div>
@@ -116,6 +220,9 @@ $(function () {
     const form = $('#combinedTransferForm');
     const ipoRequests = {source: null, destination: null};
     let allocationInputError = '';
+    let editingBatchId = null;
+    let editState = null;
+    let pendingEditSides = new Set();
 
     function toMinorUnits(value) {
         const number = Number(value);
@@ -168,7 +275,10 @@ $(function () {
         if (!groupId) return;
 
         select.append($('<option>', {disabled: true}).text('Loading IPOs...'));
-        const url = "{% url 'get_transfer_group_ipos' 0 %}".replace('/0/', '/' + encodeURIComponent(groupId) + '/');
+        let url = "{% url 'get_transfer_group_ipos' 0 %}".replace('/0/', '/' + encodeURIComponent(groupId) + '/');
+        if (editingBatchId) {
+            url += '?exclude_batch=' + encodeURIComponent(editingBatchId);
+        }
         const request = $.ajax({
             url: url,
             method: 'GET',
@@ -186,6 +296,13 @@ $(function () {
                 }
                 select.prop('disabled', true);
                 renderAllocations();
+                if (editState && pendingEditSides.has(side)) {
+                    pendingEditSides.delete(side);
+                    if (!pendingEditSides.size) {
+                        renderAllocations();
+                        editState = null;
+                    }
+                }
             },
             error: function (xhr, status) {
                 if (status !== 'abort') {
@@ -333,7 +450,26 @@ $(function () {
         $('#ct_destination_allocations').empty().append(
             allocationTable('destination', destinationItems, destinationAllocations)
         );
+        if (editState) {
+            applySavedAllocations('source', editState.source_allocations || []);
+            applySavedAllocations('destination', editState.destination_allocations || []);
+            recalculateSideJV('source');
+            recalculateSideJV('destination');
+        }
         calculateTotals();
+    }
+
+    function applySavedAllocations(side, savedItems) {
+        const savedByIpo = {};
+        savedItems.forEach(function (item) {
+            savedByIpo[String(item.ipo_id)] = item;
+        });
+        $(`#combinedTransferModal .ct-entry-row[data-side="${side}"]:not(.ct-jv-row)`).each(function () {
+            const saved = savedByIpo[String($(this).attr('data-ipo-id'))];
+            $(this).find('.ct-allocation')
+                .val(saved ? Number(saved.amount).toFixed(2) : '0.00');
+            $(this).find('.ct-allocation-include').prop('checked', !!saved);
+        });
     }
 
     function sideTotals(side) {
@@ -396,9 +532,10 @@ $(function () {
         const sourceCount = $('#ct_source_allocations .ct-allocation-include:checked').length;
         const destinationCount = $('#ct_destination_allocations .ct-allocation-include:checked').length;
         const groupsSelected = $('#ct_source_group').val() && $('#ct_destination_group').val();
+        const groupsAreDifferent = $('#ct_source_group').val() !== $('#ct_destination_group').val();
         const expectedSourceNet = $('#ct_source_type').val() === 'credit' ? master : -master;
         const balanced = !allocationInputError && master > 0 && sourceCount > 0 && destinationCount > 0 &&
-            groupsSelected && source.gross <= master && destination.gross <= master &&
+            groupsSelected && groupsAreDifferent && source.gross <= master && destination.gross <= master &&
             source.net === expectedSourceNet && destination.net === -expectedSourceNet;
 
         let validationMessage = '';
@@ -408,6 +545,8 @@ $(function () {
             validationMessage = 'Select a source group.';
         } else if (!$('#ct_destination_group').val()) {
             validationMessage = 'Select a destination group.';
+        } else if (!groupsAreDifferent) {
+            validationMessage = 'Source and destination groups must be different.';
         } else if (master <= 0) {
             validationMessage = 'Enter a transfer amount greater than zero.';
         } else if (!$('#ct_date_time').val()) {
@@ -506,8 +645,10 @@ $(function () {
 
     modal.on('shown.bs.modal', function () {
         if (!$('#ct_date_time').val()) $('#ct_date_time').val(currentLocalDateTime());
-        updateMode();
-        updateTypes();
+        if (!editingBatchId) {
+            updateMode();
+            updateTypes();
+        }
     });
 
     modal.on('hidden.bs.modal', function () {
@@ -518,6 +659,11 @@ $(function () {
         $('#ct_source_allocations, #ct_destination_allocations').empty();
         $('#ct_date_time').val('');
         allocationInputError = '';
+        editingBatchId = null;
+        editState = null;
+        pendingEditSides.clear();
+        modal.find('.modal-title').text('Multiple IPO Transfer');
+        $('#ct_save').text('Save Transfer');
         showValidation('');
         updateMode();
         updateTypes();
@@ -540,6 +686,7 @@ $(function () {
             source_jv: collectJV('source'),
             destination_jv: collectJV('destination')
         };
+        if (editingBatchId) payload.transfer_batch_id = editingBatchId;
 
         const button = $('#ct_save');
         const csrfToken = form.find('[name=csrfmiddlewaretoken]').val() ||
@@ -557,7 +704,40 @@ $(function () {
                     ? xhr.responseJSON.message
                     : 'Unable to save transfer (HTTP ' + xhr.status + '). Restart the Django server and try again.';
                 showValidation(message);
-                button.prop('disabled', false).text('Save Transfer');
+                button.prop('disabled', false).text(editingBatchId ? 'Update Transfer' : 'Save Transfer');
+            }
+        });
+    });
+
+    $(document).on('click', '.bulk-transfer-edit-btn', function () {
+        const batchId = String($(this).attr('data-transfer-batch') || '');
+        if (!batchId) return;
+
+        $.ajax({
+            url: '/api/transfer-batch/' + encodeURIComponent(batchId) + '/',
+            method: 'GET',
+            success: function (response) {
+                const data = response.data || {};
+                editingBatchId = data.transfer_batch_id;
+                editState = data;
+                pendingEditSides = new Set(['source', 'destination']);
+                $('#ct_source_group').val(String(data.source_group_id));
+                $('#ct_destination_group').val(String(data.destination_group_id));
+                $('#ct_source_type').val(data.source_type);
+                $('#ct_destination_type').val(data.source_type === 'credit' ? 'Debit' : 'Credit');
+                $('#ct_amount').val(Number(data.master_amount).toFixed(2));
+                $('#ct_remark').val(data.remark || '');
+                $('#ct_date_time').val(data.date_time);
+                modal.find('.modal-title').text('Edit Multiple IPO Transfer');
+                $('#ct_save').text('Update Transfer');
+                loadGroupIPOs('source');
+                loadGroupIPOs('destination');
+                modal.modal('show');
+            },
+            error: function (xhr) {
+                const message = xhr.responseJSON && xhr.responseJSON.message
+                    ? xhr.responseJSON.message : 'Unable to load transfer details.';
+                window.alert(message);
             }
         });
     });

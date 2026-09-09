@@ -2,7 +2,7 @@
 <div class="modal fade" id="transactionModal" tabindex="-1" role="dialog" aria-labelledby="transactionModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <form action="{% url 'add_transaction' %}" method="post">
+            <form action="{% if request.resolver_match.url_name == 'GroupWiseDashboard' %}{% url 'add_transaction_group' %}{% else %}{% url 'add_transaction' %}{% endif %}" method="post">
                 {% csrf_token %}
                 <div class="modal-header">
                     <h5 class="modal-title">Add Payment</h5>
