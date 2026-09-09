@@ -3415,6 +3415,17 @@
             stateSave: true,
             stateLoadParams: function (settings, data) {
                 data.length = pageLength;
+                data.start = 0;
+                if (data.search) {
+                    data.search.search = '';
+                }
+                if (Array.isArray(data.columns)) {
+                    data.columns.forEach(function (column) {
+                        if (column.search) {
+                            column.search.search = '';
+                        }
+                    });
+                }
             },
             columnDefs: [
                 { targets: 0, width: '3%' },
@@ -3509,7 +3520,7 @@
                             $(api.column(colIdx).header()).index()
                         );
                         var title = $(cell).text();
-                        $(cell).html('<input class="Input" type="text" placeholder="' + title + '" style="text-align: center ;" />');
+                        $(cell).html('<input class="Input" type="text" autocomplete="off" placeholder="' + title + '" style="text-align: center ;" />');
                         
                         $(
                             'input',
