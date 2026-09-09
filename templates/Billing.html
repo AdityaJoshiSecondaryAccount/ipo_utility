@@ -1717,6 +1717,17 @@
             stateSave: true,
             stateLoadParams: function (settings, data) {
                 data.length = pageLength;
+                data.start = 0;
+                if (data.search) {
+                    data.search.search = '';
+                }
+                if (data.columns) {
+                    data.columns.forEach(function (column) {
+                        if (column.search) {
+                            column.search.search = '';
+                        }
+                    });
+                }
             },
             columnDefs: [
                 { targets: 'remark-col', visible: false }
@@ -1814,7 +1825,7 @@
                             var title = $(cell).text();
                             var stateSearch = api.column(colIdx).search();
                             var initialValue = stateSearch ? stateSearch.replace(/^\(\(\(\(/, '').replace(/\)\)\)\)$/, '') : '';
-                            $(cell).html('<input type="text" placeholder="' + title + '" value="' + initialValue + '" style="text-align: center ; width: 100%;" />');
+                            $(cell).html('<input type="text" autocomplete="off" placeholder="' + title + '" value="' + initialValue + '" style="text-align: center ; width: 100%;" />');
         
                             
                             $(
@@ -1920,7 +1931,7 @@
                 
                 if (cell.find('input').length === 0) {
                     var title = $(api.column(colIdx).header()).text();
-                    cell.html('<input type="text" placeholder="' + title + '" style="text-align: center; width: 100%;" />');
+                    cell.html('<input type="text" autocomplete="off" placeholder="' + title + '" style="text-align: center; width: 100%;" />');
                     
                     $('input', cell)
                         .off('keyup change')

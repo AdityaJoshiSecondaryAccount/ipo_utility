@@ -8977,34 +8977,81 @@ def AllIpoBackup(request):
 def AccountingBackup(request):
     user = request.user
     entries = Accounting.objects.filter(user=user).select_related("group", "ipo")
-    response = HttpResponse(content_type='text/csv')
-    # --- Group entries by IPO ---
+
+    # --- Build Accounting rows grouped by IPO ---
     ipo_dict = {}
     for e in entries:
         ipo_name = e.ipo.IPOName if e.ipo else (f"{e.ipo_name} (Deleted)" if e.ipo_name else "JV")
         group_name = e.group.GroupName if e.group else (f"{e.group_name} (Deleted)" if e.group_name else "")
         local_dt = timezone.localtime(e.date_time)
-    
         row = [
             ipo_name,
             group_name,
             e.amount_type.upper(),
-            e.amount,
-            e.remark,
-            local_dt.strftime("%d-%m-%y %H:%M:%S")
+            str(e.amount),
+            e.remark or "",
+            local_dt.strftime("%d-%m-%y %H:%M:%S"),
         ]
-
         if ipo_name not in ipo_dict:
             ipo_dict[ipo_name] = []
         ipo_dict[ipo_name].append(row)
-    current_time = datetime.now().strftime("%d-%m-%y_%H-%M-%S")
-    response['Content-Disposition'] = f'attachment; filename="Accounting-Backup {current_time}.csv"'
-    writer = csv.writer(response)
-    writer.writerow(["IPO Name", "Group Name", "Amount Type", "Amount", "Remark", "Date Time"])
 
+    accounting_rows = []
     for rows in ipo_dict.values():
-        for row in rows:
-            writer.writerow(row)
+        accounting_rows.extend(rows)
+
+    df_accounting = pd.DataFrame(
+        accounting_rows,
+        columns=["IPO Name", "Group Name", "Amount Type", "Amount", "Remark", "Date Time"],
+    )
+
+    # --- Build Accounting Logs rows ---
+    audit_logs = AccountingAuditLog.objects.filter(user=user).select_related(
+        "accounting__group", "accounting__ipo"
+    ).order_by("-timestamp")
+
+    log_rows = []
+    for log in audit_logs:
+        acc = log.accounting
+        ipo_name = acc.ipo.IPOName if acc.ipo else (acc.ipo_name or "JV")
+        group_name = acc.group.GroupName if acc.group else (acc.group_name or "")
+        txn_ref = f"{ipo_name} / {group_name}" if group_name else ipo_name
+        local_ts = timezone.localtime(log.timestamp).strftime("%d-%m-%Y %H:%M:%S")
+
+        changes = log.changes or {}
+        changes_parts = []
+        for field, vals in changes.items():
+            if isinstance(vals, dict) and "old" in vals and "new" in vals:
+                changes_parts.append(f"{field}: {vals['old']} -> {vals['new']}")
+            else:
+                changes_parts.append(f"{field}: {vals}")
+        changes_str = "; ".join(changes_parts) if changes_parts else "-"
+
+        log_rows.append([
+            local_ts,
+            txn_ref,
+            log.action,
+            changes_str,
+            acc.id,
+        ])
+
+    df_logs = pd.DataFrame(
+        log_rows,
+        columns=["Timestamp", "Transaction", "Action", "Changes", "Accounting ID"],
+    )
+
+    # --- Write both sheets to Excel ---
+    current_time = datetime.now().strftime("%d-%m-%y_%H-%M-%S")
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = (
+        f'attachment; filename="Accounting-Backup {current_time}.xlsx"'
+    )
+
+    with pd.ExcelWriter(response, engine="xlsxwriter") as writer:
+        df_accounting.to_excel(writer, sheet_name="Accounting", index=False)
+        df_logs.to_excel(writer, sheet_name="Accounting Logs", index=False)
 
     return response
 
