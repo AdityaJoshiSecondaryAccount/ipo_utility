@@ -6840,7 +6840,7 @@ def GroupWiseDashboard(request):
         
         html_table += "</th>"
         
-    html_table += "<th>JV</th><th>Total</th><th title=\"This column will be removed soon\">Old Collection</th><th>Collection</th><th>Due Amount</th>"
+    html_table += "<th>JV</th><th>Total</th><th>Collection</th><th>Due Amount</th>"
     # for col in df.columns:
     #     html_table += f"<td style='background :rgb(182, 182, 158)'>{col}</td>"
     html_table += "</tr></thead>\n" 
@@ -6864,7 +6864,8 @@ def GroupWiseDashboard(request):
                 
                 html_table += f'<td title= "Double Click To pay" class="amount-cell" data-ipo-id="{ipo.id}" data-ipo-name="{col_name}" data-group-id="{index.id}" data-group-name="{index}">Total: {float_format.format(cell)}<br>Collection: {float_format.format(accounting_amount1)} <br> Due: {float_format.format(due_amount)}</td>'
             elif col_name == 'Collection':
-                html_table += f"<td title='This column will be removed soon'>{float_format.format(cell)}</td>"
+                # Retained for calculations, but no longer rendered in the dashboard.
+                continue
             
             elif col_name == 'JV':
                 jv_amount = JV_lookup.get(index.id, 0)
@@ -6921,7 +6922,6 @@ def GroupWiseDashboard(request):
         """
     html_table += f"<td>{float_format.format(sum(JV_list))}</td>" 
     html_table += f"<td>{float_format.format(Total)}</td>"
-    html_table += f"<td>{float_format.format(SumCollection)}</td>"
     html_table += f"<td>{float_format.format(total_new_collection_footer)}</td>" 
     html_table += f"<td>{float_format.format(DueAmountSum)}</td>"
     html_table += "</tr></tfoot>"
