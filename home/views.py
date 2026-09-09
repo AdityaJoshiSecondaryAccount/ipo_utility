@@ -15489,7 +15489,10 @@ def get_group_dues(request, group_id):
             .values("OrderIPOName_id")
             .annotate(total=Sum("Amount"))
         )
-        order_dict = {row["OrderIPOName_id"]: float(row["total"] or 0) for row in order_totals}
+        order_dict = {
+            row["OrderIPOName_id"]: Decimal(str(row["total"] or 0))
+            for row in order_totals
+        }
         
         # 2. Fetch Accounting Totals (How much was paid)
         accounting_totals = (
@@ -15505,21 +15508,24 @@ def get_group_dues(request, group_id):
                 )
             )
         )
-        accounting_dict = {row["ipo_id"]: float(row["total"] or 0) for row in accounting_totals}
+        accounting_dict = {
+            row["ipo_id"]: Decimal(str(row["total"] or 0))
+            for row in accounting_totals
+        }
         
         # 3. Calculate Dues
         due_data = []
         for ipo in ipos:
-            billed = order_dict.get(ipo.id, 0.0)
-            paid = accounting_dict.get(ipo.id, 0.0)
-            due = billed - paid
+            billed = order_dict.get(ipo.id, Decimal("0.00"))
+            paid = accounting_dict.get(ipo.id, Decimal("0.00"))
+            due = (billed - paid).quantize(MONEY_QUANTUM)
             
             # Only include IPOs with a non-zero balance (exactly like the old modal logic)
-            if abs(due) > 0.001:
+            if due != Decimal("0.00"):
                 due_data.append({
                     "ipo_id": ipo.id,
                     "ipo_name": ipo.IPOName,
-                    "due_amount": round(due, 2)
+                    "due_amount": str(due)
                 })
                     
         return JsonResponse({"status": "success", "data": due_data})

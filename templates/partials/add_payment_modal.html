@@ -78,7 +78,7 @@
                     <!-- Amount Input -->
                     <div class="form-group">
                         <label for="trans_amount">Amount</label>
-                        <input type="number" min="0.01" max="9999999999.99" step="0.01" id="trans_amount" name="amount" class="form-control"
+                        <input type="number" min="1" max="9999999999.99" step="1" id="trans_amount" name="amount" class="form-control"
                                onkeydown="if (event.key === '-' || event.key === 'e' || event.key === 'E'|| event.key === '+') event.preventDefault();" required>
                     </div>
 
@@ -105,7 +105,7 @@
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary" id="saveBtn">Save</button>
+                    <button type="submit" class="btn btn-primary" id="trans_save_btn">Save</button>
                 </div>
             </form>
         </div>
@@ -173,12 +173,13 @@ $(function () {
         // Hide container if conditions for Bulk Allocation are NOT met
         if (isJV || (ipoVal !== 'all' && ipoVal) || !groupId || amountVal <= 0) {
             container.empty().hide();
-            $('#saveBtn').prop('disabled', false);
+            $('#trans_save_btn').prop('disabled', false);
             return;
         }
 
         // Show a loading indicator while fetching API
         container.html('<div class="text-center my-3"><i class="fas fa-spinner fa-spin"></i> Fetching IPO dues...</div>').show();
+        $('#trans_save_btn').prop('disabled', true);
 
         // AJAX call to our new decoupled API endpoint
         duesRequest = $.ajax({
@@ -192,6 +193,8 @@ $(function () {
                             'Error fetching dues: ' + (response.message || 'Unknown error')
                         )
                     );
+                    showValidation('Unable to load IPO balances. Please try again.');
+                    $('#trans_save_btn').prop('disabled', true);
                     return;
                 }
 
@@ -239,19 +242,19 @@ $(function () {
                         </div>
                         <div class="col-md-3">
                             <label>Amount</label>
-                            <input type="number" min="0.01" max="${amountVal.toFixed(2)}" step="0.01" class="form-control bulk-jv-amount" value="${remainingAmount.toFixed(2)}">
+                            <input type="number" min="0" max="${amountVal.toFixed(2)}" step="1" class="form-control bulk-jv-amount" value="${remainingAmount.toFixed(2)}" readonly>
                             <small class="text-muted">Excess JV</small>
                         </div>
                         <div class="col-md-3">
                             <label>Amount Type</label>
-                            <select class="form-control bulk-jv-type">
+                            <select class="form-control bulk-jv-type" disabled>
                                 <option value="credit" ${jvType === 'credit' ? 'selected' : ''}>Credit</option>
                                 <option value="debit" ${jvType === 'debit' ? 'selected' : ''}>Debit</option>
                             </select>
                         </div>
                         <div class="col-md-2 d-flex align-items-center">
                             <div class="form-check mt-3">
-                                <input class="form-check-input bulk-jv-include" type="checkbox" checked>
+                                <input class="form-check-input bulk-jv-include" type="checkbox" checked disabled>
                                 <label class="form-check-label">Include JV</label>
                             </div>
                         </div>
@@ -273,7 +276,7 @@ $(function () {
                                 </div>
                                 <div class="col-md-3">
                                     <label>Due Amount</label>
-                                    <input type="number" min="0" max="${Math.abs(Number(ipo.due)).toFixed(2)}" step="0.01"
+                                    <input type="number" min="0" max="${Math.abs(Number(ipo.due)).toFixed(2)}" step="1"
                                            data-original-limit="${Math.abs(Number(ipo.due)).toFixed(2)}"
                                            class="form-control bulk-ipo-amount" value="${Number(ipo.allocated).toFixed(2)}">
                                     <small class="text-muted">Original: ₹${ipo.due}</small>
@@ -333,6 +336,8 @@ $(function () {
             error: function(xhr, status) {
                 if (status !== 'abort' && sequence === requestSequence) {
                     container.html('<div class="alert alert-danger">Failed to connect to server.</div>');
+                    showValidation('Unable to load IPO balances. Please try again.');
+                    $('#trans_save_btn').prop('disabled', true);
                 }
             },
             complete: function() {
@@ -416,7 +421,7 @@ $(function () {
             $('#trans_amount_type').val()
         );
         const difference = expectedNet - netAmount;
-        const isValid = !allocationError && expectedNet !== 0 && difference === 0 && grossAmount <= masterAmount;
+        const isValid = expectedNet !== 0 && difference === 0 && grossAmount <= masterAmount;
         
         $('.bulk-total-amount').val((Math.abs(netAmount) / 100).toFixed(2));
         $('.bulk-total-credit').text('Credit: ' + (totalCredit / 100).toFixed(2));
@@ -425,33 +430,52 @@ $(function () {
         
         let balanceBox = $('.bulk-balance-box');
         if (allocationError) {
-            balanceBox.css({'background-color': '#f8d7da', 'color': '#721c24'}).text(allocationError);
+            balanceBox.css({'background-color': '#fff3cd', 'color': '#664d03'}).text('Amount adjusted');
             showValidation(allocationError);
         } else if (isValid) {
             balanceBox.css({'background-color': '#d4edda', 'color': '#155724'}).text('Allocation matched');
             showValidation('');
         } else {
-            balanceBox.css({'background-color': '#f8d7da', 'color': '#721c24'}).text(
-                grossAmount > masterAmount
-                    ? 'Allocated amount exceeds the payment amount'
-                    : 'Difference: ₹' + (difference / 100).toFixed(2)
-            );
+            const validationMessage = grossAmount > masterAmount
+                ? 'Allocated amount cannot exceed the entered payment amount.'
+                : 'Allocation must match the entered payment amount. Remaining difference: ₹' +
+                    (Math.abs(difference) / 100).toFixed(2) + '.';
+            balanceBox.css({'background-color': '#f8d7da', 'color': '#721c24'}).text('Allocation not matched');
+            showValidation(validationMessage);
         }
-        $('#saveBtn').prop('disabled', !isValid);
+        $('#trans_save_btn').prop('disabled', !isValid);
         return isValid;
     }
 
     $(document).on('input change', '.bulk-ipo-amount, .bulk-ipo-include, .bulk-ipo-type, .bulk-jv-amount, .bulk-jv-include, .bulk-jv-type', function(e) {
+        if ($(e.target).hasClass('bulk-ipo-amount') && e.type === 'change') return;
+        if (($(e.target).hasClass('bulk-ipo-include') || $(e.target).hasClass('bulk-jv-include')) && e.type === 'input') return;
+
         allocationError = '';
         if ($(e.target).hasClass('bulk-ipo-amount')) {
-            const limit = Number($(e.target).attr('data-original-limit')) || 0;
-            const entered = Number($(e.target).val()) || 0;
-            if (entered > limit) {
-                $(e.target).val(limit.toFixed(2));
-                allocationError = 'IPO allocation cannot exceed its outstanding balance of ₹' + limit.toFixed(2) + '.';
-            } else if (entered < 0) {
-                $(e.target).val('0.00');
+            const input = $(e.target);
+            const currentRow = input.closest('.bulk-ipo-row');
+            const originalLimit = toMinorUnits(input.attr('data-original-limit'));
+            const entered = Number(input.val()) || 0;
+            const masterAmount = toMinorUnits($('#trans_amount').val());
+            let allocatedElsewhere = 0;
+
+            $('#bulkAllocationContainer .bulk-ipo-row').each(function() {
+                const row = $(this);
+                if (row.is(currentRow) || !row.find('.bulk-ipo-include').is(':checked')) return;
+                allocatedElsewhere += toMinorUnits(row.find('.bulk-ipo-amount').val());
+            });
+
+            const available = Math.max(0, masterAmount - allocatedElsewhere);
+            const maximum = Math.min(originalLimit, available);
+            if (entered < 0) {
+                input.val('0.00');
                 allocationError = 'IPO allocation cannot be negative.';
+            } else if (toMinorUnits(entered) > maximum) {
+                input.val((maximum / 100).toFixed(2));
+                allocationError = originalLimit <= available
+                    ? 'IPO allocation cannot exceed its outstanding balance of ₹' + (originalLimit / 100).toFixed(2) + '.'
+                    : 'IPO allocation cannot exceed the remaining payment amount of ₹' + (maximum / 100).toFixed(2) + '.';
             }
         }
         const adjustJV = $(e.target).hasClass('bulk-ipo-amount') ||
@@ -477,7 +501,7 @@ $(function () {
         $('#bulkAllocationContainer').empty().hide();
         allocationError = '';
         showValidation('');
-        $('#saveBtn').prop('disabled', false);
+        $('#trans_save_btn').prop('disabled', false);
     });
 
     // -------------------------------------------------------------------------
@@ -557,7 +581,7 @@ $(function () {
                 return;
             }
             
-            const btn = $(this).find('#saveBtn');
+            const btn = $(this).find('#trans_save_btn');
             const originalText = btn.html();
             btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Saving...');
             
@@ -592,7 +616,7 @@ $(function () {
         // Keep single IPO/JV backend validation inside this modal as well.
         e.preventDefault();
         const form = $(this);
-        const btn = form.find('#saveBtn');
+        const btn = form.find('#trans_save_btn');
         const originalText = btn.html();
         showValidation('');
         btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Saving...');
