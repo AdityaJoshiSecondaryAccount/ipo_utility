@@ -1630,6 +1630,7 @@
     const form = document.getElementById("placeOrderForm");
     const csrfToken = "{{ csrf_token }}";
     const currentUrl = window.location.href;
+    const cleanOrderUrl = "/{{ IPOid }}/BUY";
     // 🔹 Place Order Only → directly hit BUY()
     document.getElementById("btnPlaceOnly").addEventListener("click", function () {
         let formData = new FormData(form);
@@ -1641,7 +1642,11 @@
         })
         .then(res => res.json())
         .then(data => {
-            location.reload();
+            if (data.status === 'success') {
+                window.location.replace(cleanOrderUrl);
+            } else {
+                location.reload();
+            }
         })
         .catch(err => {
             location.reload();
@@ -1670,7 +1675,7 @@
         })
         .then(orderRes => orderRes.json())
         .then(orderData => {
-            location.reload();
+            window.location.replace(cleanOrderUrl);
         })
         .catch(err => {
             location.reload();
