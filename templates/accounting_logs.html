@@ -1,60 +1,127 @@
 {% extends 'basic.html' %}
-{% block title %}Accounting Logs{% endblock %}
+{% block title %}Accounting Activity{% endblock %}
 
 {% block body %}
 <style>
-    #auditLogTable {
-        width: 100%;
-        table-layout: fixed;
-        margin-bottom: 0;
-        font-size: 0.875rem;
-    }
-    #auditLogTable th {
-        position: sticky;
-        top: 0;
-        z-index: 1;
-        padding: 0.65rem;
-        text-align: left;
-        background: rgb(182, 182, 158);
-    }
-    #auditLogTable td {
-        padding: 0.65rem;
-        text-align: left;
-        vertical-align: middle;
-        white-space: normal;
-        overflow-wrap: anywhere;
-    }
-    #auditLogTable th:nth-child(1) { width: 18%; }
-    #auditLogTable th:nth-child(2) { width: 28%; }
-    #auditLogTable th:nth-child(3) { width: 10%; }
-    #auditLogTable th:nth-child(4) { width: 44%; }
-    #auditLogTable .bulk-audit-row td {
-        background-color: #f3f5f7;
-        border-top: 2px solid #6c757d;
-        border-bottom: 2px solid #6c757d;
-    }
-    #auditLogTable .badge {
-        font-size: 0.75rem;
-    }
-    @media (max-width: 767.98px) {
-        #auditLogTable {
-            min-width: 760px;
-            table-layout: auto;
-        }
+    .activity-page { --border:#d6dbe0; --muted:#5e6267; width:100%; margin:0; padding:12px 20px 20px; background:#fff; }
+    .activity-header { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:2px 0 12px; border-bottom:2px solid #e4e7e9; margin-top: 30px; }
+    .activity-title { margin:0 0 2px; color:#111; font-size:1.75rem; font-weight:400; }
+    .activity-subtitle { margin:0; color:var(--muted); font-size:.84rem; }
+    .back-button { display:inline-flex; align-items:center; gap:7px; padding:6px 12px; white-space:nowrap; border:0; border-radius:2px; color:#fff; background:#6c757d; }
+    .back-button:hover { background:#5c636a; color:#fff; }
+    .activity-panel { overflow:hidden; margin-top:16px; border:1px solid var(--border); border-radius:0; background:#fff; box-shadow:none; }
+    .activity-toolbar { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:10px 12px; border-bottom:1px solid var(--border); background:#fff; }
+    .activity-count { color:#111; font-size:.86rem; white-space:nowrap; }
+    .activity-count strong { color:#252b33; }
+    .activity-filters { display:flex; align-items:center; justify-content:flex-end; gap:10px; width:min(100%,560px); }
+    .activity-search-wrap { position:relative; flex:1 1 310px; }
+    .activity-search-icon { position:absolute; top:50%; left:12px; transform:translateY(-50%); color:#8a94a3; pointer-events:none; }
+    .activity-search { height:34px; padding-left:35px; border:1px solid #111; border-radius:4px; font-size:.84rem; }
+    .activity-filter { width:145px; height:34px; border:1px solid #9aa0a6; border-radius:3px; font-size:.84rem; }
+    .activity-table-wrap { max-height:calc(100vh - 220px); overflow:auto; }
+    #auditLogTable { width:100%; min-width:860px; table-layout:fixed; margin:0; color:#28313d; font-size:.875rem; }
+    #auditLogTable thead th { position:sticky; top:0; z-index:2; padding:10px 12px; border:1px solid #d5d9dd; border-top:0; background:#b6b69e; color:#18212a; font-size:.78rem; font-weight:700; letter-spacing:0; text-align:center; text-transform:none; }
+    #auditLogTable tbody td { padding:10px 12px; border:1px solid #d9dde1; text-align:center; vertical-align:middle; white-space:normal; overflow-wrap:anywhere; line-height:1.45; }
+    #auditLogTable tbody tr:nth-child(even) td { background:#f4f4f4; }
+    #auditLogTable tbody tr:hover td { background:#edf2f5; }
+    #auditLogTable th:nth-child(1) { width:170px; }
+    #auditLogTable th:nth-child(2) { width:235px; }
+    #auditLogTable th:nth-child(3) { width:115px; }
+    #auditLogTable th:nth-child(4) { width:auto; }
+    #auditLogTable td:first-child { color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap; }
+    #auditLogTable td:nth-child(2) { color:#111; }
+    #auditLogTable td:last-child { text-align:left; }
+    #auditLogTable td:last-child > div { margin-bottom:3px; }
+    #auditLogTable td:last-child > div:last-child { margin-bottom:0; }
+    #auditLogTable .badge { min-width:62px; padding:4px 7px; border-radius:4px; font-size:.68rem; font-weight:700; letter-spacing:0; }
+    #auditLogTable .bulk-audit-row td { background:#e9e9e9 !important; border-top:2px solid #343a40; border-bottom:2px solid #343a40; }
+    #auditLogTable .bulk-audit-row td:first-child { border-left:2px solid #343a40; }
+    #auditLogTable .bulk-audit-row td:last-child { border-right:2px solid #343a40; }
+    #auditLogTable .bulk-audit-row:hover td { background:#dedede !important; }
+    .activity-empty,.activity-no-results { padding:56px 24px; text-align:center; }
+    .activity-empty-icon { display:grid; width:48px; height:48px; margin:0 auto 14px; place-items:center; border:1px solid #b6b69e; border-radius:0; background:#f1f1eb; color:#555; font-size:1.3rem; }
+    .activity-empty h5 { margin-bottom:6px; font-weight:650; }
+    .activity-empty p,.activity-no-results { margin:0; color:var(--muted); }
+    .activity-no-results { display:none; border-top:1px solid var(--border); }
+    @media (max-width:767.98px) {
+        .activity-page { padding:10px 8px 16px; }
+        .activity-header { align-items:center; }
+        .activity-title { font-size:1.25rem; }
+        .activity-toolbar { align-items:stretch; flex-direction:column; }
+        .activity-filters { justify-content:stretch; width:100%; }
+        .activity-search-wrap { flex-basis:auto; }
+        .activity-filter { width:125px; }
+        .activity-table-wrap { max-height:calc(100vh - 285px); }
     }
 </style>
-<div class="container-fluid" style="padding: 20px;">
-    
-    <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
-        <h4 style="margin: 0;">Recent Activity Logs :</h4>
-        <a href="{% url 'accounting' %}" class="btn btn-sm btn-secondary">Back to Accounting</a>
-    </div>
-    
-    <hr>
 
-    <div class="table-responsive mt-4">
-        {{ audit_log_html|safe }}
-    </div>
+<main class="activity-page">
+    <header class="activity-header">
+        <div>
+            <h1 class="activity-title">Accounting Activity</h1>
+            <p class="activity-subtitle">Review edits, deletions, and restored transactions.</p>
+        </div>
+        <a href="{% url 'accounting' %}" class="btn btn-sm back-button"><span aria-hidden="true">←</span> Back to Accounting</a>
+    </header>
 
-</div>
+    <section class="activity-panel" aria-label="Accounting activity log">
+        {% if audit_log_html %}
+        <div class="activity-toolbar">
+            <div class="activity-count"><strong id="visibleLogCount">0</strong> activities shown</div>
+            <div class="activity-filters">
+                <div class="activity-search-wrap">
+                    <span class="activity-search-icon" aria-hidden="true">⌕</span>
+                    <input id="activitySearch" class="form-control activity-search" type="search" placeholder="Search transaction or details" aria-label="Search activity logs">
+                </div>
+                <select id="activityActionFilter" class="form-select activity-filter" aria-label="Filter by action">
+                    <option value="">All actions</option>
+                    <option value="edited">Edited</option>
+                    <option value="deleted">Deleted</option>
+                    <option value="restored">Restored</option>
+                </select>
+            </div>
+        </div>
+        <div class="activity-table-wrap">{{ audit_log_html|safe }}</div>
+        <div id="activityNoResults" class="activity-no-results">No activities match your filters.</div>
+        {% else %}
+        <div class="activity-empty">
+            <div class="activity-empty-icon" aria-hidden="true">↺</div>
+            <h5>No accounting activity yet</h5>
+            <p>Edited, deleted, and restored transactions will appear here.</p>
+        </div>
+        {% endif %}
+    </section>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const table = document.getElementById('auditLogTable');
+    if (!table) return;
+    const rows = Array.from(table.querySelectorAll('tbody tr'));
+    const search = document.getElementById('activitySearch');
+    const actionFilter = document.getElementById('activityActionFilter');
+    const visibleCount = document.getElementById('visibleLogCount');
+    const noResults = document.getElementById('activityNoResults');
+
+    function applyFilters() {
+        const query = search.value.trim().toLowerCase();
+        const action = actionFilter.value;
+        let shown = 0;
+        rows.forEach(function (row) {
+            const text = row.textContent.toLowerCase();
+            const rowAction = row.cells[2] ? row.cells[2].textContent.trim().toLowerCase() : '';
+            const matches = (!query || text.includes(query)) && (!action || rowAction === action);
+            row.style.display = matches ? '' : 'none';
+            if (matches) shown += 1;
+        });
+        visibleCount.textContent = shown;
+        noResults.style.display = shown ? 'none' : 'block';
+        table.style.display = shown ? '' : 'none';
+    }
+
+    search.addEventListener('input', applyFilters);
+    actionFilter.addEventListener('change', applyFilters);
+    applyFilters();
+});
+</script>
 {% endblock %}

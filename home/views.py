@@ -13868,19 +13868,6 @@ def accounting_view(request):
             ))
             group_display = " → ".join(group_names)
             batch_key = str(e.transfer_batch_id)
-            batch_user_remark = ""
-            first_batch_remark = batch_entries[0].remark or ""
-            if len(group_names) > 1:
-                summary_prefixes = (
-                    f"Transfer to {group_names[1]}",
-                    f"Transfer excess to {group_names[1]}",
-                )
-                for prefix in summary_prefixes:
-                    if first_batch_remark.startswith(prefix):
-                        batch_user_remark = first_batch_remark[len(prefix):]
-                        if batch_user_remark.startswith(" - "):
-                            batch_user_remark = batch_user_remark[3:]
-                        break
             detail_rows = ""
             for item in batch_entries:
                 item_ipo = item.ipo.IPOName if item.ipo else "JV"
@@ -13922,7 +13909,6 @@ def accounting_view(request):
                 <td><span class="badge bg-primary">TRANSFER</span></td>
                 <td>{transfer_amount}</td>
                 <td>
-                    {f'<div style="white-space: normal; margin-bottom: 6px;" title="{escape(batch_user_remark)}">{escape(batch_user_remark)}</div>' if batch_user_remark else ''}
                     <button type="button" class="btn btn-sm btn-outline-secondary bulk-transfer-toggle"
                             data-transfer-batch="{batch_key}" aria-expanded="false">
                         View {len(batch_entries)} entries
@@ -14056,25 +14042,31 @@ def accounting_logs_view(request):
             
             acc = log.accounting
             if acc.transfer_batch_id:
-                operation_key = (
-                    str(acc.transfer_batch_id),
-                    log.action,
-                    timezone.localtime(log.timestamp).replace(microsecond=0),
-                )
+                operation_second = timezone.localtime(log.timestamp).replace(microsecond=0)
+                operation_key = (str(acc.transfer_batch_id), log.action, operation_second)
                 if operation_key in shown_bulk_actions:
                     continue
                 shown_bulk_actions.add(operation_key)
 
-                operation_logs = [
-                    item for item in audit_logs
-                    if item.accounting.transfer_batch_id == acc.transfer_batch_id
-                    and item.action == log.action
-                    and timezone.localtime(item.timestamp).replace(microsecond=0) == operation_key[2]
-                ]
-                operation_entries = sorted(
-                    {item.accounting_id: item.accounting for item in operation_logs}.values(),
-                    key=lambda item: item.id,
-                )
+                if log.action == 'EDIT':
+                    operation_entries = list(
+                        Accounting.objects.filter(
+                            user=request.user,
+                            transfer_batch_id=acc.transfer_batch_id,
+                        ).select_related('group', 'ipo').order_by('id')
+                    )
+                else:
+                    operation_logs = [
+                        item for item in audit_logs
+                        if item.accounting.transfer_batch_id == acc.transfer_batch_id
+                        and item.action == log.action
+                        and timezone.localtime(item.timestamp).replace(microsecond=0) == operation_second
+                    ]
+                    operation_entries = sorted(
+                        {item.accounting_id: item.accounting for item in operation_logs}.values(),
+                        key=lambda item: item.id,
+                    )
+
                 group_names = list(dict.fromkeys(
                     item.group.GroupName if item.group else (item.group_name or 'Deleted group')
                     for item in operation_entries
@@ -14089,17 +14081,27 @@ def accounting_logs_view(request):
                     Decimal('0.00'),
                 )
                 transfer_amount = max(credit_total, debit_total)
-                reference = min(item.id for item in operation_entries)
+                reference = min((item.id for item in operation_entries), default=acc.id)
+                details = [
+                    f"<div><b>From → To:</b> {escape(direction)}</div>",
+                    f"<div><b>Amount:</b> ₹{transfer_amount:.2f}</div>",
+                    f"<div><b>Entries:</b> {len(operation_entries)}</div>",
+                ]
+                if log.action == 'EDIT':
+                    changed_fields = []
+                    for field, values in (log.changes or {}).items():
+                        if isinstance(values, dict) and values.get('old') != values.get('new'):
+                            changed_fields.append(
+                                f"<div><b>{escape(field)}:</b> "
+                                f"{escape(values.get('old'))} → {escape(values.get('new'))}</div>"
+                            )
+                    details.extend(changed_fields)
+
                 ts = timezone.localtime(log.timestamp).strftime("%d-%m-%Y %H:%M:%S")
-                details = (
-                    f"<div><b>From → To:</b> {escape(direction)}</div>"
-                    f"<div><b>Amount:</b> ₹{transfer_amount:.2f}</div>"
-                    f"<div><b>Entries:</b> {len(operation_entries)}</div>"
-                )
                 audit_log_html += (
                     f"<tr class='bulk-audit-row'><td>{ts}</td>"
                     f"<td><b>Bulk Transfer #{reference}</b></td>"
-                    f"<td>{badge}</td><td>{details}</td></tr>\n"
+                    f"<td>{badge}</td><td>{''.join(details)}</td></tr>\n"
                 )
                 displayed_rows += 1
                 continue
@@ -14122,7 +14124,7 @@ def accounting_logs_view(request):
                             elif amt_str == 'credit':
                                 return f"<span class='badge rounded-pill bg-success'>{escape(amt)}</span>"
                             return escape(amt)
-                        changes_parts.append(f"<b>{field}:</b> {style_amt(vals['old'])} → {style_amt(vals['new'])}")
+                        changes_parts.append(f"<b>{escape(field)}:</b> {style_amt(vals['old'])} → {style_amt(vals['new'])}")
                     else:
                         changes_parts.append(f"<b>{escape(field)}:</b> {escape(vals['old'])} → {escape(vals['new'])}")
                 elif field == 'note':
@@ -15061,6 +15063,8 @@ def bulk_transfer_transactions(request):
 
         edit_batch_id = None
         existing_batch = Accounting.objects.none()
+        existing_entries = []
+        preserved_audit_logs = []
         if payload.get("transfer_batch_id"):
             try:
                 edit_batch_id = uuid.UUID(str(payload.get("transfer_batch_id")))
@@ -15073,6 +15077,15 @@ def bulk_transfer_transactions(request):
             )
             if not existing_batch.exists():
                 raise ValidationError("Transfer batch was not found.")
+            existing_entries = list(
+                existing_batch.select_related("group", "ipo").order_by("id")
+            )
+            preserved_audit_logs = list(
+                AccountingAuditLog.objects.filter(
+                    user=request.user,
+                    accounting_id__in=[entry.id for entry in existing_entries],
+                ).values("action", "changes", "timestamp")
+            )
 
         source_type = payload.get("source_type")
         if source_type not in VALID_TRANSACTION_TYPES:
@@ -15221,6 +15234,58 @@ def bulk_transfer_transactions(request):
         destination_label = destination_group.GroupName
         suffix = f" - {user_remark}" if user_remark else ""
         transfer_batch_id = edit_batch_id or uuid.uuid4()
+        edit_changes = {}
+        if edit_batch_id:
+            old_group_names = list(dict.fromkeys(
+                entry.group.GroupName if entry.group else (entry.group_name or "Deleted group")
+                for entry in existing_entries
+            ))
+            old_credit = sum(
+                (entry.amount for entry in existing_entries if entry.amount_type == "credit"),
+                Decimal("0.00"),
+            )
+            old_debit = sum(
+                (entry.amount for entry in existing_entries if entry.amount_type == "debit"),
+                Decimal("0.00"),
+            )
+            old_remark = ""
+            if existing_entries and len(old_group_names) > 1:
+                first_remark = existing_entries[0].remark or ""
+                for prefix in (
+                    f"Transfer to {old_group_names[1]}",
+                    f"Transfer excess to {old_group_names[1]}",
+                ):
+                    if first_remark.startswith(prefix):
+                        old_remark = first_remark[len(prefix):]
+                        if old_remark.startswith(" - "):
+                            old_remark = old_remark[3:]
+                        break
+            old_date = timezone.localtime(existing_entries[0].date_time).strftime(
+                "%d-%m-%Y %H:%M:%S"
+            )
+            new_date = timezone.localtime(transfer_date).strftime("%d-%m-%Y %H:%M:%S")
+            edit_changes = {
+                "From Group": {
+                    "old": old_group_names[0] if old_group_names else "",
+                    "new": source_label,
+                },
+                "To Group": {
+                    "old": old_group_names[1] if len(old_group_names) > 1 else "",
+                    "new": destination_label,
+                },
+                "Amount": {"old": str(max(old_credit, old_debit)), "new": str(master_amount)},
+                "Remark": {"old": old_remark, "new": user_remark},
+                "Date/Time": {"old": old_date, "new": new_date},
+                "Entry Count": {
+                    "old": len(existing_entries),
+                    "new": (
+                        len(source_allocations)
+                        + len(destination_allocations)
+                        + int(bool(source_jv))
+                        + int(bool(destination_jv))
+                    ),
+                },
+            }
         records = []
         for ipo, amount, amount_type in source_allocations:
             records.append(Accounting(
@@ -15280,6 +15345,31 @@ def bulk_transfer_transactions(request):
             if edit_batch_id:
                 existing_batch.delete()
             Accounting.objects.bulk_create(records)
+            if edit_batch_id:
+                representative = Accounting.objects.filter(
+                    user=request.user,
+                    transfer_batch_id=transfer_batch_id,
+                    is_deleted=False,
+                ).order_by("id").first()
+                if representative is None:
+                    raise ValidationError("Updated transfer entries were not created.")
+                if preserved_audit_logs:
+                    AccountingAuditLog.objects.bulk_create([
+                        AccountingAuditLog(
+                            user=request.user,
+                            accounting=representative,
+                            action=item["action"],
+                            changes=item["changes"],
+                            timestamp=item["timestamp"],
+                        )
+                        for item in preserved_audit_logs
+                    ])
+                AccountingAuditLog.objects.create(
+                    user=request.user,
+                    accounting=representative,
+                    action="EDIT",
+                    changes=edit_changes,
+                )
 
         return JsonResponse({
             "status": "success",
@@ -15489,10 +15579,7 @@ def get_group_dues(request, group_id):
             .values("OrderIPOName_id")
             .annotate(total=Sum("Amount"))
         )
-        order_dict = {
-            row["OrderIPOName_id"]: Decimal(str(row["total"] or 0))
-            for row in order_totals
-        }
+        order_dict = {row["OrderIPOName_id"]: float(row["total"] or 0) for row in order_totals}
         
         # 2. Fetch Accounting Totals (How much was paid)
         accounting_totals = (
@@ -15508,24 +15595,21 @@ def get_group_dues(request, group_id):
                 )
             )
         )
-        accounting_dict = {
-            row["ipo_id"]: Decimal(str(row["total"] or 0))
-            for row in accounting_totals
-        }
+        accounting_dict = {row["ipo_id"]: float(row["total"] or 0) for row in accounting_totals}
         
         # 3. Calculate Dues
         due_data = []
         for ipo in ipos:
-            billed = order_dict.get(ipo.id, Decimal("0.00"))
-            paid = accounting_dict.get(ipo.id, Decimal("0.00"))
-            due = (billed - paid).quantize(MONEY_QUANTUM)
+            billed = order_dict.get(ipo.id, 0.0)
+            paid = accounting_dict.get(ipo.id, 0.0)
+            due = billed - paid
             
             # Only include IPOs with a non-zero balance (exactly like the old modal logic)
-            if due != Decimal("0.00"):
+            if abs(due) > 0.001:
                 due_data.append({
                     "ipo_id": ipo.id,
                     "ipo_name": ipo.IPOName,
-                    "due_amount": str(due)
+                    "due_amount": round(due, 2)
                 })
                     
         return JsonResponse({"status": "success", "data": due_data})
