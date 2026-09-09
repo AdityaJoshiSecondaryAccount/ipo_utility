@@ -1,4 +1,15 @@
 <!-- templates/partials/add_payment_modal.html -->
+<style>
+    #transactionModal .trans-validation-banner {
+        display: none;
+        margin-bottom: 0;
+        padding: 0.75rem 1rem;
+        border: 1px solid #f5c2c7;
+        border-radius: 0.35rem;
+        background-color: #f8d7da;
+        color: #842029;
+    }
+</style>
 <div class="modal fade" id="transactionModal" tabindex="-1" role="dialog" aria-labelledby="transactionModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -88,7 +99,7 @@
 
                     <!-- Container for Dynamically Generated Bulk Auto-Allocation UI -->
                     <div id="bulkAllocationContainer" style="display:none;" class="mb-3 mt-3"></div>
-                    <div id="trans_validation_message" class="alert alert-danger mb-0" role="alert" style="display:none;"></div>
+                    <div id="trans_validation_message" class="trans-validation-banner" role="alert"></div>
 
                 </div>
 
@@ -575,8 +586,38 @@ $(function () {
                     btn.prop('disabled', false).html(originalText);
                 }
             });
+            return;
         }
-        // If not bulk mode, let normal browser submission proceed seamlessly
+
+        // Keep single IPO/JV backend validation inside this modal as well.
+        e.preventDefault();
+        const form = $(this);
+        const btn = form.find('#saveBtn');
+        const originalText = btn.html();
+        showValidation('');
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Saving...');
+
+        $.ajax({
+            url: form.attr('action'),
+            method: 'POST',
+            data: form.serialize(),
+            headers: {'X-Requested-With': 'XMLHttpRequest'},
+            success: function(response) {
+                if (response.status === 'success') {
+                    window.location.reload();
+                    return;
+                }
+                showValidation(response.message || 'Unable to save payment.');
+                btn.prop('disabled', false).html(originalText);
+            },
+            error: function(xhr) {
+                const message = xhr.responseJSON && xhr.responseJSON.message
+                    ? xhr.responseJSON.message
+                    : 'Unable to save payment. Please try again.';
+                showValidation(message);
+                btn.prop('disabled', false).html(originalText);
+            }
+        });
     });
 });
 </script>

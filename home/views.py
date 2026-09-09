@@ -14795,6 +14795,7 @@ def _create_single_transaction(request, redirect_name):
     if request.method != "POST":
         return redirect(redirect_name)
 
+    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
     try:
         group = _get_owned_group(request.user, request.POST.get("group_id"))
         is_jv = request.POST.get("jv") == "1"
@@ -14824,8 +14825,17 @@ def _create_single_transaction(request, redirect_name):
             jv=is_jv,
         )
     except ValidationError as exc:
+        if is_ajax:
+            return JsonResponse(
+                {"status": "error", "message": exc.messages[0]}, status=400
+            )
         messages.error(request, exc.messages[0])
+        return redirect(redirect_name)
 
+    if is_ajax:
+        return JsonResponse(
+            {"status": "success", "message": "Payment saved successfully."}
+        )
     return redirect(redirect_name)
 
 
