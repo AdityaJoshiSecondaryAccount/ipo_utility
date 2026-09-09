@@ -2,6 +2,47 @@
 {% block title %}Accounting Logs{% endblock %}
 
 {% block body %}
+<style>
+    #auditLogTable {
+        width: 100%;
+        table-layout: fixed;
+        margin-bottom: 0;
+        font-size: 0.875rem;
+    }
+    #auditLogTable th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        padding: 0.65rem;
+        text-align: left;
+        background: rgb(182, 182, 158);
+    }
+    #auditLogTable td {
+        padding: 0.65rem;
+        text-align: left;
+        vertical-align: middle;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+    #auditLogTable th:nth-child(1) { width: 18%; }
+    #auditLogTable th:nth-child(2) { width: 28%; }
+    #auditLogTable th:nth-child(3) { width: 10%; }
+    #auditLogTable th:nth-child(4) { width: 44%; }
+    #auditLogTable .bulk-audit-row td {
+        background-color: #f3f5f7;
+        border-top: 2px solid #6c757d;
+        border-bottom: 2px solid #6c757d;
+    }
+    #auditLogTable .badge {
+        font-size: 0.75rem;
+    }
+    @media (max-width: 767.98px) {
+        #auditLogTable {
+            min-width: 760px;
+            table-layout: auto;
+        }
+    }
+</style>
 <div class="container-fluid" style="padding: 20px;">
     
     <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
@@ -11,7 +52,7 @@
     
     <hr>
 
-    <div class="table-responsive text-nowrap mt-4">
+    <div class="table-responsive mt-4">
         {{ audit_log_html|safe }}
     </div>
 

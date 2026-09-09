@@ -14023,18 +14023,27 @@ def accounting_view(request):
 
 @login_required
 def accounting_logs_view(request):
-    audit_logs = AccountingAuditLog.objects.filter(user=request.user).select_related('accounting').order_by('-timestamp')[:100]
+    audit_logs = list(
+        AccountingAuditLog.objects.filter(user=request.user)
+        .select_related('accounting__group', 'accounting__ipo')
+        .order_by('-timestamp')[:500]
+    )
     audit_log_html = ""
     if audit_logs:
-        audit_log_html = "<table id='auditLogTable' class='table table-bordered table-sm table-hover' style='font-size: 0.85rem;'>\n"
-        audit_log_html += "<thead><tr style='text-align: center;'>"
-        audit_log_html += "<th style='position: sticky; top: 0; z-index: 1;'>Timestamp</th>"
-        audit_log_html += "<th style='position: sticky; top: 0; z-index: 1;'>Transaction</th>"
-        audit_log_html += "<th style='position: sticky; top: 0; z-index: 1;'>Action</th>"
-        audit_log_html += "<th style='position: sticky; top: 0; z-index: 1;'>Changes</th>"
+        audit_log_html = "<table id='auditLogTable' class='table table-bordered table-sm table-hover'>\n"
+        audit_log_html += "<thead><tr>"
+        audit_log_html += "<th>Timestamp</th>"
+        audit_log_html += "<th>Transaction</th>"
+        audit_log_html += "<th>Action</th>"
+        audit_log_html += "<th>Details</th>"
         audit_log_html += "</tr></thead>\n"
-        audit_log_html += "<tbody style='text-align: center;'>"
+        audit_log_html += "<tbody>"
+        shown_bulk_actions = set()
+        displayed_rows = 0
         for log in audit_logs:
+            if displayed_rows >= 100:
+                break
+
             # Action badge
             if log.action == 'EDIT':
                 badge = "<span class='badge bg-warning text-dark'>Edited</span>"
@@ -14043,10 +14052,59 @@ def accounting_logs_view(request):
             elif log.action == 'RESTORE':
                 badge = "<span class='badge bg-success'>Restored</span>"
             else:
-                badge = f"<span class='badge bg-secondary'>{log.action}</span>"
+                badge = f"<span class='badge bg-secondary'>{escape(log.action)}</span>"
             
-            # Transaction ref
             acc = log.accounting
+            if acc.transfer_batch_id:
+                operation_key = (
+                    str(acc.transfer_batch_id),
+                    log.action,
+                    timezone.localtime(log.timestamp).replace(microsecond=0),
+                )
+                if operation_key in shown_bulk_actions:
+                    continue
+                shown_bulk_actions.add(operation_key)
+
+                operation_logs = [
+                    item for item in audit_logs
+                    if item.accounting.transfer_batch_id == acc.transfer_batch_id
+                    and item.action == log.action
+                    and timezone.localtime(item.timestamp).replace(microsecond=0) == operation_key[2]
+                ]
+                operation_entries = sorted(
+                    {item.accounting_id: item.accounting for item in operation_logs}.values(),
+                    key=lambda item: item.id,
+                )
+                group_names = list(dict.fromkeys(
+                    item.group.GroupName if item.group else (item.group_name or 'Deleted group')
+                    for item in operation_entries
+                ))
+                direction = " → ".join(group_names) if group_names else "Group transfer"
+                credit_total = sum(
+                    (item.amount for item in operation_entries if item.amount_type == 'credit'),
+                    Decimal('0.00'),
+                )
+                debit_total = sum(
+                    (item.amount for item in operation_entries if item.amount_type == 'debit'),
+                    Decimal('0.00'),
+                )
+                transfer_amount = max(credit_total, debit_total)
+                reference = min(item.id for item in operation_entries)
+                ts = timezone.localtime(log.timestamp).strftime("%d-%m-%Y %H:%M:%S")
+                details = (
+                    f"<div><b>From → To:</b> {escape(direction)}</div>"
+                    f"<div><b>Amount:</b> ₹{transfer_amount:.2f}</div>"
+                    f"<div><b>Entries:</b> {len(operation_entries)}</div>"
+                )
+                audit_log_html += (
+                    f"<tr class='bulk-audit-row'><td>{ts}</td>"
+                    f"<td><b>Bulk Transfer #{reference}</b></td>"
+                    f"<td>{badge}</td><td>{details}</td></tr>\n"
+                )
+                displayed_rows += 1
+                continue
+
+            # Transaction ref
             ipo_ref = acc.ipo.IPOName if acc.ipo else (acc.ipo_name or 'JV')
             grp_ref = acc.group.GroupName if acc.group else (acc.group_name or '')
             txn_ref = f"{ipo_ref} / {grp_ref}" if grp_ref else ipo_ref
@@ -14060,21 +14118,22 @@ def accounting_logs_view(request):
                         def style_amt(amt):
                             amt_str = str(amt).lower()
                             if amt_str == 'debit':
-                                return f"<span class='badge rounded-pill bg-danger' style='font-size:0.75rem;'>{amt}</span>"
+                                return f"<span class='badge rounded-pill bg-danger'>{escape(amt)}</span>"
                             elif amt_str == 'credit':
-                                return f"<span class='badge rounded-pill bg-success' style='font-size:0.75rem;'>{amt}</span>"
-                            return amt
+                                return f"<span class='badge rounded-pill bg-success'>{escape(amt)}</span>"
+                            return escape(amt)
                         changes_parts.append(f"<b>{field}:</b> {style_amt(vals['old'])} → {style_amt(vals['new'])}")
                     else:
-                        changes_parts.append(f"<b>{field}:</b> {vals['old']} → {vals['new']}")
+                        changes_parts.append(f"<b>{escape(field)}:</b> {escape(vals['old'])} → {escape(vals['new'])}")
                 elif field == 'note':
-                    changes_parts.append(f"<i>{vals}</i>")
+                    changes_parts.append(f"<i>{escape(vals)}</i>")
                 else:
-                    changes_parts.append(f"<b>{field}:</b> {vals}")
+                    changes_parts.append(f"<b>{escape(field)}:</b> {escape(vals)}")
             changes_str = "<br>".join(changes_parts) if changes_parts else "-"
             
             ts = timezone.localtime(log.timestamp).strftime("%d-%m-%Y %H:%M:%S")
-            audit_log_html += f"<tr><td>{ts}</td><td>{txn_ref}</td><td>{badge}</td><td style='text-align:left;'>{changes_str}</td></tr>\n"
+            audit_log_html += f"<tr><td>{ts}</td><td>{escape(txn_ref)}</td><td>{badge}</td><td>{changes_str}</td></tr>\n"
+            displayed_rows += 1
         audit_log_html += "</tbody></table>"
 
     return render(request, "accounting_logs.html", {
