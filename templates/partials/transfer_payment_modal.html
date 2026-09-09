@@ -70,6 +70,9 @@
     #combinedTransferModal input[type="checkbox"] {
         accent-color: #0d6efd;
     }
+    #combinedTransferModal input[type="checkbox"]:not(:disabled) {
+        cursor: pointer;
+    }
     #combinedTransferModal table.table .form-control {
         min-height: 2rem !important;
         padding: 0.25rem 0.35rem !important;
@@ -165,7 +168,7 @@
                         </div>
                         <div class="col-md-4 form-group">
                             <label for="ct_amount">Transfer Amount</label>
-                            <input type="number" id="ct_amount" class="form-control" min="0.01" step="0.01" required>
+                            <input type="number" id="ct_amount" class="form-control" min="1" step="1" required>
                         </div>
                         <div class="col-md-4 form-group">
                             <label>Destination Amount Type</label>
@@ -357,9 +360,9 @@ $(function () {
             row.append($('<td>').text('₹' + item.due.toFixed(2)));
             row.append($('<td>').append($('<input>', {
                 type: 'number',
-                min: '0.01',
+                min: '0',
                 max: Math.abs(item.due).toFixed(2),
-                step: '0.01',
+                step: '1',
                 class: 'form-control form-control-sm ct-allocation',
                 'data-side': side,
                 'data-original-limit': Math.abs(item.due).toFixed(2),
@@ -525,6 +528,91 @@ $(function () {
         }
     }
 
+    function redistributeSideAllocations(side, changedRow) {
+        const master = toMinorUnits($('#ct_amount').val());
+        const rows = $(`#combinedTransferModal .ct-entry-row[data-side="${side}"]:not(.ct-jv-row)`);
+        const changed = changedRow ? $(changedRow) : $();
+        const changedInput = changed.find('.ct-allocation');
+        const changedAmount = changed.length
+            ? Math.max(0, toMinorUnits(changedInput.val()))
+            : 0;
+        let remaining = Math.max(0, master - changedAmount);
+
+        if (changed.length) {
+            changed.removeAttr('data-manually-excluded');
+            changed.find('.ct-allocation-include').prop('checked', changedAmount > 0);
+        }
+
+        rows.each(function () {
+            const row = $(this);
+            if (row.is(changed)) return;
+
+            const input = row.find('.ct-allocation');
+            if (row.attr('data-manually-excluded') === '1') {
+                input.val('0.00');
+                row.find('.ct-allocation-include').prop('checked', false);
+                return;
+            }
+            const limit = toMinorUnits(input.attr('data-original-limit'));
+            const amount = Math.min(limit, remaining);
+            input.val((amount / 100).toFixed(2));
+            row.find('.ct-allocation-include').prop('checked', amount > 0);
+            remaining -= amount;
+        });
+    }
+
+    function allocateRemainderToRow(side, targetRow) {
+        const master = toMinorUnits($('#ct_amount').val());
+        const target = $(targetRow);
+        let allocatedElsewhere = 0;
+
+        $(`#combinedTransferModal .ct-entry-row[data-side="${side}"]:not(.ct-jv-row)`).each(function () {
+            const row = $(this);
+            if (row.is(target) || !row.find('.ct-allocation-include').is(':checked')) return;
+            allocatedElsewhere += toMinorUnits(row.find('.ct-allocation').val());
+        });
+
+        const input = target.find('.ct-allocation');
+        const limit = toMinorUnits(input.attr('data-original-limit'));
+        const amount = Math.min(limit, Math.max(0, master - allocatedElsewhere));
+        input.val((amount / 100).toFixed(2));
+        target.find('.ct-allocation-include').prop('checked', amount > 0);
+    }
+
+    function redistributeAfterExcludedRow(side, excludedRow) {
+        const master = toMinorUnits($('#ct_amount').val());
+        const excluded = $(excludedRow);
+        const rows = $(`#combinedTransferModal .ct-entry-row[data-side="${side}"]:not(.ct-jv-row)`);
+        let allocated = 0;
+        let passedExcluded = false;
+
+        rows.each(function () {
+            const row = $(this);
+            if (row.is(excluded)) return;
+            if (!row.find('.ct-allocation-include').is(':checked')) return;
+            allocated += toMinorUnits(row.find('.ct-allocation').val());
+        });
+
+        let remaining = Math.max(0, master - allocated);
+        rows.each(function () {
+            const row = $(this);
+            if (row.is(excluded)) {
+                passedExcluded = true;
+                return;
+            }
+            if (!passedExcluded || row.attr('data-manually-excluded') === '1' || remaining <= 0) return;
+
+            const input = row.find('.ct-allocation');
+            const current = toMinorUnits(input.val());
+            const limit = toMinorUnits(input.attr('data-original-limit'));
+            const addition = Math.min(Math.max(0, limit - current), remaining);
+            const amount = current + addition;
+            input.val((amount / 100).toFixed(2));
+            row.find('.ct-allocation-include').prop('checked', amount > 0);
+            remaining -= addition;
+        });
+    }
+
     function calculateTotals() {
         const master = toMinorUnits($('#ct_amount').val());
         const source = sideTotals('source');
@@ -624,17 +712,50 @@ $(function () {
     $('#ct_amount, #ct_source_ipos, #ct_destination_ipos').on('input change', renderAllocations);
     $('#ct_source_group').on('change', function () { loadGroupIPOs('source'); });
     $('#ct_destination_group').on('change', function () { loadGroupIPOs('destination'); });
-    $(document).on('input change', '#combinedTransferModal .ct-allocation, #combinedTransferModal .ct-allocation-type, #combinedTransferModal .ct-allocation-include', function () {
+    $(document).on('input change', '#combinedTransferModal .ct-allocation, #combinedTransferModal .ct-allocation-type, #combinedTransferModal .ct-allocation-include', function (event) {
+        if ($(this).hasClass('ct-allocation-include') && event.type === 'input') return;
+        if ($(this).hasClass('ct-allocation') && event.type === 'change') return;
+
         if ($(this).hasClass('ct-allocation')) {
+            const input = $(this);
+            const row = input.closest('.ct-entry-row');
+            const side = row.attr('data-side');
             const limit = Number($(this).attr('data-original-limit')) || 0;
             const entered = Number($(this).val()) || 0;
+            const master = toMinorUnits($('#ct_amount').val());
+            let allocatedElsewhere = 0;
+
+            $(`#combinedTransferModal .ct-entry-row[data-side="${side}"]:not(.ct-jv-row)`).each(function () {
+                const otherRow = $(this);
+                if (otherRow.is(row) || !otherRow.find('.ct-allocation-include').is(':checked')) return;
+                allocatedElsewhere += toMinorUnits(otherRow.find('.ct-allocation').val());
+            });
+
+            const available = Math.max(0, master - allocatedElsewhere);
+            const originalLimit = toMinorUnits(limit);
+            const maximum = Math.min(originalLimit, available) / 100;
             allocationInputError = '';
-            if (entered > limit) {
-                $(this).val(limit.toFixed(2));
-                allocationInputError = 'IPO allocation cannot exceed its original balance of ₹' + limit.toFixed(2) + '.';
-            } else if (entered < 0) {
-                $(this).val('0.00');
+            if (entered < 0) {
+                input.val('0.00');
                 allocationInputError = 'IPO allocation cannot be negative.';
+            } else if (toMinorUnits(entered) > Math.min(originalLimit, available)) {
+                input.val(maximum.toFixed(2));
+                allocationInputError = originalLimit <= available
+                    ? 'IPO allocation cannot exceed its original balance of ₹' + limit.toFixed(2) + '.'
+                    : 'IPO allocation cannot exceed the remaining transfer amount of ₹' + maximum.toFixed(2) + '.';
+            }
+            redistributeSideAllocations(side, row);
+        } else if ($(this).hasClass('ct-allocation-include')) {
+            allocationInputError = '';
+            const row = $(this).closest('.ct-entry-row');
+            const side = row.attr('data-side');
+            if ($(this).is(':checked')) {
+                row.removeAttr('data-manually-excluded');
+                allocateRemainderToRow(side, row);
+            } else {
+                row.attr('data-manually-excluded', '1');
+                row.find('.ct-allocation').val('0.00');
+                redistributeAfterExcludedRow(side, row);
             }
         } else {
             allocationInputError = '';
