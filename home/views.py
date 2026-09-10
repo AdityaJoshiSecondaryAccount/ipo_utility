@@ -14101,6 +14101,18 @@ def accounting_view(request):
 
 @login_required
 def accounting_logs_view(request):
+    def render_change(field, old_value, new_value):
+        return (
+            "<div class='audit-change'>"
+            f"<span class='audit-change-field'>{escape(field)}</span>"
+            "<span class='audit-value audit-value-old'>"
+            f"<small>Before</small>{escape(old_value)}</span>"
+            "<span class='audit-change-arrow' aria-hidden='true'>→</span>"
+            "<span class='audit-value audit-value-new'>"
+            f"<small>After</small>{escape(new_value)}</span>"
+            "</div>"
+        )
+
     audit_logs = list(
         AccountingAuditLog.objects.filter(user=request.user)
         .select_related('accounting__group', 'accounting__ipo')
@@ -14180,17 +14192,20 @@ def accounting_logs_view(request):
                     f"<div><b>Entries:</b> {len(operation_entries)}</div>",
                 ]
                 audit_reason = (log.changes or {}).get("reason")
-                if audit_reason:
-                    details.append(f"<div><b>Reason:</b> {escape(audit_reason)}</div>")
                 if log.action == 'EDIT':
                     changed_fields = []
                     for field, values in (log.changes or {}).items():
                         if isinstance(values, dict) and values.get('old') != values.get('new'):
-                            changed_fields.append(
-                                f"<div><b>{escape(field)}:</b> "
-                                f"{escape(values.get('old'))} → {escape(values.get('new'))}</div>"
-                            )
-                    details.extend(changed_fields)
+                            changed_fields.append(render_change(
+                                field, values.get('old'), values.get('new')
+                            ))
+                    if changed_fields:
+                        details.append("<div class='audit-changes-title'>Changed fields</div>")
+                        details.extend(changed_fields)
+                if audit_reason:
+                    details.append(
+                        f"<div class='audit-reason'><b>Reason:</b> {escape(audit_reason)}</div>"
+                    )
 
                 ts = timezone.localtime(log.timestamp).strftime("%d-%m-%Y %H:%M:%S")
                 target_url = f"/accounting/?batch_id={acc.transfer_batch_id}"
@@ -14228,22 +14243,16 @@ def accounting_logs_view(request):
             changes_parts = []
             for field, vals in changes.items():
                 if isinstance(vals, dict) and 'old' in vals and 'new' in vals:
-                    if field == 'Amount Type':
-                        def style_amt(amt):
-                            amt_str = str(amt).lower()
-                            if amt_str == 'debit':
-                                return f"<span class='badge rounded-pill bg-danger text-white'>{escape(amt)}</span>"
-                            elif amt_str == 'credit':
-                                return f"<span class='badge rounded-pill bg-success text-white'>{escape(amt)}</span>"
-                            return escape(amt)
-                        changes_parts.append(f"<b>{escape(field)}:</b> {style_amt(vals['old'])} → {style_amt(vals['new'])}")
-                    else:
-                        changes_parts.append(f"<b>{escape(field)}:</b> {escape(vals['old'])} → {escape(vals['new'])}")
+                    changes_parts.append(render_change(field, vals['old'], vals['new']))
                 elif field == 'note':
-                    changes_parts.append(f"<i>{escape(vals)}</i>")
+                    changes_parts.append(f"<div class='audit-note'>{escape(vals)}</div>")
+                elif field == 'reason':
+                    changes_parts.append(
+                        f"<div class='audit-reason'><b>Reason:</b> {escape(vals)}</div>"
+                    )
                 else:
                     changes_parts.append(f"<b>{escape(field)}:</b> {escape(vals)}")
-            changes_str = "<br>".join(changes_parts) if changes_parts else "-"
+            changes_str = "".join(changes_parts) if changes_parts else "-"
             
             ts = timezone.localtime(log.timestamp).strftime("%d-%m-%Y %H:%M:%S")
             audit_log_html += f"<tr><td>{ts}</td><td>{txn_link}</td><td>{badge}</td><td>{changes_str}</td></tr>\n"
