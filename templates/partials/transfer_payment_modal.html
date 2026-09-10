@@ -128,7 +128,7 @@
             <form id="combinedTransferForm">
                 {% csrf_token %}
                 <div class="modal-header">
-                    <h5 class="modal-title">Transfer Between Groups</h5>
+                    <h5 class="modal-title">JV Payment Between Groups</h5>
                     <button type="button" class="btn-close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
@@ -137,7 +137,7 @@
 
                     <div class="row">
                         <div class="col-md-6">
-                            <h6>Money taken from</h6>
+                            <!-- <h6>Money taken from</h6> -->
                             <div class="form-group">
                                 <label for="ct_source_group">From Group</label>
                                 <select id="ct_source_group" class="form-control" required>
@@ -156,7 +156,7 @@
                         </div>
 
                         <div class="col-md-6">
-                            <h6>Money given to</h6>
+                            <!-- <h6>Money given to</h6> -->
                             <div class="form-group">
                                 <label for="ct_destination_group">To Group</label>
                                 <select id="ct_destination_group" class="form-control" required>
@@ -836,7 +836,7 @@ $(function () {
         editingBatchId = null;
         editState = null;
         pendingEditSides.clear();
-        modal.find('.modal-title').text('Transfer Between Groups');
+        modal.find('.modal-title').text('JV Payment Between Groups');
         $('#ct_save').text('Save Transfer');
         showValidation('');
         updateMode();
@@ -910,7 +910,7 @@ $(function () {
                 $('#ct_edit_reason').val('');
                 $('#ct_edit_reason_group').show();
                 $('#ct_date_time').val(data.date_time);
-                modal.find('.modal-title').text('Edit Transfer Between Groups');
+                modal.find('.modal-title').text('Edit JV Payment Between Groups');
                 $('#ct_save').text('Update Transfer');
                 loadGroupIPOs('source');
                 loadGroupIPOs('destination');
