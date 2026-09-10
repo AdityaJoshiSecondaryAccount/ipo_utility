@@ -13754,7 +13754,22 @@ def send_status_to_telegram_image(request, IPOid):
 @login_required
 def accounting_view(request):
     show_all = request.GET.get("show_all")
-    show_deleted = request.GET.get("show_deleted", "0") == "1"
+    show_deleted_param = request.GET.get("show_deleted")
+    entry_id = request.GET.get("entry_id") or request.GET.get("id")
+    batch_id = request.GET.get("batch_id") or request.GET.get("transfer_batch_id")
+
+    # Determine show_deleted: if explicitly passed use it, otherwise check target entry
+    if show_deleted_param is not None:
+        show_deleted = show_deleted_param == "1"
+    elif entry_id:
+        target = Accounting.objects.filter(user=request.user, id=entry_id).first()
+        show_deleted = bool(target and target.is_deleted)
+    elif batch_id:
+        target = Accounting.objects.filter(user=request.user, transfer_batch_id=batch_id).first()
+        show_deleted = bool(target and target.is_deleted)
+    else:
+        show_deleted = False
+
     entries = Accounting.objects.filter(user=request.user).select_related("group", "ipo")
     
     # Filter by soft-delete status
@@ -13776,17 +13791,21 @@ def accounting_view(request):
             Group_DropDown.append(gname)
     
     Group_DropDown.sort()
-        # if entry.ipo_id:  # FK exists
-        #     IPO_DropDown.append(entry.ipo.IPOName)  # from related IPO table
-        # else:
-        #     IPO_DropDown.append(entry.ipo_name or "")  # from local field
-    
-    # group_id = request.GET.get("group_id")
-    # ipo_id = request.GET.get("ipo_id")
+
     group_name = request.GET.get("group_name")  # string instead of group_id
     ipo_name = request.GET.get("ipo_name")
     date_from = request.GET.get("date_from")
     date_to = request.GET.get("date_to")
+
+    # Filter by specific entry_id or batch_id if provided (e.g. from activity logs)
+    if entry_id:
+        target_entry = Accounting.objects.filter(user=request.user, id=entry_id).first()
+        if target_entry and target_entry.transfer_batch_id:
+            entries = entries.filter(transfer_batch_id=target_entry.transfer_batch_id)
+        else:
+            entries = entries.filter(id=entry_id)
+    elif batch_id:
+        entries = entries.filter(transfer_batch_id=batch_id)
 
     
     # if ipo_name:
@@ -14076,6 +14095,8 @@ def accounting_view(request):
         "order_by": order_by or "date_time",
         "order_dir": order_dir or "desc",
         "show_deleted": show_deleted,
+        "filtered_entry_id": entry_id,
+        "filtered_batch_id": batch_id,
     })
 
 @login_required
@@ -14172,9 +14193,17 @@ def accounting_logs_view(request):
                     details.extend(changed_fields)
 
                 ts = timezone.localtime(log.timestamp).strftime("%d-%m-%Y %H:%M:%S")
+                target_url = f"/accounting/?batch_id={acc.transfer_batch_id}"
+                if acc.is_deleted:
+                    target_url += "&show_deleted=1"
+                txn_link = (
+                    f"<a href='{target_url}' class='txn-link' title='View this bulk transfer in Accounting'>"
+                    f"<b>Bulk Transfer #{reference}</b>"
+                    f"</a>"
+                )
                 audit_log_html += (
                     f"<tr class='bulk-audit-row'><td>{ts}</td>"
-                    f"<td><b>Bulk Transfer #{reference}</b></td>"
+                    f"<td>{txn_link}</td>"
                     f"<td>{badge}</td><td>{''.join(details)}</td></tr>\n"
                 )
                 displayed_rows += 1
@@ -14185,6 +14214,15 @@ def accounting_logs_view(request):
             grp_ref = acc.group.GroupName if acc.group else (acc.group_name or '')
             txn_ref = f"{ipo_ref} / {grp_ref}" if grp_ref else ipo_ref
             
+            target_url = f"/accounting/?entry_id={acc.id}"
+            if acc.is_deleted:
+                target_url += "&show_deleted=1"
+            txn_link = (
+                f"<a href='{target_url}' class='txn-link' title='View this transaction in Accounting'>"
+                f"{escape(txn_ref)}"
+                f"</a>"
+            )
+
             # Changes summary
             changes = log.changes or {}
             changes_parts = []
@@ -14208,7 +14246,7 @@ def accounting_logs_view(request):
             changes_str = "<br>".join(changes_parts) if changes_parts else "-"
             
             ts = timezone.localtime(log.timestamp).strftime("%d-%m-%Y %H:%M:%S")
-            audit_log_html += f"<tr><td>{ts}</td><td>{escape(txn_ref)}</td><td>{badge}</td><td>{changes_str}</td></tr>\n"
+            audit_log_html += f"<tr><td>{ts}</td><td>{txn_link}</td><td>{badge}</td><td>{changes_str}</td></tr>\n"
             displayed_rows += 1
         audit_log_html += "</tbody></table>"
 

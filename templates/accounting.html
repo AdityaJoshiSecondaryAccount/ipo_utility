@@ -2287,6 +2287,19 @@
         <!-- Non-JV Transaction Modal -->
         
         <hr>
+        {% if filtered_entry_id or filtered_batch_id %}
+        <div class="alert alert-info d-flex justify-content-between align-items-center py-2 px-3 my-2" role="alert">
+            <div>
+                <i class="fas fa-filter me-2"></i>
+                <strong>Filtered View:</strong> Showing specific transaction from Activity Logs.
+            </div>
+            <div>
+                <a href="{% url 'accounting' %}{% if show_deleted %}{% endif %}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-times me-1"></i> Clear Filter (Show All)
+                </a>
+            </div>
+        </div>
+        {% endif %}
             <!-- Render Table -->
         <div class="table-responsive text-nowrap table-wrapper-scroll-x my-custom-scrollbar" >
             <table id="example" class="table table-bordered table-hover table-striped" style='width:100%'>

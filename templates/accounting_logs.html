@@ -29,11 +29,14 @@
     #auditLogTable th:nth-child(3) { width:115px; }
     #auditLogTable th:nth-child(4) { width:auto; }
     #auditLogTable td:first-child { color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap; }
-    #auditLogTable td:nth-child(2) { color:#111; }
+    #auditLogTable td:nth-child(2) { color:#111; cursor:pointer; }
     #auditLogTable td:last-child { text-align:left; }
     #auditLogTable td:last-child > div { margin-bottom:3px; }
     #auditLogTable td:last-child > div:last-child { margin-bottom:0; }
     #auditLogTable .badge { min-width:62px; padding:4px 7px; border-radius:4px; font-size:.68rem; font-weight:700; letter-spacing:0; }
+    .txn-link { color:#0d6efd; text-decoration:underline; font-weight:600; }
+    .txn-link:hover { color:#0a58ca; text-decoration:underline; }
+    #auditLogTable tbody tr:hover td:nth-child(2) .txn-link { color:#0a58ca; }
     #auditLogTable .bulk-audit-row td { background:#e9e9e9 !important; border-top:2px solid #343a40; border-bottom:2px solid #343a40; }
     #auditLogTable .bulk-audit-row td:first-child { border-left:2px solid #343a40; }
     #auditLogTable .bulk-audit-row td:last-child { border-right:2px solid #343a40; }
@@ -59,7 +62,7 @@
     <header class="activity-header">
         <div>
             <h1 class="activity-title">Accounting Activity</h1>
-            <p class="activity-subtitle">Review edits, deletions, and restored transactions.</p>
+            <p class="activity-subtitle">Review edits, deletions, and restored transactions. Click on a transaction to view it in Accounting.</p>
         </div>
         <a href="{% url 'accounting' %}" class="btn btn-sm back-button"><span aria-hidden="true">←</span> Back to Accounting</a>
     </header>
@@ -97,6 +100,19 @@
 document.addEventListener('DOMContentLoaded', function () {
     const table = document.getElementById('auditLogTable');
     if (!table) return;
+
+    // Allow clicking the entire transaction cell to follow the link
+    table.querySelectorAll('tbody td:nth-child(2)').forEach(function (td) {
+        td.addEventListener('click', function (e) {
+            if (e.target.tagName !== 'A') {
+                const link = td.querySelector('a.txn-link');
+                if (link) {
+                    window.location.href = link.getAttribute('href');
+                }
+            }
+        });
+    });
+
     const rows = Array.from(table.querySelectorAll('tbody tr'));
     const search = document.getElementById('activitySearch');
     const actionFilter = document.getElementById('activityActionFilter');
