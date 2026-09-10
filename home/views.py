@@ -15253,6 +15253,17 @@ def bulk_transfer_transactions(request):
         transfer_date = _parse_transaction_datetime(payload.get("date_time"))
         user_remark = str(payload.get("remark") or "").strip()[:250]
 
+        def allocation_remark(item, side, is_jv=False):
+            submitted = item.get("remark")
+            if submitted is not None:
+                return _validate_transaction_remark(submitted)
+            suffix = f" - {user_remark}" if user_remark else ""
+            if side == "source":
+                prefix = "Transfer excess to" if is_jv else "Transfer to"
+                return f"{prefix} {destination_group.GroupName}{suffix}"[:250]
+            prefix = "JV transfer from" if is_jv else "Transfer from"
+            return f"{prefix} {source_group.GroupName}{suffix}"[:250]
+
         def validate_allocations(items, side, expected_type):
             if not isinstance(items, list):
                 raise ValidationError(f"Invalid {side} allocations.")
@@ -15288,6 +15299,7 @@ def bulk_transfer_transactions(request):
                 amount_type = item.get("amount_type")
                 if amount_type not in VALID_TRANSACTION_TYPES:
                     raise ValidationError(f"Invalid {side} amount type.")
+                row_remark = allocation_remark(item, side)
 
                 order_total = Order.objects.filter(
                     user=request.user,
@@ -15329,7 +15341,7 @@ def bulk_transfer_transactions(request):
                     )
                 gross_total += amount
                 signed_total += amount if amount_type == "credit" else -amount
-                validated.append((ipo, amount, amount_type))
+                validated.append((ipo, amount, amount_type, row_remark))
 
             jv_data = payload.get(f"{side}_jv")
             validated_jv = None
@@ -15340,9 +15352,10 @@ def bulk_transfer_transactions(request):
                 jv_type = jv_data.get("amount_type")
                 if jv_type not in VALID_TRANSACTION_TYPES:
                     raise ValidationError(f"Invalid {side} JV amount type.")
+                jv_remark = allocation_remark(jv_data, side, is_jv=True)
                 gross_total += jv_amount
                 signed_total += jv_amount if jv_type == "credit" else -jv_amount
-                validated_jv = (jv_amount, jv_type)
+                validated_jv = (jv_amount, jv_type, jv_remark)
 
             if not validated and validated_jv is None:
                 raise ValidationError(f"No {side} allocation was provided.")
@@ -15368,11 +15381,12 @@ def bulk_transfer_transactions(request):
             destination_items, "destination", destination_type
         )
         source_accounts = {
-            (source_group.id, ipo.id) for ipo, amount, amount_type in source_allocations
+            (source_group.id, ipo.id)
+            for ipo, amount, amount_type, row_remark in source_allocations
         }
         destination_accounts = {
             (destination_group.id, ipo.id)
-            for ipo, amount, amount_type in destination_allocations
+            for ipo, amount, amount_type, row_remark in destination_allocations
         }
         if source_accounts & destination_accounts:
             raise ValidationError(
@@ -15381,7 +15395,6 @@ def bulk_transfer_transactions(request):
 
         source_label = source_group.GroupName
         destination_label = destination_group.GroupName
-        suffix = f" - {user_remark}" if user_remark else ""
         transfer_batch_id = edit_batch_id or uuid.uuid4()
         edit_changes = {}
         if edit_batch_id:
@@ -15437,55 +15450,55 @@ def bulk_transfer_transactions(request):
                 "reason": edit_reason,
             }
         records = []
-        for ipo, amount, amount_type in source_allocations:
+        for ipo, amount, amount_type, row_remark in source_allocations:
             records.append(Accounting(
                 user=request.user,
                 ipo=ipo,
                 group=source_group,
                 amount=amount,
                 amount_type=amount_type,
-                remark=(f"Transfer to {destination_label}{suffix}")[:250],
+                remark=row_remark,
                 date_time=transfer_date,
                 jv=False,
                 transfer_batch_id=transfer_batch_id,
             ))
 
         if source_jv:
-            amount, amount_type = source_jv
+            amount, amount_type, row_remark = source_jv
             records.append(Accounting(
                 user=request.user,
                 ipo=None,
                 group=source_group,
                 amount=amount,
                 amount_type=amount_type,
-                remark=(f"Transfer excess to {destination_label}{suffix}")[:250],
+                remark=row_remark,
                 date_time=transfer_date,
                 jv=True,
                 transfer_batch_id=transfer_batch_id,
             ))
 
-        for ipo, amount, amount_type in destination_allocations:
+        for ipo, amount, amount_type, row_remark in destination_allocations:
             records.append(Accounting(
                 user=request.user,
                 ipo=ipo,
                 group=destination_group,
                 amount=amount,
                 amount_type=amount_type,
-                remark=(f"Transfer from {source_label}{suffix}")[:250],
+                remark=row_remark,
                 date_time=transfer_date,
                 jv=False,
                 transfer_batch_id=transfer_batch_id,
             ))
 
         if destination_jv:
-            amount, amount_type = destination_jv
+            amount, amount_type, row_remark = destination_jv
             records.append(Accounting(
                 user=request.user,
                 ipo=None,
                 group=destination_group,
                 amount=amount,
                 amount_type=amount_type,
-                remark=(f"JV transfer from {source_label}{suffix}")[:250],
+                remark=row_remark,
                 date_time=transfer_date,
                 jv=True,
                 transfer_batch_id=transfer_batch_id,
@@ -15594,9 +15607,20 @@ def get_transfer_batch(request, batch_id):
                 "ipo_id": entry.ipo_id,
                 "amount": str(entry.amount),
                 "amount_type": entry.amount_type,
+                "remark": entry.remark or "",
             }
             for entry in batch_entries if entry.ipo_id is not None
         ]
+
+    def serialize_jv(batch_entries):
+        entry = next((item for item in batch_entries if item.ipo_id is None), None)
+        if entry is None:
+            return None
+        return {
+            "amount": str(entry.amount),
+            "amount_type": entry.amount_type,
+            "remark": entry.remark or "",
+        }
 
     return JsonResponse({
         "status": "success",
@@ -15610,6 +15634,8 @@ def get_transfer_batch(request, batch_id):
             "date_time": timezone.localtime(entries[0].date_time).strftime("%Y-%m-%dT%H:%M:%S"),
             "source_allocations": serialize_allocations(source_entries),
             "destination_allocations": serialize_allocations(destination_entries),
+            "source_jv": serialize_jv(source_entries),
+            "destination_jv": serialize_jv(destination_entries),
         },
     })
 

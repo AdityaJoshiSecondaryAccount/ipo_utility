@@ -43,11 +43,12 @@
         white-space: normal !important;
         overflow-wrap: anywhere !important;
     }
-    #combinedTransferModal table.table th:nth-child(1) { width: 22% !important; }
-    #combinedTransferModal table.table th:nth-child(2) { width: 22% !important; }
-    #combinedTransferModal table.table th:nth-child(3) { width: 27% !important; }
-    #combinedTransferModal table.table th:nth-child(4) { width: 17% !important; }
-    #combinedTransferModal table.table th:nth-child(5) { width: 12% !important; }
+    #combinedTransferModal table.table th:nth-child(1) { width: 18% !important; }
+    #combinedTransferModal table.table th:nth-child(2) { width: 18% !important; }
+    #combinedTransferModal table.table th:nth-child(3) { width: 17% !important; }
+    #combinedTransferModal table.table th:nth-child(4) { width: 14% !important; }
+    #combinedTransferModal table.table th:nth-child(5) { width: 26% !important; }
+    #combinedTransferModal table.table th:nth-child(6) { width: 7% !important; }
     #combinedTransferModal table.table thead th {
         background-color: rgb(182, 182, 158) !important;
         font-weight: 700 !important;
@@ -102,6 +103,7 @@
         padding-right: 0.3rem !important;
         text-align: center !important;
     }
+    #combinedTransferModal .ct-row-remark { min-width: 125px; }
     #combinedTransferModal .ct-validation-banner {
         display: none;
         margin-top: 1rem;
@@ -362,9 +364,33 @@ $(function () {
         });
     }
 
+    function generatedRowRemark(side, isJV) {
+        const sourceName = $('#ct_source_group option:selected').text().trim();
+        const destinationName = $('#ct_destination_group option:selected').text().trim();
+        const extra = $('#ct_remark').val().trim();
+        let value = '';
+        if (side === 'source' && destinationName && $('#ct_destination_group').val()) {
+            value = (isJV ? 'Transfer excess to ' : 'Transfer to ') + destinationName;
+        } else if (side === 'destination' && sourceName && $('#ct_source_group').val()) {
+            value = (isJV ? 'JV transfer from ' : 'Transfer from ') + sourceName;
+        }
+        return (value + (value && extra ? ' - ' + extra : '')).slice(0, 250);
+    }
+
+    function refreshGeneratedRowRemarks() {
+        $('#combinedTransferModal .ct-entry-row').each(function () {
+            const row = $(this);
+            const input = row.find('.ct-row-remark');
+            if (input.attr('data-manually-edited') === '1') return;
+            input.val(generatedRowRemark(
+                row.attr('data-side'), row.attr('data-jv') === '1'
+            ));
+        });
+    }
+
     function allocationTable(side, items, allocations) {
         const table = $('<table>', {class: 'table table-sm table-bordered mb-0'});
-        table.append('<thead><tr><th>IPO</th><th>Available</th><th>Amount</th><th>Type</th><th>Use</th></tr></thead>');
+        table.append('<thead><tr><th>IPO</th><th>Available</th><th>Amount</th><th>Type</th><th>Remark</th><th>Use</th></tr></thead>');
         const body = $('<tbody>');
 
         if (!items.length) {
@@ -381,7 +407,7 @@ $(function () {
             }
             body.append(
                 $('<tr>').append(
-                    $('<td>', {colspan: 5, class: 'text-center text-muted'}).text(
+                    $('<td>', {colspan: 6, class: 'text-center text-muted'}).text(
                         emptyMessage
                     )
                 )
@@ -416,6 +442,12 @@ $(function () {
             ));
             typeSelect.prop('disabled', true);
             row.append($('<td>').append(typeSelect));
+            row.append($('<td>').append($('<input>', {
+                type: 'text',
+                class: 'form-control form-control-sm ct-row-remark',
+                maxlength: 250,
+                value: generatedRowRemark(side, false)
+            })));
             row.append($('<td>').append($('<input>', {
                 type: 'checkbox',
                 class: 'ct-allocation-include',
@@ -467,6 +499,12 @@ $(function () {
             readonly: true
         })));
         row.append($('<td>').append($('<input>', {
+            type: 'text',
+            class: 'form-control form-control-sm ct-row-remark',
+            maxlength: 250,
+            value: generatedRowRemark(side, true)
+        })));
+        row.append($('<td>').append($('<input>', {
             type: 'checkbox',
             class: 'ct-allocation-include',
             checked: amount > 0,
@@ -511,7 +549,23 @@ $(function () {
             $(this).find('.ct-allocation')
                 .val(saved ? Number(saved.amount).toFixed(2) : '0.00');
             $(this).find('.ct-allocation-include').prop('checked', !!saved);
+            if (saved) {
+                $(this).attr('data-manually-allocated', '1');
+            } else {
+                $(this).removeAttr('data-manually-allocated');
+            }
+            if (saved && saved.remark !== undefined) {
+                $(this).find('.ct-row-remark')
+                    .val(saved.remark || '')
+                    .attr('data-manually-edited', '1');
+            }
         });
+        const savedJV = side === 'source' ? editState.source_jv : editState.destination_jv;
+        if (savedJV && savedJV.remark !== undefined) {
+            $(`#combinedTransferModal .ct-jv-row[data-side="${side}"] .ct-row-remark`)
+                .val(savedJV.remark || '')
+                .attr('data-manually-edited', '1');
+        }
     }
 
     function sideTotals(side) {
@@ -571,20 +625,25 @@ $(function () {
         const master = toMinorUnits($('#ct_amount').val());
         const rows = $(`#combinedTransferModal .ct-entry-row[data-side="${side}"]:not(.ct-jv-row)`);
         const changed = changedRow ? $(changedRow) : $();
-        const changedInput = changed.find('.ct-allocation');
-        const changedAmount = changed.length
-            ? Math.max(0, toMinorUnits(changedInput.val()))
-            : 0;
-        let remaining = Math.max(0, master - changedAmount);
 
         if (changed.length) {
+            const changedAmount = Math.max(0, toMinorUnits(changed.find('.ct-allocation').val()));
+            changed.attr('data-manually-allocated', '1');
             changed.removeAttr('data-manually-excluded');
             changed.find('.ct-allocation-include').prop('checked', changedAmount > 0);
         }
 
+        let manuallyAllocated = 0;
         rows.each(function () {
             const row = $(this);
-            if (row.is(changed)) return;
+            if (row.attr('data-manually-allocated') !== '1') return;
+            manuallyAllocated += Math.max(0, toMinorUnits(row.find('.ct-allocation').val()));
+        });
+        let remaining = Math.max(0, master - manuallyAllocated);
+
+        rows.each(function () {
+            const row = $(this);
+            if (row.attr('data-manually-allocated') === '1') return;
 
             const input = row.find('.ct-allocation');
             if (row.attr('data-manually-excluded') === '1') {
@@ -639,7 +698,12 @@ $(function () {
                 passedExcluded = true;
                 return;
             }
-            if (!passedExcluded || row.attr('data-manually-excluded') === '1' || remaining <= 0) return;
+            if (
+                !passedExcluded ||
+                row.attr('data-manually-excluded') === '1' ||
+                row.attr('data-manually-allocated') === '1' ||
+                remaining <= 0
+            ) return;
 
             const input = row.find('.ct-allocation');
             const current = toMinorUnits(input.val());
@@ -745,7 +809,8 @@ $(function () {
             return {
                 ipo_id: $(this).attr('data-ipo-id'),
                 amount: Number($(this).find('.ct-allocation').val()).toFixed(2),
-                amount_type: $(this).find('.ct-allocation-type').val()
+                amount_type: $(this).find('.ct-allocation-type').val(),
+                remark: $(this).find('.ct-row-remark').val().trim()
             };
         }).get();
     }
@@ -755,11 +820,13 @@ $(function () {
         if (!row.length) return null;
         return {
             amount: Number(row.find('.ct-jv-amount').val()).toFixed(2),
-            amount_type: row.find('.ct-jv-type').attr('data-value')
+            amount_type: row.find('.ct-jv-type').attr('data-value'),
+            remark: row.find('.ct-row-remark').val().trim()
         };
     }
 
     $('#ct_source_type').on('change', updateTypes);
+    $('#ct_remark').on('input', refreshGeneratedRowRemarks);
     $('#ct_amount, #ct_source_ipos, #ct_destination_ipos').on('input change', renderAllocations);
     $('#ct_source_group').on('change', function () { loadGroupIPOs('source'); });
     $('#ct_destination_group').on('change', function () { loadGroupIPOs('destination'); });
@@ -804,6 +871,7 @@ $(function () {
                 row.removeAttr('data-manually-excluded');
                 allocateRemainderToRow(side, row);
             } else {
+                row.removeAttr('data-manually-allocated');
                 row.attr('data-manually-excluded', '1');
                 row.find('.ct-allocation').val('0.00');
                 redistributeAfterExcludedRow(side, row);
@@ -813,6 +881,9 @@ $(function () {
         }
         recalculateSideJV($(this).closest('.ct-entry-row').attr('data-side'));
         calculateTotals();
+    });
+    $(document).on('input', '#combinedTransferModal .ct-row-remark', function () {
+        $(this).attr('data-manually-edited', '1');
     });
 
     modal.on('shown.bs.modal', function () {
