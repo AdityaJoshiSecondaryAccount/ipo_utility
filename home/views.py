@@ -1,3 +1,4 @@
+import ddddocr
 from django.http.response import JsonResponse
 from django.shortcuts import render, redirect,get_object_or_404
 from django.contrib.auth.models import Group, User
@@ -306,34 +307,93 @@ def kefintech_function():
     # print(dropdown_dict)
     # return dropdown_dict
 
+BIGSHARE_MIRRORS = [
+    'https://ipo.bigshareonline.com',
+    'https://ipo1.bigshareonline.com',
+    'https://ipo2.bigshareonline.com'
+]
+
+DATAIMPULSE_GW = 'gw.dataimpulse.com:823'
+
+DATAIMPULSE_USER = '2a453efdf9d430c29be6'
+
+DATAIMPULSE_PASS = '9cb5ba72c778da2a'
+
+_OCR_LOCK = threading.Lock()
+
+_OCR_INSTANCE = None
+
+LETTER_TO_DIGIT = {
+    'o': '0', 'O': '0', 'D': '0', 'Q': '0',
+    'i': '1', 'I': '1', 'l': '1', '|': '1', 'j': '1', 'J': '1',
+    'z': '2', 'Z': '2',
+    'e': '3', 'E': '3',
+    'a': '4', 'A': '4',
+    's': '5', 'S': '5',
+    'b': '6', 'G': '6',
+    't': '7', 'T': '7',
+    'B': '8',
+    'g': '9', 'q': '9'
+}
+
+def get_ocr():
+    """Returns the thread-safe ONNX OCR instance."""
+    global _OCR_INSTANCE
+    if _OCR_INSTANCE is None:
+        with _OCR_LOCK:
+            if _OCR_INSTANCE is None:
+                _OCR_INSTANCE = ddddocr.DdddOcr(show_ad=False)
+    return _OCR_INSTANCE
+
+def solve_6digit_numeric_captcha(image_bytes: bytes) -> str:
+    """
+    Ultra-fast in-memory OCR extraction strictly for 6-digit numeric CAPTCHAs.
+    - Execution Time: ~2-4 ms (in native C++ via ONNX Runtime)
+    - Zero network latency (no external HTTP calls)
+    - Replaces common visual letter-to-digit misreads
+    - Enforces 6-digit numeric output
+    """
+    if not image_bytes:
+        return ""
+    try:
+        ocr = get_ocr()
+        if ocr is None:
+            return ""
+        raw_text = ocr.classification(image_bytes)
+        if not raw_text:
+            return ""
+        text = str(raw_text).strip()
+        mapped = "".join(LETTER_TO_DIGIT.get(ch, ch) for ch in text)
+        digits = re.sub(r'[^0-9]', '', mapped)
+        if len(digits) >= 6:
+            return digits[:6]
+        return digits
+    except Exception:
+        return ""
+
+
 def BigShareDropDown():
     global dropdown_dict
-    def getDropDown(url):
+    for mirror in BIGSHARE_MIRRORS:
         try:
-            response = requests.get(url, verify=True)
+            url = f'{mirror}/IPO_Status.html'
+            response = requests.get(url, verify=True, timeout=10)
             if response.status_code == 200:
-                return response.text
-            else:
-                return None
-        except requests.RequestException as e:
-            print(f"Error: {e}")
-            return None
+                soup = BeautifulSoup(response.text, 'html.parser')
+                dropdown_options = soup.select('#ddlCompany option')
+                data = [option.text for option in dropdown_options]
+                data2 = [option.get('value', '') for option in dropdown_options]
 
-    url = 'https://ipo.bigshareonline.com/IPO_Status.html'
-    html_content = getDropDown(url)
-
-    if html_content:
-        soup = BeautifulSoup(html_content, 'html.parser')
-        dropdown_options = soup.select('#ddlCompany option')
-        data = [option.text for option in dropdown_options]
-        data2 = [option.get('value', '') for option in dropdown_options]
-
-        dropdown_dict = dict(zip(data, data2))
-        normalized_dict = {
-            re.sub(r'\s+', ' ', key.strip()): value
-            for key, value in dropdown_dict.items()
-        }
-        return normalized_dict
+                dropdown_dict = dict(zip(data, data2))
+                normalized_dict = {
+                    re.sub(r'\s+', ' ', key.strip()): value
+                    for key, value in dropdown_dict.items()
+                }
+                return normalized_dict
+        except Exception as e:
+            print(f"Error fetching BigShare dropdown from {mirror}: {e}")
+            continue
+    return {}
 
 def PurvaDropDown():
     global dropdown_dict
@@ -423,8 +483,14 @@ def IntegratedDropDown():
 def MaashitlaDropDown():
     global dropdown_dict
     def getDropDown(url):
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            "Referer": "https://maashitla.com/allotment-status/public-issues",
+            "Origin": "https://maashitla.com",
+            "Accept": "application/json, text/plain, */*",
+        }
         try:
-            response = requests.get(url, verify=False)
+            response = requests.get(url, headers=headers, timeout=15, verify=False)
             if response.status_code == 200:
                 return response.json()
             else:
@@ -434,18 +500,27 @@ def MaashitlaDropDown():
             return None
 
     url = 'https://api.maashitla.com/api/public-issue/companies'
-    html_content = getDropDown(url)
+    json_data = getDropDown(url)
 
-    if html_content:
-        soup = html_content
-        data = [item['company_name'] for item in soup]
-        data2 = [item['company_id'] for item in soup]
-        dropdown_dict = dict(zip(data, data2))
-        normalized_dict = {
-            re.sub(r'\s+', ' ', key.strip()): value
-            for key, value in dropdown_dict.items()
-        }
-        return normalized_dict
+    if json_data:
+        items = json_data.get("data", json_data) if isinstance(json_data, dict) else json_data
+        if isinstance(items, list):
+            data = []
+            data2 = []
+            for item in items:
+                if isinstance(item, dict):
+                    cid = str(item.get("company_id") or item.get("companyId") or item.get("company_name") or "").strip()
+                    title = str(item.get("company_name") or item.get("companyTitle") or item.get("name") or "").strip()
+                    if cid and title:
+                        data.append(title)
+                        data2.append(cid)
+            dropdown_dict = dict(zip(data, data2))
+            normalized_dict = {
+                re.sub(r'\s+', ' ', key.strip()): value
+                for key, value in dropdown_dict.items()
+            }
+            return normalized_dict
+    return {}
     
 def CambridgeDropDown():
     global dropdown_dict
@@ -652,16 +727,16 @@ def get_options(request):
 
 async def update_database(user, IPOid, panno, shares_alloted, OrderType):
     try:
-        entry = await sync_to_async(OrderDetail.objects.get)(
-            user=user,
-            Order__OrderIPOName_id=IPOid,
-            OrderDetailPANNo__PANNo=panno,
-            Order__OrderType=OrderType
-        )
-        entry.AllotedQty = int(shares_alloted)
-        await sync_to_async(entry.save)()
+        await sync_to_async(
+            OrderDetail.objects.filter(
+                user=user,
+                Order__OrderIPOName_id=IPOid,
+                OrderDetailPANNo__PANNo=panno,
+                Order__OrderType=OrderType
+            ).update
+        )(AllotedQty=int(shares_alloted))
     except Exception as e:
-        print(f"Error updating database: {e}")
+        pass
 
 async def linkin_token(session, url,ssl_context,retries=3, timeout=5):
     # ssl_context = ssl.create_default_context(cafile='pemfile/my_trust_store.pem')
@@ -993,138 +1068,208 @@ async def Kfintech_allotment(user,IPOid,OrderType,ipo_register,ipo_name,Data):
     
     return response        
 
-async def BigShare_fetch_allotment(session,user, myobj, panno, result,IPOid,OrderType,ssl_context,retries=3, timeout=5):
-    url = 'https://ipo.bigshareonline.com/Data.aspx/FetchIpodetails'
-    # ssl_context = ssl.create_default_context(cafile=r'pemfile/_.bigshareonline.pem')
-    for attempt in range(retries):
-        try:
-            async with session.post(url, data=json.dumps(myobj),ssl = ssl_context) as response:
-                soup = await response.json()
-                soup = BeautifulSoup(f'''{soup}''', "lxml")
-                tag21 = soup.find('p').text
-                try:
-                    dpid_data = eval(tag21)['d']['DPID']
-                    result['DPID'] = dpid_data
-                except (AttributeError, KeyError):
-                    result['DPID'] = None
-                    
-                try:
-                    App_no = eval(tag21)['d']['APPLICATION_NO']
-                    result['APPLICATION_NO'] = App_no
-                except (AttributeError, KeyError):
-                    result['APPLICATION_NO'] = None
-                    
-                try:
-                    Name = eval(tag21)['d']['Name']
-                    result['Name'] = Name
-                except (AttributeError, KeyError):
-                    result['Name'] = None
-                
-                try:
-                    Applied = eval(tag21)['d']['APPLIED']
-                    result['APPLIED'] = Applied
-                except (AttributeError, KeyError):
-                    result['APPLIED'] = None
-                    
-                try:
-                    alloted1 = eval(tag21)['d']['ALLOTED']
-                    if alloted1 == "NON-ALLOTTE":
-                        alloted1 = 0
-                    result['QTY'] = alloted1
-                    if alloted1 != '':
-                        if Name != '':
-                            if int(alloted1) >= 0:
-                                await update_database(user, IPOid, panno,alloted1 ,OrderType)
-                except (AttributeError, KeyError):
-                    result['QTY'] = None
-                
-                result['REMRAK'] = 'DONE'
-                return result
-    
-        except (asyncio.TimeoutError, aiohttp.ClientError) as e:
-            print(f"Error in Big share allotment ConnectionError for PAN {panno}. Retrying... (Attempt {attempt + 1}/{retries})({e})")
-        
-        except Exception as e:
-            result['REMRAK'] = "ERROR"
-            return result
+async def BigShare_fetch_allotment(session, user, selected_value, panno, result, IPOid, OrderType, pan_index=0, max_retries=5):
+    result['PAN'] = panno
+    result['DPID'] = None
+    result['APPLICATION_NO'] = None
+    result['Name'] = None
+    result['APPLIED'] = None
+    result['QTY'] = None
+    result['STATUS'] = 'FAILED'
+    result['REMRAK'] = 'ERROR'
+    result['REMARK'] = 'ERROR'
 
-async def BigShare_allotment(user,IPOid,OrderType,ipo_register,ipo_name,Data):
-    
-    entry = Data
-    
-    data_length = len(entry)
-    
-    BigShare_company_data = BigShareDropDown()
-    IPO_options_dict = BigShare_company_data
-    selected_text = ipo_name
-    selected_value = IPO_options_dict.get(selected_text, "")
-    
-    results = []
-    
-    ssl_context = ssl.create_default_context()
-    # ssl_context.load_verify_locations(cafile=r'pemfile/_.bigshareonline.pem')
-    
-    # connector = aiohttp.TCPConnector(limit=10000)
-    async with aiohttp.ClientSession(headers={
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Accept': 'application/json, text/javascript, */*; q=0.01',
-        'Content-Type': 'application/json; charset=UTF-8',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    }) as session:
-        tasks = []
-        for i in range(data_length):
-            panno = entry[i]
-            myobj = {
+    for attempt in range(max_retries):
+        mirror = BIGSHARE_MIRRORS[(pan_index + attempt) % len(BIGSHARE_MIRRORS)]
+        session_id = f"p_{panno}_{attempt}_{uuid.uuid4().hex[:6]}"
+        proxy = f"http://{DATAIMPULSE_USER}__cr.in__session.{session_id}:{DATAIMPULSE_PASS}@{DATAIMPULSE_GW}"
+
+        headers = {
+            'Referer': f"{mirror}/IPO_Status.html",
+            'Origin': mirror,
+            'Content-Type': 'application/json; charset=UTF-8',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+        }
+
+        try:
+            # 1. Fetch Captcha Challenge via Proxy
+            captcha_url = f"{mirror}/Captcha.ashx"
+            async with session.get(captcha_url, headers=headers, proxy=proxy, timeout=aiohttp.ClientTimeout(total=15)) as cap_resp:
+                if cap_resp.status == 429 or cap_resp.status != 200:
+                    continue
+                cap_data = await cap_resp.json(content_type=None)
+                cap_token = cap_data.get('token') or cap_data.get('Token') or ''
+                cap_image = cap_data.get('image') or cap_data.get('Image') or ''
+                img_b64 = cap_image.split(',', 1)[1] if ',' in cap_image else cap_image
+
+            # 2. Solve Captcha via fast local in-memory ONNX solver (~2-4ms)
+            captcha_text = ""
+            if img_b64:
+                try:
+                    img_bytes = base64.b64decode(img_b64)
+                    captcha_text = solve_6digit_numeric_captcha(img_bytes)
+                except Exception:
+                    pass
+
+            # Guard: If captcha was not solved, retry challenge
+            if not captcha_text:
+                continue
+
+            # 3. Post Allotment Request via the SAME unique residential IP session
+            post_url = f"{mirror}/Data.aspx/FetchIpodetails"
+            req_payload = {
                 'Applicationno': '',
-                'Company': selected_value,
+                'Company': str(selected_value),
                 'SelectionType': 'PN',
                 'PanNo': panno,
                 'txtcsdl': '',
                 'txtDPID': '',
                 'txtClId': '',
                 'ddlType': '0',
-                'lang': 'en'
+                'lang': 'en',
+                'CaptchaToken': cap_token,
+                'CaptchaAnswer': captcha_text,
+                'ResultToken': ''
             }
-            result = {'PAN': panno}
-            tasks.append(BigShare_fetch_allotment(session,user, myobj, panno, result,IPOid,OrderType,ssl_context))
 
-        responses = await asyncio.gather(*tasks)
-        valid_responses = [response for response in responses if response and 'error' not in response]
-        # updates = []
-        # for res in responses:
-        #     if 'QTY' in res:
-        #         if res['QTY'] != 'No data found' and res['Name'] != '':
-        #             qty_sum = 0
-        #             for key, value in res.items():
-        #                 if key.startswith('QTY'):  # Check if the key starts with 'QTY'
-        #                     qty_sum += int(value)
-                            
-        #             if 'QTY' in res:
-        #                 updates.append({
-        #                     'user': user,
-        #                     'IPOid': IPOid,
-        #                     'panno': res['PAN'],
-        #                     'shares_alloted': qty_sum,
-        #                     'OrderType': OrderType,
-        #                 })
-       
-        # await bulk_create_or_update(updates)
-        results.extend(responses)
+            async with session.post(post_url, data=json.dumps(req_payload), headers=headers, proxy=proxy, timeout=aiohttp.ClientTimeout(total=15)) as response:
+                if response.status == 429:
+                    continue
 
+                res_data = await response.json(content_type=None)
+
+            # 4. Parse response
+            d_val = res_data.get('d') if isinstance(res_data, dict) and 'd' in res_data else res_data
+            if isinstance(d_val, str):
+                try:
+                    d_val = json.loads(d_val)
+                except Exception:
+                    pass
+
+            if isinstance(d_val, dict):
+                status_code_str = str(d_val.get('Status', '')).upper()
+                msg_str = str(d_val.get('Message', '')).lower()
+
+                # Check if Bigshare rejected the captcha
+                if status_code_str == 'CAPTCHA' or 'captcha' in msg_str:
+                    continue
+
+                result['DPID'] = d_val.get('DPID')
+                result['APPLICATION_NO'] = d_val.get('APPLICATION_NO')
+                result['Name'] = d_val.get('Name')
+                result['APPLIED'] = d_val.get('APPLIED')
+                alloted1 = d_val.get('ALLOTED')
+
+                # Genuine NOT FOUND check
+                if status_code_str == 'NOTFOUND' or result['DPID'] == "No data found":
+                    result['QTY'] = 0
+                    result['STATUS'] = 'NOT_FOUND'
+                    result['REMRAK'] = 'DONE'
+                    result['REMARK'] = 'DONE'
+                    return result
+
+                # Record was found
+                if result['Name'] or alloted1:
+                    if alloted1 == "NON-ALLOTTE":
+                        alloted1 = 0
+
+                    if alloted1 not in ('', None):
+                        try:
+                            qty_val = int(alloted1)
+                            result['QTY'] = qty_val
+                            result['STATUS'] = 'ALLOTTED' if qty_val > 0 else 'NON_ALLOTTED'
+                        except ValueError:
+                            result['QTY'] = alloted1
+                            result['STATUS'] = 'NON_ALLOTTED'
+                    else:
+                        result['QTY'] = 0
+                        result['STATUS'] = 'NON_ALLOTTED'
+
+                    result['REMRAK'] = 'DONE'
+                    result['REMARK'] = 'DONE'
+                    return result
+
+                # If name is blank and status not explicitly NOTFOUND, retry
+                continue
+
+        except (asyncio.TimeoutError, aiohttp.ClientError):
+            pass
+        except Exception:
+            break
+
+    return result
+
+async def BigShare_allotment(user, IPOid, OrderType, ipo_register, ipo_name, Data):
+    entry = Data
+    data_length = len(entry)
+
+    BigShare_company_data = await sync_to_async(BigShareDropDown)()
+    IPO_options_dict = BigShare_company_data
+    selected_text = ipo_name
+    selected_value = IPO_options_dict.get(selected_text, "")
+
+    print(f"[BigShare] Checking {data_length} PANs for '{selected_text}' (Company ID: {selected_value})...")
+
+    # Pre-warm local ONNX OCR model into RAM
+    get_ocr()
+
+    concurrency = min(50, max(1, data_length))
+    semaphore = asyncio.Semaphore(concurrency)
+    results_dict = {}
+
+    ssl_context = ssl.create_default_context()
+    connector = aiohttp.TCPConnector(ssl=ssl_context, limit=concurrency * 2, limit_per_host=concurrency)
+
+    async with aiohttp.ClientSession(connector=connector) as session:
+        async def worker(idx, panno):
+            async with semaphore:
+                result = {'PAN': panno}
+                res = await BigShare_fetch_allotment(session, user, selected_value, panno, result, IPOid, OrderType, pan_index=idx)
+                results_dict[idx] = res
+
+        tasks = [
+            asyncio.create_task(worker(i, entry[i]))
+            for i in range(data_length)
+        ]
+        await asyncio.gather(*tasks)
+
+    results = [results_dict[i] for i in range(data_length) if i in results_dict]
+
+    # Direct concurrent database updates for all checked PANs in this batch
+    async def safe_db_update(res):
+        panno = res.get('PAN')
+        qty = res.get('QTY')
+        name = res.get('Name')
+        if name and qty is not None:
+            try:
+                qty_int = int(qty) if str(qty).isdigit() else 0
+                await update_database(user, IPOid, panno, qty_int, OrderType)
+            except Exception:
+                pass
+
+    await asyncio.gather(*(safe_db_update(r) for r in results))
+
+    # Summary log
+    allotted_count = sum(1 for r in results if r.get('STATUS') == 'ALLOTTED')
+    non_allotted_count = sum(1 for r in results if r.get('STATUS') == 'NON_ALLOTTED')
+    not_found_count = sum(1 for r in results if r.get('STATUS') == 'NOT_FOUND')
+    failed_count = sum(1 for r in results if r.get('STATUS') == 'FAILED')
+    print(f"[BigShare] Completed {len(results)} PANs: {allotted_count} Allotted, {non_allotted_count} Non-Allotted, {not_found_count} Not Found, {failed_count} Errors.")
+
+    # Build and return Excel file
     df = pd.DataFrame(results)
-    IPO_name = ipo_name
+    IPO_name = ipo_name or "BigShare IPO"
     IPO_NAME = IPO_name.split()
-    ipon = IPO_NAME[0]
+    ipon = IPO_NAME[0] if len(IPO_NAME) > 0 else "BigShare"
+    sub_name = IPO_NAME[1] if len(IPO_NAME) > 1 else "IPO"
 
-    # Write to Excel using pandas
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = f'attachment; filename="{ipon}_{IPO_NAME[1]}_IPO_Allotment.xlsx"'
-    
+    response['Content-Disposition'] = f'attachment; filename="{ipon}_{sub_name}_IPO_Allotment.xlsx"'
+
     with pd.ExcelWriter(response, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='IPO Allotment')
-    
-    return response        
+
+    return response
 
 async def fetch_csrf_token(session, url,retries=3, timeout=5):
     for attempt in range(retries):
@@ -1467,44 +1612,89 @@ async def Integrated_allotment(user, IPOid, OrderType, ipo_register, ipo_name,Da
     
     return response
 
-async def Maashitla_fetch_allotment(user,session, myobj, panno, result,IPOid,OrderType,ssl_context, retries=3,timeout=5):
-    company = myobj['company']
-    url = f'https://api.maashitla.com/api/public-issue/search?company_name={company}&pan={panno}'
-    # url = 'https://maashitla.com/PublicIssues/Search'
-    # ssl_context = ssl.create_default_context(cafile='pemfile/maashitla.pem')
+async def Maashitla_fetch_allotment(user, session, myobj, panno, result, IPOid, OrderType, ssl_context=None, retries=3, timeout=15):
+    company_name = myobj.get('company_name') or myobj.get('company', '')
+    company_id = myobj.get('company_id', '')
+
+    url = 'https://api.maashitla.com/api/public-issue/search'
+    params = {
+        'company_name': company_name,
+        'company_id': company_id,
+        'pan': panno,
+    }
+
     for attempt in range(retries):
         try:
-            async with session.get(url, data=myobj) as response:
-                data = await response.json()
-                # data1 = await response.json()
-                pan = data.get('pan',None)
-                if pan == panno:
-                    dpclitid = data.get('dpid_client_id',None)
-                    result['DPID'] = dpclitid
-                    appnum1 = data.get('application_no',None)
-                    result['Appl.No'] = appnum1
-                    name = data.get('name',None)
-                    result['Name'] = name
-                    share_Applied = data.get('shares_applied',None)
-                    result['Applied'] = share_Applied
-                    share_Alloted = data.get('shares_alloted',None)
-                    result['QTY'] = share_Alloted
-                    if name and name != '':
-                        # if share_Alloted >= 0:
-                        if share_Alloted is not None and share_Alloted >= 0:
-                            await update_database(user, IPOid, panno, int(share_Alloted),OrderType)
-                    result['REMRAK'] = 'DONE'
-                    return result
-                
-                else:
-                    result['QTY'] = 'Records Not Found...!!!'
-                    result['REMRAK'] = 'DONE'
-                    return result
+            async with session.get(url, params=params, ssl=False) as response:
+                if response.status == 200:
+                    res_json = await response.json(content_type=None)
+
+                    data_block = None
+                    if isinstance(res_json, dict):
+                        if "data" in res_json and res_json["data"]:
+                            data_block = res_json["data"]
+                        elif res_json.get("success") is True and "data" in res_json:
+                            data_block = res_json.get("data")
+                        elif any(k in res_json for k in ["name", "applicant_name", "shares_applied", "shares_alloted", "shares_allotted"]):
+                            data_block = res_json
+                    elif isinstance(res_json, list) and len(res_json) > 0:
+                        data_block = res_json
+
+                    if data_block:
+                        item = data_block[0] if isinstance(data_block, list) else data_block
+
+                        name = item.get("name") or item.get("applicant_name") or ""
+                        appl_no = item.get("application_no") or item.get("applicationNumber") or ""
+                        dpid = item.get("dpid_client_id") or item.get("dematAccountNumber") or ""
+
+                        try:
+                            share_applied = int(item.get("shares_applied") or item.get("shareApplied") or 0)
+                        except Exception:
+                            share_applied = item.get("shares_applied") or item.get("shareApplied") or 0
+
+                        try:
+                            allotted_val = (
+                                item.get("shares_allotted")
+                                if item.get("shares_allotted") is not None
+                                else (
+                                    item.get("shares_alloted")
+                                    if item.get("shares_alloted") is not None
+                                    else (
+                                        item.get("shareAllotted")
+                                        if item.get("shareAllotted") is not None
+                                        else item.get("shareAlloted", 0)
+                                    )
+                                )
+                            )
+                            share_allotted = int(allotted_val)
+                        except Exception:
+                            share_allotted = 0
+
+                        result['DPID'] = dpid
+                        result['Appl.No'] = appl_no
+                        result['Name'] = name
+                        result['Applied'] = share_applied
+                        result['QTY'] = share_allotted
+                        result['REMRAK'] = 'DONE'
+
+                        if name and name != '':
+                            if isinstance(share_allotted, int) and share_allotted >= 0:
+                                await update_database(user, IPOid, panno, int(share_allotted), OrderType)
+                        return result
+                    else:
+                        result['QTY'] = 'Records Not Found...!!!'
+                        result['REMRAK'] = 'DONE'
+                        return result
         except aiohttp.ClientConnectionError:
             print(f"ConnectionError for PAN {panno}. Retrying... (Attempt {attempt + 1}/{retries})")
         except Exception as e:
-            result['REMRAK'] = "ERROR"
-            return result
+            if attempt == retries - 1:
+                result['REMRAK'] = "ERROR"
+                return result
+        await asyncio.sleep(0.5)
+
+    result['REMRAK'] = 'ERROR'
+    return result
 
 async def Maashitla_allotment(user, IPOid, OrderType, ipo_register, ipo_name,Data):
     entry = Data
@@ -1531,6 +1721,7 @@ async def Maashitla_allotment(user, IPOid, OrderType, ipo_register, ipo_name,Dat
             panno = entry[i]
             myobj = {
                         'company': selected_text,
+                        'company_id': selected_value,
                         'search': panno,
                     }
             result = {'PAN': panno}
