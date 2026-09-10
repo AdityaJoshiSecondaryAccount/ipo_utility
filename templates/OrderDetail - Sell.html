@@ -2439,7 +2439,9 @@
                             });
                             let data = await response.json();
 
-                           if (ipoRegister == 'BigShare' || ipoRegister == 'Maashitla'){
+                           if (ipoRegister == 'BigShare'){
+                                part_num = 50;
+                            }else if (ipoRegister == 'Maashitla'){
                                 part_num = 300;
                             }else if(ipoRegister == 'SkyLine'){
                                 part_num = 10;
