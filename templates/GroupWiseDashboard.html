@@ -2830,7 +2830,7 @@ function deleteIPO(ipoId, pageNumber, btn) {
                 extend: 'colvis',
                 prefixButtons: [
                     {
-                        text: '<div class="d-flex justify-content-between align-items-center w-100" style="pointer-events: none;"><span>Toggle All IPOs</span><div class="form-check form-switch ms-3 mb-0" style="pointer-events: none;"><input class="form-check-input custom-green-switch" type="checkbox" id="toggleAllIposSwitch" checked></div></div>',
+                        text: '<div class="d-flex justify-content-between align-items-center w-100" style="pointer-events: none;"><span>Toggle All IPOs</span><div class="form-check form-switch ms-3 mb-0" style="pointer-events: none;"><input class="form-check-input custom-blue-switch" type="checkbox" id="toggleAllIposSwitch" checked></div></div>',
                         action: function ( e, dt, node, config ) {
                             var numIPOs = {{ IPOName|length }};
                             var cols = [];
