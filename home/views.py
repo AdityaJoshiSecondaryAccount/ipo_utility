@@ -14217,7 +14217,7 @@ def accounting_logs_view(request):
                     f"</a>"
                 )
                 audit_log_html += (
-                    f"<tr class='bulk-audit-row'><td>{ts}</td>"
+                    f"<tr><td>{ts}</td>"
                     f"<td>{txn_link}</td>"
                     f"<td>{badge}</td><td>{''.join(details)}</td></tr>\n"
                 )
