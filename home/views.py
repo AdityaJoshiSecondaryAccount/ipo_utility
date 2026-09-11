@@ -14021,19 +14021,24 @@ def accounting_view(request):
         group_name = unquote(group_name)
         entries = entries.filter(Q(group__GroupName__iexact=group_name) | Q(group_name__iexact=group_name))
         # print("Filtered entries count after group_name:", entries.count())
-    # --- filter by dates ---
-    if date_from:
-        # date_from_obj = datetime.fromisoformat(date_from) + timedelta(days=1) - timedelta(seconds=1)
-        date_from_obj = datetime.fromisoformat(date_from).date()  # extract date only
-        # print("date_from_obj", date_from_obj)
-        entries = entries.filter(date_time__gte=date_from_obj)
-        # print("Filtered entries count after date_from:", entries.count())
-
-    if date_to:
-        date_to_obj = datetime.fromisoformat(date_to) + timedelta(days=1) - timedelta(seconds=1)
-        # print("date_to_obj", date_to_obj)
-        entries = entries.filter(date_time__lte=date_to_obj)
-        # print("Filtered entries count after date_to:", entries.count())
+    # The requested date range runs backwards: To Date <= From Date <= today.
+    try:
+        date_from_obj = datetime.strptime(date_from, "%Y-%m-%d").date() if date_from else None
+        date_to_obj = datetime.strptime(date_to, "%Y-%m-%d").date() if date_to else None
+        today = timezone.localdate()
+        if date_from_obj and date_from_obj > today:
+            raise ValueError("From Date cannot be in the future.")
+        if date_to_obj and date_to_obj > (date_from_obj or today):
+            raise ValueError("To Date cannot be after From Date (or today when From Date is empty).")
+    except ValueError:
+        messages.error(request, "Use valid dates: From Date cannot be in the future and To Date cannot be after From Date.")
+        date_from = date_to = None
+        date_from_obj = date_to_obj = None
+        entries = entries.none()
+    if date_from_obj:
+        entries = entries.filter(date_time__date__lte=date_from_obj)
+    if date_to_obj:
+        entries = entries.filter(date_time__date__gte=date_to_obj)
      
     
     jv_filter = request.GET.get('jv')
@@ -14155,13 +14160,14 @@ def accounting_view(request):
                 )
                 detail_rows += f"""
                 <tr class="bulk-transfer-detail-row" data-transfer-batch="{batch_key}" style="display:none; {detail_style}">
+                    {'<td class="no-export accounting-selection"></td>' if not show_deleted else ''}
                     <td class="filter-ipo" data-ipo="{escape(item_ipo)}">↳ {escape(item_ipo)}</td>
                     <td class="filter-group" data-group="{escape(item_group)}">{escape(item_group)}</td>
                     <td><span class="badge {'bg-success' if item.amount_type == 'credit' else 'bg-danger'}">{escape(item.amount_type.upper())}</span></td>
                     <td>{item.amount}</td>
                     <td><textarea class="form-control form-control-sm" readonly>{escape(item.remark or '')}</textarea></td>
                     <td data-order="{item_date.strftime('%Y-%m-%d %H:%M:%S')}">{item_date.strftime('%d-%m-%y %H:%M:%S')}</td>
-                    <td class="no-export"></td>
+                    {'<td class="no-export"></td>' if not show_deleted else ''}
                 </tr>
                 """
             batch_date = batch_entries[0].date_time
@@ -14180,6 +14186,7 @@ def accounting_view(request):
             )
             rows += f"""
             <tr class="bulk-transfer-row" data-transfer-batch="{batch_key}" style="{'opacity: 0.6; background-color: #ffe6e6;' if show_deleted else ''}">
+                {f'<td class="no-export accounting-selection"><input type="checkbox" class="accounting-select form-check-input" value="{representative_id}" aria-label="Select bulk transfer"></td>' if not show_deleted else ''}
                 <td>
                     <span class="bulk-transfer-label">
                         <strong>Bulk Transfer</strong>
@@ -14198,7 +14205,7 @@ def accounting_view(request):
                 <td data-order="{timezone.localtime(batch_date).strftime('%Y-%m-%d %H:%M:%S')}">
                     {timezone.localtime(batch_date).strftime("%d-%m-%y %H:%M:%S")}
                 </td>
-                <td class="no-export">{batch_action}</td>
+                {f'<td class="no-export">{batch_action}</td>' if not show_deleted else ''}
             </tr>
             {detail_rows}
             """
@@ -14224,6 +14231,7 @@ def accounting_view(request):
         
         rows += f"""
         <tr style="{'opacity: 0.6; background-color: #ffe6e6;' if show_deleted else ''}">
+            {f'<td class="no-export accounting-selection"><input type="checkbox" class="accounting-select form-check-input" value="{e.id}" aria-label="Select entry"></td>' if not show_deleted else ''}
             <td class="filter-ipo" data-ipo="{ipo_display}">{ipo_display}</td>
             <td class="filter-group" data-group="{group_name1}">{group_name1}</td>
             <td><span class="badge {'bg-success' if e.amount_type=='credit' else 'bg-danger'}">{e.amount_type.upper()}</span></td>
@@ -14233,8 +14241,8 @@ def accounting_view(request):
             <td data-order="{timezone.localtime(e.date_time).strftime('%Y-%m-%d %H:%M:%S')}">
                 {timezone.localtime(e.date_time).strftime("%d-%m-%y %H:%M:%S")}
             </td>
-            <td class="no-export">
-                {f'''<button type="button" disabled='true' class="btn btn-sm btn-outline-success restore-btn" data-id="{e.id}" title="Restore this entry"><i class="fas fa-undo"></i> Restore</button>''' if show_deleted else f'''<button type="button" class="btn btn-sm btn-outline-primary edit-btn" 
+            {'' if show_deleted else f'''<td class="no-export">
+                <button type="button" class="btn btn-sm btn-outline-primary edit-btn"
                         data-id="{e.id}" 
                         data-ipo-id="{ipo_id_val}" 
                         data-group-id="{group_id_val}" 
@@ -14247,21 +14255,24 @@ def accounting_view(request):
                 </button>
                 <button type="button" class="btn btn-sm btn-outline-danger delete-btn ms-1" data-id="{e.id}" title="Delete this entry">
                     <i class="fas fa-trash"></i>
-                </button>'''}
-            </td>
+                </button>
+            </td>'''}
         </tr>
         """
         
     net_amount = credit_amount - debit_amount
     html_table = "<table >\n"
     html_table = "<thead><tr style='text-align: center;white-space: nowrap; width:100%' >"
+    if not show_deleted:
+        html_table += "<th class='no-export accounting-selection'><input type='checkbox' id='selectAllAccounting' class='form-check-input' aria-label='Select all filtered entries'></th>"
     html_table += "<th>IPO</th>"
     html_table += "<th>Group</th>"
     html_table += "<th>Amount Type</th>"
     html_table += "<th>Amount</th>"
     html_table += "<th>Remark</th>"
     html_table += "<th>Date Time</th>"
-    html_table += "<th class='no-export'>Action</th>"
+    if not show_deleted:
+        html_table += "<th class='no-export'>Actions</th>"
     html_table += "</tr></thead>\n"
     html_table += f"<tbody style='text-align: center;white-space: nowrap;'> {rows} </tbody>\n"
     html_table += "</table>"
@@ -14432,6 +14443,7 @@ def accounting_logs_view(request):
             # Changes summary
             changes = log.changes or {}
             changes_parts = []
+            detail_parts = []
             for field, vals in changes.items():
                 if isinstance(vals, dict) and 'old' in vals and 'new' in vals:
                     changes_parts.append(render_change(field, vals['old'], vals['new']))
@@ -14442,7 +14454,16 @@ def accounting_logs_view(request):
                         f"<div class='audit-reason'><b>Reason:</b> {escape(vals)}</div>"
                     )
                 else:
-                    changes_parts.append(f"<b>{escape(field)}:</b> {escape(vals)}")
+                    detail_parts.append(
+                        "<div class='audit-detail'>"
+                        f"<span class='audit-detail-label'>{escape(field)}</span>"
+                        f"<span class='audit-detail-value'>{escape(vals)}</span>"
+                        "</div>"
+                    )
+            if detail_parts:
+                changes_parts.insert(
+                    0, f"<div class='audit-details'>{''.join(detail_parts)}</div>"
+                )
             changes_str = "".join(changes_parts) if changes_parts else "-"
             
             ts = timezone.localtime(log.timestamp).strftime("%d-%m-%Y %H:%M:%S")
@@ -14949,75 +14970,110 @@ def soft_delete_accounting(request, entry_id):
         except ValidationError as exc:
             return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
 
-        if entry.transfer_batch_id:
-            batch_entries = Accounting.objects.filter(
-                user=request.user,
-                transfer_batch_id=entry.transfer_batch_id,
-                is_deleted=False,
-            )
-            deleted_at = timezone.now()
-            with transaction.atomic():
-                for batch_entry in batch_entries:
-                    batch_entry.is_deleted = True
-                    batch_entry.deleted_at = deleted_at
-                    batch_entry.save(update_fields=["is_deleted", "deleted_at"])
-                    AccountingAuditLog.objects.create(
-                        user=request.user,
-                        accounting=batch_entry,
-                        action="SOFT_DELETE",
-                        changes={
-                            "note": f"Bulk transfer {entry.transfer_batch_id} deleted",
-                            "reason": reason,
-                        },
-                    )
-            return JsonResponse({"success": True})
-        
-        # Soft delete the entry
-        entry.is_deleted = True
-        entry.deleted_at = timezone.now()
-        entry.save()
+        with transaction.atomic():
+            return _soft_delete_accounting_entry(request, entry, reason)
 
-        # Log audit
-        AccountingAuditLog.objects.create(
+    return JsonResponse({"success": False, "error": "Invalid request"})
+
+
+def _soft_delete_accounting_entry(request, entry, reason):
+    if entry.is_deleted:
+        return JsonResponse({"success": True})
+    if entry.transfer_batch_id:
+        batch_entries = Accounting.objects.filter(
             user=request.user,
-            accounting=entry,
-            action='SOFT_DELETE',
-            changes={
-                "IPO": entry.ipo.IPOName if entry.ipo else (entry.ipo_name or ""),
-                "Group": entry.group.GroupName if entry.group else (entry.group_name or ""),
-                "Amount": str(entry.amount),
-                "Amount Type": entry.amount_type,
-                "reason": reason,
-            }
+            transfer_batch_id=entry.transfer_batch_id,
+            is_deleted=False,
         )
-
-        # Also soft-delete JV sibling if exists
-        siblings = Accounting.objects.filter(
-            user=request.user,
-            date_time=entry.date_time,
-            amount=entry.amount,
-            is_deleted=False
-        ).exclude(id=entry.id)
-        
-        if siblings.exists() and siblings.count() == 1:
-            sibling = siblings.first()
-            if sibling.amount_type != entry.amount_type:
-                sibling.is_deleted = True
-                sibling.deleted_at = timezone.now()
-                sibling.save()
-                sibling_group = sibling.group.GroupName if sibling.group else (sibling.group_name or "")
+        deleted_at = timezone.now()
+        with transaction.atomic():
+            for batch_entry in batch_entries:
+                batch_entry.is_deleted = True
+                batch_entry.deleted_at = deleted_at
+                batch_entry.save(update_fields=["is_deleted", "deleted_at"])
                 AccountingAuditLog.objects.create(
                     user=request.user,
-                    accounting=sibling,
-                    action='SOFT_DELETE',
+                    accounting=batch_entry,
+                    action="SOFT_DELETE",
                     changes={
-                        "note": f"JV sibling [ {sibling_group} ] auto-deleted",
+                        "note": f"Bulk transfer {entry.transfer_batch_id} deleted",
                         "reason": reason,
-                    }
+                    },
                 )
-
         return JsonResponse({"success": True})
-    return JsonResponse({"success": False, "error": "Invalid request"})
+
+    # Soft delete the entry
+    entry.is_deleted = True
+    entry.deleted_at = timezone.now()
+    entry.save()
+
+    # Log audit
+    AccountingAuditLog.objects.create(
+        user=request.user,
+        accounting=entry,
+        action='SOFT_DELETE',
+        changes={
+            "IPO": entry.ipo.IPOName if entry.ipo else (entry.ipo_name or ""),
+            "Group": entry.group.GroupName if entry.group else (entry.group_name or ""),
+            "Amount": str(entry.amount),
+            "Amount Type": entry.amount_type,
+            "reason": reason,
+        }
+    )
+
+    # Also soft-delete JV sibling if exists
+    siblings = Accounting.objects.filter(
+        user=request.user,
+        date_time=entry.date_time,
+        amount=entry.amount,
+        is_deleted=False
+    ).exclude(id=entry.id)
+
+    if siblings.exists() and siblings.count() == 1:
+        sibling = siblings.first()
+        if sibling.amount_type != entry.amount_type:
+            sibling.is_deleted = True
+            sibling.deleted_at = timezone.now()
+            sibling.save()
+            sibling_group = sibling.group.GroupName if sibling.group else (sibling.group_name or "")
+            AccountingAuditLog.objects.create(
+                user=request.user,
+                accounting=sibling,
+                action='SOFT_DELETE',
+                changes={
+                    "note": f"JV sibling [ {sibling_group} ] auto-deleted",
+                    "reason": reason,
+                }
+            )
+
+    return JsonResponse({"success": True})
+
+@login_required
+def bulk_delete_accounting(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "POST required."}, status=405)
+    try:
+        payload = json.loads(request.body or "{}")
+        if not isinstance(payload, dict):
+            raise ValueError
+        reason = _validate_audit_reason(payload.get("reason"))
+        ids = payload.get("ids")
+        if not isinstance(ids, list) or not ids or any(type(i) is not int or i <= 0 for i in ids):
+            raise ValueError
+        ids = set(ids)
+    except (ValueError, TypeError):
+        return JsonResponse({"success": False, "error": "Select valid accounting entries."}, status=400)
+    except ValidationError as exc:
+        return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
+    with transaction.atomic():
+        entries = list(Accounting.objects.select_for_update().filter(user=request.user, id__in=ids))
+        if len(entries) != len(ids):
+            return JsonResponse({"success": False, "error": "One or more entries are unavailable."}, status=404)
+        for entry in entries:
+            # A previously selected row may already have deleted this linked entry.
+            entry.refresh_from_db()
+            _soft_delete_accounting_entry(request, entry, reason)
+    return JsonResponse({"success": True})
 
 
 @login_required
@@ -15238,6 +15294,7 @@ def _create_single_transaction(request, redirect_name):
             date_time=_parse_transaction_datetime(request.POST.get("date_time")),
             jv=is_jv,
         )
+        messages.success(request, "Payment saved successfully.")
     except ValidationError as exc:
         if is_ajax:
             return JsonResponse(
@@ -15292,11 +15349,21 @@ def bulk_ipo_transactions(request):
         if len(items) > 500:
             raise ValidationError("Too many transactions.")
 
-        master_amount = _parse_transaction_amount(request.POST.get("master_amount"))
+        master_amount_value = request.POST.get("master_amount")
         master_type = request.POST.get("master_amount_type")
-        if master_type not in VALID_TRANSACTION_TYPES:
-            raise ValidationError("Invalid master amount type.")
-        expected_total = master_amount if master_type == "credit" else -master_amount
+        has_master_payment = bool(master_amount_value or master_type)
+        if has_master_payment:
+            if not master_amount_value or not master_type:
+                raise ValidationError("Payment amount and type are both required.")
+            master_amount = _parse_transaction_amount(master_amount_value)
+            if master_type not in VALID_TRANSACTION_TYPES:
+                raise ValidationError("Invalid master amount type.")
+            expected_total = master_amount if master_type == "credit" else -master_amount
+        else:
+            # Group Wise Dashboard submits allocations directly and has no
+            # separate master-payment fields to reconcile against.
+            master_amount = None
+            expected_total = None
 
         records = []
         signed_total = Decimal("0.00")
@@ -15334,7 +15401,7 @@ def bulk_ipo_transactions(request):
             if amount_type not in VALID_TRANSACTION_TYPES:
                 raise ValidationError("Invalid amount type.")
             amount = _parse_transaction_amount(item.get("amount"))
-            if amount_type != master_type:
+            if has_master_payment and amount_type != master_type:
                 raise ValidationError("Every allocation must use the selected amount type.")
             if ipo is not None:
                 _validate_ipo_payment(request.user, group, ipo, amount, amount_type)
@@ -15357,10 +15424,11 @@ def bulk_ipo_transactions(request):
                 jv=is_jv,
             ))
 
-        if gross_total > master_amount:
-            raise ValidationError("Allocated amount exceeds the payment amount.")
-        if signed_total.quantize(MONEY_QUANTUM) != expected_total:
-            raise ValidationError("Allocation total does not match the payment amount.")
+        if has_master_payment:
+            if gross_total > master_amount:
+                raise ValidationError("Allocated amount exceeds the payment amount.")
+            if signed_total.quantize(MONEY_QUANTUM) != expected_total:
+                raise ValidationError("Allocation total does not match the payment amount.")
 
         with transaction.atomic():
             Accounting.objects.bulk_create(records)
@@ -15879,7 +15947,7 @@ def get_transfer_group_ipos(request, group_id):
         ipos = CurrentIpoName.objects.filter(
             user=request.user,
             id__in=ipo_ids,
-        ).order_by("IPOName")
+        ).order_by("id")
         order_totals = Order.objects.filter(
             user=request.user, OrderGroup=group, OrderIPOName_id__in=ipo_ids
         ).values("OrderIPOName_id").annotate(total=Sum("Amount"))
@@ -15938,7 +16006,7 @@ def get_group_dues(request, group_id):
         from .models import GroupDetail, CurrentIpoName, Order, Accounting
         
         group = GroupDetail.objects.get(id=group_id, user=request.user)
-        ipos = CurrentIpoName.objects.filter(user=request.user)
+        ipos = CurrentIpoName.objects.filter(user=request.user).order_by("id")
         
         # 1. Fetch Order Totals (How much was billed)
         order_totals = (

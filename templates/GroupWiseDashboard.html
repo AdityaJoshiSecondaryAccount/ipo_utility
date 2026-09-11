@@ -2117,14 +2117,16 @@ $(function () {
                 },
                 success: function(response) {
                     if (response.status === 'success') {
-                        alert(`Successfully created ${transactions.length} IPO-wise payment entries!`);
                         location.reload(); // Refresh to show updated data
                     } else {
                         alert('Error: ' + response.message);
                     }
                 },
                 error: function(xhr, status, error) {
-                    alert('Error creating transactions: ' + error);
+                    const message = xhr.responseJSON && xhr.responseJSON.message
+                        ? xhr.responseJSON.message
+                        : error;
+                    alert('Error creating transactions: ' + message);
                 }
             });
         }
@@ -2665,7 +2667,6 @@ $(function () {
                 },
                 success: function(response) {
                     if (response.status === 'success') {
-                        alert(`Successfully created ${transactions.length} IPO-wise payment entries!`);
                         $('#multipleIPOModal').modal('hide');
                         location.reload(); // Refresh to show updated data
                     } else {
@@ -2673,7 +2674,10 @@ $(function () {
                     }
                 },
                 error: function(xhr, status, error) {
-                    alert('Error creating transactions: ' + error);
+                    const message = xhr.responseJSON && xhr.responseJSON.message
+                        ? xhr.responseJSON.message
+                        : error;
+                    alert('Error creating transactions: ' + message);
                 }
             });
         });

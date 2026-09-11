@@ -1815,12 +1815,12 @@
                                 <div class="col-sm-6 drop-f">
                                     <label class="form-label">From Date</label>
                                     {% comment %} <input type="date" name="date_from" value="{{ date_from|default:'' }}" class="form-control"> {% endcomment %}
-                                    <input tabindex="-1" type="date" style="width: 100%;" class="form-control width" step="1" name="date_from" id="date_from" value="{{ date_from|default:'' }}" min="2020-01-01T00:00:00" max="2035-12-31T23:59:59" >
+                                    <input type="date" style="width: 100%;" class="form-control width" step="1" name="date_from" id="date_from" value="{{ date_from|default:'' }}" max="{% now 'Y-m-d' %}">
                                 </div>
                                 <div class="col-md-6 drop-f">
                                     <label class="form-label">To Date</label>
                                     {% comment %} <input type="date" name="date_to" value="{{ date_to|default:'' }}" class="form-control"> {% endcomment %}
-                                    <input tabindex="-1" type="date" style="width: 100%;" class="form-control width" step="1" name="date_to" id="date_to" value="{{ date_to|default:'' }}" min="2020-01-01T00:00:00" max="2035-12-31T23:59:59" >
+                                    <input type="date" style="width: 100%;" class="form-control width" step="1" name="date_to" id="date_to" value="{{ date_to|default:'' }}" max="{% if date_from %}{{ date_from }}{% else %}{% now 'Y-m-d' %}{% endif %}">
                                 </div>
                                 
                                 <div class="col-md-12 d-flex justify-content-center mt-3">
@@ -1894,6 +1894,11 @@
                             <a href="{% url 'accounting_logs' %}" class="btn btn-sm btn-outline-info mb-2" title="View Activity Logs">
                                 <i class="fas fa-history"></i> Activity Logs
                             </a>
+                            {% if not show_deleted %}
+                            <button type="button" id="deleteSelectedAccounting" class="btn btn-sm btn-outline-danger mb-2" disabled>
+                                <i class="fas fa-trash"></i> Delete selected (<span id="selectedAccountingCount">0</span>)
+                            </button>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -2301,10 +2306,12 @@
         </div>
         {% endif %}
             <!-- Render Table -->
+        <div class="px-3">
         <div class="table-responsive text-nowrap table-wrapper-scroll-x my-custom-scrollbar" >
             <table id="example" class="table table-bordered table-hover table-striped" style='width:100%'>
                 {{ html_table|safe }}
             </table> 
+        </div>
         </div>
 
         {% comment %} Audit logs moved to separate page {% endcomment %}
@@ -2313,6 +2320,20 @@
 </div>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
+        const fromDate = document.getElementById('date_from');
+        const toDate = document.getElementById('date_to');
+        function updateDateLimits() {
+            const now = new Date();
+            const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            fromDate.max = today;
+            if (fromDate.value > today) fromDate.value = today;
+            toDate.max = fromDate.value || today;
+            if (toDate.value > toDate.max) toDate.value = toDate.max;
+        }
+        fromDate.addEventListener('input', updateDateLimits);
+        toDate.addEventListener('input', updateDateLimits);
+        updateDateLimits();
+
         // Double-click IPO
         document.querySelectorAll(".filter-ipo").forEach(function(cell) {
             cell.addEventListener("dblclick", function() {
@@ -2617,6 +2638,34 @@
         justify-content: center;
         gap: 8px;
     }
+    #example .accounting-selection {
+        position: relative;
+        box-sizing: border-box;
+        width: 44px !important;
+        min-width: 44px !important;
+        max-width: 44px !important;
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+        text-align: center;
+        vertical-align: middle;
+        cursor: pointer;
+    }
+    #example .accounting-selection .form-check-input {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        float: none;
+        margin: 0;
+        cursor: pointer;
+        background-color: #eef1f4;
+        border: 1.5px solid #6c757d;
+        opacity: 1;
+    }
+    #example .accounting-selection .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
     #example .bulk-transfer-toggle {
         display: inline-flex;
         width: 24px;
@@ -2732,7 +2781,11 @@
                 });
             },
             
-            order: [[5, "desc"]],
+            order: [[{% if show_deleted %}5{% else %}6{% endif %}, "desc"]],
+            columnDefs: [
+                { targets: 'no-export', orderable: false, searchable: false },
+                { targets: 'accounting-selection', width: '44px' }
+            ],
             buttons: [ {
                 text: 'Columns', 
                 extend: 'colvis',
@@ -2934,6 +2987,91 @@
 
         {% comment %} $('select[name="example_length"] option[value="-1"]').text('All'); {% endcomment %}
         
+        const deleteSelected = document.getElementById('deleteSelectedAccounting');
+        const selectAll = document.getElementById('selectAllAccounting');
+        const selectedIds = new Set();
+        let deleting = false;
+        function filteredCheckboxes() {
+            return table.rows({ search: 'applied', page: 'current' }).nodes().toArray()
+                .flatMap(row => Array.from(row.querySelectorAll('.accounting-select')));
+        }
+        function updateSelection() {
+            if (!deleteSelected) return;
+            const checkboxes = filteredCheckboxes();
+            table.rows().nodes().toArray().forEach(row => {
+                let rowSelected = false;
+                row.querySelectorAll('.accounting-select').forEach(box => {
+                    box.checked = selectedIds.has(Number(box.value));
+                    box.disabled = deleting;
+                    rowSelected = rowSelected || box.checked;
+                });
+                row.querySelectorAll('.edit-btn, .delete-btn, .bulk-transfer-edit-btn').forEach(button => {
+                    button.disabled = deleting || rowSelected;
+                });
+            });
+            const count = checkboxes.filter(box => box.checked).length;
+            selectAll.checked = checkboxes.length > 0 && count === checkboxes.length;
+            selectAll.indeterminate = false;
+            selectAll.disabled = deleting;
+            document.getElementById('selectedAccountingCount').textContent = selectedIds.size;
+            deleteSelected.disabled = deleting || selectedIds.size === 0;
+        }
+        if (deleteSelected) {
+            $('#example').on('click', '.accounting-selection', function (event) {
+                if (event.target.matches('.accounting-select, #selectAllAccounting')) return;
+                const checkbox = this.querySelector('.accounting-select, #selectAllAccounting');
+                if (!checkbox || checkbox.disabled) return;
+                checkbox.checked = !checkbox.checked;
+                checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+            $('#example').on('change', '.accounting-select', function () {
+                const id = Number(this.value);
+                if (this.checked) selectedIds.add(id);
+                else selectedIds.delete(id);
+                updateSelection();
+            });
+            selectAll.addEventListener('change', function () {
+                filteredCheckboxes().forEach(box => {
+                    const id = Number(box.value);
+                    if (this.checked) selectedIds.add(id);
+                    else selectedIds.delete(id);
+                });
+                updateSelection();
+            });
+            table.on('draw', updateSelection);
+            deleteSelected.addEventListener('click', async function () {
+                const ids = Array.from(selectedIds);
+                const result = await Swal.fire({
+                    title: `Delete ${ids.length} selected item(s)?`,
+                    text: 'Linked JV entries and complete transfer batches will also be deleted.',
+                    icon: 'warning', input: 'textarea', inputLabel: 'Reason for deletion',
+                    inputAttributes: { maxlength: 250 },
+                    inputValidator: value => !value || !value.trim() ? 'Please enter a reason.' : undefined,
+                    showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Delete selected'
+                });
+                if (!result.isConfirmed) return;
+                deleting = true;
+                updateSelection();
+                try {
+                    const response = await fetch("{% url 'bulk_delete_accounting' %}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        },
+                        body: JSON.stringify({ ids, reason: result.value.trim() })
+                    });
+                    const data = await response.json();
+                    if (!response.ok || !data.success) throw new Error(data.error || 'Failed to delete entries.');
+                    location.reload();
+                } catch (error) {
+                    await Swal.fire('Error', error.message || 'Failed to delete entries.', 'error');
+                    deleting = false;
+                    updateSelection();
+                }
+            });
+        }
+
         table.buttons().container()
             .appendTo( '#example_wrapper .col-md-6:eq(-1)' );
         $('#example_wrapper .col-md-6:eq(-1)').append(`

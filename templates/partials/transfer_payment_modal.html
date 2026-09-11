@@ -360,14 +360,19 @@ $(function () {
             method: 'GET',
             success: function (response) {
                 select.empty();
-                (response.data || []).forEach(function (ipo) {
+                // CurrentIpoName has no creation timestamp, so ascending ID is
+                // its creation order: oldest IPO first, newest IPO last.
+                const ipoData = (response.data || []).slice().sort(function (a, b) {
+                    return Number(a.ipo_id) - Number(b.ipo_id);
+                });
+                ipoData.forEach(function (ipo) {
                     select.append($('<option>', {
                         value: ipo.ipo_id,
                         'data-due': ipo.due_amount,
                         selected: true
                     }).text(ipo.ipo_name));
                 });
-                if (!response.data || !response.data.length) {
+                if (!ipoData.length) {
                     select.append($('<option>', {disabled: true}).text('No IPOs found for this group'));
                 }
                 select.prop('disabled', true);
