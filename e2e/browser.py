@@ -78,7 +78,7 @@ class BrowserCase(StaticLiveServerTestCase):
 
     def tearDown(self):
         # Known runtime defects are separately asserted in RuntimeHealth. New errors fail here.
-        known = ("Cannot read properties of null (reading 'addEventListener')", 'node.getAttribute is not a function')
+        known = ("Cannot read properties of null (reading 'addEventListener')",)
         unexpected = [e for e in self.errors if e not in known]
         self.assertEqual(unexpected, [], 'Unexpected browser/server errors; see browser-errors.json')
 

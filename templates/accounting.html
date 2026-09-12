@@ -2192,6 +2192,10 @@
                                     const rightHidden = document.getElementById("remark_right");
                                     const rightError = document.getElementById("remark_right_error");
 
+                                    if (!saveBtn || !leftInput || !leftError || !rightInput || !rightHidden || !rightError) {
+                                        return;
+                                    }
+
                                     function validateInputs() {
                                         let leftValid = true, rightValid = true;
 
@@ -2272,6 +2276,9 @@
                 const errorBox    = document.getElementById("trans_remark_error");
                 const submitBtn = document.getElementById("saveBtn5");
 
+                if (!remarkInput || !errorBox || !submitBtn) {
+                    return;
+                }
 
                 remarkInput.addEventListener("input", function(){
                     let value = remarkInput.value;
