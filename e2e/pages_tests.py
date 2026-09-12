@@ -19,7 +19,6 @@ PAGE_CASES = [
     ('group_positions','/group-billing-details/{group}/','Positions'),
     ('positions','/group-billing-details/','Positions'),
     ('backup','/BackUp','BACK UP'),
-    ('pan_allotted','/panalloted','PAN'),
     ('accounting_logs','/accounting-logs/','Accounting Activity'),
     ('sme_analysis_a','/{sme}/Dashboard/A','Analysis'),
     ('sme_analysis_b','/{sme}/Dashboard/B','Analysis'),

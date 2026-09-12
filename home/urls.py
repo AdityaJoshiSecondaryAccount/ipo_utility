@@ -85,7 +85,6 @@ urlpatterns = [
     path('group-billing-details/', views.group_billing_details, name='group_billing_details'),
     path('group-billing-details/<int:group_id>/', views.group_billing_details, name='group_billing_details_by_id'),
     path('BackUp',views.BackUp, name='BackUp'),
-    path('panalloted', views.panalloted, name='panalloted'),
     path('<str:IPOid>/<str:OrderType>/upload-csv/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>',views.OrderDetail_upload, name="OrderDetail_upload"),
     path('<str:IPOid>/<str:OrderType>/upload-csv/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>/<str:Rate>',views.OrderDetail_upload, name="OrderDetail_upload"),
     path('<str:IPOid>/upload-csv/<str:Groupfilter>/<str:Ordercatagoryfilter>/<str:InvestorTypefilter>',views.Order_upload, name="Order_upload"),

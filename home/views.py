@@ -7595,38 +7595,6 @@ def BackUp(request):
     return render(request, 'Backup.html',{'html_table': html_table, 'user': user,'page_obj': page_obj,'Backup_page_size':page_size})
 
 @allowed_users(allowed_roles=['Broker'])
-def panalloted(request):
-    Client = ClientDetail.objects.filter(user=request.user)
-    IPO = CurrentIpoName.objects.filter(user=request.user)
-    grpname = []
-    IPOName = []
-    nlist = []
-    l = []
-    for IpoName in IPO:
-        IPOName.append(IpoName)
-    lenofipo = len(IPOName)
-    for j in range(0, lenofipo):
-        l.append(j)
-    for GroupName in Client:
-        grpname.append(GroupName.PANNo)
-    lenofgroup = len(grpname)
-
-    for ClientPan in Client:
-        IPOTotal = []
-        for IpoName in IPO:
-            try:
-                entry = OrderDetail.objects.get(
-                    user=request.user, OrderDetailPANNo=ClientPan, Order__OrderIPOName=IpoName)
-                a = entry.AllotedQty
-            except:
-                a = None
-            IPOTotal.append(a)
-        nlist.append(IPOTotal)
-
-    df = pd.DataFrame(nlist, columns=IPOName, index=grpname)
-    return render(request, 'panalloted.html', {'entry': grpname, 'lenofipo': l, 'IPOTotal': IPOTotal, 'IPOName': IPOName, 'df': df})
-
-@allowed_users(allowed_roles=['Broker'])
 def autocomplete(request):
     if 'term' in request.GET:
         qs = ClientDetail.objects.filter(

@@ -130,7 +130,7 @@ def write_coverage():
     }
     pages = {'IPOSETUP','ClientSetup','GroupSetup','edit','EditClient','EditGroup','EditOrder','dashboard',
              'OrderFunction','OrderDetailFunction','Billing','Status','GroupWiseDashboard','group_billing_details',
-             'BackUp','panalloted','accounting_logs_view'}
+             'BackUp','accounting_logs_view'}
     text=['# Playwright coverage matrix','',
         'TESTED means an executable check exists, not that it passed or that every branch is covered.',
         'Anonymous-only checks do not establish authenticated workflow coverage. See the JSON interaction inventory for individual fields/buttons and the final report for failures.', '',
