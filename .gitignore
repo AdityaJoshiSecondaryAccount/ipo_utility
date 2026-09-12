@@ -52,6 +52,12 @@ docs/
 
 **/migrations/
 
+# Isolated browser automation artifacts
+test-results/
+tmp/playwright-e2e-*/
+playwright-report/
+playwright/.auth/
+
 # OS-specific
 .DS_Store
 Thumbs.db

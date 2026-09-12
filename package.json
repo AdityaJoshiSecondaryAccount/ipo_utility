@@ -1,0 +1,9 @@
+{
+  "name": "ipo-utility-e2e",
+  "private": true,
+  "scripts": {
+    "test:e2e": ".venv/bin/python scripts/run_e2e.py",
+    "test:e2e:headed": ".venv/bin/python scripts/run_e2e.py --headed",
+    "test:e2e:report": ".venv/bin/python scripts/run_e2e.py --report"
+  }
+}
