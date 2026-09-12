@@ -69,6 +69,7 @@ from django.http.response import JsonResponse
 from django.contrib.auth.models import Group, User
 from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from .models import CurrentIpoName, GroupDetail, Order, OrderDetail, ClientDetail, CustomUser, RateList,SharedLink
 from django.http import JsonResponse
 from telethon import TelegramClient
@@ -683,6 +684,7 @@ def encVal(vl):
     
     return base64.b64encode(encrypted_data)
 
+@allowed_users(allowed_roles=['Broker'])
 def get_options(request):
     PRI_limit  = CustomUser.objects.get(username = request.user)
     is_premium_user = PRI_limit.Allotment_access    
@@ -3212,6 +3214,7 @@ def EditGroup(request, GroupNameId):
         id=GroupNameId, user=request.user)
     return render(request, 'EditGroup.html', {'employee': employee,'page_number':page_number})
 
+@allowed_users(allowed_roles=['Broker'])
 def EditOrder(request, OrderId,IPOid,Grpf,OrCtf,InTyf):
     page_number = request.GET.get('page')
     order = Order.objects.get(OrderIPOName_id = IPOid,
@@ -7511,6 +7514,7 @@ def group_billing_details(request, group_id=None):
         'empty_groups': empty_groups,
     })
 
+@allowed_users(allowed_roles=['Broker'])
 def BackUp(request):
     user = request.user
     entry = CurrentIpoName.objects.filter(user=request.user)
@@ -7765,15 +7769,23 @@ async def process_data(request,userid, pan_data, IPOid, OrderType, Groupfilter, 
 
 
 def Update_pann(request,IPOid,OrderType,GrpName=None, OrderCategory=None, InvestorType=None):
-
-    try:
-        if request.user.groups.all()[0].name == 'Broker':
+    # Broker requests use their own data.  Guest requests are only allowed
+    # when the access-link view has established a link owner in the session.
+    if request.user.is_authenticated:
+        if request.user.groups.filter(name='Broker').exists():
             userid = request.user.id
-        else:
+        elif request.user.groups.filter(name='Customer').exists() and request.user.Broker_id:
             userid = request.user.Broker_id
-    except:
-        userid = request.session[f'link_owner_{IPOid}']
-        userid= CustomUser.objects.get(id=userid).id
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Not authorized.'}, status=403)
+    else:
+        link_owner_id = request.session.get(f'link_owner_{IPOid}')
+        if not link_owner_id:
+            return JsonResponse({'status': 'error', 'message': 'Authentication required.'}, status=403)
+        try:
+            userid = CustomUser.objects.get(id=link_owner_id).id
+        except CustomUser.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Invalid access link.'}, status=403)
     # userid = request.user
     pan_data = {}
     page_number = request.GET.get('page','1')
@@ -8381,6 +8393,7 @@ def Billing(request, IPOid):
     return render(request, 'Billing.html', {'Group': Group.order_by('GroupName'),'html_table':html_table,'select': IPOTypefilterList, 'select2': InvestorTypeFilterList,"total": "{:.0f}".format(total),'Groupfilter': Groupfilter, "IPOName": IPO, 'IPOTypefilter': IPOTypefilter, 'InvestorTypeFilter': InvestorTypeFilter,  "IPO": IPO, "IPOid": IPOid,'page_obj': page_obj,'Billing_page_size':page_size})
     return render(request, 'Billing.html', {'Group': Group.order_by('GroupName'),'select': IPOTypefilterList, 'select2': InvestorTypeFilterList,"total": "{:.0f}".format(total),'Groupfilter': Groupfilter, "IPOName": IPO, 'IPOTypefilter': IPOTypefilter, 'InvestorTypeFilter': InvestorTypeFilter,  "IPO": IPO, "IPOid": IPOid,'page_obj': page_obj,'Billing_page_size':page_size})
 
+@allowed_users(allowed_roles=['Broker'])
 def FileterBilling(request, IPOid ,group,IPOType,InvestType, Rate='All'):
     if request.user.groups.all()[0].name == 'Broker':
         userid = request.user
@@ -8744,6 +8757,7 @@ def exportBillingFilter(request, IPOid, group=None, IPOType=None, InvestorType=N
     return response
 
 #Group Wise Dashboard  billing download PDF fun
+@allowed_users(allowed_roles=['Broker'])
 def exportGroupwise(request):
 
     Group = GroupDetail.objects.filter(user=request.user)
@@ -8812,6 +8826,7 @@ def exportGroupwise(request):
     return response
 
 
+@allowed_users(allowed_roles=['Broker'])
 def exportBillingFilterpdf(request, IPOid, group=None, IPOType=None, InvestorType=None):
     group = unquote(group)
     IPOType = unquote(IPOType)
@@ -9004,6 +9019,7 @@ def Backup(request,IPOid ):
         os.remove(file_path)
     return response
 
+@allowed_users(allowed_roles=['Broker'])
 def AllIpoBackup(request):
     user = request.user
     IPOs = CurrentIpoName.objects.filter(user=user)
@@ -9108,6 +9124,7 @@ def AllIpoBackup(request):
 
     return response
 
+@allowed_users(allowed_roles=['Broker'])
 def AccountingBackup(request):
     user = request.user
     entries = Accounting.objects.filter(user=user).select_related("group", "ipo")
@@ -9790,6 +9807,7 @@ def OrderDetail_upload(request, IPOid, OrderType, GrpName, OrderCategory, Invest
             return redirect(f"/{IPOid}/OrderDetail/{OrderType}")
         return redirect(f"/{IPOid}/OrderDetail/{OrderType}/{GrpName}/{OrderCategory}/{InvestorType}/{OrderDate}/{OrderTime}/{Rate}")
 
+@allowed_users(allowed_roles=['Broker'])
 def Sempale_Order(request,IPOid):
     response = HttpResponse(content_type='text/csv')
     IPOName = CurrentIpoName.objects.get(id=IPOid, user=request.user)
@@ -9804,6 +9822,8 @@ def Sempale_Order(request,IPOid):
 
     return response
 
+@allowed_users(allowed_roles=['Broker'])
+@require_POST
 def Order_upload(request, IPOid, Groupfilter, Ordercatagoryfilter, InvestorTypefilter):
     csv_file = request.FILES['file']
     if not csv_file.name.endswith('.csv'):
@@ -12718,6 +12738,8 @@ def DeleteAllOrders(request, IPOid):
 OTP_SESSIONS = {}
 
 @csrf_exempt
+@allowed_users(allowed_roles=['Broker'])
+@require_POST
 def send_telegram_otp(request):
     if request.method == "POST":
         user = request.user
@@ -12778,6 +12800,8 @@ def send_telegram_otp(request):
             return JsonResponse({'status': 'error', 'message': str(e)})
 
 @csrf_exempt
+@allowed_users(allowed_roles=['Broker'])
+@require_POST
 def verify_telegram_otp(request):
     if request.method == "POST":
         user = request.user
@@ -13474,6 +13498,7 @@ def generate_status_image(context):
     buf.name = "status_report.png"
     return buf
 
+@allowed_users(allowed_roles=['Broker'])
 def get_all_groups(request, IPOid):
     User = request.user
     groups = list(Order.objects.filter(user=User,OrderIPOName=IPOid).values_list('OrderGroup', flat=True).distinct())
@@ -14420,6 +14445,7 @@ def accounting_logs_view(request):
 
 
 
+@allowed_users(allowed_roles=['Broker'])
 def get_accounting_entries(request):
     try:
         group_id = request.GET.get("group_id")
@@ -16143,6 +16169,8 @@ def GroupBillShare(request, IPOid):
         return redirect('Status', IPOid=IPOid)
 
 @csrf_exempt
+@allowed_users(allowed_roles=['Broker'])
+@require_POST
 def Share_AppDetails(request):
     if request.method == 'POST':
         group_name_list_json = request.POST.get('selected_records', 'Default Group') 
@@ -16256,6 +16284,8 @@ def Share_AppDetails(request):
         return JsonResponse('Success', safe=False)
     
 #PAN UPDATE LINK
+@allowed_users(allowed_roles=['Broker'])
+@require_POST
 def generate_shared_link(request):
     if request.method == "POST":
         ipo_id = request.POST.get('ipo_id')
@@ -16650,6 +16680,7 @@ def resolve_shared_link(request, link_id,order_type=None):
         Rate = Rate
     )
     
+@allowed_users(allowed_roles=['Broker'])
 def get_user_links(request,IPOid,order_type):
     # Filters links created by the current user
     
@@ -16922,6 +16953,8 @@ def update_all_expiries(request, IPOid):
     return JsonResponse({'status': 'error', 'message': 'Invalid request.'}, status=400)
 
 # 2. Send all mails for this IPO
+@allowed_users(allowed_roles=['Broker'])
+@require_POST
 def send_all_link_mails(request, IPOid):
     if request.method == 'POST':
         # Check sender's configuration
@@ -17046,6 +17079,8 @@ async def create_ipo_link(request,user, ipo_id, group_obj, expiry_str, send_emai
     return link
 
 # The View for the Popup
+@allowed_users(allowed_roles=['Broker'])
+@require_POST
 def bulk_generate_links(request, IPOid):
     if request.method == "POST":
         try:
