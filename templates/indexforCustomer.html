@@ -1,0 +1,297 @@
+{% extends 'basic.html' %}
+
+{% block title%} Home{% endblock %}
+{% block css %}
+{% load static %}
+<style>
+    @import url('https://fonts.googleapis.com/css?family=poppins:100,200,300,400,500,600,700,800,900');
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'poppins', sans-serif;
+    }
+
+    body {
+        display: flex;
+        /* justify-content: center; */
+        align-items: center;
+        min-height: 100vh;
+        background: bisque;
+    }
+
+    ------------------------------------------------------------------- .container {
+        width: 100%;
+        max-width: 1550px;
+        margin: 0 25px;
+        padding: 0 0px;
+    }
+
+    .heder {
+        background-color: white;
+        /* background-image: url(https://source.unsplash.com/1600x200/?waterfall/mountain); */
+        border-bottom: 3px solid#898c8f;
+        width: 100%;
+        padding-top: 9px;
+        padding-bottom: 0;
+        color: rgb(0, 0, 0);
+        margin: 27px 0px 0px 0px;
+
+    }
+
+    .card-deck {
+        display: flex;
+        /* flex-flow: row wrap; */
+        margin: 7% 2%;
+        width: 100%;
+    }
+
+    .card-deck .card {
+        display: flex;
+        flex-direction: column;
+        width: 18rem;
+        border: none;
+        margin: 10px 15px;
+        background: rgba(0, 0, 0, 0.02);
+        /* box-shadow: 0px 4px 10px 1px rgba(0, 0, 0, 0.1); */
+    }
+
+    .card-deck .card:hover {
+        background: rgba(0, 0, 0, 0.10);
+
+    }
+
+    .col-lg-3 {
+        /* -ms-flex: 0 0 25%; */
+        flex: 0 0 0;
+        max-width: 25%;
+        padding-right: 5px;
+        padding-left: 7px;
+    }
+
+    .card-body {
+        line-height: 2;
+        padding: 6px 0;
+    }
+
+    .card-title {
+        border-bottom: 3px solid #020202;
+        margin: 15px;
+        margin-top: 3px;
+        margin-bottom: 10px;
+        padding: 5px 0px;
+        color: black;
+        /* background-color: teal; */
+        border-color: black;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        /* border-bottom-left-radius: 40px;
+    border-bottom-right-radius: 40px; */
+    }
+
+
+    .card-body {
+        /* display: flex; */
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    .card-body a {
+        position: relative;
+        width: 125px;
+        height: 45px;
+        display: inline-block;
+        margin: 0px 1px 0px 0px;
+    }
+
+    .card-body a::before,
+    .card-body a::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: red;
+        transition: 0.5s;
+    }
+
+    .card-body a:nth-child(1)::before,
+    .card-body a:nth-child(1)::after {
+        background: linear-gradient(45deg, #00ccff, white, white, #d400d4);
+
+    }
+
+    .container a:nth-child(2)::before,
+    .container a:nth-child(2)::after {
+        background: linear-gradient(45deg, #ff1313, white, white, #22ff0e);
+        /* background: linear-gradient(45deg,white,#ff1313,white,white,#22ff0e,white); */
+
+    }
+
+    .container a:nth-child(3)::before,
+    .container a:nth-child(3)::after {
+        background: linear-gradient(45deg, brown, white, brown);
+    }
+
+    .container a:nth-child(4)::before,
+    .container a:nth-child(4)::after {
+        background: linear-gradient(45deg, #00ccff, rgb(255, 170, 113), #d400d4);
+    }
+
+    .card-body a:nth-child(5)::before,
+    .card-body a:nth-child(5)::after {
+        background: linear-gradient(45deg, #00ccff, white, white, #d400d4);
+
+    }
+
+    .container a:nth-child(6)::before,
+    .container a:nth-child(6)::after {
+        background: linear-gradient(45deg, #ff1313, white, white, #22ff0e);
+        /* background: linear-gradient(45deg,white,#ff1313,white,white,#22ff0e,white); */
+
+    }
+
+    .container a:nth-child(7)::before,
+    .container a:nth-child(7)::after {
+        background-image: radial-gradient(#00ccff, rgb(249, 252, 74), rgb(255, 170, 113), #d400d4);
+    }
+
+    .card-body a:hover::before {
+        inset: -3px;
+    }
+
+    .card-body a:hover::after {
+        inset: -3px;
+        filter: blur(10px);
+    }
+
+    .card-body a span {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: inline-block;
+        background: white;
+        z-index: 10;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /* font-size: 1.2em; */
+        /* text-transform: uppercase; */
+        /* letter-spacing: 2px; */
+        color: black;
+        border: 1px solid #040a29;
+        z-index: 1;
+    }
+
+    .width {
+        max-width: 1540px;
+    }
+
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        max-width: 1615px;
+        padding: 10px 0 50px;
+    }
+
+    .container .card {
+        position: relative;
+        min-width: 305px;
+        height: 350px;
+        box-shadow: inset 5px 5px 5px rgba(0, 0, 0, 0.2),
+            inset -5px -5px 15px rgba(255, 255, 255, 0.1),
+            5px 5px 5px rgba(0, 0, 0, 0.3), -5px -5px 15px rgba(255, 255, 255, 0.1);
+        border-radius: 23px;
+        margin: 5px 13px;
+    }
+
+    .container .card .box {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        background: white;
+        border-radius: 15px;
+        /* border: 2px solid black; */
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        /* align-items: center; */
+    }
+
+    .container .card:hover .box {
+        transform: translateY(-25px);
+        box-shadow: 0 40px 70px rgba(0, 0, 0, 0.0.5);
+    }
+</style>
+
+
+{% endblock %}
+
+{% block body %}
+<!--{% load static %}-->
+<!--  navigation bar code starts here-->
+
+
+<div class="container width">
+
+    <nav>
+        <center>
+            <h1 class="fixed-top heder" style="position: fixed; z-index: 9;">
+                Current IPOs</h1>
+        </center>
+    </nav>
+
+    <div class="card-deck active responsive">
+
+        {% for i in product %}
+        <div class="col-lg-3">
+            <div class="card" style="margin-left: 30px;margin-right: 30px;margin-bottom: 30px;">
+
+
+                <div class="box">
+
+                    <div class="content">
+
+                        <div class="card-body">
+                            <center><b>
+                                    <h5 class="card-title">
+                                        {{i.IPOName}}</h5>
+                                </b></center>
+                            <div style="margin: 0 14px;">
+                                <a href=""><span>Place Order</span></a>
+                                <a href="{{ i.id }}/OrderDetail"><span>Order Detail</span></a>
+                                <a href=""><span>Billing</span></a>
+                                <a href=""><span>Status</span></a>
+                                <a href=""><span>Premium-Buy</span></a>
+                                <a href=""><span>Premium-Sell</span></a>
+                                <a href="" style="width: 255px;"><span>Analysis</span></a>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+        {% endfor %}
+
+        
+
+        <script src="{% static 'JS/jquery-3.2.1.slim.min.js' %}"></script>
+
+        <script>
+            var myVar;
+
+            function myFunction() {
+                myVar = setTimeout(showPage, 3000);
+            }
+        </script>
+
+        {% endblock %}

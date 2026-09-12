@@ -1,0 +1,869 @@
+{% extends 'basic.html' %}
+
+{% block title%} Home{% endblock %}
+{% block css %}
+
+<style>
+    @media all and (display-mode: fullscreen) {
+        .card-body .indexbtn span {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: inline-block;
+            background: white;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 19px;
+            /* text-transform: uppercase; */
+            /* letter-spacing: 2px; */
+            color: black;
+            border: 1px solid #040a29;
+            z-index: 1;
+        }
+      }
+    @import url('https://fonts.googleapis.com/css?family=poppins:100,200,300,400,500,600,700,800,900');
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        {% comment %} font-family: 'poppins', sans-serif; {% endcomment %}
+    }
+    .navbar{
+        padding: 0.5rem 0rem !important;
+    }
+
+    hr{
+        margin-top: auto;
+        border: nonen;
+        margin-bottom: 0.5rem;
+        border-top: 1px solid black;        
+    }
+
+    h5 {
+        text-align: center;
+    }
+
+    .col-lg-6 {
+        -ms-flex: 0 0 50%;
+        flex: 0 0 40%;
+        max-width: 50%;
+    }
+
+    body {
+        display: flex;
+        /* justify-content: center; */
+        align-items: center;
+        /* min-height: 100vh; */
+        background: bisque;
+    }
+
+    .heder {
+        background-color: white;
+        border-bottom: 3px solid #898c8f;
+        width: 100%;
+        padding-top: 9px;
+        padding-bottom: 0;
+        color: rgb(0, 0, 0);
+        margin: 27px 0px 0px 0px;
+
+    }
+
+    .card-deck {
+        display: flex;
+        margin: 0% 0%;
+        width: 100%;
+    }
+
+    .card-deck .card {
+        display: flex;
+        flex-direction: column;
+        width: 18rem;
+        border: none;
+        margin: 0px 15px;
+        background: rgba(0, 0, 0, 0.02);
+        
+    }
+
+    .card-deck .card:hover {
+        background: rgba(0, 0, 0, 0.10);
+    }
+
+    .col-lg-3 {
+        
+        flex: 0 0 0;
+        max-width: 25%;
+        padding-right: 5px;
+        padding-left: 7px;
+    }
+
+    .card-body {
+        line-height: 2;
+        padding: 0px 0;
+    }
+
+    .card-title {
+        border-bottom: 3px solid #020202;
+        margin: 15px;
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 1.5em;
+        margin-top: 3px;
+        margin-bottom: 10px;
+        padding: 5px 0px;
+        color: black;
+        /* background-color: teal; */
+        border-color: black;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        font-weight: bold;
+        /* border-bottom-left-radius: 40px;
+    border-bottom-right-radius: 40px; */
+    }
+
+
+    .card-body {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card-body a {
+        position: relative;
+        width: 100%;
+        height: 45px;
+        display: inline-block;
+        margin: 0px 1px 0px 0px;
+    }
+
+    .card-body .indexbtn::before,
+    .card-body .indexbtn::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: red;
+        transition: 0.5s;
+        /* text-align: center; */
+    }
+
+    .card-body a:nth-child(1)::before,
+    .card-body a:nth-child(1)::after {
+        background: linear-gradient(45deg, #00ccff, white, white, #d400d4);
+        border-radius: 11px;
+
+    }
+
+    .container a:nth-child(2)::before,
+    .container a:nth-child(2)::after {
+        background: linear-gradient(45deg, #ff1313, white, white, #22ff0e);
+        border-radius: 11px;
+        /* background: linear-gradient(45deg,white,#ff1313,white,white,#22ff0e,white); */
+
+    }
+
+    .container a:nth-child(3)::before,
+    .container a:nth-child(3)::after {
+        /* background: linear-gradient(45deg, brown, white, brown); */
+        background: linear-gradient(45deg, #00ccff, white, white, #d400d4);
+        border-radius: 11px;
+    }
+
+    .container a:nth-child(4)::before,
+    .container a:nth-child(4)::after {
+        /* background: linear-gradient(45deg, #00ccff, rgb(255, 170, 113), #d400d4); */
+        background: linear-gradient(45deg, #ff1313, white, white, #22ff0e);
+        border-radius: 11px;
+    }
+
+    .card-body a:nth-child(5)::before,
+    .card-body a:nth-child(5)::after {
+        background: linear-gradient(45deg, #00ccff, white, white, #d400d4);
+        border-radius: 11px;
+
+    }
+
+    .container a:nth-child(6)::before,
+    .container a:nth-child(6)::after {
+        background: linear-gradient(45deg, #ff1313, white, white, #22ff0e);
+        border-radius: 11px;
+        /* background: linear-gradient(45deg,white,#ff1313,white,white,#22ff0e,white); */
+    }
+
+    .container a:nth-child(7)::before,
+    .container a:nth-child(7)::after {
+        background-image: radial-gradient(#00ccff, rgb(249, 252, 74), rgb(255, 170, 113), #d400d4);
+        border-radius: 11px;
+    }
+
+    .card-body a:hover::before {
+        inset: -3px;
+    }
+
+    .card-body a:hover::after {
+        inset: -3px;
+        filter: blur(10px);
+    }
+
+    .card-body .indexbtn span {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: inline-block;
+        background: white;
+        z-index: 10;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 13px;
+        /* text-transform: uppercase; */
+        /* letter-spacing: 2px; */
+        color: black;
+        border: 1px solid #040a29;
+        z-index: 1;
+        border-radius: 8px;
+    }
+
+    .container {
+        display: block;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        max-width: 100%;
+        margin-top: 82px;
+        
+    }
+
+    .container .card {
+        position: relative;
+        min-width: 98%;
+        height: 320px;
+        /* box-shadow: inset 5px 5px 5px rgba(0, 0, 0, 0.2),
+            inset -5px -5px 15px rgba(255, 255, 255, 0.1),
+            5px 5px 5px rgba(0, 0, 0, 0.3), -5px -5px 15px rgba(255, 255, 255, 0.1); */
+        border-radius: 23px;
+        margin-bottom: 0%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .container .card .box {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        bottom: 22px;
+        background: white;
+        border-radius: 15px;
+        /* border: 2px solid black; */
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        /* display: flex; */
+        /* justify-content: center; */
+        /* align-items: center; */
+        transition:all 0.5s ease os;
+    }
+
+    .container .card:hover .box {
+        /* transform: translateY(-25px);  */
+        transform:scale(1.02);
+        box-shadow: 0 40px 70px rgba(0, 0, 0, 0.0.5);
+        transition:all 0.5s ease 0s;
+    }
+
+    .row {
+        display: -ms-flexbox;
+        display: flex;
+        -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+        margin: 0px;
+    }
+
+    .row:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+
+    .column-title {
+        border-bottom: 2px solid #020202;
+        font-size: 1.0rem;
+        margin: 0px;
+        margin-bottom: 10%;
+        color: black;
+        text-align: center;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    .column {
+        float: left;
+        width: 25%;
+        padding: 5px 5px;
+        text-align: center;
+    }
+
+    .column1 {
+        float: initial;
+        width: 47.33%;
+        padding: 0px 3px;
+        text-align: left;
+        MARGIN: 4PX;
+    }
+
+    .columnbtn {
+        position: relative;
+        width: 100%;
+    }
+
+     .buysellbtn a {
+        position: relative;
+        width: 76px;
+        height: 30px;
+        display: inline-block;
+        margin: 0px 1px 0px 0px;
+    }
+
+    .buysellbtn a span {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: inline-block;
+        background: white;
+        z-index: 10;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.2em;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        z-index: 1;
+    } 
+    .main {
+        float: inline-end;
+        width: 25%;
+    }
+    .card-title-adjusted {
+        width: 90%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    @media screen and (min-width: 1200px){
+        .column1 {
+            float: initial!important;
+            width: 46.33%!important;
+            padding: 0px 3px!important;
+            text-align: left!important;
+            MARGIN: 4PX!important;
+        }
+        .card-body .indexbtn span {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 104%;
+            height: 104%;
+            display: inline-block;
+            background: white;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            /* text-transform: uppercase; */
+            /* letter-spacing: 2px; */
+            color: black;
+            border: 1px solid #040a29;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .card-body .indexbtn::before,
+        .card-body .indexbtn::after {
+            width: 104%;
+            height: 104%;
+        }
+
+    }
+
+    @media screen and (min-width: 600px) and (max-width: 767px) {
+        .heder {
+            background-color: white;
+            border-bottom: 3px solid #898c8f;
+            width: 100%;
+            padding-top: 8%;
+            padding-bottom: 0;
+            color: rgb(0, 0, 0);
+            margin: 0px 0px 0px 0px;
+        }
+    }
+
+    @media screen and (min-width: 600px) and (max-width: 1199px) {
+        .main {
+            float: inline-end;
+            width: 50%;
+            margin: 4% 0%;
+        }
+        .column1 {
+            float: initial!important;
+            width: 46.33%!important;
+            padding: 0px 3px!important;
+            text-align: left!important;
+            MARGIN: 4PX!important;
+        }
+
+        .card-body .indexbtn span {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 104%!important;
+            height: 111%!important;
+            display: inline-block;
+            background: white;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px!important;
+            /* text-transform: uppercase; */
+            /* letter-spacing: 2px; */
+            color: black;
+            border: 1px solid #040a29;
+            z-index: 1;
+        }
+        .column-title {
+            border-bottom: 2px solid #020202;
+            font-size: 14px;
+            margin: 0px;
+            margin-bottom: 10%;
+            color: black;
+            text-align: center;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .card-body .indexbtn span {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: inline-block;
+            background: white;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            /* text-transform: uppercase; */
+            /* letter-spacing: 2px; */
+            color: black;
+            border: 1px solid #040a29;
+            z-index: 1;
+            text-align: center;
+        }
+
+        
+    } 
+
+    @media screen and (min-width: 418px) and (max-width:599px) {
+        .card-deck {
+            display: flex;
+            flex-flow: row wrap;
+            margin: 10% 0%;
+            width: 100%;
+        }
+        .main {
+            float: inline-end;
+            width: 100%;
+            margin-top: 10%;
+        }
+        .heder {
+            background-color: white;
+            border-bottom: 3px solid #898c8f;
+            width: 100%;
+            padding-top: 14%;
+            padding-bottom: 0;
+            color: rgb(0, 0, 0);
+            margin: 0px 0px 0px 0px;
+        }
+        
+        .column-title {
+            border-bottom: 2px solid #020202;
+            font-size: 14px;
+            margin: 0px;
+            margin-bottom: 10%;
+            color: black;
+            text-align: center;
+            font-weight: bold;
+        }
+        .card-body .indexbtn span {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: inline-block;
+            background: white;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            /* text-transform: uppercase; */
+            /* letter-spacing: 2px; */
+            color: black;
+            border: 1px solid #040a29;
+            z-index: 1;
+            text-align: center;
+        }
+    }
+
+    @media screen and (min-width: 340px) and (max-width: 417px) {
+        .card-body .indexbtn span {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: inline-block;
+            background: white;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 85%;
+            /* text-transform: uppercase; */
+            /* letter-spacing: 2px; */
+            color: black;
+            border: 1px solid #040a29;
+            z-index: 1;
+            text-align: center;
+            padding-top: 5%;
+        } 
+
+        .card-deck {
+            display: flex;
+            flex-flow: row wrap;
+            margin: 10% 0%;
+            width: 100%;
+        }
+
+        .main {
+            float: inline-end;
+            width: 100%;
+            margin-top: 10%;
+        }
+
+        .container .card {
+            position: relative;
+            min-width: 100%;
+            height: 320px;
+            
+            /* border-radius: 23px; 
+            margin-bottom: 0%;
+            margin-left: auto;
+            margin-right: auto;  */
+        }
+
+        .heder {
+            background-color: white;
+            border-bottom: 3px solid #898c8f;
+            width: 100%;
+            padding-top: 14%;
+            padding-bottom: 0;
+            color: rgb(0, 0, 0);
+            margin: 0px 0px 0px 0px;
+        }
+    
+        .container .card .box {
+            position: absolute;
+            top: 10px;
+            left: 5px;
+            right: 5px;
+            bottom: 22px;
+            background: white;
+            border-radius: 15px;
+            /* border: 2px solid black; */
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            /* display: flex; */
+            /* justify-content: center; */
+            /* align-items: center; */
+            transition:all 0.5s ease os;
+            
+        }
+    }
+
+    @media screen and (min-width: 250px) and (max-width: 339px) {
+        .card-body .indexbtn span {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 102%;
+            height: 113%;
+            display: inline-block;
+            background: white;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 89%;
+            /* text-transform: uppercase; */
+            /* letter-spacing: 2px; */
+            color: black;
+            border: 1px solid #040a29;
+            z-index: 1;
+            text-align: center;
+           
+        } 
+
+        .card-deck {
+            display: flex;
+            flex-flow: row wrap;
+            margin: 10% 0%;
+            width: 150%;
+            
+        }
+
+        .main {
+            float: inline-end;
+            width: 100%;
+            margin-top: 10%;
+        }
+
+        .card-body .indexbtn::before,
+        .card-body .indexbtn::after {
+            width: 102%;
+            height: 113%;
+        }
+
+        .heder {
+            background-color: white;
+            border-bottom: 3px solid #898c8f;
+            width: 100%;
+            padding-top: 14%;
+            padding-bottom: 0;
+            color: rgb(0, 0, 0);
+            margin: 0px 0px 0px 0px;
+        }
+
+    }
+</style>
+
+
+{% endblock %}
+
+{% block body %}
+<!--{% load static %}-->
+<!--  navigation bar code starts here-->
+
+{% comment %} {% if messages %}
+<div class="alert alert-success fixed-top" id="successalerts" style="position:fixed;">
+    <button type="button" class="close" data-dismiss="alert">x</button>
+    {% for message in messages %}
+    <strong>{{message}}</strong><br>
+    {% endfor %}
+
+    
+</div>
+{% endif %} {% endcomment %}
+
+{% for message in messages %}
+    {% if messages %}
+        <div class="alert {{ message.tags }} alert-dismissible  fixed-top" role="alert" id="successalerts" style="position:fixed;">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+            {{ message }}
+        </div>
+    {% endif %}
+{% endfor %}
+
+<nav>        
+    <center>
+        <h1 class="fixed-top heder" style="position: fixed; z-index: 9;">
+            Current IPOs</h1>
+    </center>
+</nav>
+<div class="container ">
+
+    <div class="card-deck active responsive">
+      {% comment %} {% for i in product %} {% endcomment %}
+
+        {% for i in entry %}
+        <div class="main">
+            <div class="card">
+
+                <div class="box">
+
+                    <div class="content">
+
+                        <div class="card-body">
+
+                            <h5 class="card-title card-title-adjusted">
+                                {{ i.IPOName }}
+                                {% comment %} {% if i.IPOName|length > 13 %}
+                                    {{ i.IPOName|slice:":13" }}...
+                                {% else %} {% endcomment %}
+                                    {% comment %} {{ i.IPOName }} {% endcomment %}
+                                {% comment %} {% endif %} {% endcomment %}
+                            </h5>
+                            <div>
+                                <div class="row">
+                                    {% comment %} <div class="column">
+                                        <h6 class="column-title">Kostak</h6>
+                                        <div>
+                                          {% for i in RateList %}
+                                            <label class="columnbtn" for="">{% if j.kostakBuyRate is not None%}{{j.KostakBuyQty}}/{{j.kostakBuyRate}}{%else%}0/0{%endif%}</label>
+                                            <hr>
+                                            <label class="columnbtn" for="">{% if j.kostakSellRate is not None%}{{j.KostakSellQty}}/{{j.kostakSellRate}}{%else%}0/0{%endif%}</label>
+                                          {% endfor %}
+                                        </div>
+                                    </div> {% endcomment %}
+                                    {% comment %} <div class="column">
+                                        <h6 class="column-title">Subject To</h6>
+                                        <div>
+                                            <label class="columnbtn" for="">{% if j.SubjecToBuyRate is not None%}{{j.SubjecToBuyQty}}/{{j.SubjecToBuyRate}}{%else%}0/0{%endif%}</label>
+                                            <hr>
+                                            <label class="columnbtn" for="">{% if j.SubjecToSellRate is not None%}{{j.SubjecToSellQty}}/{{j.SubjecToSellRate}}{%else%}0/0{%endif%}</label>
+                                        </div>
+                                    </div> {% endcomment %}
+                                    {% comment %} <div class="column">
+                                        <h6 class="column-title">Premium</h6>
+                                        <div>
+                                            <label class="columnbtn" for="">{% if j.PremiumBuyRate is not None%}{{j.PremiumBuyQty}}/{{j.PremiumBuyRate}}{%else%}0/0{%endif%}</label>
+                                            <hr>
+                                            <label class="columnbtn" for="">{% if j.PremiumSellRate is not None%}{{j.PremiumSellQty}}/{{j.PremiumSellRate}}{%else%}0/0{%endif%}</label>
+                                        </div>
+                                    </div> {% endcomment %}
+                                    {% comment %} <div class="column">
+                                        <h6 class="column-title">Action</h6>
+                                        <div class="buysellbtn">
+                                            <a href="{{ i.id }}/BUY"><span class="btn btn-outline-success">BUY</span></a>
+                                            <hr>
+                                            <a href="{{ i.id }}/SELL"><span class="btn btn-outline-danger">SELL</span></a>
+                                       </div>
+                                    </div> {% endcomment %}
+                                </div>
+
+                                <div class="row">
+                                    <div class="column1">
+                                        <div>
+                                            <a href="{{ i.id }}/BUY" class="indexbtn"><span >BUY</span></a>
+                                            <a href="{{ i.id }}/Order" class="indexbtn"><span>Orders</span></a>
+                                            <a href="{{ i.id }}/OrderDetail/BUY" class="indexbtn ac"><span>App. Buy Order (PAN)</span></a>               
+                                            <a href="{{ i.id }}/Billing" class="indexbtn"><span>Client Wise Billing</span></a>
+                                            {% comment %} <a href="{{ i.id }}/Dashboard/A" class="indexbtn"><span>Analysis</span></a> {% endcomment %}
+                                        </div>
+                                    </div>
+                                    <div class="column1">
+                                        <div>
+                                            <a href="{{ i.id }}/SELL" class="indexbtn"><span >SELL</span></a>
+                                            <a href="{{ i.id }}/Dashboard/A" class="indexbtn"><span>Analysis</span></a>
+                                            
+                                            <a href="{{ i.id }}/OrderDetail/SELL" class="indexbtn"><span>App. Sell Order (PAN)</span></a>                
+                                            <a href="{{ i.id }}/Status" class="indexbtn"><span>Group Wise Billing</span></a><br>
+                                            {% comment %} <a href="{{ i.id }}/SetRate" class="indexbtn"><span>Set Rate</span></a> {% endcomment %}
+                                           
+                                            <!-- <a href="{{ i.id }}/PremiumBilling" class="indexbtn"><span>Premium Billing</span></a> -->
+                                        </div>
+                                    </div>
+                                    <div class="column1">
+                                        <div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- {% comment %} {% endfor %} {% endcomment %} -->
+        {% endfor %}
+
+        <div class="main">
+            <div class="card">
+                <div class="box">
+                    <div class="content">
+                        {% comment %} <div class="card-body">
+                            <h5 class="card-title">ADD NEW IPO</h5>
+                        </div> {% endcomment %}
+                        <div class="card-body">
+                            <h5  style="font-size: 150px; margin: 15px; margin-top: 52px; margin-bottom: 10px; padding: 5px 0px; color: black;" onclick="AddnewIPo()">  +</h5>
+                            {% comment %} <a href="/IPOSETUP" id="firstLink" style="display:none;"></a> {% endcomment %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>  
+    </div>
+</div>                           
+
+<script>
+    function AddnewIPo() {
+      var link1 = 'https://www.chittorgarh.com/';
+      window.open(link1, '_blank', "width=1500,height=650");
+
+      var link2 = '/IPOSETUP';      
+      window.location.href = link2;
+
+    }
+</script>
+
+<!-- <script src="{% static 'JS/jquery-3.3.1.slim.min.js' %}"></script> -->
+
+<script>
+    var myVar;
+
+    function myFunction() {
+        myVar = setTimeout(showPage, 3000);
+    }
+</script>
+
+<script src="{% static 'JS/jquery.min.js' %}"></script>
+    <script>
+        $("#successalerts").fadeTo(3000, 500).slideUp(500, function () {
+            $("#successalerts").slideUp(500);
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+          const adjustFontSize = (element) => {
+            const parentWidth = element.parentElement.offsetWidth;
+            let fontSize = parseFloat(window.getComputedStyle(element, null).getPropertyValue('font-size'));
+            const maxFontSize = 2; // Maximum font size in em
+            const minFontSize = 0.5; // Minimum font size in em
+        
+            // Reduce font size until the text fits within the parent element
+            while (element.scrollWidth > parentWidth && fontSize > minFontSize) {
+              fontSize -= 0.1;
+              element.style.fontSize = fontSize + 'em';
+            }
+        
+            // Increase font size until the text is as large as possible without overflowing
+            while (element.scrollWidth < parentWidth && fontSize < maxFontSize) {
+              fontSize += 0.1;
+              element.style.fontSize = fontSize + 'em';
+            }
+          };
+        
+          const cardTitles = document.querySelectorAll('.card-title-adjusted');
+          cardTitles.forEach(adjustFontSize);
+        
+          // Adjust font size on window resize
+          window.addEventListener('resize', () => {
+            cardTitles.forEach(adjustFontSize);
+          });
+        });
+        </script>
+
+{% endblock %}

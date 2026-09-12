@@ -1,0 +1,851 @@
+{% extends 'basic.html' %}
+{% block title%}BACK UP{% endblock %}
+{% block css %}
+{% load static %}
+<link rel="stylesheet" href="{% static  'DataTables/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static  'DataTables/css/buttons.bootstrap5.min.css' %}">
+<link rel="stylesheet" href="{% static  'DataTables/css/dataTables.bootstrap5.min.css' %}">
+<style>
+    #example th{
+        {% comment %} border: 0.1px solid black !important; {% endcomment %}
+        text-align: center;
+    }
+    .custom-width {
+        width: 81% !important;
+        left: 0% !important;;
+    }
+    .form-control-sm{
+        border: 0.3px solid black;
+        height:30px !important;
+    }
+    {% comment %} .bi{
+        margin: -2.5% 32% !important;
+    } {% endcomment %}
+    .cw{
+        width: 13%;
+        left: 5%;
+    }
+    #example_wrapper{
+        margin-top: 1.5%;
+    }
+
+    table{
+        border-collapse: collapse;
+        border-spacing: 0;
+        {% comment %} width: 100%; {% endcomment %}
+        width: 100%;
+        border: 1px solid #ddd;
+        margin-bottom: 2%;
+    }
+
+    .container-fluid {
+        {% comment %} align-items: center; {% endcomment %}
+        width: 100%;
+        margin-right: 0%;
+        margin-left: 0%;
+    }
+
+    table th:nth-child(n+1){
+        {% comment %} position : sticky;
+        top:0; {% endcomment %}
+        {% comment %} background :rgb(182, 182, 158); {% endcomment %}
+    } 
+
+    th,
+    td {
+        text-align: center;
+        padding: 15px;
+    }
+    
+
+    table td:nth-child(1){
+        {% comment %} position : sticky; {% endcomment %}
+        background :rgb(182, 182, 158);
+        {% comment %} left : 0; {% endcomment %}
+    }
+
+    .h3,
+    h3 {
+        margin: 0px 0px;
+        margin-top: 85px;
+        font-size: 1.75rem;
+        border-block-end: 3px solid #e9ecef;
+    }
+
+    .iponame {
+        background-color: white;
+        height: 45px;
+        margin-top: 35px;
+        width: 100%;
+        text-align: center;
+        text-align: center;
+    }
+
+
+    table.table-sortable th.currently-sorted[data-sort-dir="asc"]::after {
+        content: "\25b2";
+
+    }
+
+    table.table-sortable th.currently-sorted[data-sort-dir="desc"]::after {
+        content: "\25bc";
+
+    }
+
+    .col-md-3 {
+        display: inline-block;
+        margin-left: -4px;
+    }
+
+    @media (min-width: 1200px){
+        .fc{
+            margin-top: 4%;
+        }
+    }
+    @media (min-width: 3840px) and (max-width: 8835px) {
+        .bi{
+            margin-top: 0% !important;
+            margin-right: 32% !important;
+        }
+        .fc {
+            margin-top: 2%;
+        }
+        #example_filter {
+            margin-left: -2.5rem;
+        }
+        #example_wrapper {
+            margin-top: 0.5%;
+        }
+    }
+    @media (min-width: 2851px) and (max-width: 3835px) {
+        .bi{
+            margin-top: 0% !important;
+            margin-right: 32% !important;
+        }
+        .fc {
+            margin-top: 3%;
+        }
+        #example_filter {
+            margin-left: -2.5rem;
+        }
+        #example_wrapper {
+            margin-top: 0.5%;
+        }
+    }
+    @media (min-width: 1850px) and (max-width: 2850px) {
+        .bi{
+            margin-top: 0% !important;
+            margin-right: 32% !important;
+        }
+        #example_filter {
+            margin-left: -2.5rem;
+        }
+    }
+
+    @media (min-width: 1541px) and (max-width: 1883px) {
+        {% comment %} .bi{
+            margin-top: 0% !important;
+            margin-right: 32% !important;
+        } {% endcomment %}
+        #example_filter {
+            margin-left: -2.5rem;
+        }
+    }
+
+    @media (min-width: 1200px) and (max-width: 1540px) {
+        .bi{
+            margin-top: 0% !important;
+            margin-right: 32% !important;
+        }
+        #example_wrapper {
+            margin-top: 3.5%;
+        }
+        #example_filter {
+            margin-left: -6rem;
+        }
+    }
+
+    @media (min-width: 992px) and (max-width: 1199px) {
+        .bi{
+            margin-top: 0% !important;
+            margin-right: 35% !important;
+            width: 18% !important;
+        }
+        #example_filter {
+            margin-left: -8em;
+          
+          }
+
+        .fc{
+            margin-top: 9%;
+        }
+    }
+
+    @media (min-width: 768px) and (max-width: 991px) {
+        .fc{
+            margin-top: 11%;
+        }
+
+        .bi{
+            margin-top: 0% !important;
+            width: 13% !important;
+            margin-right: 34% !important;
+        }
+
+        .addipomodal {
+            margin: 0% -22%!important;
+            position: fixed;
+        }
+        #example_filter {
+            margin-left: -10rem;
+          
+          }
+    }
+
+    @media (min-width: 637px) and (max-width: 767px) {
+        .fc{
+            margin-top: 18%;
+        }
+        .bi{
+            margin-top: 0% !important;
+            width: 84% !important;
+            margin-right: -10rem !important;
+        }
+        .addipomodal {
+            margin: 0% -39%!important;
+            position: fixed;
+        }
+        .iponame{
+            margin-top: 54px;     
+        }
+        #example_length {
+            margin-right: 67%;
+        }
+        #example_filter {
+            margin-left: -12rem !important;
+        }
+    }
+
+
+
+    @media (min-width: 576px) and (max-width: 636px) {
+        .fc{
+            margin-top: 18%;
+        }
+        .bi{
+            margin-top: 0% !important;
+            width: 95% !important;
+            margin-right: -9rem !important;
+        }
+        .addipomodal {
+            margin: 0% -39%!important;
+            position: fixed;
+        }
+        .iponame{
+            margin-top: 54px;     
+        }
+        #example_length {
+            margin-right: 67%;
+        }
+        #example_filter {
+            margin-left: -12rem !important;
+        }
+    }
+    @media (min-width: 520px) and (max-width: 575px) {
+        .fc{
+            margin-top: 18%;
+        }
+
+        .bi{
+            margin-top: 1% !important;
+            width: 101% !important;
+            margin-right: -22rem !important;
+        }
+
+        .addipomodal {
+            margin: 0% -64%!important;
+            position: fixed;
+        }
+
+        .iponame{
+            margin-top: 54px;     
+        }
+        #example_length {
+            margin-right: 67%;
+        }
+        #example_filter {
+            margin-left: -13rem !important;
+            margin-top: 120%;
+        }
+        .slr{
+            position: absolute;
+            top: 58%;
+            left: 1%;
+        }
+    }
+
+    @media (min-width: 427px) and (max-width: 519px) {
+        .fc{
+            margin-top: 23%;
+        }
+
+        .bi{
+            margin-top: 1% !important;
+            width: 130% !important;
+            margin-right: -18rem !important;
+        }
+
+        .addipomodal {
+            margin: 0% -64%!important;
+            position: fixed;
+        }
+
+        .iponame{
+            margin-top: 54px;     
+        }
+        #example_length {
+            margin-right: 67%;
+        }
+        #example_filter {
+            margin-left: -13rem !important;
+            margin-top: 120%;
+        }
+        .slr{
+            position: absolute;
+            top: 58%;
+            left: 1%;
+        }
+    }
+    @media (min-width: 400px) and (max-width: 426px) {
+        .fc{
+            margin-top: 26%;
+        }
+
+        .bi{
+            margin-top: -0.5rem !important;
+            width: 138% !important;
+            margin-right: -17.4rem !important;
+        }
+
+        .addipomodal {
+            margin: 0% -82%!important;
+            position: fixed;
+        }
+        #example_wrapper {
+            margin-top: 2.5%;
+        }
+
+        .iponame{
+            margin-top: 54px;     
+        }
+        #example_length {
+            margin-right: 67%;
+        }
+        #example_filter {
+            margin-left: -10rem !important;
+            margin-top: 2.5rem;
+        }
+        .form-control-sm {
+            width: 72% !important;
+        }
+        .slr{
+            position: absolute;
+            top: 55%;
+            left: 1%;
+        }
+    }
+
+    @media (min-width: 316px) and (max-width: 399px) {
+        .fc{
+            margin-top: 33%;
+        }
+
+        .bi{
+            margin-top: -0.5rem !important;
+            width: 182% !important;
+            margin-right: -13.5rem !important;
+        }
+
+        .addipomodal {
+            margin: 0% -82%!important;
+            position: fixed;
+        }
+        #example_wrapper {
+            margin-top: 2.5%;
+        }
+
+        .iponame{
+            margin-top: 54px;     
+        }
+        #example_length {
+            margin-right: 67%;
+        }
+        #example_filter {
+            margin-left: -13rem !important;
+            margin-top: 2.5rem;
+        }
+    }
+
+    @media (min-width: 280px) and (max-width: 315px){ 
+        .bi{
+            margin-top: 2.1rem !important;
+            width: 207% !important;
+            margin-right: -13rem !important;
+        }
+
+        .addipomodal {
+            margin: 0% -96%!important;
+            position: fixed;
+        }
+
+        .iponame{
+            margin-top: 54px;     
+        }
+
+        .fc{
+            margin-top: 38%;
+        }
+        #example_length {
+            margin-right: 67%;
+        }
+        #example_filter {
+            margin-left: -14rem !important;
+            margin-top: 5.5rem;
+        }
+    }
+
+    @media (min-width: 280px) and (max-width: 294px){ 
+        .bi{
+            margin-top: 2.1rem !important;
+            width: 207% !important;
+            margin-right: -11.5rem !important;
+        }
+
+        .addipomodal {
+            margin: 0% -96%!important;
+            position: fixed;
+        }
+
+        .iponame{
+            margin-top: 54px;
+            height: 74px;    
+        }
+
+        .fc{
+            margin-top: 48%;
+        }
+        
+    }
+</style>
+
+<!-- <link rel="stylesheet" href="{% static 'JS/jquery-ui.css' %}"> -->
+
+{% endblock %}
+{% block body %}
+
+{% csrf_token %}
+
+{% comment %} <script src="{% static 'JS/bootstrap.min.js' %}"></script>
+<script src="{% static 'JS/jquery-1.11.1.min.js' %}"></script>
+<script src="{% static 'JS/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'JS/dataTables.bootstrap4.min.js' %}"></script> {% endcomment %}
+
+<script src="{% static 'DataTables/js/jquery-3.7.0.js' %}"></script>
+<script src="{% static 'DataTables/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.fixedHeader.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.bootstrap5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.bootstrap5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/jszip.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.colVis.min.js' %}"></script>
+<script src="{% static 'DataTables/js/pdfmake.min.js' %}"></script>
+<script src="{% static 'DataTables/js/vfs_fonts.js' %}"></script>
+
+<h3 class="fixed-top iponame" style="z-index: 9; position:absolute;  ">BACK UP</h3>
+
+{% comment %} <script src="{% static 'JS/sorttable.js' %}"></script> {% endcomment %}
+
+{% comment %} <div class="card" style="margin: 5% 0%; border: none;"> {% endcomment %}
+    {% comment %} <div class="card-body tscroll"> {% endcomment %}
+<div class="container-fluid fc" >
+    {% comment %} <button id="whatsappWebBtn">Open WhatsApp Web</button>
+
+    <script>
+      document.getElementById('whatsappWebBtn').addEventListener('click', function() {
+        // Replace the placeholders with your actual values
+        var message = 'http://127.0.0.1:8000/BackUpReadOnly';
+  
+        // Craft the WhatsApp Web link
+        var whatsappWebLink = 'https://web.whatsapp.com/send?text=' + encodeURIComponent(message);
+  
+        // Open WhatsApp Web
+        window.open(whatsappWebLink, '_blank');
+      });
+    </script> {% endcomment %}
+    <div class="table-responsive text-nowrap table-wrapper-scroll-x my-custom-scrollbar"> 
+        <table  id="example" class="table table-hover table-bordered" style='width:100%' >
+            {% comment %} <div>
+                <form method="POST" action="/AllIpoBackup">
+                    {% csrf_token %}
+                    <!-- BUTTON OF EDIT MODAL -->
+                    <button type="submit" class="btn btn-outline-primary" style="float:right; margin: 12px 16px; width: 10%;">
+                        IPO Backup &nbsp;
+                    </button>
+                </form>
+                {% for profile in entry %}
+                    {{ profile.name }}
+                {% endfor %} 
+            </div> {% endcomment %}
+            {{ html_table |safe }}
+            {% comment %} <div>
+                <thead class="table-sortable">
+                    <tr style="text-align: center; white-space: nowrap;">
+                        <th scope="col" style="width:70px;" >Sr No.</th>
+                        <th scope="col" style="width:500px;" >IPO Name</th>
+                        <th scope="col"style="width:200px;"> IPO ID </th>
+                        <th scope="col"style="width:90px;"> Actions </th>
+                    </tr>
+                </thead>
+                {% comment %} <div>
+                    <form method="POST"  action="/{{user}}/AllIpoBackup/" >
+                    {% csrf_token %}
+                    <!-- BUTTON OF EDIT MODAL -->
+                        <button type="button" class="btn btn-outline-primary" style="float:right; margin: 12px 16px; width: 10%;">IPO Backup &nbsp;
+                                <i aria-hidden="true" style='font-size:18px;' action="/{{user}}/AllIpoBackup/"></i>
+                        </button>
+                    </form>
+                    {% for profile in entry%}
+                        {{profile.name}}
+                    {% endfor %} 
+                </div> 
+
+                <tbody> 
+                    {% for i in entry %}
+                        <tr >
+                            <th>{{forloop.counter}}</th>
+                            <th scope="col">{{i.IPOName}}</th>
+                            <th scope="col" style="background: whitesmoke">{{i.id}}</th>
+                            <th scope="col">
+                                
+                                <form method="POST" {% if IPOName.IPOType == "MAINBOARD" %} action="/{{i.id}}/Backup/" {%else%}  action="/{{i.id}}/Backup/" {%endif%} >
+                                    {% csrf_token %} 
+                                        <button type="submit" class="btn btn-outline-primary" style="width: auto;  text-align: center;" >Backup &nbsp; 
+                                            <i aria-hidden="true" style='font-size:18px;'></i>
+                                        </button>
+                                </form>
+                                {% for profile in entry%}
+                                    {{profile.name}}
+                                {% endfor %} 
+                            </th>
+                        </tr>
+
+                    {% endfor %}
+                </tbody>
+            </div> {% endcomment %}
+
+        </table>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <!-- Total rows and current range display (left aligned) -->
+            <p class="text-left">
+                Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} Rows
+            </p>
+        </div>
+
+        {% comment %} <div class="col-md-6">
+            <ul class="pagination justify-content-end text-left" style="margin: 0; margin-right:2%;">
+                <!-- First page link -->
+                <li class="page-item">
+                    <a class="page-link" href="/BackUp?page=1">First</a>
+                </li>
+                
+                <!-- Previous page link -->
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="/BackUp?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Previous</span>
+                    </li>
+                {% endif %}
+                
+                <!-- Current page number -->
+                <li class="page-item active">
+                    <a class="page-link">{{ page_obj.number }}</a>
+                </li>
+                
+                <!-- Next page link -->
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="/BackUp?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Next</span>
+                    </li>
+                {% endif %}
+                
+                <!-- Last page link -->
+                <li class="page-item">
+                    <a class="page-link" href="/BackUp?page={{ page_obj.paginator.num_pages }}">Last</a>
+                </li>
+            </ul>
+        </div> {% endcomment %}
+
+        <div class="col-md-6">
+            <ul class="pagination justify-content-end text-left" style="margin: 0; margin-right:2%;">
+                <!-- Always show the first page -->
+                {% if page_obj.number != 1 %}
+                    <li class="page-item">
+                        <a class="page-link" href="/BackUp?page=1">1</a>
+                    </li>
+                {% endif %}
+                
+                <!-- Show ellipsis if current page is greater than 4 -->
+                {% if page_obj.number > 4 %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+                
+                <!-- Display pages before the current page -->
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num > 1 and num < page_obj.number and num >= page_obj.number|add:'-2' %}
+                        <li class="page-item">
+                            <a class="page-link" href="/BackUp?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                <!-- Display current page -->
+                <li class="page-item active">
+                    <span class="page-link">{{ page_obj.number }}</span>
+                </li>
+                
+                <!-- Display pages after the current page -->
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num > page_obj.number and num < page_obj.number|add:'3' and num < page_obj.paginator.num_pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="/BackUp?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                <!-- Show ellipsis if current page is less than num_pages - 3 -->
+                {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+                
+                <!-- Always show the last page -->
+                {% if page_obj.number != page_obj.paginator.num_pages %}
+                    <li class="page-item">
+                        <a class="page-link" href="/BackUp?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
+</div> 
+
+<script>
+    $(document).ready(function () {
+        $('#bootstrapdatatable').DataTable({
+            "aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
+            "iDisplayLength": 25
+        }
+        );
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        {% comment %} $('#example thead tr')
+            .clone(true)
+            .addClass('filters')
+            .appendTo('#example thead'); {% endcomment %}
+
+        var pageLength = "{{ Backup_page_size|default:'50' }}";
+        pageLength = pageLength === "All" ? -1 : parseInt(pageLength, 50);
+    
+        var table = $('#example').DataTable({
+            orderCellsTop: true,
+            {% comment %} fixedHeader: true, {% endcomment %}
+            lengthMenu: [50, 100, 150, 200,-1],
+            lengthChange: true,
+            info:false,
+            "pageLength": pageLength,
+            
+            initComplete: function () {
+                var api = this.api();
+    
+                
+                api
+                    .columns(':not(:last-child)')
+                    .eq(0)
+                    .each(function (colIdx) {
+                        
+                        var cell = $('.filters th').eq(
+                            $(api.column(colIdx).header()).index()
+                        );
+                        var title = $(cell).text();
+                        $(cell).html('<input class="Input" type="text" placeholder="' + title + '" style="text-align: center ;" />');
+                        
+                        $(
+                            'input',
+                            $('.filters th').eq($(api.column(colIdx).header()).index())
+                        )
+                            .off('keyup change')
+                            .on('change', function (e) {
+                                
+                                $(this).attr('title', $(this).val());
+                                var regexr = '({search})'; //$(this).parents('th').find('select').val();
+    
+                                var cursorPosition = this.selectionStart;
+                                
+                                api
+                                    .column(colIdx)
+                                    .search(
+                                        this.value != ''
+                                            ? regexr.replace('{search}', '(((' + this.value + ')))')
+                                            : '',
+                                        this.value != '',
+                                        this.value == ''
+                                    )
+                                    .draw();
+                            })
+                            .on('keyup', function (e) {
+                                e.stopPropagation();
+    
+                                $(this).trigger('change');
+                                $(this)
+                                    .focus()[0]
+                                    .setSelectionRange(cursorPosition, cursorPosition);
+                            });
+                    });
+                    var lastCell = $('.filters th').eq(
+                    $(api.column(':last-child').header()).index()
+                    );
+                    $(lastCell).html('');
+            },
+            language: {
+                info: 'Showing _START_ to _END_ of _TOTAL_ Rows',
+                infoFiltered: '(filtered from _MAX_ total Rows)',
+                emptyTable: "No data available",
+                lengthMenu: 'Show <select>' +
+                            '<option value="50">50</option>' +
+                            '<option value="100">100</option>' +
+                            '<option value="150">150</option>' +
+                            '<option value="200">200</option>' +
+                            '<option value="-1">All</option>' +
+                            '</select> Rows',
+                search: 'Search:',
+                paginate: {
+                    first: 'First',
+                    last: 'Last',
+                    next: 'Next',
+                    previous: 'Previous'
+                }
+            },
+            
+        });
+        var customButton = $('<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#exampleModal">Status</button>');
+        $('.dt-buttons.btn-group').append(customButton);
+
+        $('select[name="example_length"] option[value="-1"]').text('All');
+        
+        table.buttons().container()
+            .appendTo( '#example_wrapper .col-md-6:eq(0)' );
+
+        var table = $('#example').DataTable();
+
+        var dataTableLengthDiv = document.getElementById('example_length');
+
+        var firstLabel = dataTableLengthDiv.querySelector('label');
+
+        if (firstLabel) {
+        firstLabel.classList.add('slr');
+        }
+    } );
+</script>
+<script>
+
+    $(document).ready(function () {
+        var newDiv = $('<div></div>');
+        var formHtml =    `
+            <form method="POST" action="/AllIpoBackup"style="margin-left: -64%;">
+                {% csrf_token %}
+                <!-- BUTTON OF EDIT MODAL -->
+                <button type="submit" class="btn btn-outline-primary bi" style="/*float:right; margin: -2.5% 0%;*/ margin-left: 60%;">
+                   All IPOs Backup &nbsp;
+                </button>
+            </form>
+            <div style="display:inline-block;margin-left: 73%;">
+                <a href="{% url 'AccountingBackup' %}" class="btn btn-outline-primary" style="margin-top: -41%;">
+                    Accounting Backup  
+                </a>
+            </div>
+            {% for profile in entry %}
+                {{ profile.name }}
+            {% endfor %} 
+        `;
+        
+        newDiv.append(formHtml);
+        $('.dataTables_length').append(newDiv);
+    });
+        $(document).ready(function() {
+        $(".col-sm-12.col-md-6:first").addClass("custom-width");
+        $(".col-sm-12.col-md-6").addClass("cw");
+        $(".dt-row:first").addClass("table-responsive");
+        $(".buttons-collection").addClass("d-flex justify-content-center align-items-center");
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        // Initialize DataTables instance
+        // Remove the existing rows selection dropdown and pagination if needed
+        $('.slr').remove();
+        $('#example_paginate').remove();
+        
+        // Create the new form HTML for rows per page selection
+        var formHtml = `
+            <form method="POST" action="/BackUp" style="margin-top: -4%;"> 
+                {% csrf_token %}
+                <label for="page_size">Show 
+                <select name="Backup_page_size" id="Backup_page_size" onchange="this.form.submit()">
+                    <option value="{{Backup_page_size}}" style='display:None;' {% if Backup_page_size|default_if_none:50 == 50 %}selected{% endif %}>{{Backup_page_size}}</option>
+                    <option value="50" {% if Backup_page_size == 50 %}selected{% endif %}>50</option>
+                    <option value="100" {% if Backup_page_size == 100 %}selected{% endif %}>100</option>
+                    <option value="200" {% if Backup_page_size == 200 %}selected{% endif %}>200</option>
+                    <option value="250" {% if Backup_page_size == 250 %}selected{% endif %}>250</option>
+                    <option value="All" {% if Backup_page_size == 'All' %}selected{% endif %}>All</option>
+                </select>
+                Rows</label>
+                <input type="hidden" name="page" value="{{ page_obj.number }}">
+            </form>
+        `;
+    
+        // Append the form to a specific element
+        $('.dataTables_length').append(formHtml);
+
+        // Update page length when selection is changed
+        {% comment %} $('#Backup_page_size').on('change', function() {
+            var pageSize = $(this).val();
+            if (pageSize === 'All') {
+                table.page.len(-1).draw(); // Show all rows if "All" is selected
+            } else {
+                table.page.len(parseInt(pageSize)).draw(); // Set to selected page length
+            }
+        });
+
+        // Set the initial page length when the page loads (from the server-side)
+        table.page.len({{ Backup_page_size|default:50 }}).draw(); {% endcomment %}
+    });
+</script>
+
+{% endblock %}

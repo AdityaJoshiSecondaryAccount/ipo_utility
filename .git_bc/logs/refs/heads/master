@@ -1,0 +1,95 @@
+0000000000000000000000000000000000000000 8dd1a6ed355831a5924904407b83958b6852eeb2 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788162295 +0530	commit (initial): initial commit
+8dd1a6ed355831a5924904407b83958b6852eeb2 c08a43d568e277c3409240805b31cb5bcbca4f6c Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788168064 +0530	commit: fix the loader
+c08a43d568e277c3409240805b31cb5bcbca4f6c 6e3118edcc086d1fd75c51b0cfb9967499216aea Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788169079 +0530	commit: fix loader css
+6e3118edcc086d1fd75c51b0cfb9967499216aea d5c364af8643de9e48bc00245b13d3189fa04a88 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788170875 +0530	commit: added edit functionalitty in /accounting page
+d5c364af8643de9e48bc00245b13d3189fa04a88 15a0f92cb5b8b8ad81301fbe4921a83d436aac27 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788174494 +0530	commit: addded loader
+15a0f92cb5b8b8ad81301fbe4921a83d436aac27 18fc3d8ef1917584af42275c692f424e63af2181 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788174743 +0530	commit: perf: optimize order placement with bulk_create and add button loaders
+18fc3d8ef1917584af42275c692f424e63af2181 4793a750bc95aedd9fe23a732b356529b8a99249 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788178689 +0530	commit: added positions page
+4793a750bc95aedd9fe23a732b356529b8a99249 70c4aa6b240a6dae1c785a1faa8c6bcc9533717d Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788238904 +0530	commit: added hide functionality in positions | new column added is_hidden
+70c4aa6b240a6dae1c785a1faa8c6bcc9533717d 271ac4cdfe830b5a354260729c21a158e7bed07c Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788242105 +0530	commit: update position table with sorting
+271ac4cdfe830b5a354260729c21a158e7bed07c c01125f877210664b462f52a3baa9a0e82ef056b Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788242212 +0530	commit: git ignore
+c01125f877210664b462f52a3baa9a0e82ef056b bbfbb8b2b570fdecc6c8c12f9a9f308654ebc872 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788245777 +0530	commit: data table fix in positions
+bbfbb8b2b570fdecc6c8c12f9a9f308654ebc872 dae92028cda6a7e41f8afd8b9f33b419f26976ba Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788246307 +0530	commit: remove ishidden field from curreniponame table and use tally field from orders table
+dae92028cda6a7e41f8afd8b9f33b419f26976ba 61c6a896e1e61b757998c11c5916ae1acb92b3bd Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788257391 +0530	commit: added edit and delete functionality, account log in /accounting | tally timestamp added | remove ishidden field
+61c6a896e1e61b757998c11c5916ae1acb92b3bd b1cf8cfb69a1ff6d960fa7016bf50e021c5647e2 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788261297 +0530	commit: ui change for show soft delete checkbox
+b1cf8cfb69a1ff6d960fa7016bf50e021c5647e2 1519fede03249ad81314fdd070ba0be20779f983 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788263342 +0530	commit: account logs moved to new page | mobile reres
+1519fede03249ad81314fdd070ba0be20779f983 a89c7a9afa10cd1421cf2591af64c684ddb9d643 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788263864 +0530	commit: change ui
+a89c7a9afa10cd1421cf2591af64c684ddb9d643 2913d38291aedcc3bf07ebdfbc33bf826a350fd6 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788263916 +0530	commit: change toggle name
+2913d38291aedcc3bf07ebdfbc33bf826a350fd6 bba428a390d8567c4fb2332a26b0657859a66858 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788265486 +0530	commit: update positions page by default list all groups
+bba428a390d8567c4fb2332a26b0657859a66858 2230ec0879fc2081b4800d9263c3c83a0c5f4989 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788265613 +0530	commit: hide ipo type from add ipo model | /IPOSETUP -> page`
+2230ec0879fc2081b4800d9263c3c83a0c5f4989 aa5dd93d22e1b9f6b98249cdf94f009f3ad67e48 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788267160 +0530	commit: remove read only tally in positions table
+aa5dd93d22e1b9f6b98249cdf94f009f3ad67e48 4c4d661d12bb2a78872073489d008c5c38832050 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788267590 +0530	commit: auto update tally status without page reload same as position page
+4c4d661d12bb2a78872073489d008c5c38832050 55fe5e98bdc83c00700280fe7f4962e96ee7b2f6 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788268307 +0530	commit: revert old refresh logic
+55fe5e98bdc83c00700280fe7f4962e96ee7b2f6 93a49c716fbebb07e3d4f8a5e3ea8243e1534f42 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788268891 +0530	commit: fix show unshow load problem
+93a49c716fbebb07e3d4f8a5e3ea8243e1534f42 eff29c31397b1c551902ea5ad122db06aba0ec8a Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788328285 +0530	commit: updated loader
+eff29c31397b1c551902ea5ad122db06aba0ec8a 2067e905b3a28efb0b855a44ce537bfcdecd0f6f Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788329219 +0530	commit: old loader
+2067e905b3a28efb0b855a44ce537bfcdecd0f6f b7e17b3dea56d6038454ca67306c1238a9bd2c8e Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788333970 +0530	commit: new day
+b7e17b3dea56d6038454ca67306c1238a9bd2c8e bbdb2d9aef2f0537b56fb07f97516292664c750f Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788334039 +0530	commit: git commit -m "perf: resolve N+1 query issue in firm allotment calculate to optimize performance for large order volumes"
+bbdb2d9aef2f0537b56fb07f97516292664c750f 971e8e1b47838815f78bdb23e599c51effb40bd8 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788337857 +0530	commit: added check in firm allotment if no orders for [buy and sell]
+971e8e1b47838815f78bdb23e599c51effb40bd8 eb6afd2d3745818cbf6e3f1c05247766bb2f9734 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788338554 +0530	commit: copy btn in orders status model
+eb6afd2d3745818cbf6e3f1c05247766bb2f9734 be4e4a24841f1eb3a947742d9425fbf5cec55ad8 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788341608 +0530	commit: removed decimal and reound off | ;Done
+be4e4a24841f1eb3a947742d9425fbf5cec55ad8 ab42e60ab689c769e97452ff189822f1c0e5d751 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788342284 +0530	commit: comment causing problem in ui
+ab42e60ab689c769e97452ff189822f1c0e5d751 2f34a4b9e6b16ff6800e42426971afb495a1da1b Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788348670 +0530	commit: new loader
+2f34a4b9e6b16ff6800e42426971afb495a1da1b 8668b28d130c1dbcedc4bca257dff08e7545f181 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788348704 +0530	commit: Fix string format error in Billing view
+8668b28d130c1dbcedc4bca257dff08e7545f181 32ac4ee87c3a9c97c4d2b54a20916124190e1a97 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788353610 +0530	commit: feat: Add clickable Group Name link in Status page for auto-filtered Orders
+32ac4ee87c3a9c97c4d2b54a20916124190e1a97 0ec5e4efd3fd1e8823c1944bd0c0ccf6799e4193 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788354022 +0530	commit: redesign positions page
+0ec5e4efd3fd1e8823c1944bd0c0ccf6799e4193 d5f7729d3b82ef58ac51900b47a438b892b44e1c Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788498535 +0530	commit: fixed decimal on page change
+d5f7729d3b82ef58ac51900b47a438b892b44e1c 15dc5b09142576952994b2920dcfbe50089b9b15 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788588015 +0530	commit: updated add payment model with bulking of ipos in order of the creation date of ipo if amount exceed the remaining amount goes as JV
+15dc5b09142576952994b2920dcfbe50089b9b15 5d0ae1370be49fed8f60424b646e97827334635e Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788591694 +0530	commit: created the add payment model so it can be reused in accouting and group wise billing
+5d0ae1370be49fed8f60424b646e97827334635e 0aaac6ffc7c4735d9dedd7a2a91bafedf096def3 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788592187 +0530	commit: state is now stored of columns
+0aaac6ffc7c4735d9dedd7a2a91bafedf096def3 a7ffdfeabef66ff4cec6ad17296e83d19bde0b37 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788593254 +0530	commit: added filter in orders model for copying image
+a7ffdfeabef66ff4cec6ad17296e83d19bde0b37 8cbf9a0edb590bc4c9166bfa22aeae1713f49b4e Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788597689 +0530	commit: added filtering in copy image in order's staus model
+8cbf9a0edb590bc4c9166bfa22aeae1713f49b4e 1ed9c00816ea647c8bd674af9f7ae43248d23e87 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788602630 +0530	commit: added borders to table
+1ed9c00816ea647c8bd674af9f7ae43248d23e87 3a863901e5363790623495573ac3738cdd64282f Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788604914 +0530	commit: sticky top in position and border
+3a863901e5363790623495573ac3738cdd64282f 24a96aa753c61ffe41d5be31eb2ff902fb9f558a Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788605108 +0530	commit: reduce border size
+24a96aa753c61ffe41d5be31eb2ff902fb9f558a 79e568a3898b65cf920c483d5debbe9f80233cfe Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788605502 +0530	commit: added sorting in positions table
+79e568a3898b65cf920c483d5debbe9f80233cfe c5946c2495113fad78eced8757d50edc7f0e73f1 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788605777 +0530	commit: scroll phase 01
+c5946c2495113fad78eced8757d50edc7f0e73f1 a6c3b59ff337a6b305be422ed3298e59a10092bf Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788606926 +0530	commit: auto uncheck table if all the fields are 0
+a6c3b59ff337a6b305be422ed3298e59a10092bf d183f0e243d8639038cc7bc3c152484582d078ef Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788611197 +0530	commit: fixed responsiveness of model | copy of image for smaller screen fixed
+d183f0e243d8639038cc7bc3c152484582d078ef 14ba4552849cfb719f3d4178593dc980b9d12bfd Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788612015 +0530	commit: fixed css of filter
+14ba4552849cfb719f3d4178593dc980b9d12bfd 78031984674dcdbb2fe35eaebd086983502f84a2 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788612724 +0530	commit: position tally message update
+78031984674dcdbb2fe35eaebd086983502f84a2 5f135d145540839dc70a13ce3f4644f68eafafed Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788759576 +0530	commit: added model to share group - ipo details via copy btn and share via system share navigator
+5f135d145540839dc70a13ce3f4644f68eafafed 4696183cff5359c71aa049354c69074e1f44c8ba Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788759917 +0530	commit: addeed check css
+4696183cff5359c71aa049354c69074e1f44c8ba 5223aec7ce676f0b70400c645e87f4c1be09f736 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788760482 +0530	commit: added check that toggle all ipos
+5223aec7ce676f0b70400c645e87f4c1be09f736 817c2743fbd9b8626270fe6cfb5c975ca0f30f59 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788760494 +0530	commit: fix filter popup
+817c2743fbd9b8626270fe6cfb5c975ca0f30f59 c5288e806ac91a47fcd25f19b65c66bc40f7a692 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788764076 +0530	commit: git commit -m "Fix bulk allocation precision and add strict validation" -m "- Switch frontend allocation math to minor units to fix floating-point bugs
+c5288e806ac91a47fcd25f19b65c66bc40f7a692 2bf6afaa451bc46873fc7bde22ba967d7a557b7c Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788786486 +0530	commit: feat: add group-to-group IPO transfers
+2bf6afaa451bc46873fc7bde22ba967d7a557b7c 6f2d2b26edece5c6ba75b1eafb9379eb78892cba Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788787308 +0530	commit: change ui of bulk show
+6f2d2b26edece5c6ba75b1eafb9379eb78892cba e059f16144dc82c3534e5fead611ac6f81f7d0e8 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788867865 +0530	commit: if transaction is deleted it should also update the dashboard accordingly
+e059f16144dc82c3534e5fead611ac6f81f7d0e8 a6e9f6dee242f17231813573cd346e0e155306f5 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788869301 +0530	commit: added validation in addpayment model
+a6e9f6dee242f17231813573cd346e0e155306f5 c2953582d5c2755127ec69d4f5c7d6f94c9b86ab Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788932400 +0530	commit: feat: add edit capability for bulk IPO transfers | new url to fetch details of a specific batch
+c2953582d5c2755127ec69d4f5c7d6f94c9b86ab 02b2159e680b55c319f8c7263eba83333e23516c Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788935655 +0530	commit: fixed all the bugs and conditions for selecting ipo
+02b2159e680b55c319f8c7263eba83333e23516c 3188a661f9386a976c1fbc4ec2032cc5d0b580b2 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788936328 +0530	commit: cant save when there is an error which is auto solved via logic | have to manuelly check the condition
+3188a661f9386a976c1fbc4ec2032cc5d0b580b2 35383b3ae850d91a4ada8ee2ab3389a5100c12c9 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788937510 +0530	commit: added proper erros in add payment model
+35383b3ae850d91a4ada8ee2ab3389a5100c12c9 13e38edc1e1a1cd48b537d67adfb43da08a4e927 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788939417 +0530	commit: user redability
+13e38edc1e1a1cd48b537d67adfb43da08a4e927 a9582c099fc219d5d27465b86c4d0112f86e7f3b Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788940138 +0530	commit: fixed ui of acounting logs for bulk transfer
+a9582c099fc219d5d27465b86c4d0112f86e7f3b 914f9c3d412da94aa23f70707c6feaf9dfb59f30 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788941464 +0530	commit: increment and decement by 1 in add payment model [float -> decimal]
+914f9c3d412da94aa23f70707c6feaf9dfb59f30 02db49c88a1f3a2cda948278071520eb06609e6b Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788945366 +0530	commit: fix: in accounting when change order of table bulkorder dropdown distords
+02db49c88a1f3a2cda948278071520eb06609e6b ba42a1d7f588a58884b4f1522da56a37c4923609 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788950061 +0530	commit: new accounting logs page
+ba42a1d7f588a58884b4f1522da56a37c4923609 c71ba65f3bf485fbf99e67e01fb65f442beb113d Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788955986 +0530	commit: added reason for editing and deleting an enty in accounting | added arow next to bulk order
+c71ba65f3bf485fbf99e67e01fb65f442beb113d 2d726b6ac2c4b0c6f0b71ab83075f8a8c0ca76a7 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788956539 +0530	commit: fixed data table filtr problem
+2d726b6ac2c4b0c6f0b71ab83075f8a8c0ca76a7 0237400c6409dc76e3b86c4e2a12a555220310b8 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788956848 +0530	commit: added sheet to excel | filter rmove on erfresh in /billing
+0237400c6409dc76e3b86c4e2a12a555220310b8 e7dd93b9cee61f38a0c1fbe91e9bc41333545ce5 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788957664 +0530	commit: old column removed only from ui
+e7dd93b9cee61f38a0c1fbe91e9bc41333545ce5 79eaabdc4eb87ee6d6464b9557df484b79690d83 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1788957759 +0530	commit: on successful order redirect to id/buy from /buy/id/groupname
+79eaabdc4eb87ee6d6464b9557df484b79690d83 2acf8d97e6c6282d1051bfd7580db89f7b510058 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1789013597 +0530	commit: change model title details to JV payment
+2acf8d97e6c6282d1051bfd7580db89f7b510058 6815fe8a07b80551e493e87cfa4e62fc32b3dec7 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1789015439 +0530	commit: added filter logs -> accountunting
+6815fe8a07b80551e493e87cfa4e62fc32b3dec7 3d2a3df3155541f9c9db9e72b99d0e1bd5fe39d3 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1789016090 +0530	commit: highlited edits in accounting | new function render_changes
+3d2a3df3155541f9c9db9e72b99d0e1bd5fe39d3 f63f48f0477b11edc38fc50781a87aac5f85f306 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1789016330 +0530	commit: removed borders
+f63f48f0477b11edc38fc50781a87aac5f85f306 619a06049b1370b9bb6d99c10d8e495835532964 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1789016654 +0530	commit: fix: ui table width
+619a06049b1370b9bb6d99c10d8e495835532964 cffc04c1e9b1a026dfe7bd2a13d4fd602196163c Manish Sharma <220101005092@gandhinagaruni.ac.in> 1789019775 +0530	commit: added remak in jv payment model
+cffc04c1e9b1a026dfe7bd2a13d4fd602196163c b521028cc41773921604cc1c4c0b212b9fbd2bd5 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1789019850 +0530	commit: switch green to blue
+b521028cc41773921604cc1c4c0b212b9fbd2bd5 08f34402c4162c4279922ab997a9e05a4a87e72e Manish Sharma <220101005092@gandhinagaruni.ac.in> 1789022375 +0530	commit: merge update
+08f34402c4162c4279922ab997a9e05a4a87e72e d6416a11f125877f7c2f9fc413dfc5e27732083f Manish Sharma <220101005092@gandhinagaruni.ac.in> 1789022606 +0530	commit: fixed: arrow flow of money
+d6416a11f125877f7c2f9fc413dfc5e27732083f e00013db0a6a95971c11c956d9ab115d43479d2f Manish Sharma <220101005092@gandhinagaruni.ac.in> 1789024392 +0530	commit: allotment checker fix
+e00013db0a6a95971c11c956d9ab115d43479d2f 15144f4784ecfd36a92ebf031ea0a0364f19ed55 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1789024894 +0530	commit: footer z index increased so current page of data table dosent overlap
+15144f4784ecfd36a92ebf031ea0a0364f19ed55 70e60cf6cb3e36ef06305fabc494c06f216def59 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1789043326 +0530	commit: updated requirements
+70e60cf6cb3e36ef06305fabc494c06f216def59 f55b4085861c06e86958d1b434b150b6c9a88795 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1789100920 +0530	commit: added bulkdelete in accounting | date filter select problem fixed | fix the order of ipos in add payment & transfer payment model
+f55b4085861c06e86958d1b434b150b6c9a88795 12ea2e0f1a4ffeb08972acfa98332cf3951cc20b Manish Sharma <220101005092@gandhinagaruni.ac.in> 1789101008 +0530	commit: start
+12ea2e0f1a4ffeb08972acfa98332cf3951cc20b 5abdae541226b7909607c4a758c9263e63277b52 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1789116660 +0530	commit: whatsapp integrated
+5abdae541226b7909607c4a758c9263e63277b52 060dc8610a5996b6dcb8555035ff90cbab0bc667 Manish Sharma <220101005092@gandhinagaruni.ac.in> 1789119642 +0530	commit: UPDATE
+060dc8610a5996b6dcb8555035ff90cbab0bc667 5e7e23957f34899c71fa4f7666f2b82ee893735c Manish Sharma <220101005092@gandhinagaruni.ac.in> 1789127045 +0530	commit: fix: csrf and post request url
+5e7e23957f34899c71fa4f7666f2b82ee893735c 2fee6ec1e16573d8ff7ae871a65c663e4914b2ae Manish Sharma <220101005092@gandhinagaruni.ac.in> 1789128316 +0530	commit: fix button id which is incorrect
+2fee6ec1e16573d8ff7ae871a65c663e4914b2ae ba8929537d6d6f45990a69530c02e0991edc522b Manish Sharma <220101005092@gandhinagaruni.ac.in> 1789130086 +0530	commit: fix javascript error throwing in browser that makes the test fail
+ba8929537d6d6f45990a69530c02e0991edc522b 3946659a7949a34b97767b1100c58b79a986fe5b Manish Sharma <220101005092@gandhinagaruni.ac.in> 1789130534 +0530	commit: !!!!! ypo fixes cause to fail test !!!!!
+3946659a7949a34b97767b1100c58b79a986fe5b b1d8d78a1a0318632094b33cfc07b547f478c1de Manish Sharma <220101005092@gandhinagaruni.ac.in> 1789130778 +0530	commit: !!!!! b is not defined !!!!!
+b1d8d78a1a0318632094b33cfc07b547f478c1de d851f6e50bddc20389f3df692eb93e9dd4cbf76f Manish Sharma <220101005092@gandhinagaruni.ac.in> 1789131384 +0530	commit: testcase passed | Cannot set properties of null
