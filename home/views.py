@@ -2916,31 +2916,6 @@ def GroupSetup(request):
     return render(request, 'GroupSetup.html', params)
 
 @allowed_users(allowed_roles=['Broker'])
-def AddCustomerUser(request):
-    group = GroupDetail.objects.filter(user=request.user)
-    if request.method == "POST":
-        try:
-            username = request.POST.get('username', '')
-            password = request.POST.get('password', '')
-            email = request.POST.get('email', '')
-            first_name = request.POST.get('first_name', '')
-            last_name = request.POST.get('last_name', '')
-            Group1 = request.POST.get('Group', '')
-            gid = GroupDetail.objects.get(
-                GroupName=Group1, user=request.user).id
-            user = CustomUser.objects.create_user(
-                username=username, password=password, email=email, last_name=last_name, first_name=first_name, Broker_id=request.user.id, Group_id=gid)
-            user.save()
-            group11 = Group.objects.get(name='Customer')
-            user.groups.add(group11)
-            messages.success(request, "Successfully Added User")
-            return redirect("/")
-
-        except:
-            messages.error(request, 'Error.')
-    return render(request, 'AddCustomerUser.html', {'Group': group.order_by('GroupName')})
-
-@allowed_users(allowed_roles=['Broker'])
 def AddIPO(request):
     if request.method == "POST":
         try:

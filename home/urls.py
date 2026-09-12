@@ -19,7 +19,6 @@ urlpatterns = [
     path('ClientSetup', views.ClientSetup, name="ClientSetup"),
     path('ClientSetup/<str:PanNoId>', views.ClientSetup, name="ClientSetup"),
     path('GroupSetup', views.GroupSetup, name="GroupSetup"),
-    path('AddCustomerUser', views.AddCustomerUser, name="AddCustomerUser"),
     path('AddIPO', views.AddIPO, name="AddIPO"),
     path('AddClient', views.AddClient, name="AddClient"),
     path('AddGroup', views.AddGroup, name="AddGroup"),

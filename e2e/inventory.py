@@ -92,7 +92,7 @@ def write_coverage():
     routes = write_inventory()
     journeys = {
         'index':'home.test_e2e; e2e.tests.Workflows.test_login_refresh_logout_protects_deep_link',
-        'indexforCustomer':'e2e.pages_tests.Pages.test_customer_create_through_form',
+        'indexforCustomer':'e2e.tests.Workflows.test_customer_cannot_access_broker_setup',
         'loginUser':'e2e.tests.Workflows.test_login_*',
         'logoutUser':'e2e.tests.Workflows.test_login_refresh_logout_protects_deep_link',
         'Changepassword':'e2e.pages_tests.Pages.test_password_mismatch_then_change_and_relogin',
@@ -106,7 +106,6 @@ def write_coverage():
         'DeleteGroup':'e2e.tests.Workflows.test_group_create_duplicate_edit_delete_cancel',
         'update':'e2e.pages_tests.Pages.test_ipo_edit_persists_price_and_name',
         'SetRate':'e2e.pages_tests.Pages.test_rates_save_and_reopen',
-        'AddCustomerUser':'e2e.pages_tests.Pages.test_customer_create_through_form',
         'BUY':'home.test_e2e',
         'sell':'home.test_e2e.AddClientEndToEndTest.test_create_ipo_and_verify_all_home_card_pages',
         'dashboardform':'home.test_e2e.AddClientEndToEndTest.test_create_ipo_and_verify_all_home_card_pages',
