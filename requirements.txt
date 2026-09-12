@@ -47,3 +47,5 @@ XlsxWriter==3.2.0
 yarl==1.9.4
 django-pwa
 ddddocr
+telethon==1.45.0
+imgkit==1.2.3
