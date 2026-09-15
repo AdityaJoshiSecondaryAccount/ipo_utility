@@ -13530,14 +13530,13 @@ def send_status_to_telegram(request, IPOid):
         return JsonResponse(result)
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-
-
+# production
 def get_wkhtmltoimage_config():
     """
     Locates wkhtmltoimage executable from PyInstaller bundle, project folder, or system PATH.
     """
     # 1. Check system PATH first (Linux package or Windows PATH)
-    exe = shutil.which('wkhtmltoimage') # or shutil.which('wkhtmltoimage.exe')
+    exe = shutil.which('wkhtmltoimage') or shutil.which('wkhtmltoimage.exe')
     if exe:
         try:
             return imgkit.config(wkhtmltoimage=exe)
@@ -13546,12 +13545,11 @@ def get_wkhtmltoimage_config():
 
     # 2. Check PyInstaller bundle (_MEIPASS) and Project root (settings.BASE_DIR)
     possible_paths = [
-        # os.path.join(getattr(sys, '_MEIPASS', ''), "wkhtmltoimage.exe"),
-        # os.path.join(settings.BASE_DIR, "wkhtmltoimage.exe"),
+        os.path.join(getattr(sys, '_MEIPASS', ''), "wkhtmltoimage.exe"),
+        os.path.join(settings.BASE_DIR, "wkhtmltoimage.exe"),
         os.path.join(settings.BASE_DIR, "wkhtmltoimage"),  # Linux binary in project folder
-        # r"C:\Program Files\wkhtmltopdf\bin\wkhtmltoimage.exe",
+        r"C:\Program Files\wkhtmltopdf\bin\wkhtmltoimage.exe",
         r"/usr/bin/wkhtmltoimage",
-        os.path.join(settings.BASE_DIR, "wkhtmltox", "usr", "bin", "wkhtmltoimage"),
     ]
     for p in possible_paths:
         if p and os.path.exists(p):
@@ -13562,6 +13560,37 @@ def get_wkhtmltoimage_config():
 
     return None
 
+
+# testing
+# def get_wkhtmltoimage_config():
+#     """
+#     Locates wkhtmltoimage executable from PyInstaller bundle, project folder, or system PATH.
+#     """
+#     # 1. Check system PATH first (Linux package or Windows PATH)
+#     exe = shutil.which('wkhtmltoimage') # or shutil.which('wkhtmltoimage.exe')
+#     if exe:
+#         try:
+#             return imgkit.config(wkhtmltoimage=exe)
+#         except Exception:
+#             pass
+
+#     # 2. Check PyInstaller bundle (_MEIPASS) and Project root (settings.BASE_DIR)
+#     possible_paths = [
+#         # os.path.join(getattr(sys, '_MEIPASS', ''), "wkhtmltoimage.exe"),
+#         # os.path.join(settings.BASE_DIR, "wkhtmltoimage.exe"),
+#         os.path.join(settings.BASE_DIR, "wkhtmltoimage"),  # Linux binary in project folder
+#         # r"C:\Program Files\wkhtmltopdf\bin\wkhtmltoimage.exe",
+#         r"/usr/bin/wkhtmltoimage",
+#         os.path.join(settings.BASE_DIR, "wkhtmltox", "usr", "bin", "wkhtmltoimage"),
+#     ]
+#     for p in possible_paths:
+#         if p and os.path.exists(p):
+#             try:
+#                 return imgkit.config(wkhtmltoimage=p)
+#             except Exception:
+#                 pass
+
+#     return None
 
 def generate_status_image(context):
     # context = { 'kostak_data': ..., 'subject_data': ..., etc. }
