@@ -1,0 +1,659 @@
+{
+    "version": "7.0",
+    "data_api_version": "3.0",
+    "routing_model": {
+        "START": [
+            "IPO_SELECT"
+        ],
+        "IPO_SELECT": [
+            "SEGMENT"
+        ],
+        "SEGMENT": [
+            "ORDER_DETAILS"
+        ],
+        "ORDER_DETAILS": [
+            "OPTION_DETAILS",
+            "REMARK"
+        ],
+        "OPTION_DETAILS": [
+            "REMARK"
+        ],
+        "REMARK": [
+            "CONFIRM"
+        ],
+        "CONFIRM": [
+            "COMPLETE"
+        ],
+        "COMPLETE": []
+    },
+    "screens": [
+        {
+            "id": "START",
+            "title": "IPO Utility",
+            "data": {},
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "Form",
+                        "name": "start_form",
+                        "children": [
+                            {
+                                "type": "TextHeading",
+                                "text": "Place Order"
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "Select whether you want to BUY or SELL."
+                            },
+                            {
+                                "type": "RadioButtonsGroup",
+                                "label": "Order Type",
+                                "name": "side",
+                                "required": true,
+                                "data-source": [
+                                    {
+                                        "id": "BUY",
+                                        "title": "BUY"
+                                    },
+                                    {
+                                        "id": "SELL",
+                                        "title": "SELL"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "Footer",
+                                "label": "Continue",
+                                "on-click-action": {
+                                    "name": "navigate",
+                                    "next": {
+                                        "type": "screen",
+                                        "name": "IPO_SELECT"
+                                    },
+                                    "payload": {
+                                        "side": "${form.side}"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "IPO_SELECT",
+            "title": "Select IPO",
+            "data": {
+                "side": {
+                    "type": "string",
+                    "__example__": "BUY"
+                },
+                "ipo_list": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "title": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "__example__": [
+                        {
+                            "id": "1",
+                            "title": "TATA CAPITAL IPO"
+                        },
+                        {
+                            "id": "2",
+                            "title": "SWIGGY IPO"
+                        }
+                    ]
+                }
+            },
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "Form",
+                        "name": "ipo_form",
+                        "children": [
+                            {
+                                "type": "TextHeading",
+                                "text": "Select IPO"
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "Choose the IPO you want to place an order for."
+                            },
+                            {
+                                "type": "Dropdown",
+                                "label": "IPO Name",
+                                "name": "ipo_id",
+                                "required": true,
+                                "data-source": "${data.ipo_list}"
+                            },
+                            {
+                                "type": "Footer",
+                                "label": "Continue",
+                                "on-click-action": {
+                                    "name": "navigate",
+                                    "next": {
+                                        "type": "screen",
+                                        "name": "SEGMENT"
+                                    },
+                                    "payload": {
+                                        "side": "${data.side}",
+                                        "ipo_id": "${form.ipo_id}"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "SEGMENT",
+            "title": "Order Segment",
+            "data": {
+                "side": {
+                    "type": "string",
+                    "__example__": "BUY"
+                },
+                "ipo_id": {
+                    "type": "string",
+                    "__example__": "1"
+                }
+            },
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "Form",
+                        "name": "segment_form",
+                        "children": [
+                            {
+                                "type": "TextHeading",
+                                "text": "Select Segment"
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "Choose your investor segment."
+                            },
+                            {
+                                "type": "RadioButtonsGroup",
+                                "label": "Segment",
+                                "name": "segment",
+                                "required": true,
+                                "data-source": [
+                                    {
+                                        "id": "RETAIL",
+                                        "title": "Retail"
+                                    },
+                                    {
+                                        "id": "SHNI",
+                                        "title": "SHNI"
+                                    },
+                                    {
+                                        "id": "BHNI",
+                                        "title": "BHNI"
+                                    },
+                                    {
+                                        "id": "PREMIUM",
+                                        "title": "Premium"
+                                    },
+                                    {
+                                        "id": "CALL",
+                                        "title": "Call"
+                                    },
+                                    {
+                                        "id": "PUT",
+                                        "title": "Put"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "Footer",
+                                "label": "Continue",
+                                "on-click-action": {
+                                    "name": "navigate",
+                                    "next": {
+                                        "type": "screen",
+                                        "name": "ORDER_DETAILS"
+                                    },
+                                    "payload": {
+                                        "side": "${data.side}",
+                                        "ipo_id": "${data.ipo_id}",
+                                        "segment": "${form.segment}"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "ORDER_DETAILS",
+            "title": "Order Details",
+            "data": {
+                "side": {
+                    "type": "string",
+                    "__example__": "BUY"
+                },
+                "ipo_id": {
+                    "type": "string",
+                    "__example__": "1"
+                },
+                "segment": {
+                    "type": "string",
+                    "__example__": "RETAIL"
+                }
+            },
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "Form",
+                        "name": "order_form",
+                        "children": [
+                            {
+                                "type": "TextHeading",
+                                "text": "Order Details"
+                            },
+                            {
+                                "type": "Dropdown",
+                                "label": "Category",
+                                "name": "category",
+                                "required": true,
+                                "data-source": [
+                                    {
+                                        "id": "Kostak",
+                                        "title": "Kostak"
+                                    },
+                                    {
+                                        "id": "Subject To",
+                                        "title": "Subject To"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "TextInput",
+                                "label": "Quantity",
+                                "name": "quantity",
+                                "input-type": "number",
+                                "required": true,
+                                "helper-text": "Number of lots"
+                            },
+                            {
+                                "type": "TextInput",
+                                "label": "Rate",
+                                "name": "rate",
+                                "input-type": "number",
+                                "required": true,
+                                "helper-text": "Price per lot"
+                            },
+                            {
+                                "type": "Footer",
+                                "label": "Continue",
+                                "on-click-action": {
+                                    "name": "navigate",
+                                    "next": {
+                                        "type": "screen",
+                                        "name": "REMARK"
+                                    },
+                                    "payload": {
+                                        "side": "${data.side}",
+                                        "ipo_id": "${data.ipo_id}",
+                                        "segment": "${data.segment}",
+                                        "category": "${form.category}",
+                                        "quantity": "${form.quantity}",
+                                        "rate": "${form.rate}",
+                                        "strike_price": 0,
+                                        "premium_quantity": 0,
+                                        "premium_rate": 0
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "OPTION_DETAILS",
+            "title": "Option Details",
+            "data": {
+                "side": {
+                    "type": "string",
+                    "__example__": "BUY"
+                },
+                "ipo_id": {
+                    "type": "string",
+                    "__example__": "1"
+                },
+                "segment": {
+                    "type": "string",
+                    "__example__": "CALL"
+                },
+                "category": {
+                    "type": "string",
+                    "__example__": "Kostak"
+                },
+                "quantity": {
+                    "type": "number",
+                    "__example__": 5
+                },
+                "rate": {
+                    "type": "number",
+                    "__example__": 100
+                }
+            },
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "Form",
+                        "name": "option_form",
+                        "children": [
+                            {
+                                "type": "TextHeading",
+                                "text": "Option / Premium Details"
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "Enter additional details for CALL, PUT, or Premium orders."
+                            },
+                            {
+                                "type": "TextInput",
+                                "label": "Strike Price",
+                                "name": "strike_price",
+                                "input-type": "number",
+                                "required": false,
+                                "helper-text": "Required for CALL / PUT"
+                            },
+                            {
+                                "type": "TextInput",
+                                "label": "Premium Quantity",
+                                "name": "premium_quantity",
+                                "input-type": "number",
+                                "required": false
+                            },
+                            {
+                                "type": "TextInput",
+                                "label": "Premium Rate",
+                                "name": "premium_rate",
+                                "input-type": "number",
+                                "required": false
+                            },
+                            {
+                                "type": "Footer",
+                                "label": "Continue",
+                                "on-click-action": {
+                                    "name": "navigate",
+                                    "next": {
+                                        "type": "screen",
+                                        "name": "REMARK"
+                                    },
+                                    "payload": {
+                                        "side": "${data.side}",
+                                        "ipo_id": "${data.ipo_id}",
+                                        "segment": "${data.segment}",
+                                        "category": "${data.category}",
+                                        "quantity": "${data.quantity}",
+                                        "rate": "${data.rate}",
+                                        "strike_price": "${form.strike_price}",
+                                        "premium_quantity": "${form.premium_quantity}",
+                                        "premium_rate": "${form.premium_rate}"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "REMARK",
+            "title": "Remark",
+            "data": {
+                "side": {
+                    "type": "string",
+                    "__example__": "BUY"
+                },
+                "ipo_id": {
+                    "type": "string",
+                    "__example__": "1"
+                },
+                "segment": {
+                    "type": "string",
+                    "__example__": "RETAIL"
+                },
+                "category": {
+                    "type": "string",
+                    "__example__": "Kostak"
+                },
+                "quantity": {
+                    "type": "number",
+                    "__example__": 5
+                },
+                "rate": {
+                    "type": "number",
+                    "__example__": 100
+                },
+                "strike_price": {
+                    "type": "number",
+                    "__example__": 0
+                },
+                "premium_quantity": {
+                    "type": "number",
+                    "__example__": 0
+                },
+                "premium_rate": {
+                    "type": "number",
+                    "__example__": 0
+                }
+            },
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "Form",
+                        "name": "remark_form",
+                        "children": [
+                            {
+                                "type": "TextHeading",
+                                "text": "Add Remark"
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "Add an optional note for this order."
+                            },
+                            {
+                                "type": "TextArea",
+                                "label": "Remark (Optional)",
+                                "name": "remark",
+                                "required": false
+                            },
+                            {
+                                "type": "Footer",
+                                "label": "Review Order",
+                                "on-click-action": {
+                                    "name": "navigate",
+                                    "next": {
+                                        "type": "screen",
+                                        "name": "CONFIRM"
+                                    },
+                                    "payload": {
+                                        "side": "${data.side}",
+                                        "ipo_id": "${data.ipo_id}",
+                                        "segment": "${data.segment}",
+                                        "category": "${data.category}",
+                                        "quantity": "${data.quantity}",
+                                        "rate": "${data.rate}",
+                                        "strike_price": "${data.strike_price}",
+                                        "premium_quantity": "${data.premium_quantity}",
+                                        "premium_rate": "${data.premium_rate}",
+                                        "remark": "${form.remark}"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "CONFIRM",
+            "title": "Confirm Order",
+            "data": {
+                "side": {
+                    "type": "string",
+                    "__example__": "BUY"
+                },
+                "ipo_id": {
+                    "type": "string",
+                    "__example__": "1"
+                },
+                "segment": {
+                    "type": "string",
+                    "__example__": "RETAIL"
+                },
+                "category": {
+                    "type": "string",
+                    "__example__": "Kostak"
+                },
+                "quantity": {
+                    "type": "number",
+                    "__example__": 5
+                },
+                "rate": {
+                    "type": "number",
+                    "__example__": 100
+                },
+                "strike_price": {
+                    "type": "number",
+                    "__example__": 0
+                },
+                "premium_quantity": {
+                    "type": "number",
+                    "__example__": 0
+                },
+                "premium_rate": {
+                    "type": "number",
+                    "__example__": 0
+                },
+                "remark": {
+                    "type": "string",
+                    "__example__": ""
+                }
+            },
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "Form",
+                        "name": "confirm_form",
+                        "children": [
+                            {
+                                "type": "TextHeading",
+                                "text": "Confirm Your Order"
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "Please review before submitting."
+                            },
+                            {
+                                "type": "TextSubheading",
+                                "text": "Order Summary"
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "Side: ${data.side}"
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "Segment: ${data.segment}"
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "Category: ${data.category}"
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "Quantity: ${data.quantity}"
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "Rate: ${data.rate}"
+                            },
+                            {
+                                "type": "Footer",
+                                "label": "Place Order",
+                                "on-click-action": {
+                                    "name": "data_exchange",
+                                    "payload": {
+                                        "side": "${data.side}",
+                                        "ipo_id": "${data.ipo_id}",
+                                        "segment": "${data.segment}",
+                                        "category": "${data.category}",
+                                        "quantity": "${data.quantity}",
+                                        "rate": "${data.rate}",
+                                        "strike_price": "${data.strike_price}",
+                                        "premium_quantity": "${data.premium_quantity}",
+                                        "premium_rate": "${data.premium_rate}",
+                                        "remark": "${data.remark}",
+                                        "action": "place_order"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "COMPLETE",
+            "title": "Order Placed",
+            "terminal": true,
+            "success": true,
+            "data": {
+                "confirmation_text": {
+                    "type": "string",
+                    "__example__": "Your BUY order has been placed successfully."
+                }
+            },
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "Form",
+                        "name": "complete_form",
+                        "children": [
+                            {
+                                "type": "TextHeading",
+                                "text": "Order Placed"
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "${data.confirmation_text}"
+                            },
+                            {
+                                "type": "Footer",
+                                "label": "Done",
+                                "on-click-action": {
+                                    "name": "complete",
+                                    "payload": {}
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}

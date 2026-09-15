@@ -1,4 +1,7 @@
-import ddddocr
+try:
+    import ddddocr
+except ImportError:
+    ddddocr = None
 from django.http.response import JsonResponse
 from django.shortcuts import render, redirect,get_object_or_404
 from django.contrib.auth.models import Group, User
