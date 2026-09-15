@@ -86,9 +86,9 @@ from .models import CustomUser, CurrentIpoName, GroupDetail
 from .models import Accounting, AccountingAuditLog, CurrentIpoName, GroupDetail
 from django.db.models import Sum, Case, When, F, Value, DecimalField,FloatField , Q,Count
 from django.shortcuts import render, get_object_or_404
-
+import sys
 from django.utils.html import escape, format_html
-
+import html
 from io import BytesIO
 import json
 from django.utils.dateparse import parse_datetime
@@ -7111,15 +7111,22 @@ def group_billing_details(request, group_id=None):
     if group_id:
         selected_group = get_object_or_404(GroupDetail, id=group_id, user=request.user)
         groups_to_process = [selected_group]
+        has_next = False
+        offset = 0
     else:
-        groups_to_process = list(groups)
+        offset = int(request.GET.get('offset', 0))
+        groups_to_process = list(groups)[offset:]
+        has_next = False
         
     group_tables = []
     empty_groups = []
+    populated_count = 0
+    groups_processed_count = 0
     
     ipos = CurrentIpoName.objects.filter(user=request.user).order_by('-id')
     
     for current_group in groups_to_process:
+        groups_processed_count += 1
         sme_html_table = ""
         mainboard_html_table = ""
         
@@ -7370,6 +7377,36 @@ def group_billing_details(request, group_id=None):
             put_buy_amt = put_orders.filter(OrderType="BUY").aggregate(Sum('Amount'))['Amount__sum'] or 0
             put_sell_amt = put_orders.filter(OrderType="SELL").aggregate(Sum('Amount'))['Amount__sum'] or 0
             put_billing = put_buy_amt + put_sell_amt
+
+            opt_orders = orders.filter(OrderCategory__in=["CALL", "PUT"])
+            strike_prices = list(opt_orders.values_list('Method', flat=True).distinct())
+
+            options_breakdown = []
+            for sp in strike_prices:
+                sp_label = str(sp) if sp is not None else "-"
+                sp_c = opt_orders.filter(OrderCategory="CALL", Method=sp)
+                sp_c_amt = (sp_c.filter(OrderType="BUY").aggregate(Sum('Amount'))['Amount__sum'] or 0) + \
+                           (sp_c.filter(OrderType="SELL").aggregate(Sum('Amount'))['Amount__sum'] or 0)
+
+                sp_p = opt_orders.filter(OrderCategory="PUT", Method=sp)
+                sp_p_amt = (sp_p.filter(OrderType="BUY").aggregate(Sum('Amount'))['Amount__sum'] or 0) + \
+                           (sp_p.filter(OrderType="SELL").aggregate(Sum('Amount'))['Amount__sum'] or 0)
+
+                # Option net quantity: BUY - SELL
+                sp_orders = opt_orders.filter(Method=sp)
+                sp_buy_qty = sp_orders.filter(OrderType="BUY").aggregate(Sum('Quantity'))['Quantity__sum'] or 0
+                sp_sell_qty = sp_orders.filter(OrderType="SELL").aggregate(Sum('Quantity'))['Quantity__sum'] or 0
+                sp_shares = sp_buy_qty - sp_sell_qty
+                sp_total_amt = sp_c_amt + sp_p_amt
+
+                if sp_c_amt != 0 or sp_p_amt != 0 or sp_shares != 0:
+                    options_breakdown.append({
+                        'strike_price': sp_label,
+                        'call_amount': f"{sp_c_amt:.1f}",
+                        'put_amount': f"{sp_p_amt:.1f}",
+                        'shares': int(sp_shares),
+                        'amount': f"{sp_total_amt:.0f}"
+                    })
         
             total_kostak_shares = (k_retail['buy_alloted_qty'] + k_shni['buy_alloted_qty'] + k_bhni['buy_alloted_qty']) - (k_retail['sell_alloted_qty'] + k_shni['sell_alloted_qty'] + k_bhni['sell_alloted_qty'])
             total_st_shares = (st_retail['buy_alloted_qty'] + st_shni['buy_alloted_qty'] + st_bhni['buy_alloted_qty']) - (st_retail['sell_alloted_qty'] + st_shni['sell_alloted_qty'] + st_bhni['sell_alloted_qty'])
@@ -7404,6 +7441,7 @@ def group_billing_details(request, group_id=None):
                 'put_sell_amt': put_sell_amt,
                 'total_kostak_shares': total_kostak_shares,
                 'total_st_shares': total_st_shares,
+                'options_breakdown': json.dumps(options_breakdown),
             })
         
         # Build Mainboard HTML Table
@@ -7443,7 +7481,8 @@ def group_billing_details(request, group_id=None):
             for row in mainboard_data:
                 tr_class = "archived-ipo" if row.get("is_tally") else ""
                 checked = "checked" if row.get("is_tally") else ""
-                mainboard_html_table += f"<tr class='{tr_class}' style='text-align: center;'>"
+                escaped_opts = html.escape(row.get('options_breakdown', '[]'))
+                mainboard_html_table += f"<tr class='{tr_class}' data-options-breakdown='{escaped_opts}' style='text-align: center;'>"
                 ts_val = row.get('ts_str', '')
                 ts_html = f"<br><span class='tally-ts-span' style='font-size: 0.65rem; font-weight: normal;'>{ts_val}</span>"
                 mainboard_html_table += f"<th style='border-left: 1px solid #555; border-right: 1px solid #555;'><input type='checkbox' class='ipo-archive-checkbox' style='cursor: pointer; margin:0; transform: scale(1.2);' data-id='{row['ipo_id']}' data-group='{current_group.GroupName}' {checked} title='Tally status'>{ts_html}</th>"
@@ -7504,14 +7543,32 @@ def group_billing_details(request, group_id=None):
                 'sme_html_table': sme_html_table,
                 'mainboard_html_table': mainboard_html_table
             })
+            populated_count += 1
         else:
             empty_groups.append(current_group.GroupName)
+
+        if not group_id and populated_count >= 5:
+            has_next = (offset + groups_processed_count) < len(groups)
+            break
+
+    next_offset = offset + groups_processed_count if not group_id else 0
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        from django.template.loader import render_to_string
+        html_content = render_to_string('partials/group_billing_partial.html', {
+            'group_tables': group_tables,
+            'empty_groups': empty_groups,
+            'is_ajax': True
+        })
+        return JsonResponse({'html': html_content, 'has_next': has_next, 'next_offset': next_offset, 'empty_groups': empty_groups})
 
     return render(request, 'group_billing_details.html', {
         'groups': groups,
         'selected_group': selected_group,
         'group_tables': group_tables,
         'empty_groups': empty_groups,
+        'has_next': has_next,
+        'next_offset': next_offset,
     })
 
 @allowed_users(allowed_roles=['Broker'])
@@ -13475,6 +13532,35 @@ def send_status_to_telegram(request, IPOid):
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 
+def get_wkhtmltoimage_config():
+    """
+    Locates wkhtmltoimage executable from PyInstaller bundle, project folder, or system PATH.
+    """
+    # 1. Check system PATH first (Linux package or Windows PATH)
+    exe = shutil.which('wkhtmltoimage') # or shutil.which('wkhtmltoimage.exe')
+    if exe:
+        try:
+            return imgkit.config(wkhtmltoimage=exe)
+        except Exception:
+            pass
+
+    # 2. Check PyInstaller bundle (_MEIPASS) and Project root (settings.BASE_DIR)
+    possible_paths = [
+        # os.path.join(getattr(sys, '_MEIPASS', ''), "wkhtmltoimage.exe"),
+        # os.path.join(settings.BASE_DIR, "wkhtmltoimage.exe"),
+        os.path.join(settings.BASE_DIR, "wkhtmltoimage"),  # Linux binary in project folder
+        # r"C:\Program Files\wkhtmltopdf\bin\wkhtmltoimage.exe",
+        r"/usr/bin/wkhtmltoimage",
+        os.path.join(settings.BASE_DIR, "wkhtmltox", "usr", "bin", "wkhtmltoimage"),
+    ]
+    for p in possible_paths:
+        if p and os.path.exists(p):
+            try:
+                return imgkit.config(wkhtmltoimage=p)
+            except Exception:
+                pass
+
+    return None
 
 
 def generate_status_image(context):
@@ -13497,6 +13583,108 @@ def generate_status_image(context):
     buf = io.BytesIO(img_bytes)
     buf.name = "status_report.png"
     return buf
+
+def generate_status_image(context):
+    html = render_to_string('status_table_template.html', context)
+    options = {
+        'format': 'png',
+        'quality': '100',
+        'encoding': "UTF-8",
+    }
+    config = get_wkhtmltoimage_config()
+    if config:
+        img_bytes = imgkit.from_string(html, False, options=options, config=config)
+    else:
+        img_bytes = imgkit.from_string(html, False, options=options)
+    buf = io.BytesIO(img_bytes)
+    buf.name = "status_report.png"
+    return buf
+
+@login_required
+@csrf_exempt
+def generate_group_share_image(request):
+    """
+    Generates a full-width, crisp PNG image of the group billing details using wkhtmltoimage.
+    """
+    if request.method != "POST":
+        return HttpResponse("Method not allowed", status=405)
+    
+    raw_html = ""
+    try:
+        if request.body:
+            data = json.loads(request.body)
+            raw_html = data.get("html_content", "")
+    except Exception:
+        pass
+    
+    if not raw_html:
+        raw_html = request.POST.get("html_content", "")
+
+    if not raw_html:
+        return HttpResponse("No HTML content provided", status=400)
+
+    # Build clean standalone HTML with exact table layout
+    full_html = f"""<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+    body {{
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background-color: #ffffff;
+        margin: 0;
+        padding: 20px 24px;
+        width: 1200px;
+        box-sizing: border-box;
+    }}
+    table {{
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 14px;
+        margin-bottom: 20px;
+        font-size: 13.5px;
+    }}
+    th, td {{
+        border: 1px solid #000000;
+        padding: 5px 8px;
+        text-align: center;
+        white-space: nowrap;
+    }}
+    thead th {{
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }}
+    h3 {{
+        font-size: 20px;
+        margin: 0 0 12px 0;
+        font-weight: bold;
+    }}
+</style>
+</head>
+<body>
+    {raw_html}
+</body>
+</html>"""
+
+    options = {
+        'format': 'png',
+        'quality': '100',
+        'encoding': 'UTF-8',
+        'width': '1200',
+        'disable-smart-width': '',
+        'quiet': '',
+    }
+
+    try:
+        config = get_wkhtmltoimage_config()
+        if config:
+            img_bytes = imgkit.from_string(full_html, False, options=options, config=config)
+        else:
+            img_bytes = imgkit.from_string(full_html, False, options=options)
+        return HttpResponse(img_bytes, content_type="image/png")
+    except Exception as e:
+        print(f"generate_group_share_image exception: {e}")
+        return HttpResponse(f"Image generation failed: {e}", status=500)
 
 @allowed_users(allowed_roles=['Broker'])
 def get_all_groups(request, IPOid):

@@ -145,4 +145,5 @@ urlpatterns = [
     #for multiple/bulk Group delete button
     path('BulkDeleteGroup', views.BulkDeleteGroup, name='BulkDeleteGroup'),
     path('BulkDeleteClients', views.BulkDeleteClients, name='BulkDeleteClients'),
+    path('generate-group-share-image/', views.generate_group_share_image, name='generate_group_share_image'),
 ]

@@ -119,7 +119,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'IPOutility',
+#         'NAME': 'Testapp_IPOUtility',
 #         'USER': 'hostingerdb',
 #         'PASSWORD': 'Hostingerdb@1234',
 #         'HOST': '46.202.162.106',  # Or your MySQL server's host address

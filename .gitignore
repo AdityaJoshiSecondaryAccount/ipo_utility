@@ -51,6 +51,7 @@ venv.bak/
 docs/
 
 **/migrations/
+wkhtmltox/
 
 # Isolated browser automation artifacts
 test-results/
