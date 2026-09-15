@@ -29,7 +29,9 @@
     </style>
 </head>
 <body>
-    <h3 style="text-align:center;">Status</h3>
+    <h2 style="text-align:center; font-weight: bold; margin-bottom: 20px;">
+        {% if IPOName %}{{IPOName.IPOName|default:IPOName}} Ipo Status{% else %}Status{% endif %}
+    </h2>
 
     <div class="table-responsive text-nowrap">
         <table style="height: 20px; ">

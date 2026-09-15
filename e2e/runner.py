@@ -59,7 +59,7 @@ class SafeRunner(DiscoverRunner):
         out = Path(settings.BASE_DIR) / 'test-results'
         out.mkdir(exist_ok=True)
         failures = [(t.id(), trace) for t, trace in result.failures + result.errors]
-        summary = {'tests': result.testsRun, 'passed': len(result.passed_ids),
+        summary = {'tests': result.testsRun, 'passed': result.testsRun - len(failures) - len(result.skipped),
                    'failed': len(failures), 'skipped': len(result.skipped), 'failures': failures,
                    'passed_ids': result.passed_ids,
                    'skipped_details': [(str(t), reason) for t, reason in result.skipped]}

@@ -13,6 +13,12 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 import pymysql
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env'))
+except ImportError:
+    pass
+
 pymysql.version_info = (1, 4, 6, 'final', 0)
 pymysql.install_as_MySQLdb()
 
@@ -49,6 +55,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'home',
     'pwa',
+    'whatsapp.apps.WhatsAppConfig',
 ]
 
 MIDDLEWARE = [
@@ -73,7 +80,11 @@ ROOT_URLCONF = 'userproject.urls'
 
 CSRF_TRUSTED_ORIGINS = [
     "https://ipoutility.in",
-    "https://www.ipoutility.in",  # add this too if you use www
+    "https://www.ipoutility.in",
+    "https://tweet-collage-barman.ngrok-free.dev",
+    "https://*.ngrok-free.dev",
+    "https://*.ngrok-free.app",
+    "https://*.ngrok.io",
 ]
 
 TEMPLATES = [
@@ -119,7 +130,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'Testapp_IPOUtility',
+#         'NAME': 'IPOutility',
 #         'USER': 'hostingerdb',
 #         'PASSWORD': 'Hostingerdb@1234',
 #         'HOST': '46.202.162.106',  # Or your MySQL server's host address
@@ -216,3 +227,19 @@ PWA_APP_SPLASH_SCREEN = [
 ]
 PWA_APP_DIR = 'ltr'
 PWA_APP_LANG = 'en-US'
+
+# Meta WhatsApp Cloud API configuration. Keep credentials in the environment.
+WHATSAPP_API_VERSION = os.environ.get('WHATSAPP_API_VERSION', 'v21.0')
+WHATSAPP_ACCESS_TOKEN = os.environ.get('WHATSAPP_ACCESS_TOKEN', 'EAARwZCKnack4BSWdUyaMxAnN0EzBEXHYfBBUI2ZB2ZBF4oF6TBcLx4XetVTqMpIYGYyYuZBJ9VtkGZAQrWW5WcVPMVHbaioujlwwwfTl4mqZBOdcrxfiNhHhGBqZBQIuADCOS9VmNlCYFVDfsW7sZAQZC4NLOctBDAfLBt2ewcYCcnXIk6MFBIvyxU9G7OeQlcb9vHQZDZD')
+WHATSAPP_PHONE_NUMBER_ID = os.environ.get('WHATSAPP_PHONE_NUMBER_ID', '1287337667797572')
+WHATSAPP_WEBHOOK_VERIFY_TOKEN = os.environ.get('WHATSAPP_WEBHOOK_VERIFY_TOKEN', 'ADwealth_WA_Webhook_2026')
+WHATSAPP_APP_SECRET = os.environ.get('WHATSAPP_APP_SECRET', '')
+WHATSAPP_FLOW_PRIVATE_KEY_PATH = os.environ.get(
+    'WHATSAPP_FLOW_PRIVATE_KEY_PATH',
+    os.path.join(BASE_DIR, 'whatsapp', 'flow_keys', 'private.pem')
+)
+WHATSAPP_FLOW_PRIVATE_KEY_PASSPHRASE = os.environ.get('WHATSAPP_FLOW_PRIVATE_KEY_PASSPHRASE', None)
+
+# WHATSAPP_API_VERSION = 'v21.0'
+# WHATSAPP_ACCESS_TOKEN = 'EAARwZCKnack4BSWdUyaMxAnN0EzBEXHYfBBUI2ZB2ZBF4oF6TBcLx4XetVTqMpIYGYyYuZBJ9VtkGZAQrWW5WcVPMVHbaioujlwwwfTl4mqZBOdcrxfiNhHhGBqZBQIuADCOS9VmNlCYFVDfsW7sZAQZC4NLOctBDAfLBt2ewcYCcnXIk6MFBIvyxU9G7OeQlcb9vHQZDZD'
+# WHATSAPP_PHONE_NUMBER_ID = '1287337667797572'

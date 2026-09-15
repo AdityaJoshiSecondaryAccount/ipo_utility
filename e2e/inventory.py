@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def discover():
     functions = {}
-    for app in ('home',):
+    for app in ('home', 'whatsapp'):
         tree = ast.parse((ROOT / app / 'views.py').read_text(encoding='utf-8-sig'))
         functions[app] = {n.name: n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))}
     routes = []
@@ -33,9 +33,9 @@ def discover():
             decorators = [ast.unparse(d) for d in view.decorator_list]
             redirects = [ast.unparse(c.args[0]) for c in calls if isinstance(c.func, ast.Name)
                          and c.func.id == 'redirect' and c.args]
-            routes.append(dict(app=app, route='/' + route.value,
+            routes.append(dict(app=app, route='/' + ('whatsapp/' if app == 'whatsapp' else '') + route.value,
                 name=next((k.value.value for k in n.keywords if k.arg == 'name'), ''),
-                namespace='', view=target.attr,
+                namespace='whatsapp' if app == 'whatsapp' else '', view=target.attr,
                 line=view.lineno, decorators=decorators, templates=templates, parameters=params,
                 redirects=redirects, methods='POST only' if 'require_POST' in decorators else
                 'POST branch; other verbs not necessarily rejected' if params['POST'] else 'No method decorator',
@@ -92,7 +92,7 @@ def write_coverage():
     routes = write_inventory()
     journeys = {
         'index':'home.test_e2e; e2e.tests.Workflows.test_login_refresh_logout_protects_deep_link',
-        'indexforCustomer':'e2e.tests.Workflows.test_customer_cannot_access_broker_setup',
+        'indexforCustomer':'e2e.pages_tests.Pages.test_customer_create_through_form',
         'loginUser':'e2e.tests.Workflows.test_login_*',
         'logoutUser':'e2e.tests.Workflows.test_login_refresh_logout_protects_deep_link',
         'Changepassword':'e2e.pages_tests.Pages.test_password_mismatch_then_change_and_relogin',
@@ -106,7 +106,8 @@ def write_coverage():
         'DeleteGroup':'e2e.tests.Workflows.test_group_create_duplicate_edit_delete_cancel',
         'update':'e2e.pages_tests.Pages.test_ipo_edit_persists_price_and_name',
         'SetRate':'e2e.pages_tests.Pages.test_rates_save_and_reopen',
-        'BUY':'home.test_e2e',
+        'AddCustomerUser':'e2e.pages_tests.Pages.test_customer_create_through_form',
+        'BUY':'home.test_e2e; e2e.tests.Workflows.test_whatsapp_buy_ui_uses_supplied_number',
         'sell':'home.test_e2e.AddClientEndToEndTest.test_create_ipo_and_verify_all_home_card_pages',
         'dashboardform':'home.test_e2e.AddClientEndToEndTest.test_create_ipo_and_verify_all_home_card_pages',
         'user_profile':'e2e.tests.Workflows.test_profile_email_saved_and_password_visibility',
@@ -119,6 +120,8 @@ def write_coverage():
         'update_shared_link':'e2e.api_tests.Contracts.test_shared_link_create_update_delete',
         'delete_link':'e2e.api_tests.Contracts.test_shared_link_create_update_delete',
         'resolve_shared_link':'e2e.tests.Workflows.test_shared_link_*',
+        'send_buy_order':'e2e.tests.Workflows.test_whatsapp_buy_ui_uses_supplied_number; e2e.api_tests.Contracts.test_whatsapp_*',
+        'send_sell_order':'e2e.api_tests.Contracts.test_whatsapp_*',
         'BulkDeleteClients':'e2e.api_tests.Contracts.test_bulk_deletes_preserve_referenced_clients_groups_and_foreign_data',
         'BulkDeleteGroup':'e2e.api_tests.Contracts.test_bulk_deletes_preserve_referenced_clients_groups_and_foreign_data',
         'BulkDeleteOrders':'e2e.api_tests.Contracts.test_bulk_deletes_preserve_referenced_clients_groups_and_foreign_data',
@@ -129,7 +132,7 @@ def write_coverage():
     }
     pages = {'IPOSETUP','ClientSetup','GroupSetup','edit','EditClient','EditGroup','EditOrder','dashboard',
              'OrderFunction','OrderDetailFunction','Billing','Status','GroupWiseDashboard','group_billing_details',
-             'BackUp','accounting_logs_view'}
+             'BackUp','panalloted','accounting_logs_view'}
     text=['# Playwright coverage matrix','',
         'TESTED means an executable check exists, not that it passed or that every branch is covered.',
         'Anonymous-only checks do not establish authenticated workflow coverage. See the JSON interaction inventory for individual fields/buttons and the final report for failures.', '',
@@ -151,7 +154,7 @@ def write_coverage():
              scenario,'P0' if view in journeys else 'P1',files.strip('; '),'TESTED'])+' |')
     text += ['', '## Explicit limits', '',
         '- Every application route declaration is represented, including aliases and the duplicate send-status route. Route-level coverage is not exhaustive functional coverage.',
-        '- Live registrar CAPTCHA/allotment, Telegram OTP/session and email delivery are intentionally excluded from real providers. This application has no active WhatsApp routes; WhatsApp-specific tests from the source suite are excluded.',
+        '- Live registrar CAPTCHA/allotment, Telegram OTP/session and email delivery are intentionally excluded from real providers. Only WhatsApp has a full simulated provider contract in this suite.',
         '- Complex bulk transfers, every export format, every upload parser, every table filter/sort/page-size combination, and all order-category boundary combinations remain functional coverage gaps.',
         '- Framework admin routes: representative group CRUD and broker denial are tested; individual field validation for every registered model is intentionally excluded. PWA manifest/service-worker routes are NOT USER-FACING framework resources.',
         '- Static legacy templates not referenced by any active view are NOT USER-FACING; the interaction JSON retains them for review.',

@@ -118,10 +118,10 @@ class AddClientEndToEndTest(BrowserCase):
 
         expect(self.page.locator("#btnPlaceOnly")).to_be_visible()
         expect(self.page.locator("#btnPlaceWithTelegram")).to_be_visible()
-        expect(self.page.locator("#btnSendWhatsApp")).to_have_count(0)
+        expect(self.page.locator("#btnSendWhatsApp")).to_be_visible()
         print(
             f"[E2E][INFO]  {order_type}: verified {len(expected_fields)} form fields "
-            "and both available order action buttons; WhatsApp is absent",
+            "and all three order action buttons",
             flush=True,
         )
 

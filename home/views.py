@@ -1,4 +1,7 @@
-import ddddocr
+try:
+    import ddddocr
+except ImportError:
+    ddddocr = None
 from django.http.response import JsonResponse
 from django.shortcuts import render, redirect,get_object_or_404
 from django.contrib.auth.models import Group, User
@@ -69,7 +72,6 @@ from django.http.response import JsonResponse
 from django.contrib.auth.models import Group, User
 from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST
 from .models import CurrentIpoName, GroupDetail, Order, OrderDetail, ClientDetail, CustomUser, RateList,SharedLink
 from django.http import JsonResponse
 from telethon import TelegramClient
@@ -86,9 +88,9 @@ from .models import CustomUser, CurrentIpoName, GroupDetail
 from .models import Accounting, AccountingAuditLog, CurrentIpoName, GroupDetail
 from django.db.models import Sum, Case, When, F, Value, DecimalField,FloatField , Q,Count
 from django.shortcuts import render, get_object_or_404
-import sys
+
 from django.utils.html import escape, format_html
-import html
+
 from io import BytesIO
 import json
 from django.utils.dateparse import parse_datetime
@@ -174,15 +176,7 @@ def indexforCustomer(request):
     if request.user.is_anonymous:
         return redirect("/login")
     products = CurrentIpoName.objects.filter(user=request.user.Broker_id)
-    ratelist = []
-    for i in products:
-        try:
-            Ratelistitem = RateList.objects.get(
-                user=request.user.Broker_id, RateListIPOName_id=i.id)
-        except:
-            Ratelistitem = 0
-        ratelist.append(Ratelistitem)
-    params = {'entry': zip(products, ratelist), 'product': products}
+    params = {'entry': products, 'product': products}
     return render(request, 'index.html', params)
 
 # <!--- Allotment Check Start
@@ -684,7 +678,6 @@ def encVal(vl):
     
     return base64.b64encode(encrypted_data)
 
-@allowed_users(allowed_roles=['Broker'])
 def get_options(request):
     PRI_limit  = CustomUser.objects.get(username = request.user)
     is_premium_user = PRI_limit.Allotment_access    
@@ -2918,6 +2911,31 @@ def GroupSetup(request):
     return render(request, 'GroupSetup.html', params)
 
 @allowed_users(allowed_roles=['Broker'])
+def AddCustomerUser(request):
+    group = GroupDetail.objects.filter(user=request.user)
+    if request.method == "POST":
+        try:
+            username = request.POST.get('username', '')
+            password = request.POST.get('password', '')
+            email = request.POST.get('email', '')
+            first_name = request.POST.get('first_name', '')
+            last_name = request.POST.get('last_name', '')
+            Group1 = request.POST.get('Group', '')
+            gid = GroupDetail.objects.get(
+                GroupName=Group1, user=request.user).id
+            user = CustomUser.objects.create_user(
+                username=username, password=password, email=email, last_name=last_name, first_name=first_name, Broker_id=request.user.id, Group_id=gid)
+            user.save()
+            group11 = Group.objects.get(name='Customer')
+            user.groups.add(group11)
+            messages.success(request, "Successfully Added User")
+            return redirect("/")
+
+        except:
+            messages.error(request, 'Error.')
+    return render(request, 'AddCustomerUser.html', {'Group': group.order_by('GroupName')})
+
+@allowed_users(allowed_roles=['Broker'])
 def AddIPO(request):
     if request.method == "POST":
         try:
@@ -3214,7 +3232,6 @@ def EditGroup(request, GroupNameId):
         id=GroupNameId, user=request.user)
     return render(request, 'EditGroup.html', {'employee': employee,'page_number':page_number})
 
-@allowed_users(allowed_roles=['Broker'])
 def EditOrder(request, OrderId,IPOid,Grpf,OrCtf,InTyf):
     page_number = request.GET.get('page')
     order = Order.objects.get(OrderIPOName_id = IPOid,
@@ -4232,6 +4249,7 @@ def BUY(request, IPOid, selectgroup=None):
         PutRate = request.POST.get('PutRate', '')
         PutStrikePrice = request.POST.get('PutStrikePrice', '')
         placeOrderOnly = request.POST.get('placeOrderOnly', False)
+        placeOrderWithWhatsApp = request.POST.get('placeOrderWithWhatsApp', False)
 
         DateTime = request.POST.get('datetime', '')
         OrderDate = DateTime[0:10]
@@ -4492,7 +4510,9 @@ def BUY(request, IPOid, selectgroup=None):
                 a==0
         
         if a == 1:
-            if placeOrderOnly:
+            if placeOrderWithWhatsApp:
+                pass
+            elif placeOrderOnly:
                 messages.success(request, 'Buy order placed successfully.')
             else:
                 messages.success(request, 'Buy order placed successfully. Telegram message sent successfully ')
@@ -7111,22 +7131,15 @@ def group_billing_details(request, group_id=None):
     if group_id:
         selected_group = get_object_or_404(GroupDetail, id=group_id, user=request.user)
         groups_to_process = [selected_group]
-        has_next = False
-        offset = 0
     else:
-        offset = int(request.GET.get('offset', 0))
-        groups_to_process = list(groups)[offset:]
-        has_next = False
+        groups_to_process = list(groups)
         
     group_tables = []
     empty_groups = []
-    populated_count = 0
-    groups_processed_count = 0
     
     ipos = CurrentIpoName.objects.filter(user=request.user).order_by('-id')
     
     for current_group in groups_to_process:
-        groups_processed_count += 1
         sme_html_table = ""
         mainboard_html_table = ""
         
@@ -7377,36 +7390,6 @@ def group_billing_details(request, group_id=None):
             put_buy_amt = put_orders.filter(OrderType="BUY").aggregate(Sum('Amount'))['Amount__sum'] or 0
             put_sell_amt = put_orders.filter(OrderType="SELL").aggregate(Sum('Amount'))['Amount__sum'] or 0
             put_billing = put_buy_amt + put_sell_amt
-
-            opt_orders = orders.filter(OrderCategory__in=["CALL", "PUT"])
-            strike_prices = list(opt_orders.values_list('Method', flat=True).distinct())
-
-            options_breakdown = []
-            for sp in strike_prices:
-                sp_label = str(sp) if sp is not None else "-"
-                sp_c = opt_orders.filter(OrderCategory="CALL", Method=sp)
-                sp_c_amt = (sp_c.filter(OrderType="BUY").aggregate(Sum('Amount'))['Amount__sum'] or 0) + \
-                           (sp_c.filter(OrderType="SELL").aggregate(Sum('Amount'))['Amount__sum'] or 0)
-
-                sp_p = opt_orders.filter(OrderCategory="PUT", Method=sp)
-                sp_p_amt = (sp_p.filter(OrderType="BUY").aggregate(Sum('Amount'))['Amount__sum'] or 0) + \
-                           (sp_p.filter(OrderType="SELL").aggregate(Sum('Amount'))['Amount__sum'] or 0)
-
-                # Option net quantity: BUY - SELL
-                sp_orders = opt_orders.filter(Method=sp)
-                sp_buy_qty = sp_orders.filter(OrderType="BUY").aggregate(Sum('Quantity'))['Quantity__sum'] or 0
-                sp_sell_qty = sp_orders.filter(OrderType="SELL").aggregate(Sum('Quantity'))['Quantity__sum'] or 0
-                sp_shares = sp_buy_qty - sp_sell_qty
-                sp_total_amt = sp_c_amt + sp_p_amt
-
-                if sp_c_amt != 0 or sp_p_amt != 0 or sp_shares != 0:
-                    options_breakdown.append({
-                        'strike_price': sp_label,
-                        'call_amount': f"{sp_c_amt:.1f}",
-                        'put_amount': f"{sp_p_amt:.1f}",
-                        'shares': int(sp_shares),
-                        'amount': f"{sp_total_amt:.0f}"
-                    })
         
             total_kostak_shares = (k_retail['buy_alloted_qty'] + k_shni['buy_alloted_qty'] + k_bhni['buy_alloted_qty']) - (k_retail['sell_alloted_qty'] + k_shni['sell_alloted_qty'] + k_bhni['sell_alloted_qty'])
             total_st_shares = (st_retail['buy_alloted_qty'] + st_shni['buy_alloted_qty'] + st_bhni['buy_alloted_qty']) - (st_retail['sell_alloted_qty'] + st_shni['sell_alloted_qty'] + st_bhni['sell_alloted_qty'])
@@ -7441,7 +7424,6 @@ def group_billing_details(request, group_id=None):
                 'put_sell_amt': put_sell_amt,
                 'total_kostak_shares': total_kostak_shares,
                 'total_st_shares': total_st_shares,
-                'options_breakdown': json.dumps(options_breakdown),
             })
         
         # Build Mainboard HTML Table
@@ -7481,8 +7463,7 @@ def group_billing_details(request, group_id=None):
             for row in mainboard_data:
                 tr_class = "archived-ipo" if row.get("is_tally") else ""
                 checked = "checked" if row.get("is_tally") else ""
-                escaped_opts = html.escape(row.get('options_breakdown', '[]'))
-                mainboard_html_table += f"<tr class='{tr_class}' data-options-breakdown='{escaped_opts}' style='text-align: center;'>"
+                mainboard_html_table += f"<tr class='{tr_class}' style='text-align: center;'>"
                 ts_val = row.get('ts_str', '')
                 ts_html = f"<br><span class='tally-ts-span' style='font-size: 0.65rem; font-weight: normal;'>{ts_val}</span>"
                 mainboard_html_table += f"<th style='border-left: 1px solid #555; border-right: 1px solid #555;'><input type='checkbox' class='ipo-archive-checkbox' style='cursor: pointer; margin:0; transform: scale(1.2);' data-id='{row['ipo_id']}' data-group='{current_group.GroupName}' {checked} title='Tally status'>{ts_html}</th>"
@@ -7543,35 +7524,16 @@ def group_billing_details(request, group_id=None):
                 'sme_html_table': sme_html_table,
                 'mainboard_html_table': mainboard_html_table
             })
-            populated_count += 1
         else:
             empty_groups.append(current_group.GroupName)
-
-        if not group_id and populated_count >= 5:
-            has_next = (offset + groups_processed_count) < len(groups)
-            break
-
-    next_offset = offset + groups_processed_count if not group_id else 0
-
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        from django.template.loader import render_to_string
-        html_content = render_to_string('partials/group_billing_partial.html', {
-            'group_tables': group_tables,
-            'empty_groups': empty_groups,
-            'is_ajax': True
-        })
-        return JsonResponse({'html': html_content, 'has_next': has_next, 'next_offset': next_offset, 'empty_groups': empty_groups})
 
     return render(request, 'group_billing_details.html', {
         'groups': groups,
         'selected_group': selected_group,
         'group_tables': group_tables,
         'empty_groups': empty_groups,
-        'has_next': has_next,
-        'next_offset': next_offset,
     })
 
-@allowed_users(allowed_roles=['Broker'])
 def BackUp(request):
     user = request.user
     entry = CurrentIpoName.objects.filter(user=request.user)
@@ -7629,6 +7591,38 @@ def BackUp(request):
     html_table += "</tbody></table>"
     
     return render(request, 'Backup.html',{'html_table': html_table, 'user': user,'page_obj': page_obj,'Backup_page_size':page_size})
+
+@allowed_users(allowed_roles=['Broker'])
+def panalloted(request):
+    Client = ClientDetail.objects.filter(user=request.user)
+    IPO = CurrentIpoName.objects.filter(user=request.user)
+    grpname = []
+    IPOName = []
+    nlist = []
+    l = []
+    for IpoName in IPO:
+        IPOName.append(IpoName)
+    lenofipo = len(IPOName)
+    for j in range(0, lenofipo):
+        l.append(j)
+    for GroupName in Client:
+        grpname.append(GroupName.PANNo)
+    lenofgroup = len(grpname)
+
+    for ClientPan in Client:
+        IPOTotal = []
+        for IpoName in IPO:
+            try:
+                entry = OrderDetail.objects.get(
+                    user=request.user, OrderDetailPANNo=ClientPan, Order__OrderIPOName=IpoName)
+                a = entry.AllotedQty
+            except:
+                a = None
+            IPOTotal.append(a)
+        nlist.append(IPOTotal)
+
+    df = pd.DataFrame(nlist, columns=IPOName, index=grpname)
+    return render(request, 'panalloted.html', {'entry': grpname, 'lenofipo': l, 'IPOTotal': IPOTotal, 'IPOName': IPOName, 'df': df})
 
 @allowed_users(allowed_roles=['Broker'])
 def autocomplete(request):
@@ -7826,23 +7820,15 @@ async def process_data(request,userid, pan_data, IPOid, OrderType, Groupfilter, 
 
 
 def Update_pann(request,IPOid,OrderType,GrpName=None, OrderCategory=None, InvestorType=None):
-    # Broker requests use their own data.  Guest requests are only allowed
-    # when the access-link view has established a link owner in the session.
-    if request.user.is_authenticated:
-        if request.user.groups.filter(name='Broker').exists():
+
+    try:
+        if request.user.groups.all()[0].name == 'Broker':
             userid = request.user.id
-        elif request.user.groups.filter(name='Customer').exists() and request.user.Broker_id:
-            userid = request.user.Broker_id
         else:
-            return JsonResponse({'status': 'error', 'message': 'Not authorized.'}, status=403)
-    else:
-        link_owner_id = request.session.get(f'link_owner_{IPOid}')
-        if not link_owner_id:
-            return JsonResponse({'status': 'error', 'message': 'Authentication required.'}, status=403)
-        try:
-            userid = CustomUser.objects.get(id=link_owner_id).id
-        except CustomUser.DoesNotExist:
-            return JsonResponse({'status': 'error', 'message': 'Invalid access link.'}, status=403)
+            userid = request.user.Broker_id
+    except:
+        userid = request.session[f'link_owner_{IPOid}']
+        userid= CustomUser.objects.get(id=userid).id
     # userid = request.user
     pan_data = {}
     page_number = request.GET.get('page','1')
@@ -8450,7 +8436,6 @@ def Billing(request, IPOid):
     return render(request, 'Billing.html', {'Group': Group.order_by('GroupName'),'html_table':html_table,'select': IPOTypefilterList, 'select2': InvestorTypeFilterList,"total": "{:.0f}".format(total),'Groupfilter': Groupfilter, "IPOName": IPO, 'IPOTypefilter': IPOTypefilter, 'InvestorTypeFilter': InvestorTypeFilter,  "IPO": IPO, "IPOid": IPOid,'page_obj': page_obj,'Billing_page_size':page_size})
     return render(request, 'Billing.html', {'Group': Group.order_by('GroupName'),'select': IPOTypefilterList, 'select2': InvestorTypeFilterList,"total": "{:.0f}".format(total),'Groupfilter': Groupfilter, "IPOName": IPO, 'IPOTypefilter': IPOTypefilter, 'InvestorTypeFilter': InvestorTypeFilter,  "IPO": IPO, "IPOid": IPOid,'page_obj': page_obj,'Billing_page_size':page_size})
 
-@allowed_users(allowed_roles=['Broker'])
 def FileterBilling(request, IPOid ,group,IPOType,InvestType, Rate='All'):
     if request.user.groups.all()[0].name == 'Broker':
         userid = request.user
@@ -8814,7 +8799,6 @@ def exportBillingFilter(request, IPOid, group=None, IPOType=None, InvestorType=N
     return response
 
 #Group Wise Dashboard  billing download PDF fun
-@allowed_users(allowed_roles=['Broker'])
 def exportGroupwise(request):
 
     Group = GroupDetail.objects.filter(user=request.user)
@@ -8883,7 +8867,6 @@ def exportGroupwise(request):
     return response
 
 
-@allowed_users(allowed_roles=['Broker'])
 def exportBillingFilterpdf(request, IPOid, group=None, IPOType=None, InvestorType=None):
     group = unquote(group)
     IPOType = unquote(IPOType)
@@ -9076,7 +9059,6 @@ def Backup(request,IPOid ):
         os.remove(file_path)
     return response
 
-@allowed_users(allowed_roles=['Broker'])
 def AllIpoBackup(request):
     user = request.user
     IPOs = CurrentIpoName.objects.filter(user=user)
@@ -9181,7 +9163,6 @@ def AllIpoBackup(request):
 
     return response
 
-@allowed_users(allowed_roles=['Broker'])
 def AccountingBackup(request):
     user = request.user
     entries = Accounting.objects.filter(user=user).select_related("group", "ipo")
@@ -9864,7 +9845,6 @@ def OrderDetail_upload(request, IPOid, OrderType, GrpName, OrderCategory, Invest
             return redirect(f"/{IPOid}/OrderDetail/{OrderType}")
         return redirect(f"/{IPOid}/OrderDetail/{OrderType}/{GrpName}/{OrderCategory}/{InvestorType}/{OrderDate}/{OrderTime}/{Rate}")
 
-@allowed_users(allowed_roles=['Broker'])
 def Sempale_Order(request,IPOid):
     response = HttpResponse(content_type='text/csv')
     IPOName = CurrentIpoName.objects.get(id=IPOid, user=request.user)
@@ -9879,8 +9859,6 @@ def Sempale_Order(request,IPOid):
 
     return response
 
-@allowed_users(allowed_roles=['Broker'])
-@require_POST
 def Order_upload(request, IPOid, Groupfilter, Ordercatagoryfilter, InvestorTypefilter):
     csv_file = request.FILES['file']
     if not csv_file.name.endswith('.csv'):
@@ -11764,6 +11742,7 @@ def sell(request, IPOid,selectgroup=None):
         PutRate = request.POST.get('PutRate', '')
         PutStrikePrice = request.POST.get('PutStrikePrice', '')
         placeOrderOnly = request.POST.get('placeOrderOnly', False)
+        placeOrderWithWhatsApp = request.POST.get('placeOrderWithWhatsApp', False)
         DateTime = request.POST.get('datetime', '')
         OrderDate = DateTime[0:10]
         OrderTime = DateTime[11:19]
@@ -12033,7 +12012,9 @@ def sell(request, IPOid,selectgroup=None):
             except:
                 a==0
         if a == 1:
-            if placeOrderOnly:
+            if placeOrderWithWhatsApp:
+                pass
+            elif placeOrderOnly:
                 messages.success(request, 'Sell order placed successfully.')
             else:
                 messages.success(request, 'Sell order placed successfully. Telegram message sent successfully ')
@@ -12795,8 +12776,6 @@ def DeleteAllOrders(request, IPOid):
 OTP_SESSIONS = {}
 
 @csrf_exempt
-@allowed_users(allowed_roles=['Broker'])
-@require_POST
 def send_telegram_otp(request):
     if request.method == "POST":
         user = request.user
@@ -12857,8 +12836,6 @@ def send_telegram_otp(request):
             return JsonResponse({'status': 'error', 'message': str(e)})
 
 @csrf_exempt
-@allowed_users(allowed_roles=['Broker'])
-@require_POST
 def verify_telegram_otp(request):
     if request.method == "POST":
         user = request.user
@@ -13530,67 +13507,9 @@ def send_status_to_telegram(request, IPOid):
         return JsonResponse(result)
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-# production
-def get_wkhtmltoimage_config():
-    """
-    Locates wkhtmltoimage executable from PyInstaller bundle, project folder, or system PATH.
-    """
-    # 1. Check system PATH first (Linux package or Windows PATH)
-    exe = shutil.which('wkhtmltoimage') or shutil.which('wkhtmltoimage.exe')
-    if exe:
-        try:
-            return imgkit.config(wkhtmltoimage=exe)
-        except Exception:
-            pass
-
-    # 2. Check PyInstaller bundle (_MEIPASS) and Project root (settings.BASE_DIR)
-    possible_paths = [
-        os.path.join(getattr(sys, '_MEIPASS', ''), "wkhtmltoimage.exe"),
-        os.path.join(settings.BASE_DIR, "wkhtmltoimage.exe"),
-        os.path.join(settings.BASE_DIR, "wkhtmltoimage"),  # Linux binary in project folder
-        r"C:\Program Files\wkhtmltopdf\bin\wkhtmltoimage.exe",
-        r"/usr/bin/wkhtmltoimage",
-    ]
-    for p in possible_paths:
-        if p and os.path.exists(p):
-            try:
-                return imgkit.config(wkhtmltoimage=p)
-            except Exception:
-                pass
-
-    return None
 
 
-# testing
-# def get_wkhtmltoimage_config():
-#     """
-#     Locates wkhtmltoimage executable from PyInstaller bundle, project folder, or system PATH.
-#     """
-#     # 1. Check system PATH first (Linux package or Windows PATH)
-#     exe = shutil.which('wkhtmltoimage') # or shutil.which('wkhtmltoimage.exe')
-#     if exe:
-#         try:
-#             return imgkit.config(wkhtmltoimage=exe)
-#         except Exception:
-#             pass
 
-#     # 2. Check PyInstaller bundle (_MEIPASS) and Project root (settings.BASE_DIR)
-#     possible_paths = [
-#         # os.path.join(getattr(sys, '_MEIPASS', ''), "wkhtmltoimage.exe"),
-#         # os.path.join(settings.BASE_DIR, "wkhtmltoimage.exe"),
-#         os.path.join(settings.BASE_DIR, "wkhtmltoimage"),  # Linux binary in project folder
-#         # r"C:\Program Files\wkhtmltopdf\bin\wkhtmltoimage.exe",
-#         r"/usr/bin/wkhtmltoimage",
-#         os.path.join(settings.BASE_DIR, "wkhtmltox", "usr", "bin", "wkhtmltoimage"),
-#     ]
-#     for p in possible_paths:
-#         if p and os.path.exists(p):
-#             try:
-#                 return imgkit.config(wkhtmltoimage=p)
-#             except Exception:
-#                 pass
-
-#     return None
 
 def generate_status_image(context):
     # context = { 'kostak_data': ..., 'subject_data': ..., etc. }
@@ -13613,109 +13532,6 @@ def generate_status_image(context):
     buf.name = "status_report.png"
     return buf
 
-def generate_status_image(context):
-    html = render_to_string('status_table_template.html', context)
-    options = {
-        'format': 'png',
-        'quality': '100',
-        'encoding': "UTF-8",
-    }
-    config = get_wkhtmltoimage_config()
-    if config:
-        img_bytes = imgkit.from_string(html, False, options=options, config=config)
-    else:
-        img_bytes = imgkit.from_string(html, False, options=options)
-    buf = io.BytesIO(img_bytes)
-    buf.name = "status_report.png"
-    return buf
-
-@login_required
-@csrf_exempt
-def generate_group_share_image(request):
-    """
-    Generates a full-width, crisp PNG image of the group billing details using wkhtmltoimage.
-    """
-    if request.method != "POST":
-        return HttpResponse("Method not allowed", status=405)
-    
-    raw_html = ""
-    try:
-        if request.body:
-            data = json.loads(request.body)
-            raw_html = data.get("html_content", "")
-    except Exception:
-        pass
-    
-    if not raw_html:
-        raw_html = request.POST.get("html_content", "")
-
-    if not raw_html:
-        return HttpResponse("No HTML content provided", status=400)
-
-    # Build clean standalone HTML with exact table layout
-    full_html = f"""<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<style>
-    body {{
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        background-color: #ffffff;
-        margin: 0;
-        padding: 20px 24px;
-        width: 1200px;
-        box-sizing: border-box;
-    }}
-    table {{
-        border-collapse: collapse;
-        width: 100%;
-        margin-top: 14px;
-        margin-bottom: 20px;
-        font-size: 13.5px;
-    }}
-    th, td {{
-        border: 1px solid #000000;
-        padding: 5px 8px;
-        text-align: center;
-        white-space: nowrap;
-    }}
-    thead th {{
-        background-color: #f8f9fa;
-        font-weight: bold;
-    }}
-    h3 {{
-        font-size: 20px;
-        margin: 0 0 12px 0;
-        font-weight: bold;
-    }}
-</style>
-</head>
-<body>
-    {raw_html}
-</body>
-</html>"""
-
-    options = {
-        'format': 'png',
-        'quality': '100',
-        'encoding': 'UTF-8',
-        'width': '1200',
-        'disable-smart-width': '',
-        'quiet': '',
-    }
-
-    try:
-        config = get_wkhtmltoimage_config()
-        if config:
-            img_bytes = imgkit.from_string(full_html, False, options=options, config=config)
-        else:
-            img_bytes = imgkit.from_string(full_html, False, options=options)
-        return HttpResponse(img_bytes, content_type="image/png")
-    except Exception as e:
-        print(f"generate_group_share_image exception: {e}")
-        return HttpResponse(f"Image generation failed: {e}", status=500)
-
-@allowed_users(allowed_roles=['Broker'])
 def get_all_groups(request, IPOid):
     User = request.user
     groups = list(Order.objects.filter(user=User,OrderIPOName=IPOid).values_list('OrderGroup', flat=True).distinct())
@@ -14662,7 +14478,6 @@ def accounting_logs_view(request):
 
 
 
-@allowed_users(allowed_roles=['Broker'])
 def get_accounting_entries(request):
     try:
         group_id = request.GET.get("group_id")
@@ -16386,8 +16201,6 @@ def GroupBillShare(request, IPOid):
         return redirect('Status', IPOid=IPOid)
 
 @csrf_exempt
-@allowed_users(allowed_roles=['Broker'])
-@require_POST
 def Share_AppDetails(request):
     if request.method == 'POST':
         group_name_list_json = request.POST.get('selected_records', 'Default Group') 
@@ -16501,8 +16314,6 @@ def Share_AppDetails(request):
         return JsonResponse('Success', safe=False)
     
 #PAN UPDATE LINK
-@allowed_users(allowed_roles=['Broker'])
-@require_POST
 def generate_shared_link(request):
     if request.method == "POST":
         ipo_id = request.POST.get('ipo_id')
@@ -16897,7 +16708,6 @@ def resolve_shared_link(request, link_id,order_type=None):
         Rate = Rate
     )
     
-@allowed_users(allowed_roles=['Broker'])
 def get_user_links(request,IPOid,order_type):
     # Filters links created by the current user
     
@@ -17170,8 +16980,6 @@ def update_all_expiries(request, IPOid):
     return JsonResponse({'status': 'error', 'message': 'Invalid request.'}, status=400)
 
 # 2. Send all mails for this IPO
-@allowed_users(allowed_roles=['Broker'])
-@require_POST
 def send_all_link_mails(request, IPOid):
     if request.method == 'POST':
         # Check sender's configuration
@@ -17296,8 +17104,6 @@ async def create_ipo_link(request,user, ipo_id, group_obj, expiry_str, send_emai
     return link
 
 # The View for the Popup
-@allowed_users(allowed_roles=['Broker'])
-@require_POST
 def bulk_generate_links(request, IPOid):
     if request.method == "POST":
         try:

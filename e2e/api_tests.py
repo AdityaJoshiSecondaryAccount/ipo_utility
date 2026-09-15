@@ -3,6 +3,8 @@ import json
 import re
 from datetime import timedelta
 from urllib.parse import quote
+from unittest.mock import patch
+import requests
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.conf import settings
 from django.utils import timezone
@@ -140,6 +142,47 @@ class Contracts(APIBase):
         self.assertEqual(self.post(f'/update-link/{pk}/',form={'expiry':expiry}).json()['status'],'success')
         self.assertEqual(self.post('/delete-link/',form={'link_id':pk}).json()['status'],'success')
         self.assertFalse(self.orm(lambda: SharedLink.objects.filter(pk=pk).exists()))
+
+    def test_whatsapp_success_payload_and_sell(self):
+        self.login()
+        for order_type in ('buy','sell'):
+            with self.subTest(order_type=order_type):
+                response=requests.Response(); response.status_code=200; response._content=b'{"messages":[{"id":"e2e"}]}'
+                with patch('requests.sessions.Session.request', return_value=response) as provider:
+                    actual=self.post(f'/whatsapp/{order_type}/{self.ipo.pk}/send/',form={
+                        'item_id':'TEST GROUP','KostakQTY':'1','KostakRate':'100','datetime':'2026-09-11T10:30'})
+                self.assertEqual(actual.status,200)
+                payload=provider.call_args.kwargs['json']
+                self.assertEqual(payload['to'],'91'+PHONE)
+                self.assertEqual(payload['template']['components'][0]['parameters'][1]['text'],order_type.upper())
+
+    def test_whatsapp_validates_missing_group_details_and_number(self):
+        self.login()
+        path=f'/whatsapp/buy/{self.ipo.pk}/send/'
+        with patch('whatsapp.views.send_order_confirmation') as provider:
+            for form, message in [({},'Select a group first.'),({'item_id':'TEST GROUP'},'Enter at least one order quantity or rate.')]:
+                response=self.post(path,form=form)
+                self.assertEqual(response.status,400)
+                self.assertEqual(response.json()['message'],message)
+            self.orm(lambda: GroupDetail.objects.filter(pk=self.group.pk).update(MobileNo='123'))
+            self.assertEqual(self.post(path,form={'item_id':'TEST GROUP','KostakQTY':'1'}).status,400)
+            self.orm(lambda: GroupDetail.objects.filter(pk=self.group.pk).update(MobileNo=''))
+            self.assertEqual(self.post(path,form={'item_id':'TEST GROUP','KostakQTY':'1'}).status,400)
+            provider.assert_not_called()
+
+    def test_whatsapp_provider_failure_timeout_and_csrf(self):
+        self.login()
+        path=f'/whatsapp/buy/{self.ipo.pk}/send/'
+        form={'item_id':'TEST GROUP','KostakQTY':'1'}
+        self.assertEqual(self.api.post(path,form=form).status,403)
+        self.assertEqual(self.api.get(path).status,405)
+        with patch('whatsapp.views.send_order_confirmation',side_effect=requests.Timeout('simulated timeout')):
+            self.assertEqual(self.post(path,form=form).status,502)
+        response=requests.Response(); response.status_code=400; response._content=b'{"error":{"message":"Simulated rejection"}}'
+        with patch('whatsapp.views.send_order_confirmation',return_value=response):
+            actual=self.post(path,form=form)
+            self.assertEqual(actual.status,400)
+            self.assertEqual(actual.json()['message'],'Simulated rejection')
 
     def test_group_server_validation(self):
         self.login()

@@ -1491,11 +1491,10 @@
     function updateMasterTallyCheckbox() {
         const masterCheckbox = document.getElementById('master-tally-checkbox');
         const groupCheckboxes = document.querySelectorAll('.group-checkbox');
-        if (!masterCheckbox) {
-            return;
-        }
         const allChecked = Array.from(groupCheckboxes).every(checkbox => checkbox.checked);
-        masterCheckbox.checked = allChecked;
+        if (masterCheckbox) {
+            masterCheckbox.checked = allChecked;
+        }
     }
 
     // Call updateMasterTallyCheckbox on page load
@@ -1551,3 +1550,4 @@
 <script src="{% static 'DataTables/js/pdfmake.min.js' %}"></script>
 <script src="{% static 'DataTables/js/vfs_fonts.js' %}"></script>
 {% endblock %}
+

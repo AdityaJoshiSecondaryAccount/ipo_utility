@@ -1,6 +1,8 @@
 import json
 import re
 import uuid
+from unittest.mock import patch
+import requests
 from django.utils import timezone
 from playwright.sync_api import expect
 from home.models import Accounting, ClientDetail, GroupDetail, CurrentIpoName, Order, SharedLink
@@ -143,6 +145,25 @@ class Workflows(BrowserCase):
         expect(self.page.locator('input[value="ABCDE1234F"]')).to_be_visible()
         expect(self.page.get_by_text('PRIVATE GROUP', exact=True)).to_have_count(0)
 
+    def test_whatsapp_buy_ui_uses_supplied_number(self):
+        self.signed_in()
+        self.navigate(f'/{self.ipo.pk}/BUY')
+        self.page.locator('[name="item_id"]').select_option(label='TEST GROUP')
+        self.page.locator('[name="datetime"]').fill(timezone.localtime().strftime('%Y-%m-%dT%H:%M'))
+        self.page.locator('[name="KostakQTY"]').fill('1')
+        self.page.locator('[name="KostakRate"]').fill('100')
+        response = requests.Response()
+        response.status_code = 200
+        response._content = b'{"messages":[{"id":"e2e-message"}]}'
+        with patch('whatsapp.client.requests.post', return_value=response) as send:
+            with self.page.expect_response(lambda r: '/whatsapp/buy/' in r.url) as sent:
+                self.page.get_by_role('button', name='Send to WhatsApp').click()
+            self.assertEqual(sent.value.status, 200)
+            expect(self.page.get_by_role('heading', name='Recent Orders', exact=False)).to_be_visible()
+            self.assertEqual(send.call_count, 1)
+            self.assertEqual(send.call_args.kwargs['json']['to'], '91'+PHONE)
+        self.stop_browser()
+        self.assertEqual(Order.objects.filter(user=self.user, OrderIPOName=self.ipo).count(), 2)
 
 
 def invalid_login(username, password, message):

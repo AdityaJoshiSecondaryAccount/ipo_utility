@@ -9,6 +9,7 @@ PAGE_CASES = [
     ('ipo_list','/IPOSETUP','TEST IPO'),
     ('groups','/GroupSetup','TEST GROUP'),
     ('clients','/ClientSetup','TEST CLIENT'),
+    ('customer_create','/AddCustomerUser','Create Customer User'),
     ('ipo_edit','/edit/{ipo}','TEST IPO'),
     ('client_edit','/EditClient/{client}','TEST CLIENT'),
     ('group_edit','/EditGroup/{group}','TEST GROUP'),
@@ -18,6 +19,7 @@ PAGE_CASES = [
     ('group_positions','/group-billing-details/{group}/','Positions'),
     ('positions','/group-billing-details/','Positions'),
     ('backup','/BackUp','BACK UP'),
+    ('pan_allotted','/panalloted','PAN'),
     ('accounting_logs','/accounting-logs/','Accounting Activity'),
     ('sme_analysis_a','/{sme}/Dashboard/A','Analysis'),
     ('sme_analysis_b','/{sme}/Dashboard/B','Analysis'),
@@ -60,6 +62,20 @@ class Pages(BrowserCase):
         self.navigate(f'/edit/{self.ipo.pk}')
         expect(self.page.locator('[name="name"]')).to_have_value('EDITED IPO')
         expect(self.page.locator('[name="IPOPrice"]')).to_have_value('175.0')
+
+    def test_customer_create_through_form(self):
+        self.navigate('/AddCustomerUser')
+        form=self.page.locator('form[action="/AddCustomerUser"]')
+        for field,value in {'username':'new-customer','password':'test-password-123','email':'customer@example.test',
+                            'first_name':'Test','last_name':'Customer'}.items():
+            form.locator(f'[name="{field}"]').fill(value)
+        form.locator('[name="Group"]').select_option(label='TEST GROUP')
+        form.get_by_role('button',name=re.compile('Submit|Create|Add')).click()
+        expect(self.page.get_by_text('Successfully Added User')).to_be_visible()
+        self.navigate('/logout')
+        self.login('new-customer')
+        self.page.wait_for_url(self.live_server_url+'/indexforCustomer')
+        expect(self.page.get_by_text('TEST IPO',exact=True)).to_be_visible()
 
     def test_password_mismatch_then_change_and_relogin(self):
         self.navigate('/user-profile/')

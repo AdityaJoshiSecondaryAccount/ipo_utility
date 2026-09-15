@@ -1477,8 +1477,8 @@
                     <td>{{ i.Order.Rate|floatformat:2 }}</td>
                     <td>{{ i.OrderDetailPANNo.PANNo }}</td>
                     <td><a style='color: #007bff;'  aria-hidden="true" data-toggle="modal" data-target="#edit-{{ i.id }}">{% if i.PreOpenPrice != 0.0 %} {{i.PreOpenPrice|floatformat:2 }} {% else %} {{IPO.PreOpenPrice|floatformat:2 }}  {%endif%} </a></td>
-                    <td>{% if i.AllotedQty %}{{ i.AllotedQty }}{% endif %}</td>
-                    <td>{% if i.Amount %}{{ i.Amount }}{% endif %}</td>
+                    <td>{{ i.AllotedQty|floatformat:0 }}</td>
+                    <td>{{ i.Amount|floatformat:1 }}</td>
                     </td>
                 </tr>
                 

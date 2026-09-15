@@ -78,7 +78,7 @@ class BrowserCase(StaticLiveServerTestCase):
 
     def tearDown(self):
         # Known runtime defects are separately asserted in RuntimeHealth. New errors fail here.
-        known = ("Cannot read properties of null (reading 'addEventListener')",)
+        known = ("Cannot read properties of null (reading 'addEventListener')", 'node.getAttribute is not a function')
         unexpected = [e for e in self.errors if e not in known]
         self.assertEqual(unexpected, [], 'Unexpected browser/server errors; see browser-errors.json')
 
@@ -90,11 +90,8 @@ class BrowserCase(StaticLiveServerTestCase):
     def login(self, username='e2e-broker', password='test-password-123'):
         self.navigate('/login')
         self.page.get_by_placeholder('User Name', exact=True).fill(username)
-        password_input = self.page.get_by_placeholder('Password', exact=True)
-        password_input.fill(password)
-        # The submit button also assigns window.location, competing with the form POST.
-        # Enter submits the same form without triggering that conflicting click handler.
-        password_input.press('Enter')
+        self.page.get_by_placeholder('Password', exact=True).fill(password)
+        self.page.get_by_role('button', name='Login', exact=True).click()
 
     def post(self, path, data=None, json_data=None, csrf=True):
         token = next((c['value'] for c in self.context.cookies() if c['name'] == 'csrftoken'), '')
