@@ -527,7 +527,18 @@
                     return;
                 }
 
-                const ipoName = extractText(cells[1]);
+                const ipoNameText = extractText(cells[1]);
+                let ipoName = ipoNameText;
+                if (isTallied) {
+                    const tallySpan = cells[0].querySelector('.tally-ts-span');
+                    const tallyDateText = tallySpan ? tallySpan.innerText.trim().replace(/\n/g, ' ') : '';
+                    let tallyHtml = `<span style="color: #28a745;" title="Tallied">✔</span>`;
+                    if (tallyDateText) {
+                        tallyHtml += `<br><span style="font-size:0.75em; color:#666; font-weight:normal;">${tallyDateText}</span>`;
+                    }
+                    ipoName = `${ipoNameText} ${tallyHtml}`;
+                }
+                const rowBgColor = isTallied ? '#f4fff4' : '#fff';
 
                 const makeRowAndCheckEmpty = (tableObj, data) => {
                     const isAllZeros = data.every(val => {
@@ -538,9 +549,9 @@
                     if (hideEmpty && isAllZeros) return;
 
                     const trHTML = document.createElement('tr');
-                    trHTML.innerHTML = `<th style="text-align:center; border:1px solid #000; background-color:#fff;">${ipoName}</th>`;
+                    trHTML.innerHTML = `<th style="text-align:center; border:1px solid #000; background-color:${rowBgColor};">${ipoName}</th>`;
                     data.forEach(val => {
-                        trHTML.innerHTML += `<td style="text-align:center; border:1px solid #000; background-color:#fff;">${val}</td>`;
+                        trHTML.innerHTML += `<td style="text-align:center; border:1px solid #000; background-color:${rowBgColor};">${val}</td>`;
                     });
                     tableObj.querySelector('tbody').appendChild(trHTML);
                 };
@@ -580,14 +591,14 @@
                     items.forEach((item, idx) => {
                         const trEl = document.createElement('tr');
                         if (idx === 0) {
-                            trEl.innerHTML += `<th rowspan="${rowSpan}" style="text-align:center; vertical-align:middle; border:1px solid #000; background-color:#fff;">${ipoName}</th>`;
+                            trEl.innerHTML += `<th rowspan="${rowSpan}" style="text-align:center; vertical-align:middle; border:1px solid #000; background-color:${rowBgColor};">${ipoName}</th>`;
                         }
                         trEl.innerHTML += `
-                            <td style="text-align:center; border:1px solid #000; background-color:#fff;">${item.strike_price}</td>
-                            <td style="text-align:center; border:1px solid #000; background-color:#fff;">${item.call_amount}</td>
-                            <td style="text-align:center; border:1px solid #000; background-color:#fff;">${item.put_amount}</td>
-                            <td style="text-align:center; border:1px solid #000; background-color:#fff;">${item.shares !== undefined ? item.shares : 0}</td>
-                            <td style="text-align:center; border:1px solid #000; background-color:#fff;">${item.amount !== undefined ? item.amount : '0'}</td>
+                            <td style="text-align:center; border:1px solid #000; background-color:${rowBgColor};">${item.strike_price}</td>
+                            <td style="text-align:center; border:1px solid #000; background-color:${rowBgColor};">${item.call_amount}</td>
+                            <td style="text-align:center; border:1px solid #000; background-color:${rowBgColor};">${item.put_amount}</td>
+                            <td style="text-align:center; border:1px solid #000; background-color:${rowBgColor};">${item.shares !== undefined ? item.shares : 0}</td>
+                            <td style="text-align:center; border:1px solid #000; background-color:${rowBgColor};">${item.amount !== undefined ? item.amount : '0'}</td>
                         `;
                         tbody.appendChild(trEl);
                     });
