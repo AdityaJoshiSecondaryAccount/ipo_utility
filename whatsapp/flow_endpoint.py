@@ -26,17 +26,21 @@ def get_or_create_customer_group(phone_number: str, user):
     clean_number = "".join(filter(str.isdigit, phone_number))
     last10 = clean_number[-10:] if len(clean_number) >= 10 else clean_number
 
-    # Try matching existing GroupDetail
-    group = GroupDetail.objects.filter(MobileNo__endswith=last10, Active=True).first()
+    group = None
+    if last10:
+        group = GroupDetail.objects.filter(MobileNo__endswith=last10, Active=True).first()
+
     if not group:
-        group_name = f"WA_{last10}" if last10 else "WA_CUSTOMER"
-        group = GroupDetail.objects.create(
-            user=user,
-            GroupName=group_name,
-            MobileNo=last10,
-            Active=True,
-        )
-        logger.info(f"Auto-created GroupDetail #{group.id} ({group_name}) for phone {phone_number}")
+        group_name = f"WA_{last10}" if last10 else "MANISH _ SHARMA"
+        group = GroupDetail.objects.filter(GroupName=group_name, Active=True).first()
+        if not group:
+            group = GroupDetail.objects.create(
+                user=user,
+                GroupName=group_name,
+                MobileNo=last10,
+                Active=True,
+            )
+            logger.info(f"Auto-created GroupDetail #{group.id} ({group_name}) for phone {phone_number}")
 
     return group
 
@@ -92,9 +96,8 @@ def handle_flow_action(decrypted_payload: dict, customer_phone: str = None) -> d
             })
 
         return {
-            "screen": "IPO_SELECT",
+            "screen": "START",
             "data": {
-                "side": "BUY",
                 "ipo_list": ipo_list
             }
         }
@@ -131,19 +134,7 @@ def process_order_placement(data: dict, customer_phone: str = None) -> dict:
     Validates and places BUY or SELL order into Django database models (Order & OrderDetail).
     """
     try:
-        default_user = get_default_user()
-        group = get_or_create_customer_group(customer_phone, default_user)
-        user = group.user if (group and group.user) else default_user
-
-        side = (data.get("side") or "BUY").upper()
         ipo_id = data.get("ipo_id")
-        segment = data.get("segment") or "RETAIL"
-        category = data.get("category") or "Kostak"
-        quantity = float(data.get("quantity") or 0)
-        rate = float(data.get("rate") or 0)
-        strike_price = data.get("strike_price")
-        remark_text = (data.get("remark") or "").strip()
-
         if not ipo_id or str(ipo_id) == "0":
             return {
                 "screen": "COMPLETE",
@@ -161,18 +152,29 @@ def process_order_placement(data: dict, customer_phone: str = None) -> dict:
                 }
             }
 
+        owner_user = (ipo and ipo.user) or get_default_user()
+        group = get_or_create_customer_group(customer_phone, owner_user)
+
+        side = (data.get("side") or "BUY").upper()
+        segment = data.get("segment") or "RETAIL"
+        category = data.get("category") or "Kostak"
+        quantity = float(data.get("quantity") or 0)
+        rate = float(data.get("rate") or 0)
+        strike_price = data.get("strike_price")
+        remark_text = (data.get("remark") or "").strip()
+
         now = timezone.localtime(timezone.now())
         order_date = now.date()
-        order_time = now.time()
+        order_time = now.time().replace(microsecond=0)
 
         # Build remark JSON
         remark_dict = {"source": "whatsapp_flow"}
         if remark_text:
             remark_dict["text"] = remark_text
 
-        # Create Order record
+        # Create Order record (owned by the IPO broker)
         order = Order.objects.create(
-            user=user,
+            user=owner_user,
             OrderGroup=group,
             OrderIPOName=ipo,
             OrderType=side,
@@ -194,7 +196,7 @@ def process_order_placement(data: dict, customer_phone: str = None) -> dict:
             pre_open_price = getattr(ipo, "PreOpenPrice", 0) or 0
             OrderDetail.objects.bulk_create([
                 OrderDetail(
-                    user=user,
+                    user=owner_user,
                     Order=order,
                     PreOpenPrice=pre_open_price,
                     Amount=0,
@@ -205,56 +207,66 @@ def process_order_placement(data: dict, customer_phone: str = None) -> dict:
 
         logger.info(f"Successfully placed {side} Order #{order.id} for {ipo.IPOName} (Qty: {quantity}, Rate: {rate}) via WhatsApp Flow.")
 
-        # Send WhatsApp Confirmation Message to customer chat
+        # Send WhatsApp Confirmation & Status Image asynchronously in background
         target_phone = customer_phone or getattr(group, "MobileNo", "")
+
         if target_phone:
             clean_phone = "".join(filter(str.isdigit, target_phone))
             if len(clean_phone) == 10:
                 clean_phone = "91" + clean_phone
 
             if len(clean_phone) >= 11:
-                try:
-                    from .client import send_text_message
-                    wa_message = (
-                        f"🎉 *Order Confirmation*\n\n"
-                        f"Your *{side}* order has been placed successfully!\n\n"
-                        f"📋 *Order ID:* #{order.id}\n"
-                        f"🏢 *IPO:* {ipo.IPOName}\n"
-                        f"👥 *Group:* {group.GroupName}\n"
-                        f"📦 *Segment:* {segment}\n"
-                        f"🏷️ *Category:* {category}\n"
-                        f"🔢 *Quantity:* {int(quantity)} lot(s)\n"
-                        f"💰 *Rate:* ₹{rate}\n"
-                        f"📅 *Date & Time:* {order_date.strftime('%d-%m-%Y')} {order_time.strftime('%H:%M:%S')}"
-                    )
-                    if remark_text:
-                        wa_message += f"\n📝 *Remark:* {remark_text}"
+                import threading
 
-wa_res = send_text_message(clean_phone, wa_message)
-                    logger.info(f"WhatsApp order confirmation sent to {clean_phone}: HTTP {wa_res.status_code}")
-                    
-                    # ALSO send the status image immediately after text confirmation
+                def async_send_notifications(phone, order_id, order_side, ipo_obj, group_obj, seg, cat, qty, prc, o_date, o_time, rmk):
                     try:
-                        from .client import upload_media, send_image_message
-                        from .services import build_order_summary_context, generate_order_summary_image
-                        
-                        orders = Order.objects.filter(OrderGroup=group, OrderIPOName=ipo, Active=True)
-                        img_context = build_order_summary_context(group=group, orders=orders, ipo=ipo)
-                        img_buf = generate_order_summary_image(img_context)
-                        
-                        if img_buf:
-                            upload_res = upload_media(img_buf, mime_type="image/png", filename="status_report.png")
-                            if upload_res.ok:
-                                media_id = upload_res.json().get('id')
-                                send_image_message(clean_phone, media_id=media_id, caption=f"{ipo.IPOName} Status - {group.GroupName}")
-                                logger.info(f"WhatsApp order status image sent to {clean_phone}")
-                            else:
-                                logger.error(f"Failed to upload status image to WhatsApp: {upload_res}")
-                    except Exception as img_err:
-                        logger.error(f"Error generating/sending order status image to {clean_phone}: {img_err}")
+                        from .client import send_text_message
+                        wa_message = (
+                            f"🎉 *Order Confirmation*\n\n"
+                            f"Your *{order_side}* order has been placed successfully!\n\n"
+                            f"📋 *Order ID:* #{order_id}\n"
+                            f"🏢 *IPO:* {ipo_obj.IPOName}\n"
+                            f"👥 *Group:* {group_obj.GroupName}\n"
+                            f"📦 *Segment:* {seg}\n"
+                            f"🏷️ *Category:* {cat}\n"
+                            f"🔢 *Quantity:* {int(qty)} lot(s)\n"
+                            f"💰 *Rate:* ₹{prc}\n"
+                            f"📅 *Date & Time:* {o_date.strftime('%d-%m-%Y')} {o_time.strftime('%H:%M:%S')}"
+                        )
+                        if rmk:
+                            wa_message += f"\n📝 *Remark:* {rmk}"
 
-                except Exception as send_err:
-                    logger.error(f"Error sending WhatsApp confirmation message to {clean_phone}: {send_err}")
+                        wa_res = send_text_message(phone, wa_message)
+                        logger.info(f"WhatsApp order confirmation sent to {phone}: HTTP {wa_res.status_code}")
+
+                        # Also send status summary image
+                        try:
+                            from .client import upload_media, send_image_message
+                            from .services import build_order_summary_context, generate_order_summary_image
+
+                            orders = Order.objects.filter(OrderGroup=group_obj, OrderIPOName=ipo_obj, Active=True)
+                            img_context = build_order_summary_context(group=group_obj, orders=orders, ipo=ipo_obj)
+                            img_buf = generate_order_summary_image(img_context)
+
+                            if img_buf:
+                                upload_res = upload_media(img_buf, mime_type="image/png", filename="status_report.png")
+                                if upload_res.ok:
+                                    media_id = upload_res.json().get('id')
+                                    send_image_message(phone, media_id=media_id, caption=f"{ipo_obj.IPOName} Status - {group_obj.GroupName}")
+                                    logger.info(f"WhatsApp order status image sent to {phone}")
+                                else:
+                                    logger.error(f"Failed to upload status image to WhatsApp: {upload_res.text}")
+                        except Exception as img_err:
+                            logger.error(f"Error generating/sending order status image to {phone}: {img_err}")
+
+                    except Exception as send_err:
+                        logger.error(f"Error sending WhatsApp confirmation to {phone}: {send_err}")
+
+                threading.Thread(
+                    target=async_send_notifications,
+                    args=(clean_phone, order.id, side, ipo, group, segment, category, quantity, rate, order_date, order_time, remark_text),
+                    daemon=True
+                ).start()
 
         flow_confirmation = (
             f"Thank you! Your {side} order for {ipo.IPOName} (Qty: {int(quantity)}, Rate: ₹{rate}) "

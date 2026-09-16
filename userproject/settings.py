@@ -37,7 +37,7 @@ SECRET_KEY = '+w2t1e^5j(dc$6hp$z8q%j&u@()wo327xxiq@bd%z7*v27_hx%'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 # Allow all the hosts
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', 'hostinger.ipoutility.in']
 
 
 # Application definition
@@ -81,6 +81,7 @@ ROOT_URLCONF = 'userproject.urls'
 CSRF_TRUSTED_ORIGINS = [
     "https://ipoutility.in",
     "https://www.ipoutility.in",
+    "https://hostinger.ipoutility.in",
     "https://tweet-collage-barman.ngrok-free.dev",
     "https://*.ngrok-free.dev",
     "https://*.ngrok-free.app",

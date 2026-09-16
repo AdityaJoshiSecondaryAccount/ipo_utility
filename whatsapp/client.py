@@ -13,7 +13,7 @@ def _get_api_headers(content_type="application/json"):
 
 
 def send_order_confirmation(phone_number, ipo_name, order_type, group_name,
-                            order_datetime, order_details, ipo_id=None):
+                            order_datetime, order_details, ipo_id=None, broker_id=None):
     url = (
         "https://graph.facebook.com/"
         f"{settings.WHATSAPP_API_VERSION}/"
@@ -32,6 +32,7 @@ def send_order_confirmation(phone_number, ipo_name, order_type, group_name,
     }]
 
     if ipo_id:
+        payload_str = f"view_orders_{ipo_id}_{broker_id}" if broker_id else f"view_orders_{ipo_id}"
         components.append({
             "type": "button",
             "sub_type": "quick_reply",
@@ -39,7 +40,7 @@ def send_order_confirmation(phone_number, ipo_name, order_type, group_name,
             "parameters": [
                 {
                     "type": "payload",
-                    "payload": f"view_orders_{ipo_id}"
+                    "payload": payload_str
                 }
             ]
         })
