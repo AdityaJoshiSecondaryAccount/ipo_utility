@@ -9,7 +9,7 @@ from ..webhook_handler import process_webhook_payload
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(tags=["Webhook"])
+router = APIRouter(prefix="/chat-api", tags=["Webhook"])
 
 def verify_meta_signature(raw_body: bytes, signature_header: str) -> bool:
     """Verifies X-Hub-Signature-256 header against WHATSAPP_APP_SECRET."""

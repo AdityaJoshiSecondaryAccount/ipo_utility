@@ -54,7 +54,7 @@ export const ChatProvider = ({ children }) => {
   // 1. Fetch Conversations from backend
   const fetchConversations = useCallback(async () => {
     try {
-      const res = await fetch('/api/conversations');
+      const res = await fetch('/chat-api/conversations');
       if (res.ok) {
         const data = await res.json();
         setConversations(data);
@@ -67,7 +67,7 @@ export const ChatProvider = ({ children }) => {
   // 2. Fetch Canned Replies
   const fetchCannedReplies = useCallback(async () => {
     try {
-      const res = await fetch('/api/canned-responses');
+      const res = await fetch('/chat-api/canned-responses');
       if (res.ok) {
         const data = await res.json();
         setCannedReplies(data);
@@ -82,14 +82,14 @@ export const ChatProvider = ({ children }) => {
     setActiveConversation(conv);
     setLoadingMessages(true);
     try {
-      const res = await fetch(`/api/conversations/${conv.id}/messages`);
+      const res = await fetch(`/chat-api/conversations/${conv.id}/messages`);
       if (res.ok) {
         const data = await res.json();
         setMessages(data);
       }
 
       // Send read receipt to backend & Meta
-      await fetch(`/api/conversations/${conv.id}/read`, { method: 'POST' });
+      await fetch(`/chat-api/conversations/${conv.id}/read`, { method: 'POST' });
       setConversations(prev => prev.map(c => c.id === conv.id ? { ...c, unread_count: 0 } : c));
     } catch (err) {
       console.error("Failed to load messages:", err);
@@ -104,7 +104,7 @@ export const ChatProvider = ({ children }) => {
     const phone = activeConversation.contact.phone_number;
 
     try {
-      const res = await fetch('/api/messages/send', {
+      const res = await fetch('/chat-api/messages/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -178,7 +178,7 @@ export const ChatProvider = ({ children }) => {
               });
               // Auto mark read if viewing this conversation
               if (message.direction === 'inbound') {
-                fetch(`/api/conversations/${message.conversation_id}/read`, { method: 'POST' });
+                fetch(`/chat-api/conversations/${message.conversation_id}/read`, { method: 'POST' });
               }
             }
           } else if (type === 'MESSAGE_STATUS_UPDATE') {

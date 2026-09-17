@@ -17,7 +17,7 @@ from ..websocket_manager import manager
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api", tags=["Conversations & Messages"])
+router = APIRouter(prefix="/chat-api", tags=["Conversations & Messages"])
 
 def is_within_24_hours(last_inbound_time: Optional[datetime]) -> bool:
     if not last_inbound_time:

@@ -46,7 +46,7 @@ export const MessageComposer = () => {
 
     setSending(true);
     try {
-      const uploadRes = await fetch('/api/media/upload', {
+      const uploadRes = await fetch('/chat-api/media/upload', {
         method: 'POST',
         body: formData
       });
