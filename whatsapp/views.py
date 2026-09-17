@@ -122,6 +122,7 @@ def _send_order(request, ipo_id, order_type):
             order_datetime=request.POST.get("datetime", ""),
             order_details=details,
             ipo_id=ipo.id,
+            broker_id=request.user.id,
         )
         response_data = response.json() if response.content else {}
     except requests.RequestException as exc:
@@ -304,8 +305,23 @@ def webhook(request):
                         print(f"[WA Webhook] Message is not a button click or orders action.")
                         continue
 
+                    # Extract optional IPO ID and broker ID from payload if present (e.g., 'view_orders_12_5')
+                    ipo_id = None
+                    broker_id = None
+                    if "view_orders_" in payload:
+                        try:
+                            parts = payload.split("view_orders_")[-1].split("_")
+                            ipo_id = int(parts[0])
+                            if len(parts) > 1:
+                                broker_id = int(parts[1])
+                        except ValueError:
+                            pass
+
                     # Customer Identification
                     groups = get_groups_by_phone(sender_clean)
+                    if broker_id:
+                        groups = groups.filter(user_id=broker_id)
+                        
                     group_names = list(groups.values_list('GroupName', flat=True))
                     print(f"[WA Webhook] Matching Customer Group(s): {group_names}")
 
@@ -321,14 +337,6 @@ def webhook(request):
                             print(f"[WA Webhook Error] Failed to send unregistered message: {e}")
                             traceback.print_exc()
                         continue
-
-                    # Extract optional IPO ID from payload if present (e.g., 'view_orders_12')
-                    ipo_id = None
-                    if "view_orders_" in payload:
-                        try:
-                            ipo_id = int(payload.split("view_orders_")[-1])
-                        except ValueError:
-                            pass
 
                     # Order Retrieval scoped to specific IPO
                     if ipo_id:

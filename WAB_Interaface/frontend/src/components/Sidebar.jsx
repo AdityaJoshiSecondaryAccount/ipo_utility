@@ -34,33 +34,6 @@ export const Sidebar = () => {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <button 
-            className="header-btn" 
-            style={{ 
-              width: 'auto', 
-              padding: '4px 10px', 
-              borderRadius: '6px', 
-              background: 'rgba(37, 211, 102, 0.15)', 
-              color: 'var(--accent-wa)',
-              fontSize: '11.5px',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}
-            onClick={async () => {
-              const choice = prompt("Enter 1 for Aditya (6355783769) or 2 for Prateek (7016868618):", "1");
-              if (choice) {
-                const msg = prompt("Enter test message:", "Hello! Is my IPO order active?");
-                if (msg) {
-                  await fetch(`/api/test/simulate-incoming?phone_choice=${encodeURIComponent(choice)}&text=${encodeURIComponent(msg)}`, { method: 'POST' });
-                }
-              }
-            }}
-            title="Click to simulate an incoming message from 6355783769 or 7016868618"
-          >
-            ⚡ Test Msg
-          </button>
 
           <button 
             className="header-btn" 

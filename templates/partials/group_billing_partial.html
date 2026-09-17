@@ -1,0 +1,31 @@
+{% for table_data in group_tables %}
+<div class="group-section" style="margin-bottom: 5px;">
+    {% if table_data.sme_html_table %}
+    <div>
+        <h4 class="text-center">
+            Group : {{ table_data.group.GroupName }} (SME IPOs)
+            <button class="btn btn-sm btn-outline-primary ms-2"
+                onclick="openGroupShareModal(this, '{{ table_data.group.GroupName }}', 'SME')" title="Share">
+                <i class="fa fa-share-alt"></i> Share
+            </button>
+        </h4>
+        {{ table_data.sme_html_table | safe }}
+    </div>
+    {% endif %}
+
+    {% if table_data.mainboard_html_table %}
+    <div style="margin-top: 5px;">
+        <h4 class="text-center">
+            Group : {{ table_data.group.GroupName }}
+            <button class="btn btn-sm btn-outline-primary ms-2"
+                onclick="openGroupShareModal(this, '{{ table_data.group.GroupName }}', 'Mainboard')" title="Share">
+                <i class="fa fa-share-alt"></i> Share
+            </button>
+        </h4>
+        {{ table_data.mainboard_html_table | safe }}
+    </div>
+    {% endif %}
+</div>
+{% endfor %}
+
+

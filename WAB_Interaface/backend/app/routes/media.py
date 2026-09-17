@@ -54,5 +54,7 @@ async def proxy_whatsapp_media(url: str):
                     media_type=resp.headers.get("Content-Type", "application/octet-stream")
                 )
             raise HTTPException(status_code=resp.status_code, detail="Failed to fetch media from Meta")
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Proxy error: {str(e)}")

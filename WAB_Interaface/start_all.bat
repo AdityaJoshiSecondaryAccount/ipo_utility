@@ -5,7 +5,7 @@ echo   Launching ADwealth WhatsApp Business Inbox System
 echo ========================================================
 echo.
 echo 1. Starting Backend (Port 8001)...
-start "ADwealth WA Backend" cmd /c "cd /d "%~dp0backend" && python -m uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload"
+start "ADwealth WA Backend" cmd /c "cd /d "%~dp0backend" && python -m uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload --reload-dir "%~dp0backend" --reload-dir "%~dp0..\whatsapp""
 
 echo 2. Starting Frontend UI (Port 5173)...
 start "ADwealth WA Frontend" cmd /c "cd /d "%~dp0frontend" && npm run dev"

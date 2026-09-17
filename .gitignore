@@ -106,3 +106,13 @@ scratch/
 
 # WAB_Interaface/
 WAB_Interaface/public_sign_readme.txt
+
+WAB_Interaface/public_sign_readme.txt
+
+# WhatsApp Inbox Microservice
+WAB_Interaface/backend/.env
+WAB_Interaface/backend/wab_inbox.db
+WAB_Interaface/backend/.venv/
+WAB_Interaface/frontend/node_modules/
+WAB_Interaface/frontend/dist/
+WAB_Interaface/ngrok.exe

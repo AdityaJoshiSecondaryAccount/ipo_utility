@@ -107,6 +107,12 @@ async def handle_whatsapp_flow(request: Request):
         except Exception as err:
             logger.error(f"Django setup exception: {err}")
 
+        import importlib
+        import whatsapp.flow_crypto
+        import whatsapp.flow_endpoint
+        importlib.reload(whatsapp.flow_crypto)
+        importlib.reload(whatsapp.flow_endpoint)
+
         from whatsapp.flow_crypto import decrypt_request, encrypt_response, FlowDecryptionError
         from whatsapp.flow_endpoint import handle_flow_action
 

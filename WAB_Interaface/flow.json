@@ -30,7 +30,32 @@
         {
             "id": "START",
             "title": "IPO Utility",
-            "data": {},
+            "data": {
+                "ipo_list": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "title": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "__example__": [
+                        {
+                            "id": "1",
+                            "title": "TATA CAPITAL IPO"
+                        },
+                        {
+                            "id": "2",
+                            "title": "SWIGGY IPO"
+                        }
+                    ]
+                }
+            },
             "layout": {
                 "type": "SingleColumnLayout",
                 "children": [
@@ -72,7 +97,8 @@
                                         "name": "IPO_SELECT"
                                     },
                                     "payload": {
-                                        "side": "${form.side}"
+                                        "side": "${form.side}",
+                                        "ipo_list": "${data.ipo_list}"
                                     }
                                 }
                             }
@@ -285,7 +311,6 @@
                                 "type": "TextInput",
                                 "label": "Quantity",
                                 "name": "quantity",
-                                "input-type": "number",
                                 "required": true,
                                 "helper-text": "Number of lots"
                             },
@@ -293,7 +318,6 @@
                                 "type": "TextInput",
                                 "label": "Rate",
                                 "name": "rate",
-                                "input-type": "number",
                                 "required": true,
                                 "helper-text": "Price per lot"
                             },
@@ -313,9 +337,9 @@
                                         "category": "${form.category}",
                                         "quantity": "${form.quantity}",
                                         "rate": "${form.rate}",
-                                        "strike_price": 0,
-                                        "premium_quantity": 0,
-                                        "premium_rate": 0
+                                        "strike_price": "0",
+                                        "premium_quantity": "0",
+                                        "premium_rate": "0"
                                     }
                                 }
                             }
@@ -345,12 +369,12 @@
                     "__example__": "Kostak"
                 },
                 "quantity": {
-                    "type": "number",
-                    "__example__": 5
+                    "type": "string",
+                    "__example__": "5"
                 },
                 "rate": {
-                    "type": "number",
-                    "__example__": 100
+                    "type": "string",
+                    "__example__": "100"
                 }
             },
             "layout": {
@@ -372,7 +396,6 @@
                                 "type": "TextInput",
                                 "label": "Strike Price",
                                 "name": "strike_price",
-                                "input-type": "number",
                                 "required": false,
                                 "helper-text": "Required for CALL / PUT"
                             },
@@ -380,14 +403,12 @@
                                 "type": "TextInput",
                                 "label": "Premium Quantity",
                                 "name": "premium_quantity",
-                                "input-type": "number",
                                 "required": false
                             },
                             {
                                 "type": "TextInput",
                                 "label": "Premium Rate",
                                 "name": "premium_rate",
-                                "input-type": "number",
                                 "required": false
                             },
                             {
@@ -438,24 +459,24 @@
                     "__example__": "Kostak"
                 },
                 "quantity": {
-                    "type": "number",
-                    "__example__": 5
+                    "type": "string",
+                    "__example__": "5"
                 },
                 "rate": {
-                    "type": "number",
-                    "__example__": 100
+                    "type": "string",
+                    "__example__": "100"
                 },
                 "strike_price": {
-                    "type": "number",
-                    "__example__": 0
+                    "type": "string",
+                    "__example__": "0"
                 },
                 "premium_quantity": {
-                    "type": "number",
-                    "__example__": 0
+                    "type": "string",
+                    "__example__": "0"
                 },
                 "premium_rate": {
-                    "type": "number",
-                    "__example__": 0
+                    "type": "string",
+                    "__example__": "0"
                 }
             },
             "layout": {
@@ -528,24 +549,24 @@
                     "__example__": "Kostak"
                 },
                 "quantity": {
-                    "type": "number",
-                    "__example__": 5
+                    "type": "string",
+                    "__example__": "5"
                 },
                 "rate": {
-                    "type": "number",
-                    "__example__": 100
+                    "type": "string",
+                    "__example__": "100"
                 },
                 "strike_price": {
-                    "type": "number",
-                    "__example__": 0
+                    "type": "string",
+                    "__example__": "0"
                 },
                 "premium_quantity": {
-                    "type": "number",
-                    "__example__": 0
+                    "type": "string",
+                    "__example__": "0"
                 },
                 "premium_rate": {
-                    "type": "number",
-                    "__example__": 0
+                    "type": "string",
+                    "__example__": "0"
                 },
                 "remark": {
                     "type": "string",
@@ -572,24 +593,44 @@
                                 "text": "Order Summary"
                             },
                             {
-                                "type": "TextBody",
-                                "text": "Side: ${data.side}"
+                                "type": "TextCaption",
+                                "text": "ORDER SIDE"
                             },
                             {
                                 "type": "TextBody",
-                                "text": "Segment: ${data.segment}"
+                                "text": "${data.side}"
+                            },
+                            {
+                                "type": "TextCaption",
+                                "text": "SEGMENT"
                             },
                             {
                                 "type": "TextBody",
-                                "text": "Category: ${data.category}"
+                                "text": "${data.segment}"
+                            },
+                            {
+                                "type": "TextCaption",
+                                "text": "CATEGORY"
                             },
                             {
                                 "type": "TextBody",
-                                "text": "Quantity: ${data.quantity}"
+                                "text": "${data.category}"
+                            },
+                            {
+                                "type": "TextCaption",
+                                "text": "QUANTITY (LOTS)"
                             },
                             {
                                 "type": "TextBody",
-                                "text": "Rate: ${data.rate}"
+                                "text": "${data.quantity}"
+                            },
+                            {
+                                "type": "TextCaption",
+                                "text": "RATE"
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "${data.rate}"
                             },
                             {
                                 "type": "Footer",
