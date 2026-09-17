@@ -40,6 +40,15 @@ class MessageCreate(BaseModel):
     media_url: Optional[str] = None
     media_filename: Optional[str] = None
 
+class OutboundLogCreate(BaseModel):
+    phone_number: str
+    text: Optional[str] = None
+    message_type: str = "text"
+    media_url: Optional[str] = None
+    media_filename: Optional[str] = None
+    wamid: Optional[str] = None
+    status: str = "sent"
+
 class MessageResponse(BaseModel):
     id: int
     conversation_id: int
