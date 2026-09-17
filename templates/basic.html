@@ -618,6 +618,11 @@
                     <b style="color: #fff;">|</b> &nbsp; Backup
                 </span>
                 {% endif %}
+                {% if request.user.groups.all.0.name == 'Broker' %}
+                <li class="nav-item active">
+                    <a class="nav-link" href="/chat" target="_blank"><b>|</b>&nbsp; WhatsApp Chat</a>
+                </li>
+                {% endif %}
                 {% comment %} <li class="nav-item active">
                     <a class="nav-link" href="/panalloted">IPO Allotment Analysis</a>
                 </li> {% endcomment %}
