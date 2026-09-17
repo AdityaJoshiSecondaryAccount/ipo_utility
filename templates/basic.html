@@ -618,6 +618,13 @@
                     <b style="color: #fff;">|</b> &nbsp; Backup
                 </span>
                 {% endif %}
+                
+                {% if request.user.is_authenticated %}
+                <li class="nav-item active">
+                    <a class="nav-link" href="/chat" target="_blank" style="color: #4CAF50;"><b>|</b>&nbsp; WhatsApp Chat</a>
+                </li>
+                {% endif %}
+
                 {% comment %} <li class="nav-item active">
                     <a class="nav-link" href="/panalloted">IPO Allotment Analysis</a>
                 </li> {% endcomment %}

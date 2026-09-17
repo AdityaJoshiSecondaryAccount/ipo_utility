@@ -30,18 +30,6 @@ def get_or_create_customer_group(phone_number: str, user):
     if last10:
         group = GroupDetail.objects.filter(MobileNo__endswith=last10, Active=True).first()
 
-    if not group:
-        group_name = f"WA_{last10}" if last10 else "MANISH _ SHARMA"
-        group = GroupDetail.objects.filter(GroupName=group_name, Active=True).first()
-        if not group:
-            group = GroupDetail.objects.create(
-                user=user,
-                GroupName=group_name,
-                MobileNo=last10,
-                Active=True,
-            )
-            logger.info(f"Auto-created GroupDetail #{group.id} ({group_name}) for phone {phone_number}")
-
     return group
 
 
@@ -154,6 +142,14 @@ def process_order_placement(data: dict, customer_phone: str = None) -> dict:
 
         owner_user = (ipo and ipo.user) or get_default_user()
         group = get_or_create_customer_group(customer_phone, owner_user)
+        
+        if not group:
+            return {
+                "screen": "COMPLETE",
+                "data": {
+                    "confirmation_text": "Error: Your mobile number is not registered as a customer. Please ask your broker to add you."
+                }
+            }
 
         side = (data.get("side") or "BUY").upper()
         segment = data.get("segment") or "RETAIL"

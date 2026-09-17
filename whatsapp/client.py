@@ -1,6 +1,31 @@
 import io
 import requests
+import threading
+import logging
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
+
+def _log_outbound_to_fastapi(phone_number, text, msg_type="text", media_url=None, media_filename=None, wamid=None):
+    def run():
+        fastapi_url = getattr(settings, "FASTAPI_INTERNAL_URL", "http://127.0.0.1:8001/api")
+        url = f"{fastapi_url}/log-outbound"
+        payload = {
+            "phone_number": phone_number,
+            "text": str(text) if text else None,
+            "message_type": msg_type,
+            "media_url": str(media_url) if media_url else None,
+            "media_filename": str(media_filename) if media_filename else None,
+            "wamid": wamid,
+            "status": "sent"
+        }
+        try:
+            requests.post(url, json=payload, timeout=5)
+        except Exception as e:
+            logger.warning(f"Failed to sync outbound message to FastAPI: {e}")
+
+    threading.Thread(target=run, daemon=True).start()
+
 
 
 def _get_api_headers(content_type="application/json"):
@@ -66,6 +91,17 @@ def send_order_confirmation(phone_number, ipo_name, order_type, group_name,
                 res = requests.post(url, headers=headers, json=payload, timeout=15)
         except Exception:
             pass
+    if res.ok:
+        try:
+            wamid = res.json().get("messages", [{}])[0].get("id")
+        except Exception:
+            wamid = None
+        _log_outbound_to_fastapi(
+            phone_number=phone_number,
+            text=f"Order Placed for {ipo_name} ({order_type})\n{group_name}\n{order_details}",
+            msg_type="template",
+            wamid=wamid
+        )
     return res
 
 
@@ -118,7 +154,20 @@ def send_image_message(phone_number, media_id=None, image_url=None, caption=None
         "type": "image",
         "image": image_obj,
     }
-    return requests.post(url, headers=headers, json=payload, timeout=15)
+    res = requests.post(url, headers=headers, json=payload, timeout=15)
+    if res.ok:
+        try:
+            wamid = res.json().get("messages", [{}])[0].get("id")
+        except Exception:
+            wamid = None
+        _log_outbound_to_fastapi(
+            phone_number=phone_number,
+            text=caption or "",
+            msg_type="image",
+            media_url=image_url or str(media_id) if media_id else None,
+            wamid=wamid
+        )
+    return res
 
 
 def send_text_message(phone_number, text):
@@ -138,4 +187,16 @@ def send_text_message(phone_number, text):
             "body": str(text),
         },
     }
-    return requests.post(url, headers=headers, json=payload, timeout=15)
+    res = requests.post(url, headers=headers, json=payload, timeout=15)
+    if res.ok:
+        try:
+            wamid = res.json().get("messages", [{}])[0].get("id")
+        except Exception:
+            wamid = None
+        _log_outbound_to_fastapi(
+            phone_number=phone_number,
+            text=str(text),
+            msg_type="text",
+            wamid=wamid
+        )
+    return res

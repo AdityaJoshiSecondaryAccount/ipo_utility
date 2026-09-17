@@ -10,7 +10,7 @@ from ..database import get_db
 from ..models import Contact, Conversation, Message, CannedResponse, utcnow
 from ..schemas import (
     ConversationResponse, MessageResponse, MessageCreate,
-    CannedResponseItem, CannedResponseCreate
+    CannedResponseItem, CannedResponseCreate, OutboundLogCreate
 )
 from ..whatsapp_client import whatsapp_client
 from ..websocket_manager import manager
@@ -275,6 +275,87 @@ async def simulate_incoming_test_message(
     }
     await process_webhook_payload(mock_payload, db)
     return {"status": "success", "phone": phone, "message": text}
+
+
+@router.post("/log-outbound")
+async def log_outbound_message(
+    log_in: OutboundLogCreate,
+    db: AsyncSession = Depends(get_db)
+):
+    """Logs an outbound message sent externally (e.g. from Django/Postman)."""
+    clean_phone = log_in.phone_number.replace("+", "").replace(" ", "").replace("-", "")
+    
+    # 1. Find or create Contact & Conversation
+    stmt = select(Contact).where(Contact.phone_number == clean_phone)
+    result = await db.execute(stmt)
+    contact = result.scalar_one_or_none()
+    if not contact:
+        contact = Contact(phone_number=clean_phone, name=f"+{clean_phone}")
+        db.add(contact)
+        await db.flush()
+        
+    stmt = select(Conversation).where(Conversation.contact_id == contact.id)
+    result = await db.execute(stmt)
+    conv = result.scalar_one_or_none()
+    if not conv:
+        conv = Conversation(contact_id=contact.id)
+        db.add(conv)
+        await db.flush()
+
+    # 3. Store message in Database
+    now = utcnow()
+    new_msg = Message(
+        conversation_id=conv.id,
+        wamid=log_in.wamid,
+        direction="outbound",
+        message_type=log_in.message_type,
+        text=log_in.text,
+        media_url=log_in.media_url,
+        media_filename=log_in.media_filename,
+        status=log_in.status,
+        timestamp=now
+    )
+    db.add(new_msg)
+    
+    # Update conversation metadata
+    conv.last_message_text = log_in.text or f"[{log_in.message_type.capitalize()}]"
+    conv.last_message_time = now
+    conv.last_message_status = log_in.status
+    
+    await db.commit()
+    await db.refresh(new_msg)
+    
+    # 4. Broadcast message creation to UI clients via WebSocket
+    await manager.broadcast("NEW_MESSAGE", {
+        "message": {
+            "id": new_msg.id,
+            "conversation_id": conv.id,
+            "wamid": new_msg.wamid,
+            "direction": new_msg.direction,
+            "message_type": new_msg.message_type,
+            "text": new_msg.text,
+            "media_url": new_msg.media_url,
+            "media_filename": new_msg.media_filename,
+            "status": new_msg.status,
+            "error_message": new_msg.error_message,
+            "timestamp": new_msg.timestamp.isoformat()
+        },
+        "conversation": {
+            "id": conv.id,
+            "contact": {
+                "id": contact.id,
+                "phone_number": contact.phone_number,
+                "name": contact.name
+            },
+            "unread_count": conv.unread_count,
+            "last_message_text": conv.last_message_text,
+            "last_message_time": conv.last_message_time.isoformat(),
+            "last_message_status": conv.last_message_status,
+            "last_inbound_time": conv.last_inbound_time.isoformat() if conv.last_inbound_time else None
+        }
+    })
+
+    return {"status": "success", "message_id": new_msg.id}
 
 
 # --- Canned Responses API ---

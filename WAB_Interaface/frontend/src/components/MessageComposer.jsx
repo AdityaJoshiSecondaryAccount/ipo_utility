@@ -56,10 +56,12 @@ export const MessageComposer = () => {
       const isImage = file.type.startsWith('image/');
       const msgType = isImage ? 'image' : 'document';
 
+      const fullMediaUrl = window.location.origin + uploadData.media_url;
+
       await sendMessage({
         text: file.name,
         messageType: msgType,
-        mediaUrl: uploadData.media_url,
+        mediaUrl: fullMediaUrl,
         mediaFilename: file.name
       });
     } catch (err) {
@@ -68,6 +70,16 @@ export const MessageComposer = () => {
       setSending(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
+  };
+
+  const handlePaste = (e) => {
+    // If it's a file (like an image screenshot)
+    if (e.clipboardData.files && e.clipboardData.files.length > 0) {
+      e.preventDefault();
+      const fakeEvent = { target: { files: e.clipboardData.files } };
+      handleFileUpload(fakeEvent);
+    }
+    // Normal text pasting continues default behavior
   };
 
   return (
@@ -114,6 +126,7 @@ export const MessageComposer = () => {
             }
           }}
           onKeyDown={handleKeyDown}
+          onPaste={handlePaste}
           disabled={sending}
         />
       </div>
