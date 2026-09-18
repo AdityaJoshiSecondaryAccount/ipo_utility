@@ -3,15 +3,27 @@ import { useChat } from '../context/ChatContext';
 import { MessageBubble } from './MessageBubble';
 import { MessageComposer } from './MessageComposer';
 import { MediaViewerModal } from './MediaViewerModal';
-import { MessageSquare, Clock, Phone, ShieldCheck, User, ArrowLeft } from 'lucide-react';
+import { MessageSquare, Clock, Phone, ShieldCheck, User, ArrowLeft, ArrowDown } from 'lucide-react';
 
 export const ChatArea = () => {
   const { activeConversation, clearActiveConversation, messages, loadingMessages } = useChat();
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const [previewMediaUrl, setPreviewMediaUrl] = useState(null);
+  const [showScrollButton, setShowScrollButton] = useState(false);
+
+  const handleScroll = () => {
+    if (!messagesContainerRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+    // Show button if we are scrolled up more than 100px from the bottom
+    const isScrolledUp = scrollHeight - scrollTop - clientHeight > 100;
+    setShowScrollButton(isScrolledUp);
+  };
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'auto', block: 'end' });
+    }, 100);
   };
 
   useEffect(() => {
@@ -52,7 +64,7 @@ export const ChatArea = () => {
   const windowOpen = isWindowActive();
 
   return (
-    <main className="chat-area">
+    <main className="chat-area" style={{ position: 'relative' }}>
       {/* Active Chat Header */}
       <header className="chat-header">
         <div className="chat-header-user">
@@ -88,7 +100,11 @@ export const ChatArea = () => {
       </header>
 
       {/* Messages Timeline */}
-      <div className="messages-container">
+      <div 
+        className="messages-container"
+        ref={messagesContainerRef}
+        onScroll={handleScroll}
+      >
         <div className="messages-date-divider">
           <span className="date-badge">End-to-End Encrypted via Meta WhatsApp API</span>
         </div>
@@ -112,6 +128,35 @@ export const ChatArea = () => {
         )}
         <div ref={messagesEndRef} />
       </div>
+
+      {/* Floating Scroll to Bottom Button */}
+      {showScrollButton && (
+        <button 
+          className="scroll-to-bottom-btn" 
+          onClick={scrollToBottom}
+          title="Scroll to latest messages"
+          style={{
+            position: 'absolute',
+            bottom: '80px',
+            right: '20px',
+            backgroundColor: 'var(--accent-wa)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '50%',
+            width: '40px',
+            height: '40px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+            zIndex: 10,
+            transition: 'opacity 0.2s'
+          }}
+        >
+          <ArrowDown size={20} />
+        </button>
+      )}
 
       {/* Message Composer Input */}
       <MessageComposer />

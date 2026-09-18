@@ -157,10 +157,31 @@ async def send_message(
     error_msg = None
     
     try:
+        media_id = None
+        if msg_in.media_url and ("/chat-api/file/" in msg_in.media_url or "localhost" in msg_in.media_url):
+            filename = msg_in.media_url.split("/")[-1]
+            from pathlib import Path
+            local_path = Path(__file__).resolve().parent.parent.parent / "uploads" / filename
+            if local_path.exists():
+                import mimetypes
+                mime_type, _ = mimetypes.guess_type(local_path)
+                media_id = await whatsapp_client.upload_media(str(local_path), mime_type or "application/octet-stream")
+
         if msg_in.message_type == "image" and msg_in.media_url:
-            resp = await whatsapp_client.send_image_message(clean_phone, msg_in.media_url, msg_in.text)
+            resp = await whatsapp_client.send_image_message(
+                clean_phone, 
+                image_url=msg_in.media_url if not media_id else None, 
+                caption=msg_in.text,
+                media_id=media_id
+            )
         elif msg_in.message_type == "document" and msg_in.media_url:
-            resp = await whatsapp_client.send_document_message(clean_phone, msg_in.media_url, msg_in.media_filename, msg_in.text)
+            resp = await whatsapp_client.send_document_message(
+                clean_phone, 
+                document_url=msg_in.media_url if not media_id else None, 
+                filename=msg_in.media_filename, 
+                caption=msg_in.text,
+                media_id=media_id
+            )
         else:
             if not msg_in.text:
                 raise HTTPException(status_code=400, detail="Message text is required")

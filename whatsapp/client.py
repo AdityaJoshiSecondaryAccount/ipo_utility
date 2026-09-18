@@ -141,7 +141,7 @@ def upload_media(file_bytes_or_buffer, mime_type="image/png", filename="orders.p
     return requests.post(url, headers=headers, data=data, files=files, timeout=30)
 
 
-def send_image_message(phone_number, media_id=None, image_url=None, caption=None):
+def send_image_message(phone_number, media_id=None, image_url=None, caption=None, log_to_fastapi=True):
     """Sends an image message via WhatsApp Cloud API using either media_id or image_url."""
     url = (
         "https://graph.facebook.com/"
@@ -165,7 +165,7 @@ def send_image_message(phone_number, media_id=None, image_url=None, caption=None
         "image": image_obj,
     }
     res = requests.post(url, headers=headers, json=payload, timeout=15)
-    if res.ok:
+    if res.ok and log_to_fastapi:
         try:
             wamid = res.json().get("messages", [{}])[0].get("id")
         except Exception:

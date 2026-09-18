@@ -116,3 +116,9 @@ WAB_Interaface/backend/.venv/
 WAB_Interaface/frontend/node_modules/
 WAB_Interaface/frontend/dist/
 WAB_Interaface/ngrok.exe
+
+
+*.jpg
+*.png
+*.webp
+*.jfif

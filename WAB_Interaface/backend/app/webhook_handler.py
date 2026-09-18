@@ -1,6 +1,8 @@
 import logging
 import json
 import httpx
+import os
+import httpx
 from datetime import datetime, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -116,6 +118,7 @@ async def process_webhook_payload(payload: dict, session: AsyncSession):
                     media_mime = None
                     media_filename = None
                     button_payload = None
+                    media_id = None
 
                     if msg_type == "text":
                         body_text = msg_data.get("text", {}).get("body", "")
@@ -139,25 +142,42 @@ async def process_webhook_payload(payload: dict, session: AsyncSession):
                         body_text = image_data.get("caption", "[Image]")
                         media_mime = image_data.get("mime_type")
                         media_id = image_data.get("id")
-                        if media_id:
-                            media_url = await whatsapp_client.get_media_url(media_id)
                     elif msg_type == "document":
                         doc_data = msg_data.get("document", {})
                         body_text = doc_data.get("caption", doc_data.get("filename", "[Document]"))
                         media_filename = doc_data.get("filename")
                         media_mime = doc_data.get("mime_type")
                         media_id = doc_data.get("id")
-                        if media_id:
-                            media_url = await whatsapp_client.get_media_url(media_id)
                     elif msg_type == "audio":
                         body_text = "[Voice Note / Audio]"
                         audio_data = msg_data.get("audio", {})
                         media_mime = audio_data.get("mime_type")
                         media_id = audio_data.get("id")
-                        if media_id:
-                            media_url = await whatsapp_client.get_media_url(media_id)
                     else:
                         body_text = f"[{msg_type.capitalize()} message]"
+
+                    # Download media if present
+                    if media_id:
+                        fb_media_url = await whatsapp_client.get_media_url(media_id)
+                        if fb_media_url:
+                            ext = ""
+                            if media_mime:
+                                if "jpeg" in media_mime or "jpg" in media_mime: ext = ".jpg"
+                                elif "png" in media_mime: ext = ".png"
+                                elif "pdf" in media_mime: ext = ".pdf"
+                                elif "mp4" in media_mime: ext = ".mp4"
+                                elif "oga" in media_mime or "ogg" in media_mime: ext = ".ogg"
+                            if not ext and msg_type == "image": ext = ".png"
+                            
+                            filename = f"{media_id}{ext}"
+                            upload_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "uploads", "media")
+                            os.makedirs(upload_dir, exist_ok=True)
+                            save_path = os.path.join(upload_dir, filename)
+                            success = await whatsapp_client.download_media(fb_media_url, save_path)
+                            if success:
+                                media_url = f"/chat-api/media/local/{filename}"
+                            else:
+                                media_url = fb_media_url
 
                     # Check if already inserted
                     stmt = select(Message).where(Message.wamid == msg_id)

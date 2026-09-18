@@ -207,7 +207,15 @@ export const ChatProvider = ({ children }) => {
 
     return () => {
       clearTimeout(reconnectTimer);
-      if (wsRef.current) wsRef.current.close();
+      if (wsRef.current) {
+        // Only close if it's actually open to prevent React StrictMode warnings
+        if (wsRef.current.readyState === 1) {
+          wsRef.current.close();
+        } else {
+          // If connecting, wait for open then close, or just set onopen to close it
+          wsRef.current.onopen = () => wsRef.current.close();
+        }
+      }
     };
   }, [fetchConversations, fetchCannedReplies]);
 

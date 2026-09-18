@@ -47,6 +47,10 @@ app.include_router(webhook.router)
 app.include_router(conversations.router)
 app.include_router(media.router)
 
+UPLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "uploads", "media")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+app.mount("/chat-api/media/local", StaticFiles(directory=UPLOAD_DIR), name="local_media")
+
 # WebSocket endpoint for real-time live inbox updates
 @app.websocket("/chat-api/ws")
 async def websocket_endpoint(websocket: WebSocket):

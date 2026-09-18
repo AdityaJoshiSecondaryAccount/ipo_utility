@@ -5,6 +5,8 @@ import logging
 import re
 import traceback
 import requests
+import os
+import time
 
 from django.conf import settings
 from django.contrib import messages
@@ -22,6 +24,7 @@ from .client import (
     send_order_confirmation,
     send_text_message,
     upload_media,
+    _log_outbound_to_fastapi,
 )
 from .services import (
     build_order_summary_context,
@@ -65,7 +68,7 @@ def _order_details(post_data):
             if rate:
                 parts.append(f"Rate: {rate}")
             details.append(" - ".join(parts))
-    return "; ".join(details)
+    return " 🔹 ".join(details)
 
 
 def _send_order(request, ipo_id, order_type):
@@ -106,6 +109,18 @@ def _send_order(request, ipo_id, order_type):
 
     ipo = get_object_or_404(CurrentIpoName, id=ipo_id, user=request.user)
     details = _order_details(request.POST)
+    
+    remark_tags = request.POST.get("remark_tags", "").strip()
+    remark_text = request.POST.get("remark_text", "").strip()
+    remark_parts = [r for r in (remark_tags, remark_text) if r]
+    
+    if remark_parts:
+        full_remark = " ".join(remark_parts)
+        if details:
+            details += f" | 📝 Remark: {full_remark}"
+        else:
+            details = f"📝 Remark: {full_remark}"
+            
     if not details:
         messages.error(request, "Order placed successfully, but WhatsApp order details were empty.")
         return JsonResponse({
@@ -113,13 +128,21 @@ def _send_order(request, ipo_id, order_type):
             "message": "Enter at least one order quantity or rate.",
         }, status=400)
 
+    raw_datetime = request.POST.get("datetime", "")
+    try:
+        from datetime import datetime
+        dt_obj = datetime.fromisoformat(raw_datetime)
+        formatted_datetime = dt_obj.strftime("%d %b %Y, %I:%M %p")
+    except Exception:
+        formatted_datetime = raw_datetime
+
     try:
         response = send_order_confirmation(
             phone_number=phone_number,
             ipo_name=ipo.IPOName,
             order_type=order_type,
             group_name=group.GroupName,
-            order_datetime=request.POST.get("datetime", ""),
+            order_datetime=formatted_datetime,
             order_details=details,
             ipo_id=ipo.id,
             broker_id=request.user.id,
@@ -377,11 +400,20 @@ def webhook(request):
                         img_buf = generate_order_summary_image(context)
                         print(f"[WA Webhook] Image generated ({len(img_buf.getvalue())} bytes). Uploading to Meta WhatsApp...")
 
+                        # Save locally for the React Chat Interface
+                        filename = f"orders_{group.id}_{int(time.time())}.png"
+                        upload_dir = os.path.join(settings.BASE_DIR, "WAB_Interaface", "backend", "uploads", "media")
+                        os.makedirs(upload_dir, exist_ok=True)
+                        save_path = os.path.join(upload_dir, filename)
+                        with open(save_path, "wb") as f:
+                            f.write(img_buf.getvalue())
+                        local_media_url = f"/chat-api/media/local/{filename}"
+
                         # Upload media to Meta WhatsApp Cloud API
                         upload_res = upload_media(
                             img_buf,
                             mime_type="image/png",
-                            filename=f"orders_{group.id}.png"
+                            filename=filename
                         )
                         print(f"[WA Webhook Upload]: HTTP {upload_res.status_code} -> {upload_res.text}")
 
@@ -393,10 +425,24 @@ def webhook(request):
                                 phone_number=sender_raw,
                                 media_id=media_id,
                                 caption=caption,
+                                log_to_fastapi=False
                             )
                             print(f"[WA Webhook Send Image]: HTTP {send_res.status_code} -> {send_res.text}")
                             if not send_res.ok:
                                 print(f"[WA Webhook ERROR sending image]: {send_res.text}")
+                            else:
+                                try:
+                                    wamid = send_res.json().get("messages", [{}])[0].get("id")
+                                except Exception:
+                                    wamid = None
+                                _log_outbound_to_fastapi(
+                                    phone_number=sender_raw,
+                                    text=caption,
+                                    msg_type="image",
+                                    media_url=local_media_url,
+                                    media_filename=filename,
+                                    wamid=wamid
+                                )
                         else:
                             print(f"[WA Webhook ERROR uploading media]: {upload_res.text}")
                             # Fallback to text message if media upload fails

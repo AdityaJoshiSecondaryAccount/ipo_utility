@@ -40,11 +40,19 @@ class WhatsAppClient:
                 raise Exception(data.get("error", {}).get("message", f"WhatsApp API error {response.status_code}"))
             return data
 
-    async def send_image_message(self, to_phone: str, image_url: str, caption: Optional[str] = None) -> Dict[str, Any]:
-        """Sends an image message with optional caption."""
+    async def send_image_message(self, to_phone: str, image_url: Optional[str] = None, caption: Optional[str] = None, media_id: Optional[str] = None) -> Dict[str, Any]:
+        """Sends an image message with optional caption using URL or Media ID."""
         clean_phone = to_phone.replace("+", "").replace(" ", "").replace("-", "")
         url = f"{self.base_url}/messages"
-        image_payload = {"link": image_url}
+        
+        image_payload = {}
+        if media_id:
+            image_payload["id"] = str(media_id)
+        elif image_url:
+            image_payload["link"] = str(image_url)
+        else:
+            raise ValueError("Must provide either image_url or media_id")
+            
         if caption:
             image_payload["caption"] = caption
         payload = {
@@ -63,11 +71,19 @@ class WhatsAppClient:
                 raise Exception(data.get("error", {}).get("message", f"WhatsApp API error {response.status_code}"))
             return data
 
-    async def send_document_message(self, to_phone: str, document_url: str, filename: Optional[str] = None, caption: Optional[str] = None) -> Dict[str, Any]:
-        """Sends a document message."""
+    async def send_document_message(self, to_phone: str, document_url: Optional[str] = None, filename: Optional[str] = None, caption: Optional[str] = None, media_id: Optional[str] = None) -> Dict[str, Any]:
+        """Sends a document message using URL or Media ID."""
         clean_phone = to_phone.replace("+", "").replace(" ", "").replace("-", "")
         url = f"{self.base_url}/messages"
-        doc_payload = {"link": document_url}
+        
+        doc_payload = {}
+        if media_id:
+            doc_payload["id"] = str(media_id)
+        elif document_url:
+            doc_payload["link"] = str(document_url)
+        else:
+            raise ValueError("Must provide either document_url or media_id")
+            
         if filename:
             doc_payload["filename"] = filename
         if caption:
@@ -118,5 +134,52 @@ class WhatsAppClient:
         except Exception as e:
             logger.warning(f"Failed to get media URL for {media_id}: {e}")
         return None
+
+    async def download_media(self, media_url: str, save_path: str) -> bool:
+        """Downloads media from WhatsApp and saves it to a local path."""
+        headers = {"Authorization": f"Bearer {self.access_token}"}
+        try:
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                response = await client.get(media_url, headers=headers)
+                if response.status_code == 200:
+                    with open(save_path, "wb") as f:
+                        f.write(response.content)
+                    return True
+                else:
+                    logger.warning(f"Failed to download media {media_url}: {response.status_code}")
+        except Exception as e:
+            logger.warning(f"Exception downloading media {media_url}: {e}")
+        return False
+
+    async def upload_media(self, file_path: str, mime_type: str) -> Optional[str]:
+        """Uploads a local file to WhatsApp Cloud API and returns the media ID."""
+        url = f"{self.base_url}/media"
+        
+        from pathlib import Path
+        filename = Path(file_path).name
+        
+        with open(file_path, "rb") as f:
+            file_data = f.read()
+            
+        files = {
+            "file": (filename, file_data, mime_type)
+        }
+        data = {
+            "messaging_product": "whatsapp"
+        }
+        
+        headers = {"Authorization": f"Bearer {self.access_token}"}
+        
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(url, headers=headers, data=data, files=files)
+                if response.status_code == 200:
+                    return response.json().get("id")
+                else:
+                    logger.error(f"Failed to upload media to WhatsApp: {response.text}")
+                    return None
+        except Exception as e:
+            logger.error(f"Exception uploading media to WhatsApp: {e}")
+            return None
 
 whatsapp_client = WhatsAppClient()

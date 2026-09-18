@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     WHATSAPP_PHONE_NUMBER_ID: str = "1287337667797572"
     WHATSAPP_BUSINESS_ACCOUNT_ID: str = "1001693916214003"
     WHATSAPP_WEBHOOK_VERIFY_TOKEN: str = "ADwealth_WA_Webhook_2026"
-    WHATSAPP_APP_SECRET: str = "arham123321"
+    WHATSAPP_APP_SECRET: str = ""
     WHATSAPP_API_VERSION: str = "v21.0"
     
     # Internal routing

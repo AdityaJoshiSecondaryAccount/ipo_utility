@@ -3,6 +3,7 @@ import { ChatProvider, useChat } from './context/ChatContext';
 import { Sidebar } from './components/Sidebar';
 import { ChatArea } from './components/ChatArea';
 
+
 function TempLogin({ onLogin }) {
   const [password, setPassword] = useState('');
   
@@ -66,7 +67,7 @@ function UserDropdown() {
           }}
           onMouseLeave={() => setIsOpen(false)}
         >
-          <a href="https://hostinger.ipoutility.in/user_profile" style={{ display: 'block', padding: '8px 24px', color: 'white', textDecoration: 'none', fontSize: '14px' }}>
+          <a href="/user-profile/" style={{ display: 'block', padding: '8px 24px', color: 'white', textDecoration: 'none', fontSize: '14px' }}>
             User Profile
           </a>
           <div style={{ display: 'block', padding: '8px 24px', color: 'white', fontSize: '14px' }}>

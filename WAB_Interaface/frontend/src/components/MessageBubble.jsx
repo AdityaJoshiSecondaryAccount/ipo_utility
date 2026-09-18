@@ -30,7 +30,7 @@ export const MessageBubble = ({ message, onPreviewMedia }) => {
                 onClick={() => onPreviewMedia && onPreviewMedia(safeMediaUrl)}
               />
             )}
-            {message.text && message.text !== '[Image]' && <p>{message.text}</p>}
+            {message.text && message.text !== '[Image]' && <p style={{ whiteSpace: 'pre-wrap', marginTop: '5px' }}>{message.text}</p>}
           </div>
         );
 

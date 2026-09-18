@@ -11,7 +11,8 @@ export default defineConfig({
     proxy: {
       '/chat-api': {
         target: 'http://127.0.0.1:8005',
-        changeOrigin: true
+        changeOrigin: true,
+        ws: true
       },
       '/ws': {
         target: 'ws://127.0.0.1:8005',
