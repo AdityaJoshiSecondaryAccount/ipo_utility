@@ -48,7 +48,7 @@ app.include_router(conversations.router)
 app.include_router(media.router)
 
 # WebSocket endpoint for real-time live inbox updates
-@app.websocket("/ws")
+@app.websocket("/chat-api/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     try:

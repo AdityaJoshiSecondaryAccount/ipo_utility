@@ -6,7 +6,7 @@ from pathlib import Path
 from fastapi import APIRouter, UploadFile, File, HTTPException, Response
 from ..config import settings
 
-router = APIRouter(prefix="/chat-api/media", tags=["Media Proxy"])
+router = APIRouter(prefix="/chat-api", tags=["Media Proxy"])
 
 MEDIA_DIR = Path(__file__).resolve().parent.parent.parent / "uploads"
 MEDIA_DIR.mkdir(parents=True, exist_ok=True)
@@ -23,7 +23,7 @@ async def upload_media_file(file: UploadFile = File(...)):
 
     return {
         "filename": file.filename,
-        "media_url": f"/chat-api/media/file/{unique_filename}",
+        "media_url": f"/chat-api/file/{unique_filename}",
         "content_type": file.content_type
     }
 

@@ -4,6 +4,9 @@ import { formatMessageTime } from '../utils/dateUtils';
 
 export const MessageBubble = ({ message, onPreviewMedia }) => {
   const isInbound = message.direction === 'inbound';
+  
+  // Patch old URLs from DB if they still use the old /api/ prefix
+  const safeMediaUrl = message.media_url ? message.media_url.replace('/api/media/file/', '/chat-api/file/') : null;
 
   const renderStatus = () => {
     if (isInbound) return null;
@@ -21,10 +24,10 @@ export const MessageBubble = ({ message, onPreviewMedia }) => {
           <div>
             {message.media_url && (
               <img 
-                src={message.media_url.startsWith('http') ? `/api/media/proxy?url=${encodeURIComponent(message.media_url)}` : message.media_url} 
+                src={safeMediaUrl.startsWith('http') ? `/chat-api/proxy?url=${encodeURIComponent(safeMediaUrl)}` : safeMediaUrl} 
                 alt="Attachment" 
                 className="message-media-img"
-                onClick={() => onPreviewMedia && onPreviewMedia(message.media_url)}
+                onClick={() => onPreviewMedia && onPreviewMedia(safeMediaUrl)}
               />
             )}
             {message.text && message.text !== '[Image]' && <p>{message.text}</p>}
@@ -35,7 +38,7 @@ export const MessageBubble = ({ message, onPreviewMedia }) => {
         return (
           <div>
             <a 
-              href={message.media_url?.startsWith('http') ? `/api/media/proxy?url=${encodeURIComponent(message.media_url)}` : message.media_url} 
+              href={safeMediaUrl?.startsWith('http') ? `/chat-api/proxy?url=${encodeURIComponent(safeMediaUrl)}` : safeMediaUrl}
               target="_blank" 
               rel="noopener noreferrer"
               className="document-card"
@@ -56,7 +59,7 @@ export const MessageBubble = ({ message, onPreviewMedia }) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0' }}>
             <Music size={22} color="var(--accent-wa)" />
             <audio controls style={{ height: '32px', maxWidth: '220px' }}>
-              <source src={message.media_url?.startsWith('http') ? `/api/media/proxy?url=${encodeURIComponent(message.media_url)}` : message.media_url} />
+              <source src={safeMediaUrl?.startsWith('http') ? `/chat-api/proxy?url=${encodeURIComponent(safeMediaUrl)}` : safeMediaUrl} />
               Audio not supported
             </audio>
           </div>
@@ -66,8 +69,22 @@ export const MessageBubble = ({ message, onPreviewMedia }) => {
       case 'button':
         return (
           <div>
-            <p>{message.text}</p>
-            <span className="button-reply-pill">🔘 Interactive Response</span>
+            <p style={{ whiteSpace: 'pre-wrap' }}>{message.text}</p>
+            <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
+              <span style={{ color: '#00a884', fontWeight: 'bold' }}>🔘 Interactive Response</span>
+            </div>
+          </div>
+        );
+
+      case 'template':
+        return (
+          <div>
+            <p style={{ whiteSpace: 'pre-wrap' }}>{message.text}</p>
+            <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
+              <span style={{ color: '#00a884', fontWeight: '500', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+                <span style={{ fontSize: '16px' }}>🔗</span> View Order Status
+              </span>
+            </div>
           </div>
         );
 

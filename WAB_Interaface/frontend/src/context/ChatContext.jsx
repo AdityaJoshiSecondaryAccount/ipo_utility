@@ -135,7 +135,7 @@ export const ChatProvider = ({ children }) => {
     fetchCannedReplies();
 
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
+    const wsUrl = `${wsProtocol}//${window.location.host}/chat-api/ws`;
 
     let reconnectTimer;
     const connectWS = () => {

@@ -5,7 +5,7 @@ export const MediaViewerModal = ({ mediaUrl, onClose }) => {
   if (!mediaUrl) return null;
 
   const proxiedUrl = mediaUrl.startsWith('http') 
-    ? `/api/media/proxy?url=${encodeURIComponent(mediaUrl)}` 
+    ? `/chat-api/proxy?url=${encodeURIComponent(mediaUrl)}` 
     : mediaUrl;
 
   return (

@@ -801,6 +801,10 @@ body, html {
 
 /* --- Mobile Responsive Media Queries --- */
 @media (max-width: 768px) {
+  .top-nav-links a:not(:first-child) {
+    display: none !important;
+  }
+
   .mobile-back-btn {
     display: flex !important;
     margin-right: -4px;

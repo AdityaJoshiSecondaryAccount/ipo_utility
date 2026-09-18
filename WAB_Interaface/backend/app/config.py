@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     
     # Server ports
     HOST: str = "0.0.0.0"
-    PORT: int = 8001
+    PORT: int = 8005
 
     model_config = SettingsConfigDict(
         env_file=str(ENV_FILE) if ENV_FILE.exists() else None,

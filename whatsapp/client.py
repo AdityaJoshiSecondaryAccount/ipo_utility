@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 def _log_outbound_to_fastapi(phone_number, text, msg_type="text", media_url=None, media_filename=None, wamid=None):
     def run():
-        fastapi_url = getattr(settings, "FASTAPI_INTERNAL_URL", "http://127.0.0.1:8001/api")
+        fastapi_url = getattr(settings, "FASTAPI_INTERNAL_URL", "http://127.0.0.1:8005/chat-api")
         url = f"{fastapi_url}/log-outbound"
         payload = {
             "phone_number": phone_number,
@@ -96,9 +96,19 @@ def send_order_confirmation(phone_number, ipo_name, order_type, group_name,
             wamid = res.json().get("messages", [{}])[0].get("id")
         except Exception:
             wamid = None
+        exact_text = (
+            "Order Confirmation\n"
+            f"📢 IPO Name: {ipo_name}\n\n"
+            f"📦 Order: {order_type}\n"
+            f"👥 Group: {group_name}\n\n"
+            f"🕒 Date & Time: {order_datetime}\n\n"
+            "Order Details:\n"
+            f"{order_details}\n\n"
+            "Order has been placed successfully. Revert if there is any discrepancy."
+        )
         _log_outbound_to_fastapi(
             phone_number=phone_number,
-            text=f"Order Placed for {ipo_name} ({order_type})\n{group_name}\n{order_details}",
+            text=exact_text,
             msg_type="template",
             wamid=wamid
         )
