@@ -37,5 +37,32 @@ export function formatConversationTime(dateVal) {
 export function formatMessageTime(dateVal) {
   if (!dateVal) return '';
   const date = parseUTCDate(dateVal);
-  return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+  const now = new Date();
+  
+  const timeStr = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+  
+  if (date.toDateString() === now.toDateString()) {
+    return timeStr;
+  }
+  
+  const dateStr = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  return `${dateStr}, ${timeStr}`;
+}
+
+export function getBadgeDateString(dateVal) {
+  if (!dateVal) return '';
+  const date = parseUTCDate(dateVal);
+  const now = new Date();
+  
+  if (date.toDateString() === now.toDateString()) {
+    return 'Today';
+  }
+  
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  if (date.toDateString() === yesterday.toDateString()) {
+    return 'Yesterday';
+  }
+  
+  return date.toLocaleDateString([], { year: 'numeric', month: 'long', day: 'numeric' });
 }

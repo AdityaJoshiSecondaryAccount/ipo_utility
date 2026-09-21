@@ -68,7 +68,10 @@ def _order_details(post_data):
             if rate:
                 parts.append(f"Rate: {rate}")
             details.append(" - ".join(parts))
-    return " 🔹 ".join(details)
+        else:
+            details.append(f"{label} - None")
+            
+    return details
 
 
 def _send_order(request, ipo_id, order_type):
@@ -114,14 +117,11 @@ def _send_order(request, ipo_id, order_type):
     remark_text = request.POST.get("remark_text", "").strip()
     remark_parts = [r for r in (remark_tags, remark_text) if r]
     
+    full_remark = "📝 Remark: None"
     if remark_parts:
-        full_remark = " ".join(remark_parts)
-        if details:
-            details += f" | 📝 Remark: {full_remark}"
-        else:
-            details = f"📝 Remark: {full_remark}"
+        full_remark = "📝 Remark: " + " ".join(remark_parts)
             
-    if not details:
+    if all(" - None" in d for d in details):
         messages.error(request, "Order placed successfully, but WhatsApp order details were empty.")
         return JsonResponse({
             "status": "error",
@@ -144,6 +144,7 @@ def _send_order(request, ipo_id, order_type):
             group_name=group.GroupName,
             order_datetime=formatted_datetime,
             order_details=details,
+            remark_text=full_remark,
             ipo_id=ipo.id,
             broker_id=request.user.id,
         )

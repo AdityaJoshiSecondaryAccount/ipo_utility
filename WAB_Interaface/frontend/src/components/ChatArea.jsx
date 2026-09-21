@@ -4,6 +4,7 @@ import { MessageBubble } from './MessageBubble';
 import { MessageComposer } from './MessageComposer';
 import { MediaViewerModal } from './MediaViewerModal';
 import { MessageSquare, Clock, Phone, ShieldCheck, User, ArrowLeft, ArrowDown } from 'lucide-react';
+import { getBadgeDateString } from '../utils/dateUtils';
 
 export const ChatArea = () => {
   const { activeConversation, clearActiveConversation, messages, loadingMessages } = useChat();
@@ -114,13 +115,28 @@ export const ChatArea = () => {
             Loading messages...
           </div>
         ) : messages.length > 0 ? (
-          messages.map((msg) => (
-            <MessageBubble 
-              key={msg.id} 
-              message={msg} 
-              onPreviewMedia={(url) => setPreviewMediaUrl(url)}
-            />
-          ))
+          (function() {
+            let lastDateStr = null;
+            return messages.map((msg) => {
+              const currentBadgeStr = getBadgeDateString(msg.timestamp);
+              const showBadge = currentBadgeStr !== lastDateStr;
+              lastDateStr = currentBadgeStr;
+
+              return (
+                <React.Fragment key={msg.id}>
+                  {showBadge && (
+                    <div className="messages-date-divider">
+                      <span className="date-badge">{currentBadgeStr}</span>
+                    </div>
+                  )}
+                  <MessageBubble 
+                    message={msg} 
+                    onPreviewMedia={(url) => setPreviewMediaUrl(url)}
+                  />
+                </React.Fragment>
+              );
+            });
+          })()
         ) : (
           <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
             No messages in this conversation yet. Send the first reply below!

@@ -15,7 +15,7 @@ async def run_tests():
         assert r.status_code == 200
 
         # 2. Webhook Handshake Verification (GET)
-        r = await client.get("/whatsapp/webhook/?hub.mode=subscribe&hub.verify_token=ADwealth_WA_Webhook_2026&hub.challenge=998877")
+        r = await client.get("/chat-api/whatsapp/webhook/?hub.mode=subscribe&hub.verify_token=ADwealth_WA_Webhook_2026&hub.challenge=998877")
         print(f"2. Webhook Handshake (GET): status={r.status_code}, body={r.text}")
         assert r.status_code == 200
         assert r.text == "998877"
@@ -48,8 +48,8 @@ async def run_tests():
                 }]
             }]
         }
-        r = await client.post("/whatsapp/webhook/", json=mock_payload)
-        print(f"3. Inbound Webhook User 1 (POST): status={r.status_code}, response={r.json()}")
+        r = await client.post("/chat-api/whatsapp/webhook/", json=mock_payload)
+        print(f"3. Inbound Message Webhook (POST): status={r.status_code}, response={r.json()}")
         assert r.status_code == 200
 
         # Simulate Incoming Message for Second Number (7016868618)

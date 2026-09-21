@@ -38,7 +38,7 @@ def _get_api_headers(content_type="application/json"):
 
 
 def send_order_confirmation(phone_number, ipo_name, order_type, group_name,
-                            order_datetime, order_details, ipo_id=None, broker_id=None):
+                            order_datetime, order_details, remark_text, ipo_id=None, broker_id=None):
     url = (
         "https://graph.facebook.com/"
         f"{settings.WHATSAPP_API_VERSION}/"
@@ -52,7 +52,16 @@ def send_order_confirmation(phone_number, ipo_name, order_type, group_name,
             {"type": "text", "parameter_name": "order_type", "text": str(order_type)},
             {"type": "text", "parameter_name": "group_name", "text": str(group_name)},
             {"type": "text", "parameter_name": "order_datetime", "text": str(order_datetime)},
-            {"type": "text", "parameter_name": "order_details", "text": str(order_details)},
+            {"type": "text", "parameter_name": "item_1", "text": str(order_details[0])},
+            {"type": "text", "parameter_name": "item_2", "text": str(order_details[1])},
+            {"type": "text", "parameter_name": "item_3", "text": str(order_details[2])},
+            {"type": "text", "parameter_name": "item_4", "text": str(order_details[3])},
+            {"type": "text", "parameter_name": "item_5", "text": str(order_details[4])},
+            {"type": "text", "parameter_name": "item_6", "text": str(order_details[5])},
+            {"type": "text", "parameter_name": "item_7", "text": str(order_details[6])},
+            {"type": "text", "parameter_name": "item_8", "text": str(order_details[7])},
+            {"type": "text", "parameter_name": "item_9", "text": str(order_details[8])},
+            {"type": "text", "parameter_name": "remark_text", "text": str(remark_text)},
         ],
     }]
 
@@ -75,7 +84,8 @@ def send_order_confirmation(phone_number, ipo_name, order_type, group_name,
         "to": phone_number,
         "type": "template",
         "template": {
-            "name": "ipo_order_confirmation",
+            # "name": "ipo_order_confirmation",
+            "name": "ipo_order_formatted",
             "language": {"code": "en"},
             "components": components,
         },
