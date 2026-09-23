@@ -86,6 +86,50 @@ function UserDropdown() {
   );
 }
 
+function SetupDropdown() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <div 
+        onClick={() => setIsOpen(!isOpen)}
+        style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', color: 'white' }}
+      >
+        <b style={{ color: '#fff' }}>|</b> &nbsp; Setup ▾
+      </div>
+      
+      {isOpen && (
+        <div 
+          style={{
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            background: '#686868',
+            border: '1px solid rgba(0,0,0,0.15)',
+            borderRadius: '4px',
+            minWidth: '160px',
+            padding: '8px 0',
+            marginTop: '10px',
+            zIndex: 1000,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+          }}
+          onMouseLeave={() => setIsOpen(false)}
+        >
+          <a href="https://hostinger.ipoutility.in/IPOSETUP" style={{ display: 'block', padding: '8px 24px', color: 'white', textDecoration: 'none', fontSize: '14px' }}>
+            IPOs Details
+          </a>
+          <a href="https://hostinger.ipoutility.in/ClientSetup" style={{ display: 'block', padding: '8px 24px', color: 'white', textDecoration: 'none', fontSize: '14px' }}>
+            Clients Details
+          </a>
+          <a href="https://hostinger.ipoutility.in/GroupSetup" style={{ display: 'block', padding: '8px 24px', color: 'white', textDecoration: 'none', fontSize: '14px' }}>
+            Groups Details
+          </a>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function MainLayout() {
   const { activeConversation } = useChat();
   return (
@@ -93,7 +137,7 @@ function MainLayout() {
       {/* Django-style Header */}
       <nav className="top-nav" style={{
         background: '#686868',
-        height: '56px',
+        height: '42px',
         display: 'flex',
         alignItems: 'center',
         padding: '0 20px',
@@ -104,14 +148,12 @@ function MainLayout() {
         justifyContent: 'space-between',
         borderBottom: '1px solid rgba(0,0,0,0.2)'
       }}>
-        <div className="top-nav-links" style={{ display: 'flex', alignItems: 'center', gap: '20px', fontSize: '15px', fontWeight: 'normal' }}>
+        <div className="top-nav-links" style={{ display: 'flex', alignItems: 'center', gap: '15px', fontSize: '14.5px', fontWeight: 'normal' }}>
           <a href="https://hostinger.ipoutility.in/" style={{ color: 'orange', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold' }}>
             <span>🏠 IPO UTILITY</span>
           </a>
           
-          <a href="https://hostinger.ipoutility.in/IPOSETUP" style={{ color: 'white', textDecoration: 'none' }}>
-            <b style={{ color: '#fff' }}>|</b> &nbsp; Setup
-          </a>
+          <SetupDropdown />
           
           <a href="https://hostinger.ipoutility.in/GroupWiseDashboard" style={{ color: 'white', textDecoration: 'none' }}>
             <b style={{ color: '#fff' }}>|</b> &nbsp; Group Wise Dashboard
@@ -142,7 +184,7 @@ function MainLayout() {
       {/* Main App Container */}
       <div 
         className={`app-container ${activeConversation ? 'has-active-chat' : 'no-active-chat'}`} 
-        style={{ flex: 1, height: 'calc(100vh - 56px)' }}
+        style={{ flex: 1, height: 'calc(100vh - 42px)' }}
       >
         <Sidebar />
         <ChatArea />

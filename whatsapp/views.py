@@ -61,8 +61,17 @@ def _order_details(post_data):
     for label, quantity_field, rate_field in ORDER_DETAIL_FIELDS:
         quantity = (post_data.get(quantity_field) or "").strip()
         rate = (post_data.get(rate_field) or "").strip()
-        if quantity or rate:
+        
+        strike = ""
+        if label == "Call":
+            strike = (post_data.get("CallStrikePrice") or "").strip()
+        elif label == "Put":
+            strike = (post_data.get("PutStrikePrice") or "").strip()
+            
+        if quantity or rate or strike:
             parts = [label]
+            if strike:
+                parts.append(f"Strike: {strike}")
             if quantity:
                 parts.append(f"Qty: {quantity}")
             if rate:
