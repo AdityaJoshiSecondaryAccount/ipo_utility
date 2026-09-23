@@ -3,7 +3,7 @@ from django.urls import path,include
 from home import views
 
 urlpatterns = [
-    path('', views.index, name="home"),
+    path('', views.Home, name="home"),
     path('indexforCustomer', views.indexforCustomer, name="homeforcustomer"),
     path('<str:IPOid>/<str:OrderType>/update_pann/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>', views.Update_pann,name = "OrderDetail_update"),
     path('clear-selected-records/', views.ClearSelectedRecords, name='clear_selected_records'),

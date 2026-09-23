@@ -1378,7 +1378,7 @@
         var $mainSearch = $('#example_filter input, .dataTables_filter input');
 
         // Unbind DataTables default instant search handler
-        $mainSearch.unbind();   
+        $mainSearch.unbind();
 
         var isSubmittingOrderSearch = false;
 
@@ -1576,7 +1576,9 @@
             return;
         }
         const allChecked = Array.from(groupCheckboxes).every(checkbox => checkbox.checked);
-        masterCheckbox.checked = allChecked;
+        if (masterCheckbox) {
+            masterCheckbox.checked = allChecked;
+        }
     }
 
     // Call updateMasterTallyCheckbox on page load

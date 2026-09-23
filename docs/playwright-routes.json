@@ -1,0 +1,3349 @@
+[
+  {
+    "app": "home",
+    "route": "/",
+    "name": "home",
+    "namespace": "",
+    "view": "index",
+    "line": 155,
+    "decorators": [
+      "Broker_only"
+    ],
+    "templates": [
+      "index.html"
+    ],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [
+      "'/login'"
+    ],
+    "methods": "No method decorator",
+    "role": "Broker_only"
+  },
+  {
+    "app": "home",
+    "route": "/indexforCustomer",
+    "name": "homeforcustomer",
+    "namespace": "",
+    "view": "indexforCustomer",
+    "line": 172,
+    "decorators": [
+      "allowed_users(allowed_roles=['Customer'])"
+    ],
+    "templates": [
+      "index.html"
+    ],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [
+      "'/login'"
+    ],
+    "methods": "No method decorator",
+    "role": "allowed_users(allowed_roles=['Customer'])"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/<str:OrderType>/update_pann/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>",
+    "name": "OrderDetail_update",
+    "namespace": "",
+    "view": "Update_pann",
+    "line": 7819,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": []
+    },
+    "redirects": [
+      "f'/{IPOid}/OrderDetail/{OrderType}/{Groupfilter}/{IPOTypefilter}/{InvestorTypefilter}?page={page_number}'",
+      "f'/access-link/{linkid}/{OrderType}?page={page_number}'"
+    ],
+    "methods": "No method decorator",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/clear-selected-records/",
+    "name": "clear_selected_records",
+    "namespace": "",
+    "view": "ClearSelectedRecords",
+    "line": 7898,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "IPOid"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/ChangePassword",
+    "name": "ChangePassword",
+    "namespace": "",
+    "view": "ChangePassword",
+    "line": 2460,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [
+      "index.html"
+    ],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "ConfirmPassword",
+        "NewPassword"
+      ]
+    },
+    "redirects": [
+      "'/'",
+      "'/'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/get-options/",
+    "name": "get_options",
+    "namespace": "",
+    "view": "get_options",
+    "line": 678,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [
+        "ipo_register"
+      ],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/get-rates/<str:Ordtyp>",
+    "name": "get_rates_json",
+    "namespace": "",
+    "view": "get_rates_json",
+    "line": 4794,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [
+        "category",
+        "date",
+        "group",
+        "investor",
+        "time"
+      ],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/<str:OrderType>/IPO_Allotment/<str:group>/<str:IPOType>/<str:InvestType>",
+    "name": "",
+    "namespace": "",
+    "view": "IPO_Allotment",
+    "line": 2391,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "Pannocheck",
+        "ipo_register",
+        "pancards",
+        "secondary_dropdown"
+      ]
+    },
+    "redirects": [
+      "f'/{IPOid}/OrderDetail/{OrderType}/All/All/All'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/<str:OrderType>/IPO_Allotment/<str:group>/<str:IPOType>/<str:InvestType>/<str:Rate>",
+    "name": "get_options",
+    "namespace": "",
+    "view": "IPO_Allotment",
+    "line": 2391,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "Pannocheck",
+        "ipo_register",
+        "pancards",
+        "secondary_dropdown"
+      ]
+    },
+    "redirects": [
+      "f'/{IPOid}/OrderDetail/{OrderType}/All/All/All'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/get_pancards/<str:IPOid>/<str:OrderType>/<str:group>/<str:IPOType>/<str:InvestType>",
+    "name": "",
+    "namespace": "",
+    "view": "get_pancards",
+    "line": 2337,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "Pannocheck"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/get_pancards/<str:IPOid>/<str:OrderType>/<str:group>/<str:IPOType>/<str:InvestType>/<str:Rate>",
+    "name": "get_pancards",
+    "namespace": "",
+    "view": "get_pancards",
+    "line": 2337,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "Pannocheck"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/ChangeUserpassword",
+    "name": "ChangeUserpassword",
+    "namespace": "",
+    "view": "Changepassword",
+    "line": 2485,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [
+      "index.html"
+    ],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "ConfirmPassword",
+        "NewPassword"
+      ]
+    },
+    "redirects": [
+      "'/'",
+      "'/'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/IPOSETUP",
+    "name": "IPOSETUP",
+    "namespace": "",
+    "view": "IPOSETUP",
+    "line": 2519,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [
+      "IPOSETUP.html"
+    ],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": [
+        "Ip_page_size"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/ClientSetup",
+    "name": "ClientSetup",
+    "namespace": "",
+    "view": "ClientSetup",
+    "line": 2651,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [
+      "ClientSetup.html"
+    ],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": [
+        "client_page_size",
+        "group_filter"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/ClientSetup/<str:PanNoId>",
+    "name": "ClientSetup",
+    "namespace": "",
+    "view": "ClientSetup",
+    "line": 2651,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [
+      "ClientSetup.html"
+    ],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": [
+        "client_page_size",
+        "group_filter"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/GroupSetup",
+    "name": "GroupSetup",
+    "namespace": "",
+    "view": "GroupSetup",
+    "line": 2805,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [
+      "GroupSetup.html"
+    ],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": [
+        "Gp_page_size"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/AddCustomerUser",
+    "name": "AddCustomerUser",
+    "namespace": "",
+    "view": "AddCustomerUser",
+    "line": 2911,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [
+      "AddCustomerUser.html"
+    ],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "Group",
+        "email",
+        "first_name",
+        "last_name",
+        "password",
+        "username"
+      ]
+    },
+    "redirects": [
+      "'/'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/AddIPO",
+    "name": "AddIPO",
+    "namespace": "",
+    "view": "AddIPO",
+    "line": 2936,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "BHNIPercentage",
+        "IPOPrice",
+        "IPOType",
+        "LotSizeBHNI",
+        "LotSizeRetail",
+        "LotSizeSHNI",
+        "Remark",
+        "RetailPercentage",
+        "SHNIPercentage",
+        "TotalIPOSzie",
+        "name"
+      ]
+    },
+    "redirects": [
+      "'/IPOSETUP'",
+      "'/IPOSETUP'",
+      "'/IPOSETUP'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/AddClient",
+    "name": "AddClient",
+    "namespace": "",
+    "view": "AddClient",
+    "line": 3172,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "ClientIdDpId",
+        "Group",
+        "Name",
+        "PANNo"
+      ]
+    },
+    "redirects": [
+      "'/ClientSetup'",
+      "'/ClientSetup'",
+      "'/ClientSetup'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/AddGroup",
+    "name": "AddGroup",
+    "namespace": "",
+    "view": "AddGroup",
+    "line": 2985,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "Address",
+        "Email",
+        "GroupName",
+        "MobileNo",
+        "Remark"
+      ]
+    },
+    "redirects": [
+      "'/GroupSetup'",
+      "'/GroupSetup'",
+      "'/GroupSetup'",
+      "'/GroupSetup'",
+      "'/GroupSetup'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/ErrorCSV",
+    "name": "ErrorCSV",
+    "namespace": "",
+    "view": "Error_csv",
+    "line": 9578,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "name"
+      ]
+    },
+    "redirects": [
+      "'login'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/AddGroup/<str:IPOid>/<str:Action>",
+    "name": "AddGroupFromPlaceOrder",
+    "namespace": "",
+    "view": "AddGroupFromPlaceOrder",
+    "line": 3036,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "GroupName"
+      ]
+    },
+    "redirects": [
+      "f'/BUY/{IPOid}/{GroupName}'",
+      "f'/SELL/{IPOid}/{GroupName}'",
+      "'/'",
+      "f'/{IPOid}/BUY'",
+      "f'/{IPOid}/SELL'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/BulkUploadGroup",
+    "name": "BulkUploadGroup",
+    "namespace": "",
+    "view": "BulkUploadGroup",
+    "line": 3078,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [
+      "'/GroupSetup'",
+      "'/GroupSetup'",
+      "'/GroupSetup'"
+    ],
+    "methods": "No method decorator",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/DownloadGroupSample",
+    "name": "DownloadGroupSample",
+    "namespace": "",
+    "view": "DownloadGroupSample",
+    "line": 3068,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/edit/<str:IPOid>",
+    "name": "",
+    "namespace": "",
+    "view": "edit",
+    "line": 3209,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [
+      "edit.html"
+    ],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/EditClient/<str:PanNoId>",
+    "name": "",
+    "namespace": "",
+    "view": "EditClient",
+    "line": 3216,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [
+      "EditClient.html"
+    ],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/EditGroup/<str:GroupNameId>",
+    "name": "",
+    "namespace": "",
+    "view": "EditGroup",
+    "line": 3225,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [
+      "EditGroup.html"
+    ],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/update/<str:IPOid>",
+    "name": "",
+    "namespace": "",
+    "view": "update",
+    "line": 3243,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [
+      "edit.html"
+    ],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": [
+        "BHNIPercentage",
+        "IPOPrice",
+        "IPOType",
+        "LotSizeBHNI",
+        "LotSizeRetail",
+        "LotSizeSHNI",
+        "Remark",
+        "RetailPercentage",
+        "SHNIPercentage",
+        "TotalIPOSize",
+        "name"
+      ]
+    },
+    "redirects": [
+      "f'/IPOSETUP?page={page_number}'",
+      "f'/edit/{IPOid}'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/updatepreopenprice/<str:group>/<str:IPOType>/<str:InvestType>",
+    "name": "",
+    "namespace": "",
+    "view": "updatepreopenprice",
+    "line": 3421,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "PreOpenPrice",
+        "selected_ids"
+      ]
+    },
+    "redirects": [
+      "f'/{IPOid}/Billing/{Groupfilter}/{IPOTypefilter}/{InvestTypefilter}'",
+      "f'/{IPOid}/Billing/{Groupfilter}/{IPOTypefilter}/{InvestTypefilter}'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/<str:OrderDetailId>/EditOrderPreOpenPrice/<str:OrderCategory>/<str:InvestorType>/<str:group>/<str:IPOType>/<str:InvestType>",
+    "name": "",
+    "namespace": "",
+    "view": "EditOrderPreOpenPrice",
+    "line": 3767,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": [
+        "PreOpenPrice",
+        "selected_ids"
+      ]
+    },
+    "redirects": [
+      "f'/{IPOid}/Billing/{group}/{IPOType}/{InvestType}?page={page_number}'",
+      "f'/{IPOid}/Billing/{group}/{IPOType}/{InvestType}?page={page_number}'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/UpdateClient/<str:PANNoId>",
+    "name": "",
+    "namespace": "",
+    "view": "UpdateClient",
+    "line": 3856,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [
+      "EditClient.html"
+    ],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": [
+        "ClientIdDpId",
+        "Group",
+        "Name",
+        "PANNo",
+        "Remark"
+      ]
+    },
+    "redirects": [
+      "f'/ClientSetup?page={page_number}'",
+      "f'/EditClient/{PANNoId}?page={page_number}'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/UpdateGroup/<str:GroupNameId>",
+    "name": "",
+    "namespace": "",
+    "view": "UpdateGroup",
+    "line": 3891,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [
+      "EditGroup.html"
+    ],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": [
+        "Address",
+        "Email",
+        "GroupName",
+        "MobileNo",
+        "Remark"
+      ]
+    },
+    "redirects": [
+      "f'/GroupSetup?page={page_number}'",
+      "f'/EditGroup/{GroupNameId}'",
+      "'/GroupSetup'",
+      "f'/EditGroup/{GroupNameId}'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/delete/<int:IPOid>",
+    "name": "destroy",
+    "namespace": "",
+    "view": "destroy",
+    "line": 3937,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [
+        "page",
+        "url"
+      ],
+      "POST": []
+    },
+    "redirects": [
+      "url or f'/IPOSETUP?page={page_number}'",
+      "url or 'IPOSETUP'",
+      "url or 'IPOSETUP'",
+      "url or 'IPOSETUP'"
+    ],
+    "methods": "No method decorator",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/DeleteClient/<str:PANNoId>",
+    "name": "",
+    "namespace": "",
+    "view": "DeleteClient",
+    "line": 3995,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": []
+    },
+    "redirects": [
+      "f'/ClientSetup?page={page_number}'"
+    ],
+    "methods": "No method decorator",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/DeleteAllClient",
+    "name": "",
+    "namespace": "",
+    "view": "DeleteAllClient",
+    "line": 4011,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/DeleteGroup/<str:GroupNameId>",
+    "name": "",
+    "namespace": "",
+    "view": "DeleteGroup",
+    "line": 4065,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": []
+    },
+    "redirects": [
+      "f'/GroupSetup?page={page_number}'"
+    ],
+    "methods": "No method decorator",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/DeleteOrder/<str:IPOid>/<str:OrderId>/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>",
+    "name": "",
+    "namespace": "",
+    "view": "DeleteOrder",
+    "line": 4140,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": []
+    },
+    "redirects": [
+      "f'/{IPOid}/Order/{GrpName}/{OrderCategory}/{InvestorType}?page={page_number}'"
+    ],
+    "methods": "No method decorator",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/SetRate",
+    "name": "",
+    "namespace": "",
+    "view": "SetRate",
+    "line": 4721,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [
+      "SetRate.html"
+    ],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "KostakQTY",
+        "KostakRate",
+        "KostakSellQTY",
+        "KostakSellRate",
+        "PremiumQTY",
+        "PremiumRate",
+        "PremiumSellQTY",
+        "PremiumSellRate",
+        "SubjectToQTY",
+        "SubjectToRate",
+        "SubjectToSellQTY",
+        "SubjectToSellRate"
+      ]
+    },
+    "redirects": [
+      "'/'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/BUY",
+    "name": "",
+    "namespace": "",
+    "view": "BUY",
+    "line": 4204,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker', 'Customer'])"
+    ],
+    "templates": [
+      "buy.html"
+    ],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "CallQTY",
+        "CallRate",
+        "CallStrikePrice",
+        "KostakQTY",
+        "KostakQTYBHNI",
+        "KostakQTYSHNI",
+        "KostakRate",
+        "KostakRateBHNI",
+        "KostakRateSHNI",
+        "PremiumQTY",
+        "PremiumRate",
+        "PutQTY",
+        "PutRate",
+        "PutStrikePrice",
+        "SubjectToQTY",
+        "SubjectToQTYBHNI",
+        "SubjectToQTYSHNI",
+        "SubjectToRate",
+        "SubjectToRateBHNI",
+        "SubjectToRateSHNI",
+        "datetime",
+        "item_id",
+        "placeOrderOnly",
+        "placeOrderWithWhatsApp",
+        "remark_tags",
+        "remark_text",
+        "subjectToIsPremiumBHNI",
+        "subjectToIsPremiumRetail",
+        "subjectToIsPremiumSHNI"
+      ]
+    },
+    "redirects": [
+      "f'/{IPOid}/BUY'",
+      "f'/{IPOid}/BUY'",
+      "f'/{IPOid}/BUY'",
+      "f'/{IPOid}/BUY'",
+      "f'/{IPOid}/BUY'",
+      "f'/{IPOid}/BUY'",
+      "f'/{IPOid}/BUY'",
+      "f'/{IPOid}/BUY'",
+      "f'/{IPOid}/BUY'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker', 'Customer'])"
+  },
+  {
+    "app": "home",
+    "route": "/BUY/<str:IPOid>/<str:selectgroup>",
+    "name": "",
+    "namespace": "",
+    "view": "BUY",
+    "line": 4204,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker', 'Customer'])"
+    ],
+    "templates": [
+      "buy.html"
+    ],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "CallQTY",
+        "CallRate",
+        "CallStrikePrice",
+        "KostakQTY",
+        "KostakQTYBHNI",
+        "KostakQTYSHNI",
+        "KostakRate",
+        "KostakRateBHNI",
+        "KostakRateSHNI",
+        "PremiumQTY",
+        "PremiumRate",
+        "PutQTY",
+        "PutRate",
+        "PutStrikePrice",
+        "SubjectToQTY",
+        "SubjectToQTYBHNI",
+        "SubjectToQTYSHNI",
+        "SubjectToRate",
+        "SubjectToRateBHNI",
+        "SubjectToRateSHNI",
+        "datetime",
+        "item_id",
+        "placeOrderOnly",
+        "placeOrderWithWhatsApp",
+        "remark_tags",
+        "remark_text",
+        "subjectToIsPremiumBHNI",
+        "subjectToIsPremiumRetail",
+        "subjectToIsPremiumSHNI"
+      ]
+    },
+    "redirects": [
+      "f'/{IPOid}/BUY'",
+      "f'/{IPOid}/BUY'",
+      "f'/{IPOid}/BUY'",
+      "f'/{IPOid}/BUY'",
+      "f'/{IPOid}/BUY'",
+      "f'/{IPOid}/BUY'",
+      "f'/{IPOid}/BUY'",
+      "f'/{IPOid}/BUY'",
+      "f'/{IPOid}/BUY'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker', 'Customer'])"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/SELL",
+    "name": "",
+    "namespace": "",
+    "view": "sell",
+    "line": 11701,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker', 'Customer'])"
+    ],
+    "templates": [
+      "sell.html"
+    ],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "CallQTY",
+        "CallRate",
+        "CallStrikePrice",
+        "KostakQTY",
+        "KostakQTYBHNI",
+        "KostakQTYSHNI",
+        "KostakRate",
+        "KostakRateBHNI",
+        "KostakRateSHNI",
+        "PremiumQTY",
+        "PremiumRate",
+        "PutQTY",
+        "PutRate",
+        "PutStrikePrice",
+        "SubjectToQTY",
+        "SubjectToQTYBHNI",
+        "SubjectToQTYSHNI",
+        "SubjectToRate",
+        "SubjectToRateBHNI",
+        "SubjectToRateSHNI",
+        "datetime",
+        "item_id",
+        "placeOrderOnly",
+        "placeOrderWithWhatsApp",
+        "remark_tags",
+        "remark_text",
+        "subjectToIsPremiumBHNI",
+        "subjectToIsPremiumRetail",
+        "subjectToIsPremiumSHNI"
+      ]
+    },
+    "redirects": [
+      "f'/{IPOid}/SELL'",
+      "f'/{IPOid}/SELL'",
+      "f'/{IPOid}/SELL'",
+      "f'/{IPOid}/SELL'",
+      "f'/{IPOid}/SELL'",
+      "f'/{IPOid}/SELL'",
+      "f'/{IPOid}/SELL'",
+      "f'/{IPOid}/SELL'",
+      "f'/{IPOid}/SELL'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker', 'Customer'])"
+  },
+  {
+    "app": "home",
+    "route": "/SELL/<str:IPOid>/<str:selectgroup>",
+    "name": "",
+    "namespace": "",
+    "view": "sell",
+    "line": 11701,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker', 'Customer'])"
+    ],
+    "templates": [
+      "sell.html"
+    ],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "CallQTY",
+        "CallRate",
+        "CallStrikePrice",
+        "KostakQTY",
+        "KostakQTYBHNI",
+        "KostakQTYSHNI",
+        "KostakRate",
+        "KostakRateBHNI",
+        "KostakRateSHNI",
+        "PremiumQTY",
+        "PremiumRate",
+        "PutQTY",
+        "PutRate",
+        "PutStrikePrice",
+        "SubjectToQTY",
+        "SubjectToQTYBHNI",
+        "SubjectToQTYSHNI",
+        "SubjectToRate",
+        "SubjectToRateBHNI",
+        "SubjectToRateSHNI",
+        "datetime",
+        "item_id",
+        "placeOrderOnly",
+        "placeOrderWithWhatsApp",
+        "remark_tags",
+        "remark_text",
+        "subjectToIsPremiumBHNI",
+        "subjectToIsPremiumRetail",
+        "subjectToIsPremiumSHNI"
+      ]
+    },
+    "redirects": [
+      "f'/{IPOid}/SELL'",
+      "f'/{IPOid}/SELL'",
+      "f'/{IPOid}/SELL'",
+      "f'/{IPOid}/SELL'",
+      "f'/{IPOid}/SELL'",
+      "f'/{IPOid}/SELL'",
+      "f'/{IPOid}/SELL'",
+      "f'/{IPOid}/SELL'",
+      "f'/{IPOid}/SELL'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker', 'Customer'])"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/Order",
+    "name": "",
+    "namespace": "",
+    "view": "OrderFunction",
+    "line": 12038,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker', 'Customer'])"
+    ],
+    "templates": [
+      "Order.html"
+    ],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": [
+        "Groupfilter",
+        "InvestorTypeFilter",
+        "OrderCategoryFilter",
+        "Order_page_size"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker', 'Customer'])"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/EditOrder/<str:OrderId>/<str:Grpf>/<str:OrCtf>/<str:InTyf>",
+    "name": "",
+    "namespace": "",
+    "view": "EditOrder",
+    "line": 3232,
+    "decorators": [],
+    "templates": [
+      "EditOrder.html"
+    ],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/<str:OrderId>/UpdateOrder/<str:Grpf>/<str:OrCtf>/<str:InTyf>",
+    "name": "",
+    "namespace": "",
+    "view": "UpdateOrder",
+    "line": 4536,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": [
+        "Group",
+        "InvestorType",
+        "OrderCategory",
+        "OrderType",
+        "Qty",
+        "Rate",
+        "Sub_Rate",
+        "datetime",
+        "optionStrikePrice",
+        "remark_tags",
+        "remark_text",
+        "subjectToIsPremium"
+      ]
+    },
+    "redirects": [
+      "f'/{IPOid}/Order/{Grpf}/{OrCtf}/{InTyf}?page={page_number}'",
+      "f'/{IPOid}/Order/{Grpf}/{OrCtf}/{InTyf}?page={page_number}'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/<str:OrderId>/EditOrderRate/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>",
+    "name": "",
+    "namespace": "",
+    "view": "EditOrderRate",
+    "line": 4709,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "Rate"
+      ]
+    },
+    "redirects": [
+      "f'/{IPOid}/Order/{GrpName}/{OrderCategory}/{InvestorType}'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/OrderDetail/<str:Ordtyp>",
+    "name": "",
+    "namespace": "",
+    "view": "OrderDetailFunction",
+    "line": 4838,
+    "decorators": [],
+    "templates": [
+      "OrderDetail - Sell.html",
+      "OrderDetail.html"
+    ],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": [
+        "Groupfilter",
+        "IPOTypefilter",
+        "InvestorTypeFilter",
+        "RateFilterValue",
+        "page_size"
+      ]
+    },
+    "redirects": [
+      "'login'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/OrderDetail/<str:Ordtyp>/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>",
+    "name": "",
+    "namespace": "",
+    "view": "OrderDetailFunction",
+    "line": 4838,
+    "decorators": [],
+    "templates": [
+      "OrderDetail - Sell.html",
+      "OrderDetail.html"
+    ],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": [
+        "Groupfilter",
+        "IPOTypefilter",
+        "InvestorTypeFilter",
+        "RateFilterValue",
+        "page_size"
+      ]
+    },
+    "redirects": [
+      "'login'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/OrderDetail/<str:Ordtyp>/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>",
+    "name": "",
+    "namespace": "",
+    "view": "OrderDetailFunction",
+    "line": 4838,
+    "decorators": [],
+    "templates": [
+      "OrderDetail - Sell.html",
+      "OrderDetail.html"
+    ],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": [
+        "Groupfilter",
+        "IPOTypefilter",
+        "InvestorTypeFilter",
+        "RateFilterValue",
+        "page_size"
+      ]
+    },
+    "redirects": [
+      "'login'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/OrderDetail/<str:Ordtyp>/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>/<str:Rate>",
+    "name": "",
+    "namespace": "",
+    "view": "OrderDetailFunction",
+    "line": 4838,
+    "decorators": [],
+    "templates": [
+      "OrderDetail - Sell.html",
+      "OrderDetail.html"
+    ],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": [
+        "Groupfilter",
+        "IPOTypefilter",
+        "InvestorTypeFilter",
+        "RateFilterValue",
+        "page_size"
+      ]
+    },
+    "redirects": [
+      "'login'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/Order/<str:Groupfilter>/<str:OrderCategoryFilter>/<str:InvestorTypeFilter>",
+    "name": "",
+    "namespace": "",
+    "view": "filterfromstatus",
+    "line": 5255,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker', 'Customer'])"
+    ],
+    "templates": [
+      "Order.html"
+    ],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": [
+        "Order_page_size"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker', 'Customer'])"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/<str:OrderType>/AddPan-<str:OrderDetailId>/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>",
+    "name": "AddPan",
+    "namespace": "",
+    "view": "AddPan",
+    "line": 7968,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker', 'Customer'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "Application",
+        "DematNo",
+        "Groupfilter",
+        "IPOTypefilter",
+        "InvestorTypeFilter",
+        "PAN",
+        "allotedqty",
+        "clientname"
+      ]
+    },
+    "redirects": [
+      "f'/{IPOid}/OrderDetail/{OrderType}/{GrpName}/{OrderCategory}/{InvestorType}/{OrderDate}/{OrderTime}'",
+      "f'/{IPOid}/OrderDetail/{OrderType}/{GrpName}/{OrderCategory}/{InvestorType}/{OrderDate}/{OrderTime}'",
+      "f'/{IPOid}/OrderDetail/{OrderType}/{GrpName}/{OrderCategory}/{InvestorType}/{OrderDate}/{OrderTime}'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker', 'Customer'])"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/<str:OrderType>/FirmAllotment/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>",
+    "name": "",
+    "namespace": "",
+    "view": "FirmAllotment",
+    "line": 8040,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker', 'Customer'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "AllotedQty",
+        "Group",
+        "InvestorType"
+      ]
+    },
+    "redirects": [
+      "f'/{IPOid}/OrderDetail/{OrderType}/{GrpName}/{OrderCategory}/{InvestorType}'",
+      "f'/{IPOid}/OrderDetail/{OrderType}'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker', 'Customer'])"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/<str:OrderType>/FirmAllotment/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>/<str:Rate>",
+    "name": "FirmAllotment",
+    "namespace": "",
+    "view": "FirmAllotment",
+    "line": 8040,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker', 'Customer'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "AllotedQty",
+        "Group",
+        "InvestorType"
+      ]
+    },
+    "redirects": [
+      "f'/{IPOid}/OrderDetail/{OrderType}/{GrpName}/{OrderCategory}/{InvestorType}'",
+      "f'/{IPOid}/OrderDetail/{OrderType}'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker', 'Customer'])"
+  },
+  {
+    "app": "home",
+    "route": "/autocomplete",
+    "name": "autocomplete",
+    "namespace": "",
+    "view": "autocomplete",
+    "line": 7625,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [
+        "term"
+      ],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/autocomplete1",
+    "name": "autocomplete1",
+    "namespace": "",
+    "view": "autocomplete1",
+    "line": 7636,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "PAN"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/Billing",
+    "name": "Billing",
+    "namespace": "",
+    "view": "Billing",
+    "line": 8085,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker', 'Customer'])"
+    ],
+    "templates": [
+      "Billing.html"
+    ],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": [
+        "Billing_page_size",
+        "Groupfilter",
+        "IPOTypefilter",
+        "InvestorTypeFilter"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker', 'Customer'])"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/Billing/<str:group>/<str:IPOType>/<str:InvestType>",
+    "name": "",
+    "namespace": "",
+    "view": "FileterBilling",
+    "line": 8436,
+    "decorators": [],
+    "templates": [
+      "Billing.html"
+    ],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": [
+        "Billing_page_size"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/Billing/<str:group>/<str:IPOType>/<str:InvestType>/<str:Rate>",
+    "name": "Billing",
+    "namespace": "",
+    "view": "FileterBilling",
+    "line": 8436,
+    "decorators": [],
+    "templates": [
+      "Billing.html"
+    ],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": [
+        "Billing_page_size"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/download-Billing/<str:group>/<str:IPOType>/<str:InvestorType>",
+    "name": "exportBillingFilter",
+    "namespace": "",
+    "view": "exportBillingFilter",
+    "line": 8753,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/download-Groupwise",
+    "name": "exportBillingFilter",
+    "namespace": "",
+    "view": "exportGroupwise",
+    "line": 8799,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/Sempale-Order",
+    "name": "Sempale-Order",
+    "namespace": "",
+    "view": "Sempale_Order",
+    "line": 9845,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/download-Billing-Pdf/<str:group>/<str:IPOType>/<str:InvestorType>",
+    "name": "exportBillingFilterpdf",
+    "namespace": "",
+    "view": "exportBillingFilterpdf",
+    "line": 8867,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/Backup/",
+    "name": "Backup",
+    "namespace": "",
+    "view": "Backup",
+    "line": 8985,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/AllIpoBackup",
+    "name": "AllIpoBackup",
+    "namespace": "",
+    "view": "AllIpoBackup",
+    "line": 9059,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/download-csv/<str:OrderType>/<str:group>/<str:IPOType>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>",
+    "name": "",
+    "namespace": "",
+    "view": "export",
+    "line": 9246,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [
+      "'login'"
+    ],
+    "methods": "No method decorator",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/download-csv/<str:OrderType>/<str:group>/<str:IPOType>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>/<str:Rate>",
+    "name": "OrderDetail_download",
+    "namespace": "",
+    "view": "export",
+    "line": 9246,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [
+      "'login'"
+    ],
+    "methods": "No method decorator",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/Group_wise-download-csv/<str:OrderType>/<str:IPOType>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>",
+    "name": "",
+    "namespace": "",
+    "view": "Group_wise_export",
+    "line": 9317,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker', 'Customer'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "allowed_users(allowed_roles=['Broker', 'Customer'])"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/Group_wise-download-csv/<str:OrderType>/<str:IPOType>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>/<str:Rate>",
+    "name": "OrderDetail_download",
+    "namespace": "",
+    "view": "Group_wise_export",
+    "line": 9317,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker', 'Customer'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "allowed_users(allowed_roles=['Broker', 'Customer'])"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/Dashboard/<str:value>",
+    "name": "Dashboard",
+    "namespace": "",
+    "view": "dashboard",
+    "line": 10252,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [
+      "Bdashboard.html",
+      "Bdashboard_sme.html",
+      "Cdashboard.html",
+      "Cdashboard_sme.html",
+      "dashboard.html",
+      "dashboard_sme.html"
+    ],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/DashboardForm/<str:value>",
+    "name": "DashboardForm",
+    "namespace": "",
+    "view": "dashboardform",
+    "line": 10168,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "ExpecetdBHNIApplication",
+        "ExpecetdRetailApplication",
+        "ExpecetdSHNIApplication",
+        "Premium",
+        "ProfitMargin"
+      ]
+    },
+    "redirects": [
+      "f'/{IPOid}/Dashboard/A'",
+      "f'/{IPOid}/Dashboard/A'",
+      "f'/{IPOid}/Dashboard/A'",
+      "f'/{IPOid}/Dashboard/B'",
+      "f'/{IPOid}/Dashboard/C'",
+      "f'/{IPOid}/Dashboard/A'",
+      "f'/{IPOid}/Dashboard/B'",
+      "f'/{IPOid}/Dashboard/C'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/download-AllRecords-csv/<str:OrderType>/<str:group>/<str:IPOType>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>",
+    "name": "",
+    "namespace": "",
+    "view": "exportall",
+    "line": 9412,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [
+      "'login'"
+    ],
+    "methods": "No method decorator",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/download-AllRecords-csv/<str:OrderType>/<str:group>/<str:IPOType>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>/<str:Rate>",
+    "name": "OrderDetail_download_AllRecords",
+    "namespace": "",
+    "view": "exportall",
+    "line": 9412,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [
+      "'login'"
+    ],
+    "methods": "No method decorator",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/Group_wise-download-AllRecords-csv/<str:OrderType>/<str:IPOType>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>",
+    "name": "",
+    "namespace": "",
+    "view": "Group_wise_exportall",
+    "line": 9484,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker', 'Customer'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "allowed_users(allowed_roles=['Broker', 'Customer'])"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/Group_wise-download-AllRecords-csv/<str:OrderType>/<str:IPOType>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>/<str:Rate>",
+    "name": "OrderDetail_download_AllRecords",
+    "namespace": "",
+    "view": "Group_wise_exportall",
+    "line": 9484,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker', 'Customer'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "allowed_users(allowed_roles=['Broker', 'Customer'])"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/Status",
+    "name": "Status",
+    "namespace": "",
+    "view": "Status",
+    "line": 5763,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [
+      "Status.html"
+    ],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": [
+        "status_page_size"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/update-telly-status/",
+    "name": "update_telly_status",
+    "namespace": "",
+    "view": "update_telly_status",
+    "line": 5714,
+    "decorators": [
+      "csrf_exempt"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "csrf_exempt"
+  },
+  {
+    "app": "home",
+    "route": "/GroupWiseDashboard",
+    "name": "GroupWiseDashboard",
+    "namespace": "",
+    "view": "GroupWiseDashboard",
+    "line": 6748,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [
+      "GroupWiseDashboard.html"
+    ],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": [
+        "GWD_page_size"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/group-billing-details/",
+    "name": "group_billing_details",
+    "namespace": "",
+    "view": "group_billing_details",
+    "line": 7119,
+    "decorators": [],
+    "templates": [
+      "group_billing_details.html"
+    ],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [
+      "'login'"
+    ],
+    "methods": "No method decorator",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/group-billing-details/<int:group_id>/",
+    "name": "group_billing_details_by_id",
+    "namespace": "",
+    "view": "group_billing_details",
+    "line": 7119,
+    "decorators": [],
+    "templates": [
+      "group_billing_details.html"
+    ],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [
+      "'login'"
+    ],
+    "methods": "No method decorator",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/BackUp",
+    "name": "BackUp",
+    "namespace": "",
+    "view": "BackUp",
+    "line": 7534,
+    "decorators": [],
+    "templates": [
+      "Backup.html"
+    ],
+    "parameters": {
+      "GET": [
+        "page"
+      ],
+      "POST": [
+        "Backup_page_size"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/panalloted",
+    "name": "panalloted",
+    "namespace": "",
+    "view": "panalloted",
+    "line": 7593,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [
+      "panalloted.html"
+    ],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/<str:OrderType>/upload-csv/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>",
+    "name": "OrderDetail_upload",
+    "namespace": "",
+    "view": "OrderDetail_upload",
+    "line": 9619,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [
+      "'login'",
+      "request.META.get('HTTP_REFERER')",
+      "'resolve_shared_link'",
+      "f'/{IPOid}/OrderDetail/{OrderType}/{GrpName}/{OrderCategory}/{InvestorType}/{OrderDate}/{OrderTime}/{Rate}'",
+      "f'/{IPOid}/OrderDetail/{OrderType}'"
+    ],
+    "methods": "No method decorator",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/<str:OrderType>/upload-csv/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>/<str:Rate>",
+    "name": "OrderDetail_upload",
+    "namespace": "",
+    "view": "OrderDetail_upload",
+    "line": 9619,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [
+      "'login'",
+      "request.META.get('HTTP_REFERER')",
+      "'resolve_shared_link'",
+      "f'/{IPOid}/OrderDetail/{OrderType}/{GrpName}/{OrderCategory}/{InvestorType}/{OrderDate}/{OrderTime}/{Rate}'",
+      "f'/{IPOid}/OrderDetail/{OrderType}'"
+    ],
+    "methods": "No method decorator",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/upload-csv/<str:Groupfilter>/<str:Ordercatagoryfilter>/<str:InvestorTypefilter>",
+    "name": "Order_upload",
+    "namespace": "",
+    "view": "Order_upload",
+    "line": 9859,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [
+      "f'/{IPOid}/Order/{Groupfilter}/{Ordercatagoryfilter}/{InvestorTypefilter}'",
+      "f'/{IPOid}/BUY'",
+      "f'/{IPOid}/BUY'",
+      "f'/{IPOid}/BUY'",
+      "f'/{IPOid}/BUY'",
+      "f'/{IPOid}/BUY'",
+      "f'/{IPOid}/BUY'"
+    ],
+    "methods": "No method decorator",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/AddPayment",
+    "name": "AddPayment",
+    "namespace": "",
+    "view": "AddPayment",
+    "line": 6736,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "Amount",
+        "Group"
+      ]
+    },
+    "redirects": [
+      "'/GroupWiseDashboard'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/login",
+    "name": "login",
+    "namespace": "",
+    "view": "loginUser",
+    "line": 12632,
+    "decorators": [],
+    "templates": [
+      "login.html"
+    ],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "password",
+        "username"
+      ]
+    },
+    "redirects": [
+      "'/'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/logout",
+    "name": "logout",
+    "namespace": "",
+    "view": "logoutUser",
+    "line": 12654,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [
+      "'/login'"
+    ],
+    "methods": "No method decorator",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/ShareBill",
+    "name": "GroupWiseBillShare",
+    "namespace": "",
+    "view": "GroupBillShare",
+    "line": 16140,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "GroupName"
+      ]
+    },
+    "redirects": [
+      "'Status'",
+      "'Status'",
+      "'login_url'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/accounting/",
+    "name": "accounting",
+    "namespace": "",
+    "view": "accounting_view",
+    "line": 13944,
+    "decorators": [
+      "login_required"
+    ],
+    "templates": [
+      "accounting.html"
+    ],
+    "parameters": {
+      "GET": [
+        "batch_id",
+        "date_from",
+        "date_to",
+        "entry_id",
+        "group_name",
+        "id",
+        "ipo_name",
+        "jv",
+        "order_by",
+        "order_dir",
+        "show_all",
+        "show_deleted",
+        "transfer_batch_id"
+      ],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "login_required"
+  },
+  {
+    "app": "home",
+    "route": "/get-accounting-entries/",
+    "name": "get_accounting_entries",
+    "namespace": "",
+    "view": "get_accounting_entries",
+    "line": 14478,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [
+        "date_from",
+        "date_to",
+        "group_id",
+        "ipo_id"
+      ],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/save_transaction/",
+    "name": "save_transaction",
+    "namespace": "",
+    "view": "save_transaction",
+    "line": 14682,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "amount",
+        "amount_type",
+        "date_time",
+        "group_id",
+        "ipo_id",
+        "jv_group_id",
+        "jv_remark",
+        "remark"
+      ]
+    },
+    "redirects": [
+      "'accounting'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/save_transaction_group/",
+    "name": "save_transaction_group",
+    "namespace": "",
+    "view": "save_transaction_group",
+    "line": 14745,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "amount",
+        "amount_type",
+        "date_time",
+        "group_id",
+        "ipo_id",
+        "jv_group_id",
+        "jv_remark",
+        "remark"
+      ]
+    },
+    "redirects": [
+      "'GroupWiseDashboard'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/update-accounting/",
+    "name": "update_accounting",
+    "namespace": "",
+    "view": "update_accounting",
+    "line": 14810,
+    "decorators": [
+      "login_required"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "amount",
+        "amount_type",
+        "date_time",
+        "edit_reason",
+        "entry_id",
+        "group_id",
+        "ipo_id",
+        "remark"
+      ]
+    },
+    "redirects": [
+      "'accounting'",
+      "'accounting'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "login_required"
+  },
+  {
+    "app": "home",
+    "route": "/bulk-delete-accounting/",
+    "name": "bulk_delete_accounting",
+    "namespace": "",
+    "view": "bulk_delete_accounting",
+    "line": 15050,
+    "decorators": [
+      "login_required"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "login_required"
+  },
+  {
+    "app": "home",
+    "route": "/soft-delete-accounting/<int:entry_id>/",
+    "name": "soft_delete_accounting",
+    "namespace": "",
+    "view": "soft_delete_accounting",
+    "line": 14960,
+    "decorators": [
+      "login_required",
+      "csrf_exempt"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "login_required; csrf_exempt"
+  },
+  {
+    "app": "home",
+    "route": "/restore-accounting/<int:entry_id>/",
+    "name": "restore_accounting",
+    "namespace": "",
+    "view": "restore_accounting",
+    "line": 15079,
+    "decorators": [
+      "login_required",
+      "csrf_exempt"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "login_required; csrf_exempt"
+  },
+  {
+    "app": "home",
+    "route": "/add-transaction/",
+    "name": "add_transaction",
+    "namespace": "",
+    "view": "add_transaction",
+    "line": 15312,
+    "decorators": [
+      "login_required"
+    ],
+    "templates": [
+      "accounting/Accounting.html"
+    ],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "login_required"
+  },
+  {
+    "app": "home",
+    "route": "/add_transaction_group/",
+    "name": "add_transaction_group",
+    "namespace": "",
+    "view": "add_transaction_group",
+    "line": 15324,
+    "decorators": [
+      "login_required"
+    ],
+    "templates": [
+      "GroupWiseDashboard.html"
+    ],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "login_required"
+  },
+  {
+    "app": "home",
+    "route": "/accounting-logs/",
+    "name": "accounting_logs",
+    "namespace": "",
+    "view": "accounting_logs_view",
+    "line": 14303,
+    "decorators": [
+      "login_required"
+    ],
+    "templates": [
+      "accounting_logs.html"
+    ],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "login_required"
+  },
+  {
+    "app": "home",
+    "route": "/ipo_transaction/",
+    "name": "ipo_transaction",
+    "namespace": "",
+    "view": "ipo_transaction",
+    "line": 14554,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "amount",
+        "amount_left",
+        "amount_right",
+        "amount_type",
+        "amount_type_left",
+        "amount_type_right",
+        "date_time_left",
+        "date_time_right",
+        "group_id_left",
+        "group_id_right",
+        "ipo_id_left",
+        "ipo_id_right",
+        "remark_left",
+        "remark_right"
+      ]
+    },
+    "redirects": [
+      "'accounting'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/ipo_transaction1 /",
+    "name": "ipo_transaction1",
+    "namespace": "",
+    "view": "ipo_transaction1",
+    "line": 14628,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "amount",
+        "amount_left",
+        "amount_right",
+        "amount_type",
+        "amount_type_left",
+        "amount_type_right",
+        "date_time_left",
+        "date_time_right",
+        "group_id_left",
+        "group_id_right",
+        "ipo_id_left",
+        "ipo_id_right",
+        "remark_left",
+        "remark_right"
+      ]
+    },
+    "redirects": [
+      "'GroupWiseDashboard'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/AccountingBackup/",
+    "name": "AccountingBackup",
+    "namespace": "",
+    "view": "AccountingBackup",
+    "line": 9163,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/share-records/",
+    "name": "Share_AppDetails",
+    "namespace": "",
+    "view": "Share_AppDetails",
+    "line": 16201,
+    "decorators": [
+      "csrf_exempt"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "IPO_id",
+        "OrderType",
+        "record_type",
+        "selected_records"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "csrf_exempt"
+  },
+  {
+    "app": "home",
+    "route": "/user-profile/",
+    "name": "user_profile",
+    "namespace": "",
+    "view": "user_profile",
+    "line": 12889,
+    "decorators": [
+      "login_required"
+    ],
+    "templates": [
+      "user_profile.html"
+    ],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "login_required"
+  },
+  {
+    "app": "home",
+    "route": "/update-user-profile/",
+    "name": "update_user_profile",
+    "namespace": "",
+    "view": "update_user_profile",
+    "line": 12902,
+    "decorators": [
+      "login_required"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "app_password",
+        "email",
+        "mobile_number",
+        "telegram_api",
+        "telegram_api_key"
+      ]
+    },
+    "redirects": [
+      "'user_profile'"
+    ],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "login_required"
+  },
+  {
+    "app": "home",
+    "route": "/send-telegram-otp/",
+    "name": "send_telegram_otp",
+    "namespace": "",
+    "view": "send_telegram_otp",
+    "line": 12776,
+    "decorators": [
+      "csrf_exempt"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "csrf_exempt"
+  },
+  {
+    "app": "home",
+    "route": "/verify-telegram-otp/",
+    "name": "verify_telegram_otp",
+    "namespace": "",
+    "view": "verify_telegram_otp",
+    "line": 12836,
+    "decorators": [
+      "csrf_exempt"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "api_hash",
+        "api_id",
+        "otp",
+        "phone",
+        "phone_code_hash",
+        "session_string"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "csrf_exempt"
+  },
+  {
+    "app": "home",
+    "route": "/place-order/<int:IPOid>/<str:order_type>/",
+    "name": "place_order",
+    "namespace": "",
+    "view": "place_order_view",
+    "line": 12943,
+    "decorators": [
+      "login_required",
+      "csrf_exempt"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "CallQTY",
+        "CallRate",
+        "CallStrikePrice",
+        "KostakQTY",
+        "KostakQTYBHNI",
+        "KostakQTYSHNI",
+        "KostakRate",
+        "KostakRateBHNI",
+        "KostakRateSHNI",
+        "PremiumQTY",
+        "PremiumRate",
+        "PutQTY",
+        "PutRate",
+        "PutStrikePrice",
+        "SubjectToQTY",
+        "SubjectToQTYBHNI",
+        "SubjectToQTYSHNI",
+        "SubjectToRate",
+        "SubjectToRateBHNI",
+        "SubjectToRateSHNI",
+        "datetime",
+        "item_id",
+        "subjectToIsPremiumBHNI",
+        "subjectToIsPremiumRetail",
+        "subjectToIsPremiumSHNI"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "login_required; csrf_exempt"
+  },
+  {
+    "app": "home",
+    "route": "/share-status-telegram/",
+    "name": "share_status_telegram",
+    "namespace": "",
+    "view": "share_status_telegram",
+    "line": 13117,
+    "decorators": [
+      "login_required",
+      "csrf_exempt"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "login_required; csrf_exempt"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/send-status-telegram/",
+    "name": "send_status_to_telegram",
+    "namespace": "",
+    "view": "send_status_to_telegram",
+    "line": 13273,
+    "decorators": [
+      "login_required",
+      "csrf_exempt"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "login_required; csrf_exempt"
+  },
+  {
+    "app": "home",
+    "route": "/<int:IPOid>/DeleteAllOrders/",
+    "name": "delete_all_orders",
+    "namespace": "",
+    "view": "DeleteAllOrders",
+    "line": 12660,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [
+      "'/'"
+    ],
+    "methods": "No method decorator",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/bulk_ipo_transactions/",
+    "name": "bulk_ipo_transactions",
+    "namespace": "",
+    "view": "bulk_ipo_transactions",
+    "line": 15336,
+    "decorators": [
+      "login_required"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "master_amount",
+        "master_amount_type",
+        "transactions"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "login_required"
+  },
+  {
+    "app": "home",
+    "route": "/bulk-transfer-transactions/",
+    "name": "bulk_transfer_transactions",
+    "namespace": "",
+    "view": "bulk_transfer_transactions",
+    "line": 15453,
+    "decorators": [
+      "login_required"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "login_required"
+  },
+  {
+    "app": "home",
+    "route": "/api/transfer-batch/<uuid:batch_id>/",
+    "name": "get_transfer_batch",
+    "namespace": "",
+    "view": "get_transfer_batch",
+    "line": 15819,
+    "decorators": [
+      "login_required"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "login_required"
+  },
+  {
+    "app": "home",
+    "route": "/api/transfer-group-ipos/<int:group_id>/",
+    "name": "get_transfer_group_ipos",
+    "namespace": "",
+    "view": "get_transfer_group_ipos",
+    "line": 15901,
+    "decorators": [
+      "login_required"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [
+        "exclude_batch"
+      ],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "login_required"
+  },
+  {
+    "app": "home",
+    "route": "/api/get-group-dues/<int:group_id>/",
+    "name": "get_group_dues",
+    "namespace": "",
+    "view": "get_group_dues",
+    "line": 15996,
+    "decorators": [
+      "login_required"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "login_required"
+  },
+  {
+    "app": "home",
+    "route": "/<int:IPOid>/get-all-groups/",
+    "name": "get_all_groups",
+    "namespace": "",
+    "view": "get_all_groups",
+    "line": 13532,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/send-status-telegram/",
+    "name": "send_status_to_telegram",
+    "namespace": "",
+    "view": "send_status_to_telegram",
+    "line": 13273,
+    "decorators": [
+      "login_required",
+      "csrf_exempt"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "login_required; csrf_exempt"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/send-status-telegram-image/",
+    "name": "send_status_to_telegram_image",
+    "namespace": "",
+    "view": "send_status_to_telegram_image",
+    "line": 13539,
+    "decorators": [
+      "login_required",
+      "csrf_exempt"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "batch_group",
+        "group_id"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "login_required; csrf_exempt"
+  },
+  {
+    "app": "home",
+    "route": "/generate-shared-link/",
+    "name": "generate_shared_link",
+    "namespace": "",
+    "view": "generate_shared_link",
+    "line": 16314,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "expiry_at",
+        "group_name",
+        "ipo_id"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/access-link/<uuid:link_id>/",
+    "name": "resolve_shared_link",
+    "namespace": "",
+    "view": "resolve_shared_link",
+    "line": 16669,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "InvestorType",
+        "OrderCategory",
+        "RateFilterValue"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/access-link/<uuid:link_id>/<str:order_type>",
+    "name": "resolve_shared_link",
+    "namespace": "",
+    "view": "resolve_shared_link",
+    "line": 16669,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "InvestorType",
+        "OrderCategory",
+        "RateFilterValue"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/get-user-links/<int:IPOid>/<str:order_type>",
+    "name": "get_user_links",
+    "namespace": "",
+    "view": "get_user_links",
+    "line": 16708,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/delete-link/",
+    "name": "delete_link",
+    "namespace": "",
+    "view": "delete_link",
+    "line": 16799,
+    "decorators": [
+      "login_required"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "link_id",
+        "link_ids"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "login_required"
+  },
+  {
+    "app": "home",
+    "route": "/update-link/<uuid:link_id>/",
+    "name": "update_shared_link",
+    "namespace": "",
+    "view": "update_shared_link",
+    "line": 16824,
+    "decorators": [
+      "login_required"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "expiry"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "login_required"
+  },
+  {
+    "app": "home",
+    "route": "/send-link-mail/<uuid:linkId>/",
+    "name": "send_link_mail",
+    "namespace": "",
+    "view": "send_link_mail",
+    "line": 16848,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/update-all-expiries/<int:IPOid>/",
+    "name": "update_all_expiries",
+    "namespace": "",
+    "view": "update_all_expiries",
+    "line": 16955,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "expiry_at",
+        "link_ids"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/send-all-link-mails/<int:IPOid>/",
+    "name": "send_all_link_mails",
+    "namespace": "",
+    "view": "send_all_link_mails",
+    "line": 16980,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "selected_links"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/bulk-generate-links/<str:IPOid>/",
+    "name": "bulk_generate_links",
+    "namespace": "",
+    "view": "bulk_generate_links",
+    "line": 17104,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "action_type",
+        "expiry_date",
+        "selected_groups"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/update-link-status/",
+    "name": "update_link_status",
+    "namespace": "",
+    "view": "update_link_status",
+    "line": 17156,
+    "decorators": [],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": [
+        "link_id",
+        "status"
+      ]
+    },
+    "redirects": [],
+    "methods": "POST branch; other verbs not necessarily rejected",
+    "role": "No explicit decorator; inspect view/session checks"
+  },
+  {
+    "app": "home",
+    "route": "/<str:IPOid>/BulkDeleteOrders/",
+    "name": "BulkDeleteOrders",
+    "namespace": "",
+    "view": "BulkDeleteOrders",
+    "line": 4162,
+    "decorators": [
+      "csrf_exempt",
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "csrf_exempt; allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/BulkDeleteGroup",
+    "name": "BulkDeleteGroup",
+    "namespace": "",
+    "view": "BulkDeleteGroup",
+    "line": 4088,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "home",
+    "route": "/BulkDeleteClients",
+    "name": "BulkDeleteClients",
+    "namespace": "",
+    "view": "BulkDeleteClients",
+    "line": 2775,
+    "decorators": [
+      "allowed_users(allowed_roles=['Broker'])"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "No method decorator",
+    "role": "allowed_users(allowed_roles=['Broker'])"
+  },
+  {
+    "app": "whatsapp",
+    "route": "/whatsapp/buy/<int:ipo_id>/send/",
+    "name": "send_buy_order",
+    "namespace": "whatsapp",
+    "view": "send_buy_order",
+    "line": 140,
+    "decorators": [
+      "login_required",
+      "require_POST"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "POST only",
+    "role": "login_required; require_POST"
+  },
+  {
+    "app": "whatsapp",
+    "route": "/whatsapp/sell/<int:ipo_id>/send/",
+    "name": "send_sell_order",
+    "namespace": "whatsapp",
+    "view": "send_sell_order",
+    "line": 146,
+    "decorators": [
+      "login_required",
+      "require_POST"
+    ],
+    "templates": [],
+    "parameters": {
+      "GET": [],
+      "POST": []
+    },
+    "redirects": [],
+    "methods": "POST only",
+    "role": "login_required; require_POST"
+  }
+]

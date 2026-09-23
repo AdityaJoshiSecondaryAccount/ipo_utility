@@ -11,11 +11,11 @@
 <link rel="stylesheet" href="{% static  'DataTables/css/dataTables.bootstrap5.min.css' %}">
 
 <style>
-    /* 
+    /*
     body {
         font-family: Arial, Helvetica, sans-serif;
 
-    } 
+    }
     */
     #example_wrapper{
         margin-top: 2% !important;
@@ -1733,9 +1733,9 @@ deleteIpoButton.addEventListener("click", function() {
         
         // Create the new form HTML for rows per page selection
         var formHtml = `
-            <form method="POST" action="/IPOSETUP" style="display: inline-block; margin-bottom: 0;"> 
+            <form method="POST" action="/IPOSETUP" style="display: inline-block; margin-bottom: 0;">
                 {% csrf_token %}
-                <label class="slr" for="page_size" style="margin-bottom: 0;">Show 
+                <label class="slr" for="page_size" style="margin-bottom: 0;">Show
                 <select name="Ip_page_size" id="Ip_page_size" onchange="this.form.submit()">
                     <option value="{{Ip_page_size}}" style='display:None;' {% if Ip_page_size|default_if_none:50 == 50 %}selected{% endif %}>{{Ip_page_size}}</option>
                     <option value="50" {% if Ip_page_size == 50 %}selected{% endif %}>50</option>

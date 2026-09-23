@@ -1989,7 +1989,7 @@ $(function () {
             // Extract first number (Total value)
             {% comment %} const match = textContent.match(/[-]?\d+(\.\d+)?/);
             const amount = match ? parseFloat(match[0]) : 0; {% endcomment %}
-            
+
             const exactDue = $(this).data('exact-due');
             let dueAmount = 0;
             if (exactDue !== undefined && exactDue !== "") {

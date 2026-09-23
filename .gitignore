@@ -25,6 +25,8 @@ MANIFEST
 # Django
 local_settings.py
 db.sqlite3
+*.sqlite3
+*.db
 db.sqlite3-journal
 staticfiles/
 
@@ -49,6 +51,10 @@ venv.bak/
 .pydevproject
 .settings/
 docs/
+!docs/
+docs/*
+!docs/playwright*.md
+!docs/playwright*.json
 
 **/migrations/
 wkhtmltox/
@@ -56,8 +62,15 @@ wkhtmltox/
 # Isolated browser automation artifacts
 playwright_testing/results/
 playwright_testing/tmp/
+tmp/playwright-e2e-*/
+test-results/
 playwright-report/
 playwright/.auth/
+*.webm
+
+**/migrations/
+!home/migrations/
+!home/migrations/*.py
 
 # OS-specific
 .DS_Store
@@ -69,17 +82,57 @@ desktop.ini
 *.log
 launcher_log.txt
 
+# Node & Frontend
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+.npm/
 
+# Executables & Binaries
+*.exe
+wkhtmltoimage.exe
+wkhtmltopdf.exe
+
+# WhatsApp Flow Keys & Secrets
+whatsapp/flow_keys/
+**/flow_keys/
+*.pem
+*.key
+*.env*
+.env*
 
 # --------------------------
+# Backup & Scratch Files
+*views2.py
+home/views2.py
+*.bak
+*.tmp
+scratch/
 
 
+# WAB_Interaface/
+WAB_Interaface/public_sign_readme.txt
 
 playwright_testing/**
 # Required source files for the remote-only test runners
 !playwright_testing/remote.py
 !playwright_testing/remote_e2e.py
 !playwright_testing/REMOTE_TESTING.md
+WAB_Interaface/public_sign_readme.txt
 
 !playwright_testing/calculation/
 !playwright_testing/calculation/remote_seed.py
+# WhatsApp Inbox Microservice
+WAB_Interaface/backend/.env
+WAB_Interaface/backend/wab_inbox.db
+WAB_Interaface/backend/.venv/
+WAB_Interaface/frontend/node_modules/
+WAB_Interaface/frontend/dist/
+WAB_Interaface/ngrok.exe
+
+
+*.jpg
+*.png
+*.webp
+*.jfif
