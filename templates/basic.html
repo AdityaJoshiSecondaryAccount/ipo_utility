@@ -509,7 +509,9 @@
 
 
 <body style="max-width: 100vw;">
-    <div class="loader"><div class="loader-style-4"></div></div>
+    <div class="loader">
+        <div class="loader-style-4"></div>
+    </div>
 
     <!-- NEW NAVBAR -->
 
@@ -626,11 +628,13 @@
                 </span>
                 {% endif %}
 
+
                 {% if request.user.is_authenticated %}
                 <li class="nav-item active">
                     <a class="nav-link" href="/chat" style="color: #ffffff;"><b>|</b>&nbsp; WhatsApp Chat</a>
                 </li>
                 {% endif %}
+
 
 
                 {% comment %} <li class="nav-item active">

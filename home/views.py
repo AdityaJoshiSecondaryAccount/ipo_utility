@@ -1,4 +1,7 @@
-import ddddocr
+try:
+    import ddddocr
+except ImportError:
+    ddddocr = None
 from django.http.response import JsonResponse
 from django.shortcuts import render, redirect,get_object_or_404
 from django.contrib.auth.models import Group, User
@@ -153,7 +156,7 @@ def fetch_data_API(url):
     return None
 # @allowed_users(allowed_roles=['Broker'])
 @Broker_only
-def index(request):
+def Home(request):
     if request.user.is_anonymous:
         return redirect("/login")
     products = CurrentIpoName.objects.filter(user=request.user).order_by('-id')

@@ -543,6 +543,8 @@
                 </tr>
             `);
 
+            let totalNetAmount = 0;
+
             rows.forEach(tr => {
                 const cells = Array.from(tr.querySelectorAll('th, td'));
                 if (cells.length < 25) return;
@@ -666,8 +668,19 @@
                                         <td style="text-align:center; border:1px solid #000; background-color:${rowBgColor};">${netShares}</td>
                                         <td style="text-align:center; border:1px solid #000; background-color:${rowBgColor};">${netAmount}</td>`;
                     tbody.appendChild(trHTML);
+                    totalNetAmount += numAmount;
                 }
             });
+
+            // Append Final amount row to netTable
+            if (netTable.querySelector('tbody').children.length > 0) {
+                const tbody = netTable.querySelector('tbody');
+                const totalTr = document.createElement('tr');
+                totalTr.innerHTML = `<th style="text-align:center; border:1px solid #000; font-weight:bold;">Final Amount</th>
+                                     <td style="text-align:center; border:1px solid #000; font-weight:bold;">—</td>
+                                     <td style="text-align:center; border:1px solid #000; font-weight:bold;">${totalNetAmount}</td>`;
+                tbody.appendChild(totalTr);
+            }
 
             [kostakTable, stTable].forEach(tbl => {
                 if (tbl.querySelector('tbody').children.length > 0) {
