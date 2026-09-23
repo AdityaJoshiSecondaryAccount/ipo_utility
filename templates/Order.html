@@ -1,0 +1,4001 @@
+{% extends 'basic.html' %}
+{% block title%} {{IPOName}}-Order{% endblock %}
+{% block css %}
+{% load static %}
+<!-- ADD NEW CODE DELETE CSS -->
+
+<link rel="stylesheet" href="{% static  'DataTables/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static  'DataTables/css/buttons.bootstrap5.min.css' %}">
+<link rel="stylesheet" href="{% static  'DataTables/css/dataTables.bootstrap5.min.css' %}">
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    #example th{
+        {% comment %} border: 0.1px solid black !important; {% endcomment %}
+        text-align: center;
+        {% comment %} width: 10%; {% endcomment %}
+    }
+    .btn-group button {
+        z-index: 9;
+    }
+    #example_wrapper{
+        margin-top: 0.5% !important;
+    }
+    {% comment %} .slr{
+        position: absolute;
+          top: 96%;
+    } {% endcomment %}
+    #example_filter{
+        margin-left: 2%;
+        float: left !important;
+        width: 50% !important;
+    }
+    .example_length{
+        width: 50% !important;
+    }
+    .Input{
+        item-align: center;
+        width: 98.5% !important;
+    }
+    .dropdown-menu {
+        min-width: 7rem !important;
+        margin-top: 0 !important;
+        background-color: #6c757d;
+    }
+    .buttons-colvis{
+        left:-11px;
+        width: 95px !important;
+    }
+    .buttons-collection{
+        height: 35px;
+        width: 100px !important;
+    }
+    .table-responsive {
+        width:101.3%;
+    }
+    .st{
+        float: left !important;
+        margin-top: -33px;
+        left: 133% ;
+        height: 35px;
+    }
+    .bo{
+        float: left !important;
+        top: -21px !important;
+        left: 111% !important;
+        margin-top: -12px !important;
+        width:10% !important;
+        height: 35px;
+    }
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .flex-wrap {
+        position: relative !important;
+        margin-top: -60px !important; 
+        left: 75.2% !important; 
+    }
+    .form-control-sm{
+        border: 0.3px solid black;
+        height:30px !important;
+    }
+    .cw {
+        margin-top: -1.7% ;
+        right: -6% ;
+        left: 16.6%;
+        width: 182px ; 
+        height:1%;
+    }
+
+    .custom-width {
+        left: 0% !important;
+        margin-top: 0% !important;
+        margin-left: 5px !important;
+        right : 0px !important;
+        width: 72.2%!important; 
+    }
+    .form-row{
+        width: 100% !important;
+    }
+    .row.dt-row {
+        margin-top: -16px !important; 
+    }
+    .form{
+        margin-top: -7% !important;
+    }
+
+    .sc{
+        top: 19px !important;
+        margin-top: 2.4% !important;
+        left: 19% !important;
+    }
+    .it{
+        top: 19px !important;
+        width: 16%;
+        margin-top: 2.4% !important;
+        left: 17.4%  !important;
+    }
+    .oc{
+        top: 19px !important;
+        width: 16%;
+        margin-top: 2.4% !important;
+        left: 17.7% !important;
+    }
+    .gp{
+        top: 19px !important;
+        width: 16%;
+        margin-top: 2.4% !important;
+        left: 18% !important;
+    }
+    .gps{
+        width: 16%;
+        position: absolute;
+        top: 1px !important;
+    }
+    .gps{
+        width: 93%!important;
+    }
+    .ocs{
+        width: 93%!important;
+    }
+
+    .its{
+        width: 93%!important;
+    }
+    .gpl{
+        position: absolute;
+        top: -33px !important;
+        left: 6%;
+    }
+    .ocs{
+        position: absolute;
+        top: 1px !important;
+    }
+
+    .ocl{
+        position: absolute;
+        top: -33px !important;
+        left: 6%;
+    }
+    .its{
+        position: absolute;
+        top: 1px !important;
+    }
+    .itl{
+        position: absolute;
+        top: -33px !important;
+        left: 6%;
+    }
+    #example_filter label {
+        position: absolute;
+        display: flex;
+        align-items: center;
+    }
+
+    #example_filter input {
+        position: absolute;
+        top: 123% !important;
+        margin-left: 0px; 
+    }
+    .custom-button {
+        margin-right: 10px; 
+      }
+      .filters input {
+        width: 100%;
+      }
+
+    .container {
+        width: 100%;
+        padding-right: 25px;
+        padding-left: 25px;
+        margin-right: auto;
+        margin-left: auto;
+    }
+
+    .containerhight {
+        margin-bottom: 10%;
+    }
+
+    .h3,
+        h3 {
+            margin: 0px 0px;
+            margin-top: 85px;
+            font-size: 1.75rem;
+            border-block-end: 3px solid #e9ecef;
+        }
+
+
+    .iponame {
+        position: absolute !important;
+            background-color: white;
+            height: 45px;
+            margin-top: 35px;
+            width: 100%;
+            text-align: center;
+            position: fixed;
+    }
+ 
+    .pagename{
+        margin-top: 7%;
+    }
+
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+        width: 100%;
+        border: 1px solid #ddd;
+    }
+
+    th,
+    td {
+        text-align: center;
+        padding: 5px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2
+    }
+
+    .footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: #686868;
+        color: white;
+        text-align: center;
+        padding: 5px 0px;
+        z-index: 999;
+    }
+
+    .button {
+        margin: 0px 10px;
+        color: black;
+        background-color: antiquewhite;
+        width: auto;
+    }
+
+    .btn-dark.disabled,
+    .btn-dark:disabled {
+        color: #000;
+        background-color: #ffddaf;
+        border-color: #040404;
+    }
+    @media (min-width: 7612px){
+        .custom-width {
+            margin-left: 2px !important;
+        }
+        .slr{
+            margin-bottom: 3.5%;
+        }
+        .gp {
+            left: 16% !important;
+        }
+        .oc {
+        left: 16% !important;
+        }
+        .it {
+            left: 16% !important;
+        }
+        .st {
+            left: 81.9%;
+        }
+        .bo{
+            left: 82.7% !important;
+        }
+        .sc {
+            left: 17% !important;
+        }
+        .flex-wrap {
+            margin-top: -57px !important;
+
+            left: 84.2% !important;
+        }
+        #example_filter {
+            margin-left: 39rem;
+            float: left !important;
+            margin-top: 62%;
+        } 
+    }
+    @media (min-width: 4501px) and (max-width: 7612px) {
+        .custom-width {
+            margin-left: 2px !important;
+        }
+        .slr{
+            margin-bottom: 3.2%;
+        }
+        .gp {
+            left: 16% !important;
+        }
+        .oc {
+        left: 16% !important;
+        }
+        .it {
+            left: 16% !important;
+        }
+        .st {
+            left: 81.9%;
+        }
+        .bo{
+            left: 82.7% !important;
+        }
+        .sc {
+            left: 17% !important;
+        }
+        .flex-wrap {
+            margin-top: -57px !important;
+
+            left: 84.2% !important;
+        }
+        #example_filter {
+            margin-left: 28rem;
+            float: left !important;
+            margin-top: 44%;
+        } 
+    }
+    @media (min-width: 3806px) and (max-width: 4500px) {
+        .custom-width {
+            margin-left: 2px !important;
+        }
+        .slr{
+            margin-bottom: 2.6%;
+        }
+        .gp {
+            left: 16% !important;
+        }
+        .oc {
+        left: 16% !important;
+        }
+        .it {
+            left: 16% !important;
+        }
+        .st {
+            left: 81.9%;
+        }
+        .bo{
+            left: 82.7% !important;
+        }
+        .sc {
+            left: 17% !important;
+        }
+        .flex-wrap {
+            margin-top: -57px !important;
+
+            left: 84.2% !important;
+        }
+        #example_filter {
+            margin-left: 149%;
+            float: left !important;
+            margin-top: 24%;
+        } 
+    }
+    @media (min-width: 2538px) and (max-width: 3805px) {
+        .custom-width {
+            margin-left: 2px !important;
+        }
+        .slr{
+            margin-bottom: 1.6%;
+        }
+        .gp {
+            left: 16% !important;
+        }
+        .oc {
+        left: 16% !important;
+        }
+        .it {
+            left: 16% !important;
+        }
+        .st {
+            left: 81.9%;
+        }
+        .bo{
+            left: 82.7% !important;
+        }
+        .sc {
+            left: 17% !important;
+        }
+        .flex-wrap {
+            margin-top: -57px !important;
+
+            left: 84.2% !important;
+        }
+        #example_filter {
+            margin-right: 9%;
+            float: right !important;
+            margin-top: 6%;
+        } 
+    }
+    @media (min-width: 2116px) and (max-width: 2537.33px) {
+        .custom-width {
+            margin-left: 2px !important;
+        }
+        .slr{
+            margin-bottom: 1.6%;
+        }
+        .gp {
+            left: 16% !important;
+        }
+        .oc {
+        left: 16% !important;
+        }
+        .it {
+            left: 16% !important;
+        }
+        .st {
+            left: 81.9%;
+        }
+        .bo{
+            left: 82.7% !important;
+        }
+        .sc {
+            left: 17% !important;
+        }
+        .flex-wrap {
+            margin-top: -57px !important;
+
+            left: 84.2% !important;
+        }
+        #example_filter {
+            margin-right: 32%;
+            float: right !important;
+            margin-top: 6%;
+        } 
+    }
+    @media (min-width: 1883px) and (max-width: 2115px) {
+        .custom-width {
+            margin-left: 2px !important;
+        }
+        .gp {
+            left: 16% !important;
+        }
+        .oc {
+        left: 16% !important;
+        }
+        .it {
+            left: 16% !important;
+        }
+        .st {
+            left: 81.9%;
+        }
+        .bo{
+            left: 82.7% !important;
+        }
+        .sc {
+            left: 17% !important;
+        }
+        .flex-wrap {
+            margin-top: -57px !important;
+
+            left: 84.2% !important;
+        }
+        #example_filter {
+            margin-right: 47%;
+            float: right !important;
+            margin-top: 1%;
+        } 
+    }
+    @media (min-width: 1758px) and (max-width: 1883px) {
+        .form {
+            margin-top: -7% !important;
+        }
+        .st {
+            left: 81.9%;
+        }
+        .flex-wrap {
+            left: 84.5% !important;
+        }
+        .bo{
+            left: 82.7% !important;
+        }
+        #example_filter {
+            margin-right: 59%;
+            float: right !important;
+            margin-top: 1%;
+        } 
+    }
+    @media (min-width: 1541px) and (max-width: 1757px) {
+        .form {
+            margin-top: -8% !important;
+        }
+        .st {
+            left: 81%;
+        }
+        .flex-wrap {
+            left: 85.5% !important;
+        }
+        .bo{
+            left: 82% !important;
+        }
+        #example_filter {
+            margin-right: 73%;
+            float: right !important;
+            margin-top: -4%;
+        }
+    }
+    @media (min-width: 1485px) and (max-width: 1540px) {
+        .form {
+            margin-top: -9% !important;
+        }
+        .st {
+            left: 82%;
+        }
+        .flex-wrap {
+            left: 87.2% !important;
+        }
+        .bo{
+            left: 83% !important;
+        }
+        #example_filter {
+            margin-right: 49%;
+            float: right !important;
+            margin-top: -8%;
+        }
+        .form-control.form-control-sm {
+            width: 263% !important;
+        }
+    }
+    @media (min-width: 1316px) and (max-width: 1484px) {
+        .form {
+            margin-top: -9% !important;
+          
+        }
+        .cw{
+            width: 10%;
+        }
+        .sc{
+            left: 18% !important;
+        }
+        .st {
+            left: 78%;
+        }
+        .flex-wrap {
+            left: 85.2% !important;
+        }
+        .bo{
+            left: 79% !important;
+        }
+        .buttons-colvis{
+            width: 89px !important;
+        }
+        #example_filter {
+            margin-right: 62%;
+            float: right !important;
+            margin-top: -10%;
+        }
+        .form-control.form-control-sm {
+            width: 263% !important;
+        }
+    }
+    @media (min-width: 1214px) and (max-width: 1315px) {
+        .form {
+            margin-top: -10% !important;
+        }
+        .cw {
+            width: 7%;
+        }
+        .gps {
+            width: 125% !important;
+        }
+        .ocs {
+            width: 125% !important;
+        }
+        .its {
+            width: 125% !important;
+        }
+        .gp {
+            left: 21.7% !important;
+        }
+        .oc{
+            left: 27.7% !important;
+        }
+        .it{
+            left: 34% !important;
+        }
+        .sc{
+            left: 45% !important;
+        }
+        .st{
+            margin-top: -4.2%;
+            left: 88%;
+        }
+        .bo{
+            top: -22px !important;
+            left: 98.7% !important;
+        }
+        .flex-wrap {
+            margin-top: -7% !important;
+            left: 106% !important;
+        }
+        #example_filter {
+            margin-right: 272%;
+            float: right !important;
+            margin-top: 49%;
+        }
+        .row.dt-row {
+            margin-top: 2% !important;
+        }
+        .form-row {    
+            margin-left: -23%;
+        }
+        .slr{
+            position: absolute;
+            top: 30%;
+            left: 1%;
+        }
+        #example_wrapper {
+            margin-top: 5.5% !important;
+        }
+        #example_filter input {
+            top: -14% !important;
+            margin-left: 66px;
+        }
+    }
+    @media (min-width: 1158px) and (max-width: 1213px) {
+        .form {
+            margin-top: -10% !important;
+        }
+        .cw {
+            width: 7%;
+        }
+        .gps {
+            width: 125% !important;
+        }
+        .ocs {
+            width: 125% !important;
+        }
+        .its {
+            width: 125% !important;
+        }
+        .gp {
+            left: 21.7% !important;
+        }
+        .oc{
+            left: 27.7% !important;
+        }
+        .it{
+            left: 34% !important;
+        }
+        .sc{
+            left: 45% !important;
+        }
+        .st{
+            margin-top: -4.2%;
+            left: 88%;
+        }
+        .bo{
+            top: -22px !important;
+            left: 89.7% !important;
+        }
+        .flex-wrap {
+            margin-top: -8% !important;
+            left: 98% !important;
+        }
+        #example_filter {
+            margin-right: 272%;
+            float: right !important;
+            margin-top: 49%;
+        }
+        .row.dt-row {
+            margin-top: 2% !important;
+        }
+        .form-row {    
+            margin-left: -23%;
+        }
+        .slr{
+            position: absolute;
+            top: 30%;
+            left: 1%;
+        }
+        #example_wrapper {
+            margin-top: 5.5% !important;
+        }
+        #example_filter input {
+            top: -14% !important;
+            margin-left: 66px;
+        }
+    }
+    @media (min-width: 1137px) and (max-width: 1157px) {
+        .form {
+            margin-top: -11% !important;
+        }
+        .form-row {    
+            margin-left: -24%;
+        }
+        .cw{
+            width: 11%;
+        }
+        .gps {
+            width: 150% !important;
+        }
+        .ocs {
+            width: 150% !important;
+        }
+        .its {
+            width: 150% !important;
+        }
+        .gp {
+            left: 23% !important;
+        }
+        .oc{
+            left: 33.7% !important;
+        }
+        .it{
+            left: 44.4% !important;
+        }
+        .sc{
+            left: 60% !important;
+        }
+        .st{
+            margin-top: -4.5%;
+            left: 112%;
+        }
+        .bo{
+            top: -23px !important;
+            left: 122% !important;
+        }
+        .flex-wrap {
+            margin-top: 14px !important;
+            left: 37.2% !important;
+        }
+        #example_filter {
+            margin-right: 204%;
+            float: right !important;
+            width: 50% !important;
+            margin-top: 30%;
+        }
+        .row.dt-row {
+            margin-top: 0% !important;
+        }
+        .slr{
+            position: absolute;
+            top: 30%;
+            left: 1%;
+        }
+        #example_wrapper {
+            margin-top: 5.5% !important;
+        }
+        #example_filter input {
+            top: -14% !important;
+            margin-left: 66px;
+        }
+    }
+    @media (min-width: 1074px) and (max-width: 1136px) {
+        .form {
+            margin-top: -11% !important;
+        }
+        .form-row {    
+            margin-left: -24%;
+        }
+        .cw{
+            width: 11%;
+        }
+        .gps {
+            width: 150% !important;
+        }
+        .ocs {
+            width: 150% !important;
+        }
+        .its {
+            width: 150% !important;
+        }
+        .gp {
+            left: 23% !important;
+        }
+        .oc{
+            left: 33.7% !important;
+        }
+        .it{
+            left: 44.4% !important;
+        }
+        .sc{
+            left: 60% !important;
+        }
+        .st{
+            margin-top: -4.5%;
+            left: 112%;
+        }
+        .bo{
+            top: -21px !important;
+            left: 113% !important;
+        }
+        .flex-wrap {
+            margin-top: 14px !important;
+            left: 37.2% !important;
+        }
+        #example_filter {
+            margin-right: 217%;
+            float: right !important;
+            width: 50% !important;
+            margin-top: 30%;
+        }
+        .row.dt-row {
+            margin-top: 0% !important;
+        }
+        .slr{
+            position: absolute;
+            top: 30%;
+            left: 1%;
+        }
+        #example_wrapper {
+            margin-top: 5.5% !important;
+        }
+        #example_filter input {
+            top: -14% !important;
+            margin-left: 66px;
+        }
+    }
+    @media (min-width: 977px) and (max-width: 1073px) {
+        .fc{
+            margin-bottom: 10%!important;
+        }
+        #example_form {
+            margin-top: 1% !important;
+            margin-right: 69%;
+        }
+        
+        .form-row{
+            margin-left: -115%;
+            margin-top: -49%;
+        }
+        .form-row{
+            width: 469% !important;
+        }
+        .sc{        
+            margin-right: 72% !important;
+            top: -3.5rem !important;
+        }
+        .sc {
+            margin-top: 4% !important;
+            left: 89% !important;
+          }
+        .gpl{
+            left: 5%!important;
+        }
+        .itl{
+            left: 4%;
+        }
+        .ocl{
+            left: 5%;
+        }
+        .row.dt-row {
+            margin-top: -3rem !important;
+        }
+        .gp {
+            width: 19%;
+            left: 24% !important;
+        }
+        .oc {
+            width: 19%;
+            left: 26.35% !important;
+        }
+        .it {
+            width: 19%;
+            left: 28.6% !important;
+        }
+        .its{
+            width: 110%!important;
+            left: 16%;
+        }
+        .gps{
+            width: 110%!important;
+            left: 0%;
+        }
+        .ocs{
+            width: 110%!important;
+            left: 8%;
+        }
+        .cw{
+            left: 7.6%;
+        }
+        .st{
+            margin-top: -9.6%;
+            margin-left: -39rem;
+            margin-bottom: -138%;
+        }
+        .bo{
+            margin-top: -13.7% !important;
+            margin-left: 2.5rem;
+        }
+        .flex-wrap {
+            margin-top: -18% !important;
+            left: 60.2% !important;
+        }
+          #example_filter {
+            margin-left: -5rem;
+            float: left !important;
+            width: 50% !important;
+            margin-top: 16%;
+        }
+        #example_filter input {
+            top: -14% !important;
+            margin-left: 66px;
+        }
+        .slr{
+            position: absolute;
+            top: 8%;
+            left: 2%;
+        }
+        #example_wrapper {
+            margin-top: 7.5% !important;
+        }
+    }
+    @media (min-width: 956px) and (max-width: 976px) {
+        .fc{
+            margin-bottom: 10%!important;
+        }
+        #example_form {
+            margin-top: 1% !important;
+            margin-right: 69%;
+        }
+        
+        .form-row{
+            margin-left: -115%;
+            margin-top: -49%;
+        }
+        .form-row{
+            width: 469% !important;
+        }
+        .sc{        
+            margin-right: 72% !important;
+            top: -3.5rem !important;
+        }
+        .sc {
+            margin-top: 4% !important;
+            left: 89% !important;
+          }
+        .gpl{
+            left: 5%!important;
+        }
+        .itl{
+            left: 4%;
+        }
+        .ocl{
+            left: 5%;
+        }
+        .row.dt-row {
+            margin-top: -3rem !important;
+        }
+        .gp {
+            width: 19%;
+            left: 24% !important;
+        }
+        .oc {
+            width: 19%;
+            left: 26.35% !important;
+        }
+        .it {
+            width: 19%;
+            left: 28.6% !important;
+        }
+        .its{
+            width: 110%!important;
+            left: 16%;
+        }
+        .gps{
+            width: 110%!important;
+            left: 0%;
+        }
+        .ocs{
+            width: 110%!important;
+            left: 8%;
+        }
+        .cw{
+            left: 7.6%;
+        }
+        .st{
+            margin-top: -9.6%;
+            margin-left: -35rem;
+            margin-bottom: -138%;
+        }
+        .bo{
+            margin-top: -13.7% !important;
+            margin-left: 2.5rem;
+        }
+        .flex-wrap {
+            margin-top: -18% !important;
+            left: 60.2% !important;
+        }
+          #example_filter {
+            margin-left: -5rem;
+            float: left !important;
+            width: 50% !important;
+            margin-top: 16%;
+        }
+        #example_filter input {
+            top: -14% !important;
+            margin-left: 66px;
+        }
+        .slr{
+            position: absolute;
+            top: 8%;
+            left: 2%;
+        }
+        #example_wrapper {
+            margin-top: 7.5% !important;
+        }
+    }
+    @media (min-width: 916px) and (max-width: 955px) {
+        .fc{
+            margin-bottom: 12%!important;
+        }
+        #example_form {
+            margin-top: 1% !important;
+            margin-right: 69%;
+        }
+        .cw{
+            width:10%;
+        }
+        .form-row{
+            margin-left: -115%;
+            margin-top: -49%;
+        }
+        .form-row{
+            width: 472% !important;
+        }
+        .sc{        
+            margin-right: 72% !important;
+            top: -3.5rem !important;
+        }
+        .sc {
+            margin-top: 4% !important;
+            left: 87% !important;
+          }
+        .gpl{
+            left: 1%!important;
+        }
+        .itl{
+            left: 17%;
+        }
+        .ocl{
+            left: 9%;
+        }
+        .row.dt-row {
+            margin-top: -44px !important;
+        }
+        .gp {
+            width: 19%;
+            left: 24% !important;
+        }
+        .oc {
+            width: 19%;
+            left: 26.35% !important;
+        }
+        .it {
+            width: 19%;
+            left: 28.6% !important;
+        }
+        .its{
+            width: 110%!important;
+            left: 16%;
+        }
+        .gps{
+            width: 110%!important;
+            left: 0%;
+        }
+        .ocs{
+            width: 110%!important;
+            left: 8%;
+        }
+        .st{
+            margin-top: -10.6%;
+            margin-left: -38.2rem;
+            margin-bottom: -138%;
+        }
+        .bo{
+            margin-top: -15% !important;
+            margin-left: 2.5rem;
+        }
+        .flex-wrap {
+            margin-top: -20% !important;
+            left: 52.2% !important;
+        }
+        #example_filter {
+            margin-left: -10.9rem;
+            float: left !important;
+            width: 50% !important;
+            margin-top: 1.7rem;
+        }
+        #example_filter input {
+            top: -14% !important;
+            margin-left: 66px;
+        }
+        .slr{
+            position: absolute;
+            top: 13%;
+            left: 2%;
+        }
+        #example_wrapper {
+            margin-top: 7.5% !important;
+        }
+        
+    }
+    @media (min-width: 892px) and (max-width: 915px) {
+        .fc{
+            margin-bottom: 12%!important;
+        }
+        #example_form {
+            margin-top: 1% !important;
+            margin-right: 69%;
+        }
+        .cw{
+            width:10%;
+        }
+        .form-row{
+            margin-left: -115%;
+            margin-top: -49%;
+        }
+        .form-row{
+            width: 472% !important;
+        }
+        .sc{        
+            margin-right: 72% !important;
+            top: -3.5rem !important;
+        }
+        .sc {
+            margin-top: 4% !important;
+            left: 87% !important;
+          }
+        .gpl{
+            left: 1%!important;
+        }
+        .itl{
+            left: 17%;
+        }
+        .ocl{
+            left: 9%;
+        }
+        .row.dt-row {
+            margin-top: -44px !important;
+        }
+        .gp {
+            width: 19%;
+            left: 24% !important;
+        }
+        .oc {
+            width: 19%;
+            left: 26.35% !important;
+        }
+        .it {
+            width: 19%;
+            left: 28.6% !important;
+        }
+        .its{
+            width: 110%!important;
+            left: 16%;
+        }
+        .gps{
+            width: 110%!important;
+            left: 0%;
+        }
+        .ocs{
+            width: 110%!important;
+            left: 8%;
+        }
+        .st{
+            margin-top: -10.6%;
+            margin-left: -36.5rem;
+            margin-bottom: -138%;
+        }
+        .bo{
+            margin-top: -15% !important;
+            margin-left: 2.5rem;
+        }
+        .flex-wrap {
+            margin-top: -20% !important;
+            left: 52.2% !important;
+        }
+        #example_filter {
+            margin-left: -10.9rem;
+            float: left !important;
+            width: 50% !important;
+            margin-top: 1.7rem;
+        }
+        #example_filter input {
+            top: -14% !important;
+            margin-left: 66px;
+        }
+        .slr{
+            position: absolute;
+            top: 13%;
+            left: 2%;
+        }
+        #example_wrapper {
+            margin-top: 7.5% !important;
+        }
+        
+    }
+    @media (min-width: 851px) and (max-width: 892px) {
+        .fc{
+            margin-bottom: 12%!important;
+        }
+        #example_form {
+            margin-top: 1% !important;
+            margin-right: 69%;
+        }
+        .cw{
+            width:10%;
+        }
+        .form-row{
+            margin-left: -115%;
+            margin-top: -49%;
+        }
+        .form-row{
+            width: 472% !important;
+        }
+        .sc{        
+            margin-right: 72% !important;
+            top: -3.5rem !important;
+        }
+        .sc {
+            margin-top: 4% !important;
+            left: 87% !important;
+          }
+        .gpl{
+            left: 1%!important;
+        }
+        .itl{
+            left: 17%;
+        }
+        .ocl{
+            left: 9%;
+        }
+        .row.dt-row {
+            margin-top: -44px !important;
+        }
+        .gp {
+            width: 19%;
+            left: 24% !important;
+        }
+        .oc {
+            width: 19%;
+            left: 26.35% !important;
+        }
+        .it {
+            width: 19%;
+            left: 28.6% !important;
+        }
+        .its{
+            width: 110%!important;
+            left: 16%;
+        }
+        .gps{
+            width: 110%!important;
+            left: 0%;
+        }
+        .ocs{
+            width: 110%!important;
+            left: 8%;
+        }
+        .st{
+            margin-top: -10.6%;
+            margin-left: -35.5rem;
+            margin-bottom: -138%;
+        }
+        .bo{
+            margin-top: -15% !important;
+            margin-left: 2.5rem;
+        }
+        .flex-wrap {
+            margin-top: -20% !important;
+            left: 52.2% !important;
+        }
+        #example_filter {
+            margin-left: -10.9rem;
+            float: left !important;
+            width: 50% !important;
+            margin-top: 1.7rem;
+        }
+        #example_filter input {
+            top: -14% !important;
+            margin-left: 66px;
+        }
+        .slr{
+            position: absolute;
+            top: 13%;
+            left: 2%;
+        }
+        #example_wrapper {
+            margin-top: 7.5% !important;
+        }
+        
+    }
+    @media (min-width: 768px) and (max-width: 850px) {
+        .fc{
+            margin-bottom: 12%!important;
+        }
+        .form-row {
+            margin-top: -50% !important;
+            margin-left: -109% !important;
+            width: 449% !important;
+        }
+        .gp {
+            width: 19%;
+            left: 24% !important;
+        }
+        .oc {
+            width: 19%;
+            left: 26.35% !important;
+        }
+        .it {
+            width: 19%;
+            left: 28.6% !important;
+        }
+        .its{
+            width: 110%!important;
+            left: 16%;
+        }
+        .gps{
+            width: 110%!important;
+            left: 0%;
+        }
+        .ocs{
+            width: 110%!important;
+            left: 8%;
+        }
+        .gpl{
+            margin-left: 1% !important;
+        }
+        .cw {
+            width: 10%;
+        }
+        .ocl{
+            margin-left: 1% !important;
+        }
+        .itl{
+            margin-left: 13% !important;
+        }
+        #example_filter {
+            margin-top: 0.8rem !important;
+            margin-left: -11.5rem !important;
+            margin-bottom: 65% !important;
+        }
+        .sc{        
+            margin-left: 65% !important;
+            top: -40px !important;
+        }
+        .flex-wrap{
+            margin-left: -8.5rem !important;
+            margin-top: -19% !important;
+        }
+        .st{
+            margin-top: -32%;
+            margin-left: -35%;
+            margin-bottom: -138%;
+        }
+        .bo{
+            margin-top: -43% !important;
+            margin-left: 25.5rem;
+        }
+        .row.dt-row {
+            margin-top: -44px !important;
+        }
+        #example_length{
+            margin-right: 68%;
+        }
+        #example_filter input {
+            top: -14% !important;
+            margin-left: 66px;
+        }
+        .slr{
+            position: absolute;
+            top: 4%;
+            left: 2%;
+        }
+        #example_wrapper {
+            margin-top: 7.5% !important;
+        }
+    }   
+    @media (min-width: 699px) and (max-width: 767px) {
+        .iponame {
+            margin-top: 54px;         
+        } 
+        .fc{
+            MARGIN-TOP: 2%;
+        }
+        .fc{
+            margin-bottom: 25%!important;
+        }
+        .gp {
+            width: 19%;
+            left: 18% !important;
+        }
+        .oc {
+            width: 19%;
+            left: 17.35% !important;
+        }
+        .it {
+            width: 19%;
+            left: 16.6% !important;
+        }
+        .form-row {
+            margin-top: -50% !important;
+            margin-left: -11.5rem !important;
+            width: 556% !important;
+        }
+        .gps {
+            width: 130%!important;
+        }
+        .ocs {
+            width: 130%!important;
+        }
+        .its {
+            width: 130%!important;
+        }
+        .gp{
+            left: 12.3% !important;
+        }
+        .it{
+            left: 30% !important;
+        }
+        .oc{
+            left: 21.1% !important;
+        }
+        .gpl{
+            margin-left: 4.4rem !important;
+        }
+        .ocl{
+            margin-left: 45% !important;
+        }
+        .itl{
+            margin-left: 46% !important;
+        }
+        #example_filter {
+            margin-top: 4.5rem !important;
+            margin-left: -11.5rem !important;
+            margin-bottom: 65% !important;
+        }
+        .sc{        
+            margin-left: 70% !important;
+            top: 3px !important;
+        }
+        .cw{
+            width:12%;
+        }
+        .flex-wrap{
+            margin-left: -14% !important;
+            margin-top: -19% !important;
+            width: auto !important;
+        }
+        .row.dt-row {
+            margin-top: -1% !important;
+        }
+        .st{
+            margin-top: -35%;
+            margin-left: -137%;
+            margin-bottom: -138%;
+        }
+        .bo{
+            margin-top: -21% !important;
+            margin-left: -37%;
+        }
+        #example_length{
+            margin-right: 68%;
+        }
+        #example_filter input {
+            top: -14% !important;
+            margin-left: 66px;
+        }
+        .slr{
+            position: absolute;
+            top: 75%;
+            left: 3%;
+        }
+        #example_wrapper {
+            margin-top: 7.5% !important;
+        }
+
+    }
+    @media (min-width: 660px) and (max-width: 698px) {
+        .slr{
+            position: absolute;
+            top: 85%;
+            left: 3%;
+        }
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+            z-index: 999;
+        }
+        #example_wrapper {
+            margin-top: 7.5% !important;
+        }
+        .chc{
+            width: 137%;
+            margin-left: -17%!important;
+        }
+        .iponame {
+            margin-top: 54px;         
+        } 
+        .fc{
+            MARGIN-TOP: 2%;
+        }
+        .fc{
+            margin-bottom: 25%!important;
+        }
+        .form-row {
+            margin-top: -50% !important;
+            margin-left: -11.5rem !important;
+            width: 556% !important;
+        }
+        .gps {
+            width: 195%!important;
+        }
+        .ocs {
+            width: 195%!important;
+        }
+        .its {
+            width: 195%!important;
+        }
+        .gp{
+            left: 21.3% !important;
+        }
+        .it{
+            left: 57.8% !important;
+        }
+        .oc{
+            left: 39.5% !important;
+        }
+        .gpl{
+            margin-left: 3rem !important;
+        }
+        .ocl{
+            margin-left: 45% !important;
+        }
+        .itl{
+            margin-left: 46% !important;
+        }
+        #example_filter {
+            margin-top: 2% !important;
+            margin-left: 176% !important;
+            margin-bottom: 65% !important;
+        }
+        .sc{        
+            margin-left: 93%!important;
+            top: 61px !important;
+        }
+        .sc{
+            margin-top: -5.6% !important;
+        }
+        .flex-wrap{
+            margin-left: -19% !important;
+            margin-top: 2% !important;
+            width: auto !important;
+        }
+        .st{
+            margin-top: 6%;
+            margin-left: -135%;
+            margin-bottom: -138%;
+        }
+        .bo{
+            margin-top: 21% !important;
+            margin-left: -48%;   
+        }
+        .form-row{
+            margin-left: -54%;
+            margin-top: -59%;
+        }
+        .form-row{
+            width: 448% !important;
+        }
+        #example_length{
+            margin-right: 68%;
+        }
+        .row.dt-row {
+            margin-top: -69px !important;
+        }
+        #example_filter input {
+            top: -14% !important;
+            margin-left: 66px;
+        }
+    }
+    @media (min-width: 576px) and (max-width: 659px) {
+        .slr{
+            position: absolute;
+            top: 57%;
+            left: 3%;
+        }
+        .sc{        
+            margin-right: 3%;
+        }
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+            z-index: 999;
+        }
+        .iponame {
+            margin-top: 54px;         
+        } 
+        .fc{
+            margin-top: 4%;
+        }
+        .bo{
+            top: 19px !important;
+            margin-left: -42%;
+        }
+        .flex-wrap{
+            margin-left: -15%;
+            margin-top: 1.8% !important;
+            width: auto !important;
+        }
+        .sc{
+            margin-left: 22% !important;
+            top: 60px !important;
+        }
+        #example_filter {
+            margin-left: -22%;
+            margin-top: 10%;
+        }
+        #example_length{
+            margin-right: 68%;
+        }
+        .gps {
+            width: 125%!important;
+        }
+        .ocs {
+            width: 125%!important;
+        }
+        .its {
+            width: 125%!important;
+        }
+        .gp{
+            left: 28.3% !important;
+        }
+        .it{
+            left: 41.8% !important;
+        }
+        .oc{
+            left: 35% !important;
+        }
+        .form-row{
+            margin-left: -251%;
+            margin-top: -19%;
+            width: auto !important;
+        }
+        .form-row {
+            width: 686% !important;
+        }
+        .form {
+            margin-top: 9% !important;
+        }
+        .st{
+            margin-top: 6%;
+            margin-left: -136%;
+            margin-bottom: 89%;
+        }
+        .gpl{
+            left: 51%!important;
+        }
+        .itl{
+            left: 49%;
+        }
+        .ocl{
+            left: 51%;
+        }
+        .row.dt-row {
+            margin-top: -58px !important;
+        }
+        .buttons-colvis{
+            left:-7px !important;
+        }
+        .cw {
+            margin-top: -19.7%;
+            left: 60.6%;
+        }
+        #example_filter input {
+            top: -14% !important;
+            margin-left: 66px;
+        }
+        #example_wrapper {
+            margin-top: -5.5% !important;
+        }
+    }
+    @media (min-width: 440px) and (max-width: 575px) {
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+            z-index: 999;
+        }
+        .iponame {
+            margin-top: 54px;         
+        } 
+        .fc{
+            margin-top: 4%;
+        }
+        .bo{
+            top: -28px !important;
+            margin-top: 91% !important;
+            margin-left: 177%;
+        }
+        .flex-wrap{
+            margin-left: -134%;
+            margin-top: 19% !important;
+        }
+        .sc{
+            margin-left: 15.4% !important;
+            top: 65px !important;
+        }
+        #example_filter {
+            margin-left: -56%;
+            margin-top: 36%;
+        }
+        .slr{
+            position: absolute;
+            top: 85%;
+            left: 3%;
+        }
+        .row.dt-row {
+            margin-top: 2% !important;
+        }
+        .chc{
+            width: 205%;
+            margin-left: -51%!important;
+        }
+        #example_length{
+            margin-right: 68%;
+        }
+        .gps {
+            width: 110%!important;
+        }
+        .ocs {
+            width: 120%!important;
+        }
+        .its {
+            width: 105%!important;
+        }
+        .gp{
+            left: 27% !important;
+        }
+        .it{
+            left: 39.4% !important;
+        }
+        .oc{
+            left: 32.7% !important;
+        }
+        .form-row{
+            margin-left: -251%;
+            margin-top: -19%;
+        }
+        .form-row{
+            width: 706% !important;
+        }
+        .st{
+            margin-top: 15%;
+            margin-left: -136%;
+            margin-bottom: 89%;
+        }
+        .gpl{
+            left: 51%!important;
+        }
+        .itl{
+            left: 49%;
+        }
+        .ocl{
+            left: 51%;
+        }
+        .buttons-colvis{
+            left:-7px !important;
+        }
+        .cw {
+            margin-top: -19.7%;
+            left: 57.6%;
+        }
+        #example_filter input {
+            top: -14% !important;
+            margin-left: 66px;
+        }
+        #example_wrapper {
+            margin-top: -5.5% !important;
+          }
+    }
+    @media (min-width: 398px) and (max-width: 439px) {
+        .sc{        
+            margin-right: 3%;
+            margin-left: auto;
+        }
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+            z-index: 999;
+        }
+        .iponame {
+            margin-top: 54px;         
+        } 
+        .fc{
+            margin-top: 4%;
+        }
+        .bo{
+            top: 23px !important;
+        }
+        .bo {
+            float: right!important;
+            margin-top: -13% !important;
+            margin-right: 200%;
+        }
+        .st {
+            margin-top: 44%;
+            margin-left: 11.8rem;
+        }
+        .slr {
+            position: absolute;
+            top: 98%;
+            left: 4%;
+        }
+        .flex-wrap{
+            margin-left: -50%;
+            margin-top: 8% !important;
+        }
+        .sc{
+            margin-left: 0% !important;
+            top: 88px !important;
+        }
+        #example_filter {
+            margin-left: 36%;
+            margin-top: 44% !important;
+        }
+        .row.dt-row {
+            margin-top: 8% !important;
+        }
+        .buttons-collection {
+            top: -18%;
+            left: 101px;
+        }
+        .buttons-colvis {
+            top: -18% !important;
+            left: 94px !important;
+        }
+        .form-row{
+            margin-left: -251%;
+            margin-top: -4%;
+        }
+        .form-row{
+            width: 701% !important;
+        }
+        .cw {
+            margin-top: -19.7%;
+            left: 28.6%;
+        }
+        #example_length{
+            margin-right: 68%;
+            margin-top: -13%;
+        }
+        .gp{
+            left: 28% !important;
+        }
+        .gp{
+            margin-right: 0%;
+        }
+        .oc{
+            left: 41.7% !important;
+        }
+        .ocs {
+            width: 206% !important;
+        }
+        .its {
+            width: 183% !important;
+        }
+        .gps {
+            width: 162% !important;
+        }
+        .it{
+            top: 90px !important;
+            left: -3.6% !important;
+        }
+        .gpl{
+            left: 51%!important;
+        }
+        .itl{
+            left: 49%;
+        }
+        .ocl{
+            left: 51%;
+        }
+        #example_filter input {
+            top: -14% !important;
+            margin-left: 66px;
+            width: 270%;
+        }
+    }
+    @media (min-width: 365px) and (max-width: 397px) {
+        .sc{        
+            margin-right: 9%;    
+            top: 88px !important;
+        }
+        .st{
+            margin-top: 117%;
+            margin-left: -130%;
+        }
+        .iponame {
+            margin-top: 54px;         
+        } 
+        .fc{
+            MARGIN-TOP: 2%;
+        }
+        .bo{
+            margin-top: 147% !important;
+            margin-left: 13%;
+        }
+        .buttons-colvis {
+            top: -113% !important;
+            left: 9px !important;
+        }
+        .buttons-collection {
+            top: -114%;
+            left: 26px;
+        }
+        #example_filter  {
+            margin-left: -57%;
+            margin-top: 20% !important;
+        }
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+            z-index: 999;
+        }
+        .form-row{
+            margin-left: -251%;
+            margin-top: -19%;
+        }
+        .form-row{
+            width: 701% !important;
+        }
+        .row.dt-row {
+            margin-top: 8% !important;
+        }
+        .cw {
+            margin-top: -19.7%;
+            left: 28.6%;
+        }
+        #example_length{
+            margin-right: 68%;
+        }
+        .gp{
+            left: 28% !important;
+        }
+        .gp{
+            margin-right: 0%;
+        }
+        .oc{
+            left: 41.7% !important;
+        }
+        .ocs {
+            width: 206% !important;
+        }
+        .its {
+            width: 183% !important;
+        }
+        .gps {
+            width: 162% !important;
+        }
+        .it{
+            top: 90px !important;
+            left: -3.6% !important;
+        }
+        .gpl{
+            left: 51%!important;
+        }
+        .itl{
+            left: 49%;
+        }
+        .ocl{
+            left: 51%;
+        }
+        .flex-wrap{
+            margin-left: -86%;
+            margin-top: 74% !important;
+        }
+
+    } 
+    @media (min-width: 335px) and (max-width: 364px) {
+        .sc{        
+            margin-right: 9%;    
+            margin-top: 18% !important;
+        }
+        .fc{
+            margin-top: 17px;
+        }
+        #example_wrapper {
+            margin-top: -4.5% !important;
+        }
+        .st{
+            margin-top: 23%;
+            margin-left: -130%;
+        }
+        .bo{
+            margin-top: 54% !important;
+            margin-left: 13%;
+        }
+        .buttons-colvis {
+            top: -113% !important;
+            left: 9px !important;
+        }
+        .buttons-collection {
+            top: -114%;
+            left: 26px;
+        }
+        #example_filter  {
+            margin-left: -50%;
+            margin-top: 9% !important;
+        }
+        .iponame {
+            margin-top: 54px;         
+        } 
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+            z-index: 999;
+        }
+        .form-row{
+            margin-left: -251%;
+            margin-top: -19%;
+        }
+        .form-row{
+            width: 701% !important;
+        }
+        .row.dt-row {
+            margin-top: 5% !important;
+        }
+        .cw {
+            margin-top: -19.7%;
+            left: 28.6%;
+        }
+        #example_length{
+            margin-right: 68%;
+            margin-top: -13px;
+        }
+        .gp{
+            left: 28% !important;
+        }
+        .gp{
+            margin-right: 0%;
+        }
+        .oc{
+            left: 41.7% !important;
+        }
+        .ocs {
+            width: 206% !important;
+        }
+        .its {
+            width: 183% !important;
+        }
+        .gps {
+            width: 162% !important;
+        }
+        .it{
+            top: 90px !important;
+            left: -3.6% !important;
+        }
+        .gpl{
+            left: 51%!important;
+        }
+        .itl{
+            left: 49%;
+        }
+        .ocl{
+            left: 51%;
+        }
+        .flex-wrap{
+            margin-left: -86%;
+            margin-top: 51% !important;
+        }
+
+    } 
+    @media (min-width: 280px) and (max-width: 334px) {
+        .sc{        
+            margin-right: 12%; 
+            margin-left: 0% !important;   
+        }
+        .sc{        
+            margin-right: 7%;     
+        }
+        .oc{
+            left: 41.7% !important;
+        }
+        .ocs {
+            width: 206% !important;
+        }
+        .its {
+            width: 183% !important;
+        }
+        .gps {
+            width: 162% !important;
+        }
+        .gp{
+            left: 28% !important;
+        }
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+            z-index: 999;
+        }
+        .iponame {
+            margin-top: 54px;         
+        } 
+        .fc{
+            margin-top: 4%;
+        }
+        .chc{
+            width: 286%;
+            margin-left: -92%!important;
+        }
+        #example_length{
+            margin-right: 68%;
+            margin-top: -11%;
+        }
+        .gp{
+            margin-right: 0%;
+        }
+        .form-row{
+            margin-left: -251%;
+            margin-top: 1%;
+        }
+        .form-row{
+            width: 701% !important;
+        }
+        .st{
+            margin-top: 152%;
+            margin-left: -93%;
+            margin-bottom: -138%;
+        }
+        .bo{
+            margin-top: 112% !important;
+            margin-left: 78%;
+        }
+        .flex-wrap{
+            margin-left: -86%;
+            margin-top: 75% !important;
+        }
+        .sc{        
+            margin-left: 2% !important;
+            top: 90px !important;
+        }
+        .gpl{
+            left: 51%!important;
+        }
+        .itl{
+            left: 49%;
+        }
+        .ocl{
+            left: 51%;
+        }
+        .it{
+            top: 90px !important;
+            left: -3.6% !important;
+        }
+        .row.dt-row {
+            margin-top: 0% !important;
+          
+        }
+        .buttons-colvis{
+            top: 0% !important;
+            left:-7px !important;
+        }
+        .buttons-collection{
+            top: -101% ;
+            left:100px ;
+        }
+        #example_filter{
+            margin-left: -34%;
+            margin-top: 12% !important;
+        }
+        .cw {
+            margin-top: -19.7%;
+            left: 28.6%;
+        }
+        #example_filter input {
+            top: -14% !important;
+            margin-left: 66px;
+            width: 292%;
+        }
+        #example_wrapper {
+            margin-top: -5.5% !important;
+        }
+    } 
+
+    /* Responsive IPO Status modal */
+    #exampleModal {
+        padding-right: 0 !important;
+    }
+    #exampleModal .modal-dialog {
+        width: calc(100vw - 24px);
+        max-width: 900px;
+        margin: 12px auto;
+    }
+    #exampleModal .modal-content {
+        max-height: calc(100vh - 24px);
+        overflow: hidden;
+        white-space: normal;
+    }
+    #exampleModal .modal-header {
+        flex: 0 0 auto;
+    }
+    #exampleModal .modal-body {
+        min-width: 0;
+        min-height: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+    #status-datetime {
+        min-width: 0;
+        gap: 6px 16px;
+        flex-wrap: wrap;
+    }
+    #status-datetime h2 {
+        min-width: 0;
+        flex: 1 1 420px;
+        font-size: clamp(1.35rem, 3vw, 2rem);
+        line-height: 1.2;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+    #live-time-display {
+        flex: 0 1 auto;
+        max-width: 100%;
+        white-space: normal;
+        text-align: right;
+    }
+    #exampleModal .table-responsive {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+    #exampleModal table {
+        width: 100%;
+        margin-bottom: 0;
+    }
+    #exampleModal table thead th {
+        min-width: 64px;
+        max-width: 150px;
+        line-height: 1.2;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: normal;
+    }
+    #exampleModal table tbody th {
+        min-width: 44px;
+        white-space: nowrap;
+        overflow-wrap: normal;
+        word-break: normal;
+    }
+    #exampleModal table td {
+        white-space: nowrap;
+    }
+    #exampleModal .modal-footer {
+        flex: 0 0 auto;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    #exampleModal .modal-footer > .d-flex {
+        min-width: 0;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    #exampleModal .dropdown-menu[aria-labelledby="tableFilterDropdown"] {
+        width: 220px !important;
+        min-width: 220px !important;
+        max-width: calc(100vw - 24px);
+        white-space: normal;
+    }
+    #exampleModal .dropdown-menu[aria-labelledby="tableFilterDropdown"] .form-check-label {
+        white-space: nowrap;
+    }
+
+    @media (max-width: 575.98px) {
+        #exampleModal .modal-dialog {
+            width: calc(100vw - 12px);
+            max-width: calc(100vw - 12px);
+            margin: 6px auto;
+        }
+        #exampleModal .modal-content {
+            max-height: calc(100vh - 12px);
+        }
+        #exampleModal .modal-header {
+            padding: 8px 12px 0;
+        }
+        #exampleModal .modal-body {
+            padding: 0 12px 12px !important;
+        }
+        #status-datetime h2 {
+            flex-basis: 100%;
+            font-size: 1.3rem;
+        }
+        #live-time-display {
+            width: 100%;
+            font-size: 0.8rem !important;
+            text-align: left;
+        }
+        #exampleModal table th,
+        #exampleModal table td {
+            padding: 4px;
+            font-size: 0.8rem;
+        }
+        #exampleModal .modal-footer {
+            justify-content: flex-start;
+            padding: 10px 12px;
+        }
+        #exampleModal .modal-footer > .d-flex {
+            width: 100%;
+            margin-right: 0 !important;
+        }
+    }
+
+    /* A fixed desktop layout used only while generating the copied image. */
+    .status-image-capture {
+        position: fixed !important;
+        top: 0 !important;
+        left: -100000px !important;
+        z-index: -1 !important;
+        display: block !important;
+        width: 1100px !important;
+        max-width: none !important;
+        height: auto !important;
+        max-height: none !important;
+        min-height: 0 !important;
+        padding: 20px !important;
+        overflow: visible !important;
+        background: #fff !important;
+        white-space: normal !important;
+    }
+    .status-image-capture #status-datetime {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+    }
+    .status-image-capture #status-datetime h2 {
+        flex: 1 1 auto !important;
+        font-size: 2rem !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
+    }
+    .status-image-capture #live-time-display {
+        width: auto !important;
+        flex: 0 0 auto !important;
+        font-size: 1rem !important;
+        white-space: nowrap !important;
+        text-align: right !important;
+    }
+    .status-image-capture .table-responsive {
+        width: 100% !important;
+        max-width: none !important;
+        overflow: visible !important;
+    }
+    .status-image-capture table {
+        width: 100% !important;
+        max-width: none !important;
+        table-layout: auto !important;
+    }
+    .status-image-capture table thead th {
+        min-width: 0 !important;
+        max-width: none !important;
+        white-space: normal !important;
+        overflow-wrap: normal !important;
+        word-break: normal !important;
+    }
+    .status-image-capture table tbody th {
+        min-width: 56px !important;
+        white-space: nowrap !important;
+    }
+    .status-image-capture table td {
+        white-space: nowrap !important;
+    }
+
+    .export-only {
+        display: none;
+    }
+
+
+</style>
+
+
+{% endblock %}
+
+{% block body %}
+
+{% for message in messages %}
+    {% if messages %}
+        <div class="alert {{ message.tags }} alert-dismissible  fixed-top" id="successalerts" role="alert" style="position:fixed;">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+            {{ message }}
+        </div>
+    {% endif %}
+{% endfor %}
+
+
+<div class="container containerhight fc" style="overflow-x:auto; margin-bottom: 3%; max-width: 100vw;">
+
+    <h3 class="fixed-top iponame" style="z-index: 9; position: fixed;">{{IPOName}}</h3>
+    
+    <h3>Order</h3>
+    <br>
+
+    <div class="text-nowrap">
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="ipoStatusModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header" style="border-bottom: none; padding-bottom: 0;">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin-top: -10px;">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" style="padding-top: 0;">
+                                        
+                        <!-- Date and Time Display -->
+                        <div id="status-datetime" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ddd; padding-bottom: 10px; margin-bottom: 15px;">
+                            <h2 id="ipoStatusModalLabel" title="{{IPOName}} IPO Status" style="margin: 0; font-weight: bold;">{{IPOName}} IPO Status</h2>
+                            <span id="live-time-display" class="text-muted" style="font-weight: bold; font-size: 16px;"></span>
+                        </div>
+
+                        {% if IPOName.IPOType == "MAINBOARD" %}
+                        <div class="table-responsive text-nowrap kostak-table">
+                            <table style="height: 20px; ">
+                                <thead>
+                                    <tr style="border: 1px solid black; border-collapse: collapse;">
+                                        {% comment %} <th scope="col" style="border: 1px solid black; border-collapse: collapse;" ></th> {% endcomment %}
+                                        <th colspan="10" style="border: 1px solid black; border-collapse: collapse;">Kostak</td>                               
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="border: 1px solid black; border-collapse: collapse; font-weight: bold;">
+                                        <th scope="row" style="border: 1px solid black; border-collapse: collapse;"></th>
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">Retail</td>
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">SHNI</td>
+                                        <td colspan="3"style="border: 1px solid black; border-collapse: collapse;" >BHNI</td>
+                                    </tr>
+                                    <tr style="border: 1px solid; border-collapse: collapse; font-weight: bold;">
+                                        <th scope="row" style="border: 1px solid black; border-collapse: collapse;"></th>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">COUNT</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse; padding-right: 16px; padding-left: 16px;">AVG</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">Amount</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">COUNT</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse; padding-right: 16px; padding-left: 16px;">AVG</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">Amount</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">COUNT</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse; padding-right: 16px; padding-left: 16px;">AVG</td>     
+                                        <td style="border: 1px solid black; border-collapse: collapse;">Amount</td>
+                                    </tr>
+                                    <tr style="border: 1px solid; border-collapse: collapse;">
+                                        <th scope="row" style="border: 1px solid black; border-collapse: collapse;">BUY</th>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_count.KostakRETAILBUYCount|floatformat:0}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_avg.KostakRETAILBUYAvg|floatformat:2}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.KostakRETAILBUYAmount|floatformat:2}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_count.KostakSHNIBUYCount|floatformat:0}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_avg.KostakSHNIBUYAvg|floatformat:2}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.KostakSHNIBUYAmount|floatformat:2}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_count.KostakBHNIBUYCount|floatformat:0}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_avg.KostakBHNIBUYAvg|floatformat:2}}</td>     
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.KostakBHNIBUYAmount|floatformat:2}}</td>               
+                                    </tr>
+                                    <tr style="border: 1px solid; border-collapse: collapse;">
+                                        <th scope="row" style="border: 1px solid black; border-collapse: collapse;">SELL</th>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_count.KostakRETAILSELLCount|floatformat:0}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_avg.KostakRETAILSELLAvg|floatformat:2}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.KostakRETAILSELLAmount|floatformat:2}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_count.KostakSHNISELLCount|floatformat:0}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_avg.KostakSHNISELLAvg|floatformat:2}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.KostakSHNISELLAmount|floatformat:2}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_count.KostakBHNISELLCount|floatformat:0}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_avg.KostakBHNISELLAvg|floatformat:2}}</td>      
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.KostakBHNISELLAmount|floatformat:2}}</td>                
+                                    </tr>
+                                    <tr style="border: 1px solid; border-collapse: collapse;">
+                                        <th scope="row" style="border: 1px solid black; border-collapse: collapse;">NET</th>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{net_count.KostakRETAILNetCount|floatformat:0}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{net_avg.KostakRETAILNetAvg|floatformat:2}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{net_amount.KostakRETAILNetAmount|floatformat:2}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{net_count.KostakSHNINetCount|floatformat:0}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{net_avg.KostakSHNINetAvg|floatformat:2}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{net_amount.KostakSHNINetAmount|floatformat:2}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{net_count.KostakBHNINetCount|floatformat:0}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{net_avg.KostakBHNINetAvg|floatformat:2}}</td>  
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{net_amount.KostakBHNINetAmount|floatformat:2}}</td>
+
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                            <br>
+
+                        <div class="table-responsive text-nowrap subjectto-table">
+                            <table style="height: 20px;">
+                                <thead>
+                                    <tr style="border: 1px solid black; border-collapse: collapse;">
+                                        {% comment %} <th scope="col" style="border: 1px solid black; border-collapse: collapse;"></th> {% endcomment %}
+                                        <th colspan="10">Subject To</td>                               
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="border: 1px solid black; border-collapse: collapse; font-weight: bold;">
+                                        <th scope="row" style="border: 1px solid black; border-collapse: collapse;"></th>
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">Retail</td>
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">SHNI</td>
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">BHNI</td>                       
+                                    </tr>
+                                    <tr style="font-weight: bold;">
+                                        <th scope="row" style="border: 1px solid black; border-collapse: collapse;"></th>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">COUNT</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse; padding-right: 16px; padding-left: 16px;">AVG</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">Amount</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">COUNT</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse; padding-right: 16px; padding-left: 16px;">AVG</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">Amount</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">COUNT</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse; padding-right: 16px; padding-left: 16px;">AVG</td> 
+                                        <td style="border: 1px solid black; border-collapse: collapse;">Amount</td>                       
+                                    </tr>
+                                    <tr style="border: 1px solid; border-collapse: collapse;">
+                                        <th scope="row" style="border: 1px solid black; border-collapse: collapse;">BUY</th>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_count.SubjectToRETAILBUYCount|floatformat:0}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_avg.SubjectToRETAILBUYAvg|floatformat:2}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.SubjectToRETAILBUYAmount|floatformat:2}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_count.SubjectToSHNIBUYCount|floatformat:0}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_avg.SubjectToSHNIBUYAvg|floatformat:2}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.SubjectToSHNIBUYAmount|floatformat:2}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_count.SubjectToBHNIBUYCount|floatformat:0}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_avg.SubjectToBHNIBUYAvg|floatformat:2}}</td>  
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.SubjectToBHNIBUYAmount|floatformat:2}}</td>                  
+                                    </tr>
+                                    <tr style="border: 1px solid; border-collapse: collapse;">
+                                        <th scope="row" style="border: 1px solid black; border-collapse: collapse;">SELL</th>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_count.SubjectToRETAILSELLCount|floatformat:0}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_avg.SubjectToRETAILSELLAvg|floatformat:2}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.SubjectToRETAILSELLAmount|floatformat:2}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_count.SubjectToSHNISELLCount|floatformat:0}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_avg.SubjectToSHNISELLAvg|floatformat:2}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.SubjectToSHNISELLAmount|floatformat:2}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_count.SubjectToBHNISELLCount|floatformat:0}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_avg.SubjectToBHNISELLAvg|floatformat:2}}</td>  
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.SubjectToBHNISELLAmount|floatformat:2}}</td>                    
+                                    </tr>
+                                    <tr style="border: 1px solid; border-collapse: collapse;">
+                                        <th scope="row" style="border: 1px solid black; border-collapse: collapse;">NET</th>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{net_count.SubjectToRETAILNetCount|floatformat:0}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{net_avg.SubjectToRETAILNetAvg|floatformat:2}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{net_amount.SubjectToRETAILNetAmount|floatformat:2}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{net_count.SubjectToSHNINetCount|floatformat:0}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{net_avg.SubjectToSHNINetAvg|floatformat:2}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{net_amount.SubjectToSHNINetAmount|floatformat:2}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{net_count.SubjectToBHNINetCount|floatformat:0}}</td>
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{net_avg.SubjectToBHNINetAvg|floatformat:2}}</td>  
+                                        <td style="border: 1px solid black; border-collapse: collapse;">{{net_amount.SubjectToBHNINetAmount|floatformat:2}}</td>
+                                </tbody>
+                            </table>
+                        </div>
+                            <br>
+                            {% else %}
+                            
+                        <div class="table-responsive text-nowrap kostak-table">
+                            <table style="height: 20px;">
+                                <thead>
+                                    <tr style="border: 1px solid black; border-collapse: collapse;">
+                                        {% comment %} <th scope="col" style="border: 1px solid black; border-collapse: collapse;"></th> {% endcomment %}
+                                        <th colspan="7" style="border: 1px solid black; border-collapse: collapse;">Kostak</td>                               
+                                    </tr>
+                                </thead>
+                                
+                                <tbody>
+                                    <tr style="border: 1px solid black; border-collapse: collapse; font-weight: bold;">
+                                        <th scope="row" style="border: 1px solid black; border-collapse: collapse;"></th>
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">COUNT</td>
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse; padding-right: 16px; padding-left: 16px;">AVG</td>      
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">Amount</td>                                                 
+                                    </tr>
+
+                                    <tr style="border: 1px solid black; border-collapse: collapse;">
+                                        <th scope="row" style="border: 1px solid black; border-collapse: collapse;">BUY</th>
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{dict_count.KostakRETAILBUYCount|floatformat:0}}</td>
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{dict_avg.KostakRETAILBUYAvg|floatformat:2}} </td>
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.KostakRETAILBUYAmount|floatformat:2}}</td>
+                                    </tr>
+
+                                    <tr style="border: 1px solid black; border-collapse: collapse;">
+                                        <th scope="row" style="border: 1px solid black; border-collapse: collapse;">SELL</th>
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{dict_count.KostakRETAILSELLCount|floatformat:0}} </td>
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{dict_avg.KostakRETAILSELLAvg|floatformat:2}} </td>  
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.KostakRETAILSELLAmount|floatformat:2}}</td>                                 
+                                    </tr>
+                                    <tr style="border: 1px solid black; border-collapse: collapse;">
+                                        <th scope="row" style="border: 1px solid black; border-collapse: collapse;">NET</th>
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{net_count.KostakRETAILNetCount|floatformat:0}} </td>
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{net_avg.KostakRETAILNetAvg|floatformat:2}} </td>  
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">{{net_amount.KostakRETAILNetAmount|floatformat:2}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                            <br>
+
+                        <div class="table-responsive text-nowrap subjectto-table">
+                            <table style="height: 20px;">
+                                    <thead>
+                                        <tr style="border: 1px solid black; border-collapse: collapse;">
+                                            {% comment %} <th scope="col" style="border: 1px solid black; border-collapse: collapse;"></th> {% endcomment %}
+                                            <th colspan="7" style="border: 1px solid black; border-collapse: collapse;">Subject To</td>                               
+                                        </tr>
+                                    </thead>
+                                    
+                                    <tbody>
+                                        <tr style="border: 1px solid black; border-collapse: collapse; font-weight: bold;">
+                                            <th scope="row" style="border: 1px solid black; border-collapse: collapse;"></th>
+                                            <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">COUNT</td>
+                                            <td colspan="3" style="border: 1px solid black; border-collapse: collapse; padding-right: 16px; padding-left: 16px;">AVG</td>    
+                                            <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">Amount</td>                                                   
+                                        </tr>
+
+                                        <tr style="border: 1px solid black; border-collapse: collapse;">
+                                            <th scope="row" style="border: 1px solid black; border-collapse: collapse;">BUY</th>
+                                            <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{dict_count.SubjectToRETAILBUYCount|floatformat:0}} </td>
+                                            <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{dict_avg.SubjectToRETAILBUYAvg|floatformat:2}} </td>
+                                            <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.SubjectToRETAILBUYAmount|floatformat:2}}</td>
+                                        </tr>
+
+                                        <tr style="border: 1px solid black; border-collapse: collapse;">
+                                            <th scope="row" style="border: 1px solid black; border-collapse: collapse;">SELL</th>
+                                            <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{dict_count.SubjectToRETAILSELLCount|floatformat:0}} </td>
+                                            <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{dict_avg.SubjectToRETAILSELLAvg|floatformat:2}} </td> 
+                                            <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.SubjectToRETAILSELLAmount|floatformat:2}}</td>                                  
+                                        </tr>
+
+                                        <tr style="border: 1px solid black; border-collapse: collapse;">
+                                            <th scope="row" style="border: 1px solid black; border-collapse: collapse;">NET</th>
+                                            <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{net_count.SubjectToRETAILNetCount|floatformat:0}} </td>
+                                            <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{net_avg.SubjectToRETAILNetAvg|floatformat:2}} </td>  
+                                            <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">{{net_amount.SubjectToRETAILNetAmount|floatformat:2}}</td>
+                                        </tr>
+                                    </tbody>
+                            </table>
+                        </div>
+                        <br>
+                        {% endif %}
+
+                        <div class="table-responsive text-nowrap premium-table">
+                            <table style="height: 20px;">
+                                <thead>
+                                    <tr style="border: 1px solid black; border-collapse: collapse;">
+                                        {% comment %} <th scope="col" style="border: 1px solid black; border-collapse: collapse;"></th> {% endcomment %}
+                                        <th colspan="10" style="border: 1px solid black; border-collapse: collapse;">Premium</td>                               
+                                    </tr>
+                                </thead>
+                                
+                                <tbody>
+                                    <tr style="border: 1px solid black; border-collapse: collapse; font-weight: bold;">
+                                        <th scope="row" style="border: 1px solid black; border-collapse: collapse;"></th>
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">COUNT</td>
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse; padding-right: 16px; padding-left: 16px;">AVG</td>                                                       
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">Amount</td>
+                                    </tr>
+
+                                    <tr style="border: 1px solid black; border-collapse: collapse;">
+                                        <th scope="row" style="border: 1px solid black; border-collapse: collapse;">BUY</th>
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{PremiumBuyCount}} </td>
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">{{PremiumBuyAvg|floatformat:2}} </td>
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">{{PremiumBuyAmount|floatformat:2}} </td>
+                                    </tr>
+
+                                    <tr style="border: 1px solid black; border-collapse: collapse;">
+                                        <th scope="row" style="border: 1px solid black; border-collapse: collapse;">SELL</th>
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{PremiumSellCount}} </td>
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{PremiumSellAvg|floatformat:2}} </td>  
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">{{PremiumSellAmount|floatformat:2}} </td>                                 
+                                    </tr>
+
+                                    <tr style="border: 1px solid black; border-collapse: collapse;">
+                                        <th scope="row" style="border: 1px solid black; border-collapse: collapse;">NET</th>
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{PremiumNetCount}} </td>
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{PremiumNetAvg|floatformat:2}} </td>   
+                                        <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">{{PremiumNetAmount|floatformat:2}} </td>                                
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>    
+                        <br>
+                        <div class="table-responsive text-nowrap strikeprice-table">
+                            <table style="border: 1px solid black; border-collapse: collapse; width:100%;">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="1" style="border: 1px solid black; text-align:center;">Strike Price</th>
+                                        <th colspan="3" style="border: 1px solid black; text-align:center;">CALL</th>
+                                        <th colspan="3" style="border: 1px solid black; text-align:center;">PUT</th>
+                                    </tr>
+                                    <tr>
+                                        <th style="border: 1px solid black; text-align:center;"></th>
+                                        <th style="border: 1px solid black; text-align:center;">Total Share</th>
+                                        <th style="border: 1px solid black; text-align:center;">Average</th>
+                                        <th style="border: 1px solid black; text-align:center;">Amount</th>
+                                        <th style="border: 1px solid black; text-align:center;">Total Share</th>
+                                        <th style="border: 1px solid black; text-align:center;">Average</th>
+                                        <th style="border: 1px solid black; text-align:center;">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for strike in strike_prices %}
+                                    <tr>
+                                        <td style="border: 1px solid black; text-align:center;">{{ strike.value }}</td>
+                                        <td style="border: 1px solid black; text-align:right;">{{ strike.call_total_count }}</td>
+                                        <td style="border: 1px solid black; text-align:right;">{{ strike.call_avg|floatformat:2 }}</td>
+                                        <td style="border: 1px solid black; text-align:right;">{{ strike.call_net_amount }}</td>
+                                        <td style="border: 1px solid black; text-align:right;">{{ strike.put_total_count }}</td>
+                                        <td style="border: 1px solid black; text-align:right;">{{ strike.put_avg|floatformat:2 }}</td>
+                                        <td style="border: 1px solid black; text-align:right;">{{ strike.put_net_amount }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    {% comment %} <tr style="font-weight:bold; background:#e8e8e8;">
+                                        <td>NET</td>
+                                        <td style="border: 1px solid black; text-align:right;">{{ grand_total.call_total_count }}</td>
+                                        <td style="border: 1px solid black; text-align:right;">{{ grand_total.call_avg|floatformat:2 }}</td>
+                                        <td style="border: 1px solid black; text-align:right;">{{ grand_total.call_net_amount }}</td>
+                                        <td style="border: 1px solid black; text-align:right;">{{ grand_total.put_total_count }}</td>
+                                        <td style="border: 1px solid black; text-align:right;">{{ grand_total.put_avg|floatformat:2 }}</td>
+                                        <td style="border: 1px solid black; text-align:right;">{{ grand_total.put_net_amount }}</td>
+                                    </tr> {% endcomment %}
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="d-flex align-items-center" style="margin-right: auto;">
+                            <button type="button" class="btn btn-info" id="copyStatusImageBtn" onclick="copyStatusImage()">Copy as Image</button>
+                            
+                            <div class="dropup ml-2">
+                                <button class="btn btn-secondary dropdown-toggle" type="button" id="tableFilterDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="margin-left: 10px;">
+                                    <i class="fa fa-filter"></i>
+                                </button>
+                                <!-- Stop dropdown from closing when clicking inside it -->
+                                <div class="dropdown-menu p-3 shadow" aria-labelledby="tableFilterDropdown" style="min-width: 200px; background-color: white; color: black; border: 1px solid #ccc; z-index: 9999;" onclick="event.stopPropagation();">
+                                    <h6 class="dropdown-header px-0" style="color: black; font-weight: bold; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px;">Filter Orders</h6>
+                                    <div class="form-check mb-2" style="display: flex; align-items: center;">
+                                        <input class="form-check-input" type="checkbox" checked onchange="toggleStatusTable('kostak-table', this.checked)" id="filterKostak" style="margin-top: 0; margin-right: 8px;">
+                                        <label class="form-check-label" for="filterKostak" style="cursor:pointer; margin-bottom: 0;">Kostak</label>
+                                    </div>
+                                    <div class="form-check mb-2" style="display: flex; align-items: center;">
+                                        <input class="form-check-input" type="checkbox" checked onchange="toggleStatusTable('subjectto-table', this.checked)" id="filterSubjectTo" style="margin-top: 0; margin-right: 8px;">
+                                        <label class="form-check-label" for="filterSubjectTo" style="cursor:pointer; margin-bottom: 0;">Subject To</label>
+                                    </div>
+                                    <div class="form-check mb-2" style="display: flex; align-items: center;">
+                                        <input class="form-check-input" type="checkbox" checked onchange="toggleStatusTable('premium-table', this.checked)" id="filterPremium" style="margin-top: 0; margin-right: 8px;">
+                                        <label class="form-check-label" for="filterPremium" style="cursor:pointer; margin-bottom: 0;">Premium</label>
+                                    </div>
+                                    <div class="form-check" style="display: flex; align-items: center;">
+                                        <input class="form-check-input" type="checkbox" checked onchange="toggleStatusTable('strikeprice-table', this.checked)" id="filterStrikePrice" style="margin-top: 0; margin-right: 8px;">
+                                        <label class="form-check-label" for="filterStrikePrice" style="cursor:pointer; margin-bottom: 0;">Options</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="sendToTelegramBtn" onclick="sendStatusToTelegram()">
+                            Send to Telegram
+                        </button>
+                        {% comment %} <button type="button" class="btn btn-success" id="sendToTelegramAllBtn" onclick="sendStatusToTelegramAll()">
+                            Send to Telegram (All Groups)
+                        </button> {% endcomment %}
+                        
+                        {% comment %} <button type="button" class="btn btn-primary">Save changes</button> {% endcomment %}
+                    </div>
+                </div>
+            </div>                                           
+        </div>
+            
+        <div class="form-group col-md-4">
+            <div class="modal fade" id="exampleuploadModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabels"
+                aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header" style="border-bottom: 1px solid black;">
+                            <h5 class="modal-title" id="exampleModalLabel">Bulk Order &nbsp;<i
+                                    class="fa fa-file-excel-o" aria-hidden="true" style='font-size:18px;'></i></h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            {{prompt}}
+                            <form {% if IPOName.IPOType == "MAINBOARD" %}action="/{{IPOid}}/upload-csv/{{Groupfilter}}/{{OrderCategoryFilter}}/{{InvestorTypeFilter}}" {% else %} action="/{{IPOid}}/upload-csv/{{Groupfilter}}/{{OrderCategoryFilter}}/All" {%endif%} method="POST" enctype="multipart/form-data"
+                                class="needs-validation" novalidate>
+                                {% csrf_token %}
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; width: 100%;">
+
+                                    <small style="color: red;  font-weight: bold; margin-right: 10px;">
+                                        
+                                            <font color="red">*</font>Only accepts CSV files.<i class="fa fa-file-excel-o"
+                                                aria-hidden="true" style='font-size:18px;'></i>
+                                        
+                                        {% comment %} <a href="/{{IPOid}}/Sample-Order"> <input type="button" value="Sample-Download" class="fa fa-file-excel-o"
+                                            style="background: darkslategrey; color: white; height: 38px; width: 30%; margin-left:145px; display: inline-flex; font-size:16px;">
+                                    </a> {% endcomment %}
+                                    </small><br><br>
+
+                                    <div style="display: flex; gap: 5px;">
+                                        <a href="/{{IPOid}}/Sample-Order" style="text-decoration: none;">
+                                            <input type="button" value="Sample Download" class="fa fa-file-excel-o"
+                                                style="background: darkslategrey; color: white; height: 38px; padding: 0 15px; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; font-size: 16px;">
+                                        </a>
+
+                                        <button type="button" class="btn btn-danger" id="confirmDeleteAll" 
+                                                data-toggle="modal" data-target="#deleteAllOrdersModal" 
+                                                style="height: 38px; border-radius: 4px; font-size: 15px;">
+                                            Delete All Orders
+                                        </button>
+                                    </div><br>
+                                </div>
+
+                                <input type="file" id="file" class="form-control" name=" file"
+                                    style="background: darkslategrey; color: white; height: 0%;width: 72%; display: inline-flex;"
+                                    required>
+                                    
+                                <button type="submit"
+                                    style="color: whitesmoke; background: darkslategrey; width: 29%; margin: 0px 150x; border: none; padding: 8px 0; border-radius: 2px; height: 38px;">Upload
+                                    &nbsp; <i class="fa fa-file-excel-o" aria-hidden="true"
+                                        style='font-size:18px;'></i></button>
+                                <div class="invalid-feedback">
+                                    Choose Your File.
+                                </div>
+                            </form>
+                            {% for profile in product%}
+                            {{profile.name}}
+                            {% endfor %}
+                            <div style="margin-top: 15px; text-align: right;">
+                                
+                                <script>
+                                    async function confirmAndDelete(ipoId) {
+                                        $('#deleteAllOrdersModal').modal('hide');
+
+                                        const deleteUrl = `/${ipoId}/DeleteAllOrders/`;
+
+                                        const response = await fetch(deleteUrl, { method: 'GET' });
+                                        if (!response.ok) {
+                                            alert('Failed to delete orders');
+                                            return;
+                                        }
+
+                                        const blob = await response.blob();
+
+                                        // Extract the filename from Content-Disposition header
+                                        let filename = 'OrdersBackup.xlsx'; // fallback
+                                        const disposition = response.headers.get('Content-Disposition');
+                                        if (disposition && disposition.includes('filename=')) {
+                                            const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                                            if (match != null && match[1]) {
+                                                filename = match[1].replace(/['"]/g, '');
+                                            }
+                                        }
+
+                                        const downloadUrl = window.URL.createObjectURL(blob);
+
+                                        const a = document.createElement('a');
+                                        a.href = downloadUrl;
+                                        a.download = filename;
+                                        document.body.appendChild(a);
+                                        a.click();
+                                        a.remove();
+
+                                        window.URL.revokeObjectURL(downloadUrl);
+
+                                        const groupFilter = '{{ Groupfilter }}';
+                                        const categoryFilter = '{{ OrderCategoryFilter }}';
+                                        const investorFilter = '{{ InvestorTypeFilter }}';
+                                        const redirectUrl = `/${ipoId}/Order/${groupFilter}/${categoryFilter}/${investorFilter}`;
+
+                                        window.location.href = redirectUrl;
+                                    }
+                                </script>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                    // Example starter JavaScript for disabling form submissions if there are invalid fields
+                    (function () {
+                        'use strict'
+
+                        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                        var forms = document.querySelectorAll('.needs-validation')
+
+                        // Loop over them and prevent submission
+                        Array.prototype.slice.call(forms)
+                            .forEach(function (form) {
+                                form.addEventListener('submit', function (event) {
+                                    if (!form.checkValidity()) {
+                                        event.preventDefault()
+                                        event.stopPropagation()
+                                    }
+
+                                    form.classList.add('was-validated')
+                                }, false)
+                            })
+                    })()
+                </script>
+            </div>
+        </div>
+        <table id="example" class="table table-bordered table-hover table-striped" style='width:100%;'>
+            
+            {{ html_table | safe }}
+
+        </table>
+    </div>
+    <div class="row">
+        <div class="col-sm-12 col-md-5">
+            <!-- Total rows and current range display (left aligned) -->
+            <p class="text-left">
+                Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} Rows
+            </p>
+        </div>
+    
+        <div class="col-sm-12 col-md-7">
+            <ul class="pagination justify-content-end text-left" style="margin: 0; margin-right:2%;">
+                <!-- Always show the first page -->
+                {% if page_obj.number != 1 %}
+                    <li class="page-item">
+                        <a class="page-link" {%if IPOName.IPOType == "MAINBOARD" %} href="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/{{InvestorTypeFilter}}?page=1{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}" {%else%} href="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/All?page=1{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}" {% endif %}>1</a>
+                    </li>
+                {% endif %}
+                
+                <!-- Show ellipsis if current page is greater than 4 -->
+                {% if page_obj.number > 4 %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+                
+                <!-- Display pages before the current page -->
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num > 1 and num < page_obj.number and num >= page_obj.number|add:'-2' %}
+                        <li class="page-item">
+                            <a class="page-link" {%if IPOName.IPOType == "MAINBOARD" %} href="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/{{InvestorTypeFilter}}?page={{ num }}{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}" {%else%} href="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/All?page={{ num }}{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}" {% endif %}>{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                <!-- Display current page -->
+                <li class="page-item active">
+                    <span class="page-link">{{ page_obj.number }}</span>
+                </li>
+                
+                <!-- Display pages after the current page -->
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num > page_obj.number and num < page_obj.number|add:'3' and num < page_obj.paginator.num_pages %}
+                        <li class="page-item">
+                            <a class="page-link" {%if IPOName.IPOType == "MAINBOARD" %} href="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/{{InvestorTypeFilter}}?page={{ num }}{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}" {%else%} href="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/All?page={{ num }}{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}" {% endif %}>{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                <!-- Show ellipsis if current page is less than num_pages - 3 -->
+                {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+                
+                <!-- Always show the last page -->
+                {% if page_obj.number != page_obj.paginator.num_pages %}
+                    <li class="page-item">
+                        <a class="page-link" {%if IPOName.IPOType == "MAINBOARD" %} href="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/{{InvestorTypeFilter}}?page={{ page_obj.paginator.num_pages }}{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}" {%else%} href="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/All?page={{ page_obj.paginator.num_pages }}{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}" {% endif %}>{{ page_obj.paginator.num_pages }}</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
+
+    <!-- Bulk Delete Modal -->
+    <div class="modal fade" id="bulkDeleteModal" tabindex="-1" role="dialog" aria-labelledby="bulkDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header" style="border-bottom: 1px solid black;">
+                    <b>
+                        <h5 class="modal-title" id="bulkDeleteModalLabel">Bulk Delete Orders</h5>
+                    </b>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" style="white-space: normal;">
+                    <center>
+                        <p>Are you sure you want to delete the selected <span id="selected-count" style="font-weight: bold;">0</span> <span id="order-suffix">order</span>?</p>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" style="width:50%;">Cancel</button>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <button type="button" id="confirm-bulk-delete" class="btn btn-outline-danger" style="width:50%;">Delete</button>
+                            </div>
+                        </div>
+                    </center>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="deleteAllOrdersModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel">Confirm Deletion</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete all orders?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    
+                    <button type="button" class="btn btn-danger" onclick="confirmAndDelete({{ IPOid }})">
+                        Yes, Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    {% comment %} <a href="/{{IPOid}}/SetRate" class="btn button btn-dark"><span>Set Rate</span></a> {% endcomment %}
+    <a href="/{{IPOid}}/BUY" class="btn button btn-dark"><span>BUY</span></a>
+    <a href="/{{IPOid}}/SELL" class="btn button btn-dark"><span>SELL</span></a>
+    <a href="/{{IPOid}}/Order" class="btn button btn-dark disabled"><span>Orders</span></a>
+    <a href="/{{IPOid}}/OrderDetail/BUY" class="btn button btn-dark" style="white-space: nowrap;"><span>App. Buy Order (PAN)</span></a>
+    <a href="/{{IPOid}}/OrderDetail/SELL" class="btn button btn-dark" style="white-space: nowrap;"><span>App. Sell Order (PAN)</span></a>
+    <a href="/{{IPOid}}/Billing" class="btn button btn-dark"><span>Client Wise Billing</span></a>
+    <a href="/{{IPOid}}/Status" class="btn button btn-dark"><span>Group Wise Billing</span></a>
+    <a href="/{{IPOid}}/Dashboard/A" class="btn button btn-dark"><span>Analysis</span></a>
+    <!-- <a href="PremiumBilling" class="btn button btn-dark" style="white-space: nowrap;"><span>Premium Billing</span></a> -->
+</div>
+
+{% comment %} telegram message send  {% endcomment %}
+<script>
+    function showToast(message, isError = false) {
+        const toast = document.createElement('div');
+        toast.innerText = message;
+        toast.style.position = 'fixed';
+        toast.style.top = '20px';
+        toast.style.right = '20px';
+        toast.style.backgroundColor = isError ? '#dc3545' : '#28a745';
+        toast.style.color = '#fff';
+        toast.style.padding = '12px 20px';
+        toast.style.borderRadius = '4px';
+        toast.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+        toast.style.zIndex = '10000';
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease-in-out';
+        toast.style.fontSize = '14px';
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => toast.style.opacity = '1', 10);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => document.body.removeChild(toast), 300);
+        }, 3000);
+    }
+
+    // IPO Status Modal Enhancements
+    function toggleStatusTable(tableClass, isChecked) {
+        const modalBody = document.querySelector('#exampleModal .modal-body');
+        
+        // Lock the height to prevent the modal from shrinking and moving the footer
+        if (!modalBody.style.minHeight || modalBody.style.minHeight === 'auto' || modalBody.style.minHeight === '') {
+            modalBody.style.minHeight = modalBody.offsetHeight + 'px';
+        }
+
+        const tables = document.querySelectorAll('.' + tableClass);
+        tables.forEach(table => {
+            table.style.display = isChecked ? 'block' : 'none';
+            // Need to hide the <br> tag after the table as well
+            const nextSib = table.nextElementSibling;
+            if (nextSib && nextSib.tagName === 'BR') {
+                nextSib.style.display = isChecked ? 'inline' : 'none';
+            }
+        });
+    }
+
+    function autoHideEmptyTables() {
+        const tableClasses = ['kostak-table', 'subjectto-table', 'premium-table', 'strikeprice-table'];
+        const filterCheckboxes = {
+            'kostak-table': 'filterKostak',
+            'subjectto-table': 'filterSubjectTo',
+            'premium-table': 'filterPremium',
+            'strikeprice-table': 'filterStrikePrice'
+        };
+
+        tableClasses.forEach(tableClass => {
+            const tableDivs = document.querySelectorAll('#exampleModal .' + tableClass);
+            let hasData = false;
+
+            tableDivs.forEach(tableDiv => {
+                const tbody = tableDiv.querySelector('tbody');
+                if (!tbody) return;
+                
+                const cells = tbody.querySelectorAll('td');
+                cells.forEach(cell => {
+                    const text = cell.innerText.trim();
+                    if (text !== "") {
+                        const num = Number(text.replace(/,/g, ''));
+                        if (!isNaN(num) && num !== 0) {
+                            hasData = true;
+                        }
+                    }
+                });
+            });
+
+            if (!hasData && tableDivs.length > 0) {
+                const checkboxId = filterCheckboxes[tableClass];
+                const checkbox = document.getElementById(checkboxId);
+                if (checkbox && checkbox.checked) {
+                    checkbox.checked = false;
+                    tableDivs.forEach(tableDiv => {
+                        tableDiv.style.display = 'none';
+                        const nextSib = tableDiv.nextElementSibling;
+                        if (nextSib && nextSib.tagName === 'BR') {
+                            nextSib.style.display = 'none';
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        autoHideEmptyTables();
+    });
+
+
+    setInterval(() => {
+        const display = document.getElementById('live-time-display');
+        if (display) {
+            const now = new Date();
+            const options = { 
+                year: 'numeric', month: 'short', day: 'numeric', 
+                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true 
+            };
+            display.innerText = now.toLocaleString('en-IN', options);
+        }
+    }, 1000);
+
+    function waitForStatusCaptureLayout() {
+        return new Promise(resolve => {
+            requestAnimationFrame(() => requestAnimationFrame(resolve));
+        });
+    }
+
+    async function renderFullStatusImage() {
+        const modalBody = document.querySelector('#exampleModal .modal-body');
+        if (!modalBody) {
+            throw new Error('IPO Status content was not found.');
+        }
+
+        const captureBody = modalBody.cloneNode(true);
+        captureBody.removeAttribute('style');
+        captureBody.classList.add('status-image-capture');
+        captureBody.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(captureBody);
+
+        try {
+            if (document.fonts && document.fonts.ready) {
+                await document.fonts.ready;
+            }
+            await waitForStatusCaptureLayout();
+
+            const captureWidth = Math.ceil(captureBody.scrollWidth);
+            const captureHeight = Math.ceil(captureBody.scrollHeight);
+
+            return await html2canvas(captureBody, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff',
+                width: captureWidth,
+                height: captureHeight,
+                windowWidth: captureWidth,
+                windowHeight: captureHeight,
+                scrollX: 0,
+                scrollY: 0
+            });
+        } finally {
+            captureBody.remove();
+        }
+    }
+
+    async function copyStatusImage() {
+        const button = document.getElementById('copyStatusImageBtn');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Copying...';
+        button.disabled = true;
+
+        try {
+            const canvas = await renderFullStatusImage();
+            const blob = await new Promise((resolve, reject) => {
+                canvas.toBlob(result => {
+                    if (result) {
+                        resolve(result);
+                    } else {
+                        reject(new Error('The status image could not be created.'));
+                    }
+                }, 'image/png');
+            });
+
+            const item = new ClipboardItem({ "image/png": blob });
+            await navigator.clipboard.write([item]);
+            showToast("Full status image copied to clipboard successfully!");
+        } catch (err) {
+            console.error("Failed to copy full status image: ", err);
+            showToast("Failed to copy image. Check browser permissions.", true);
+        } finally {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    }
+
+    function sendStatusToTelegram() {
+        const button = document.getElementById('sendToTelegramBtn');
+        const originalText = button.innerHTML;  
+        
+        button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Sending...';
+        button.disabled = true;
+
+        const modalBody = document.querySelector('#exampleModal .modal-body');
+        const originalOverflow = modalBody.style.overflow;
+        modalBody.style.overflow = 'visible';
+
+        html2canvas(modalBody, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            width: modalBody.scrollWidth,
+            height: modalBody.scrollHeight
+        }).then(canvas => {
+            canvas.toBlob(async function(blob) {
+                try {
+                    // 🟢 Step 1: Get all groups related to this IPO
+                    const response = await fetch(`/{{IPOid}}/get-all-groups/`);
+                    const data = await response.json();
+
+                    const allGroups = data.groups || [];
+
+                    if (allGroups.length === 0) {
+                        alert("❌ No Telegram groups found for this IPO.");
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                        return;
+                    } 
+
+                    // 🟢 Step 2: Split into batches of 5
+                    const batchSize = 2;
+                    const batches = [];
+                    for (let i = 0; i < allGroups.length; i += batchSize) {
+                        batches.push(allGroups.slice(i, i + batchSize));
+                    }
+
+
+                    // 🟢 Step 3: Loop through each batch and send
+                    for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+                        const batchGroups = batches[batchIndex];
+
+                        const formData = new FormData();
+                        formData.append('image', blob, 'status_table.png');
+                        formData.append('ipo_id', '{{IPOid}}');
+                        formData.append('group_id', '{{Groupfilter}}');
+                        formData.append('batch_group',batchGroups)
+
+                        const res = await fetch(`/{{IPOid}}/send-status-telegram-image/`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': '{{ csrf_token }}',
+                            },
+                            body: formData
+                        });
+
+                        const results = await res.json();
+
+                        // Optional delay between batches
+                        await new Promise(r => setTimeout(r, 1000));
+                    }
+
+                    window.location.reload();
+
+                } catch (error) {
+                    alert("Error sending messages. Check console for details.");
+                } finally {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    modalBody.style.overflow = originalOverflow;
+                }
+            }, 'image/png');
+        }).catch(error => {
+            console.error('Error capturing image:', error);
+            button.innerHTML = originalText;
+            button.disabled = false;
+        });
+    }
+</script>
+
+<script src="{% static 'DataTables/js/html2canvas.min.js' %}"></script>
+
+<script>
+    // Get the modal
+    var modal = document.getElementById('id01');
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+
+<script>
+    $(document).ready(function() {
+        $(".alert").each(function() {
+            var alert = $(this);
+            setTimeout(function() {
+                alert.fadeOut(500, function() {
+                    alert.remove();
+                });
+            }, 5000); // 5000 milliseconds = 5 seconds
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        $('#example thead tr')
+            .clone(true)
+            .addClass('filters')
+            .appendTo('#example thead');
+    
+        var pageLength = "{{ Order_page_size|default:'50' }}";
+        pageLength = pageLength === "All" ? -1 : parseInt(pageLength, 10);
+            
+        var table = $('#example').DataTable({
+            responsive: true,
+            orderCellsTop: true,
+            scrollX: true,
+            scrollY: "70vh",
+            scrollCollapse: true,
+            stateSave: true,
+            stateLoadParams: function (settings, data) {
+                data.length = pageLength;
+                data.start = 0;
+                if (data.search) {
+                    data.search.search = '';
+                }
+                if (Array.isArray(data.columns)) {
+                    data.columns.forEach(function (column) {
+                        if (column.search) {
+                            column.search.search = '';
+                        }
+                    });
+                }
+            },
+            columnDefs: [
+                { targets: 0, width: '3%' },
+                { targets: 'remark-col', visible: false }
+            ],
+            {% comment %} lengthMenu: [50, 100, 150, 200,-1], {% endcomment %}
+            lengthChange: true,
+            info:false,
+            "pageLength": pageLength,
+            buttons: [ {
+                text: 'Columns', 
+                extend: 'colvis',
+            },
+            {   
+                extend: 'collection',
+                className: 'btn btn-secondary',
+                text: 'Download',
+                buttons:[
+                    {
+                        extend: 'excel',
+                        text: 'Excel',
+                        exportOptions: {
+                            columns: function (idx, data, node) {
+                                return !$(node).hasClass('skip-export');
+                            }
+                        },
+                        customize: function(xlsx) {
+                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                    
+                            $('row:first', sheet).remove();
+                        }
+                    },
+                    {
+                        extend: 'pdf',
+                        text: 'PDF',
+                        exportOptions: {
+                            columns: function (idx, data, node) {
+                                return !$(node).hasClass('skip-export');
+                            },
+                            rows: ':visible',
+                            modifier: {
+                                page: 'current'
+                            }
+                        },
+                        customize: function(doc) {
+                            doc.pageOrientation = 'landscape';
+                            doc.styles.tableHeader = {
+                                fillColor: 'grey',
+                                color: 'whitesmoke',
+                                bold: true,
+                                alignment: 'center',
+                            };
+                            doc.styles.tableBodyEven = {
+                                alignment: 'center',
+                                fillColor: 'bisque',
+                            };
+                            doc.styles.tableBodyOdd = {
+                                alignment: 'center',
+                                fillColor: 'bisque',
+                            };
+                            
+                            doc.content[1].layout = {
+                                hLineWidth: function(i, node) {
+                                    return 1; 
+                                },
+                                vLineWidth: function(i, node) {
+                                    return 1; 
+                                },
+                                hLineColor: function(i, node) {
+                                    return 'black'; 
+                                },
+                                vLineColor: function(i, node) {
+                                    return 'black'; 
+                                },
+                            };
+                        }
+                    }
+                ]
+            },                
+                
+            ],
+            initComplete: function () {
+                var api = this.api();
+    
+                api
+                    .columns(':not(:last-child)')
+                    .eq(0)
+                    .each(function (colIdx) {
+                        var cell = $('.filters th').eq(
+                            $(api.column(colIdx).header()).index()
+                        );
+                        var title = $(cell).text();
+                        var existingSearch = api.column(colIdx).search();
+                        var cleanSearch = existingSearch ? existingSearch.replace(/^\(+|\)+$/g, '') : '';
+                        if (cleanSearch === '\\\\s*') cleanSearch = '';
+
+                        $(cell).html('<input class="form-control form-control-sm text-center" type="text" autocomplete="off" placeholder="' + title.trim() + '" value="' + cleanSearch + '" style="text-align: center;" />');
+                        
+                        var colDebounceTimer = null;
+                        $('input', cell)
+                            .off('input keyup change')
+                            .on('input', function (e) {
+                                var inputElem = this;
+                                var val = inputElem.value;
+                                var cursorPosition = inputElem.selectionStart;
+                                $(inputElem).attr('title', val);
+                                clearTimeout(colDebounceTimer);
+                                colDebounceTimer = setTimeout(function() {
+                                    var regexr = '({search})';
+                                    api
+                                        .column(colIdx)
+                                        .search(
+                                            val != ''
+                                                ? regexr.replace('{search}', '(((' + val + ')))')
+                                                : '',
+                                            val != '',
+                                            val == ''
+                                        )
+                                        .draw();
+                                    try {
+                                        $(inputElem).focus()[0].setSelectionRange(cursorPosition, cursorPosition);
+                                    } catch (err) {}
+                                }, 300);
+                            });
+                    });
+                var lastCell = $('.filters th').eq(
+                    $(api.column(':last-child').header()).index()
+                );
+                $(lastCell).html('');
+
+                // Ensure ScrollBody hidden header doesn't duplicate inputs
+                $('.dataTables_scrollBody .filters').empty();
+            },
+            language: {
+                info: 'Showing _START_ to _END_ of _TOTAL_ Rows',
+                infoFiltered: '(filtered from _MAX_ total Rows)',
+                emptyTable: "No data available",
+                lengthMenu: 'Show <select>' +
+                    '<option value="50">50</option>' +
+                    '<option value="100">100</option>' +
+                    '<option value="150">150</option>' +
+                    '<option value="200">200</option>' +
+                    '<option value="-1">All</option>' +
+                    '</select> Rows',
+                search: 'Search:',
+                paginate: {
+                    first: 'First',
+                    last: 'Last',
+                    next: 'Next',
+                    previous: 'Previous'
+                }
+            },
+            
+        });
+        var customButton = $('<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#exampleModal">Status</button>');
+        $('.dt-buttons.btn-group').append(customButton);
+
+        $('select[name="example_length"] option[value="-1"]').text('All');
+        
+        table.buttons().container()
+            .appendTo( '#example_wrapper .col-md-6:eq(0)' );
+
+        var table = $('#example').DataTable();
+        var dataTableLengthDiv = document.getElementById('example_length');
+
+        var firstLabel = dataTableLengthDiv.querySelector('label');
+
+        if (firstLabel) {
+        firstLabel.classList.add('slr');
+        }
+        {% comment %} table.page.len({{ Order_page_size|default:50 }}).draw(); {% endcomment %}
+
+        // Live debounce search across all database records
+        var searchDebounceTimer = null;
+        var $mainSearch = $('#example_filter input, .dataTables_filter input');
+
+        // Unbind DataTables default instant search handler
+        $mainSearch.unbind();   
+
+        var isSubmittingOrderSearch = false;
+
+        function submitSearchForm(searchVal) {
+            var form = $('#example_form form');
+            if (!form.length) form = $('form[action*="/Order"]');
+            if (form.length) {
+                isSubmittingOrderSearch = true;
+                sessionStorage.setItem('order_search_focused', 'true');
+                var $hidden = form.find('input[name="SearchQuery"]');
+                if (!$hidden.length) {
+                    form.append('<input type="hidden" name="SearchQuery" value="' + $('<div>').text(searchVal).html() + '">');
+                } else {
+                    $hidden.val(searchVal);
+                }
+                form.submit();
+            }
+        }
+
+        // Apply initial search query to input and restore focus/cursor even when cleared
+        var initialSearch = "{{ SearchQuery|default:''|escapejs }}";
+        $mainSearch.val(initialSearch);
+
+        function restoreOrderSearchFocus() {
+            if (sessionStorage.getItem('order_search_focused') === 'true' || initialSearch.length > 0) {
+                var $input = $('#example_filter input, .dataTables_filter input, #mainSearchInput').filter(':visible').first();
+                if ($input.length) {
+                    $('select[name="Groupfilter"], #Groupfilter').blur();
+                    $input.focus();
+                    try {
+                        var len = $input.val().length;
+                        $input[0].setSelectionRange(len, len);
+                    } catch(e) {}
+                }
+            }
+        }
+
+        restoreOrderSearchFocus();
+        setTimeout(restoreOrderSearchFocus, 20);
+        setTimeout(restoreOrderSearchFocus, 100);
+        setTimeout(restoreOrderSearchFocus, 250);
+        setTimeout(restoreOrderSearchFocus, 500);
+        setTimeout(restoreOrderSearchFocus, 800);
+
+        $mainSearch.on('blur', function() {
+            if (!isSubmittingOrderSearch) {
+                setTimeout(function() {
+                    if (!isSubmittingOrderSearch && !$(document.activeElement).is('#example_filter input, .dataTables_filter input, #mainSearchInput')) {
+                        sessionStorage.removeItem('order_search_focused');
+                    }
+                }, 150);
+            }
+        });
+
+        $mainSearch.on('input', function() {
+            var val = $(this).val();
+            sessionStorage.setItem('order_search_focused', 'true');
+            clearTimeout(searchDebounceTimer);
+            // Automatic search across entire database after typing stops (500ms debounce)
+            searchDebounceTimer = setTimeout(function() {
+                submitSearchForm(val);
+            }, 500);
+        });
+
+        $mainSearch.on('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(searchDebounceTimer);
+                sessionStorage.setItem('order_search_focused', 'true');
+                submitSearchForm($(this).val());
+            }
+        });
+    } );
+</script>
+
+<script>
+    $(document).ready(function() {
+        // Initialize DataTables instance
+        // Remove the existing rows selection dropdown and pagination if needed
+        $('.slr').remove();
+        $('#example_paginate').remove();
+        
+        // Create the new form HTML for rows per page selection
+        var formHtml = `
+            <form method="POST" {%if IPOName.IPOType == "MAINBOARD" %} action="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/{{InvestorTypeFilter}}" {%else%} action="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/All"{% endif %}> 
+                {% csrf_token %}
+                <label class='slr' for="page_size">Show 
+                <select name="Order_page_size" id="Order_page_size" onchange="this.form.submit()">
+                    <option value="{{Order_page_size}}" style='display:None;'{% if Order_page_size|default_if_none:50 == 50 %}selected{% endif %}>{{Order_page_size}}</option>
+                    <option value="50" {% if Order_page_size == 50 %}selected{% endif %}>50</option>
+                    <option value="100" {% if Order_page_size == 100 %}selected{% endif %}>100</option>
+                    <option value="200" {% if Order_page_size == 200 %}selected{% endif %}>200</option>
+                    <option value="250" {% if Order_page_size == 250 %}selected{% endif %}>250</option>
+                    <option value="All" {% if Order_page_size == 'All' %}selected{% endif %}>All</option>
+                </select>
+                Rows</label>
+                <input type="hidden" name="page" value="{{ page_obj.number }}">
+            </form>
+        `;
+    
+        // Append the form to a specific element
+        $('.dataTables_length').append(formHtml);
+
+    });
+</script>
+
+<script>
+
+    $(document).ready(function () {
+        // ... Your existing DataTable initialization code ...
+        var newDiv = $('<div id="example_form" class=\'form\'></div>');
+        var formHtml = `
+        <form method="POST" action="/{{IPOid}}/Order">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group col-xl-2 col-lg-2 col-md-2 col-sm-5 col-5 gp">
+                    <label for="Groupfilter" ><b class='gpl '>Group</b></label>
+                    <select id="Groupfilter" class="form-control custom-select gps " name="Groupfilter" autofocus="autofocus"
+                         style='border: 0.3px solid black;height:  35px;'>
+                        <option selected>All</option>
+                        {% for i in Group %}
+                        <option {% if Groupfilter == i.GroupName %} selected {%else%} {% endif %}
+                            value="{{ i.GroupName }}">
+                            {{i.GroupName }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group col-xl-2 col-lg-2 col-md-2 col-sm-4 col-7 oc" >
+                    <label for="OrderCategoryFilter"><b class='ocl '>Order Category</b></label>
+                    <select id="OrderCategoryFilter" class="form-control custom-select ocs" name="OrderCategoryFilter" style='border: 0.3px solid black; height:  35px; width: 93%;'>
+                        <option selected>All</option>
+                        <option {% if OrderCategoryFilter == 'Kostak'%} selected {% endif %} value="Kostak">Kostak</option>
+                        <option {% if OrderCategoryFilter == 'Subject To'%} selected {% endif %} value="Subject To">Subject To</option>
+                        <option {% if OrderCategoryFilter == 'CALL'%} selected {% endif %} value="CALL">CALL</option>
+                        <option {% if OrderCategoryFilter == 'PUT'%} selected {% endif %} value="PUT">PUT</option>
+                        <option {% if OrderCategoryFilter == 'Premium'%} selected {% endif %} value="Premium">Premium</option>
+                    </select>
+                </div>
+
+                {%if IPOName.IPOType == "MAINBOARD" %}
+                <div class="form-group col-xl-2 col-lg-2 col-md-2 col-sm-4 col-5 it">
+                    <label for="InvestorTypeFilter"><b class='itl'>Investor Type</b></label>
+                    <select id="InvestorTypeFilter" class="form-control custom-select its" name="InvestorTypeFilter" style='border: 0.3px solid black; height:  35px; width: 93%;'>
+                        <option selected>All</option>
+                        <option {% if InvestorTypeFilter == 'RETAIL'%} selected {% endif %} value="RETAIL">Retail</option>
+                        <option {% if InvestorTypeFilter == 'SHNI'%} selected {% endif %} value="SHNI">SHNI</option>
+                        <option {% if InvestorTypeFilter == 'BHNI'%} selected {% endif %} value="BHNI">BHNI</option>
+                        <option {% if InvestorTypeFilter == 'OPTIONS'%} selected {% endif %} value="OPTIONS">OPTIONS</option>
+                        <option {% if InvestorTypeFilter == 'PREMIUM' %} selected {% endif %} value="PREMIUM">Premium</option>
+                    </select>
+                </div>
+                
+                {%else%}
+                    <div class="form-group col-xl-2 col-lg-2 col-md-2 col-sm-4 col-5 it">
+                    </div>
+                {%endif%}
+
+                {%if IPOName.IPOType == "MAINBOARD" %}
+                <div class="form-group col-xl-1 col-lg-1 col-md-1 col-sm-1 col-1 sc" style="margin-top: 32px;">
+                    <button id='searchButton' type="submit" class="btn btn-primary">Search &nbsp; <i class="fa fa-search"
+                            aria-hidden="true"></i></button>
+                </div> 
+                {%else%}
+                <div class="form-group col-xl-1 col-lg-1 col-md-1 col-sm-1 col-1 sc" style="margin-top: 32px;">
+                    <button id='searchButton' type="submit" class="btn btn-primary">Search &nbsp; <i class="fa fa-search"
+                            aria-hidden="true"></i></button>
+                </div> 
+                {%endif%} 
+            </div>
+            </form>
+        `;
+        newDiv.append(formHtml);
+        $('.dataTables_length').append(newDiv);
+        // Add your custom button HTML after the existing buttons
+        var customButtonHtml = '<div class="btn-group st">' +
+            '<button type="button" class="btn btn-secondary d-flex justify-content-center align-items-center" data-toggle="modal" data-target="#exampleModal">' +
+            'Status' +
+            '</button> </div>' 
+
+        var customButtonHtml2 =    '<div class="btn-group bo"> <button type="button" id="bulk-order-btn" class="btn btn-secondary d-flex justify-content-center align-items-center"  data-toggle="modal" data-target="#exampleuploadModal" >Bulk'+
+            '    Order &nbsp;<i class="fa fa-file-excel-o" aria-hidden="true" style=\'font-size:18px;\'></i> '+
+            '</button>'+
+            '<button type="button" id="bulk-delete-btn" class="btn btn-danger d-none justify-content-center align-items-center" style="height: 35px;" data-toggle="modal" data-target="#bulkDeleteModal">' +
+                    'Delete &nbsp;<i class="fa fa-trash" aria-hidden="true" style="font-size:18px;"></i>' +
+            '</button>' +
+            '</div>';
+        
+        $('.dataTables_length').append(customButtonHtml);
+        $('.dataTables_length').append(customButtonHtml2);
+    
+        // ... Your existing DataTable initialization code ...
+    });
+    $(document).ready(function() {
+        $(".col-sm-12.col-md-6:first").addClass("custom-width");
+        $(".col-sm-12.col-md-6").addClass("cw");
+        $(".dt-row:first").addClass("table-responsive");
+        $(".buttons-collection").addClass("d-flex justify-content-center align-items-center");
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        var dataTable = $('#example').DataTable();
+        updateButtonColor();
+        $('#searchButton').on('click', function() {
+            updateButtonColor();
+        });
+        function updateButtonColor() {
+            var button = $('#searchButton');
+
+            if (dataTable.data().any()) {
+                button.removeClass('btn-secondary').addClass('btn-primary');
+            } else {
+                button.removeClass('btn-primary').addClass('btn-secondary');
+            }
+        }
+    });
+</script>
+
+<script>
+    function sendPostRequest(ipoId, orderGroup,IPOTypefilter,InvestorTypeFilter) {
+        // Create a hidden form dynamically
+        var form = document.createElement('form');
+        form.method = 'POST';
+        // Set the action to your Django Billing view URL
+        // Based on your urls.py, it appears to be '/Billing/<int:IPOid>'
+        form.action = '/'+ ipoId + '/Order' ; 
+
+        // Add CSRF token as a hidden input
+        var csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = '{{ csrf_token }}'; // Django's CSRF token
+        form.appendChild(csrfInput);
+
+        // Add Groupfilter as a hidden input
+        var groupFilterInput = document.createElement('input');
+        groupFilterInput.type = 'hidden';
+        groupFilterInput.name = 'Groupfilter';
+        groupFilterInput.value = orderGroup;
+        form.appendChild(groupFilterInput);
+
+        // Add other filters. Set them to 'All' or retrieve their current values
+        // from existing filter inputs on the page if you want to preserve them.
+        var ipoTypeFilterInput = document.createElement('input');
+        ipoTypeFilterInput.type = 'hidden';
+        ipoTypeFilterInput.name = 'OrderCategoryFilter';
+        ipoTypeFilterInput.value = IPOTypefilter; // Or get value from an existing element: document.getElementById('your_ipo_type_filter_id').value;
+        form.appendChild(ipoTypeFilterInput);
+
+        var investorTypeFilterInput = document.createElement('input');
+        investorTypeFilterInput.type = 'hidden';
+        investorTypeFilterInput.name = 'InvestorTypeFilter';
+        investorTypeFilterInput.value = InvestorTypeFilter; // Or get value from an existing element: document.getElementById('your_investor_type_filter_id').value;
+        form.appendChild(investorTypeFilterInput);
+
+        // Append the form to the body and submit it
+        document.body.appendChild(form);
+        form.submit();
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        // ... Your existing DataTable initialization code ...
+
+        // Store the element that triggered the modal
+        var modalTriggerElement = null;
+
+        // When the modal is shown, remember which element triggered it
+        $('#exampleModal').on('show.bs.modal', function (e) {
+            modalTriggerElement = $(e.relatedTarget);
+        });
+
+        // When the modal starts to hide, ensure nothing inside it has focus
+        // This event fires *before* the modal begins its hiding transition.
+        $('#exampleModal').on('hide.bs.modal', function () {
+            // Blur any element that currently has focus on the page
+            if (document.activeElement) {
+                document.activeElement.blur();
+            }
+            // Temporarily remove tabindex from the modal itself to ensure it cannot retain focus
+            $(this).removeAttr('tabindex');
+        });
+
+        // When the modal is completely hidden, return focus to the element that triggered it
+        // This event fires *after* the modal has finished its closing animation.
+        $('#exampleModal').on('hidden.bs.modal', function () {
+            // Re-add tabindex="-1" to the modal after it's fully hidden
+            $(this).attr('tabindex', '-1');
+
+            if (modalTriggerElement && modalTriggerElement.length > 0) {
+                modalTriggerElement.focus();
+            } else {
+                // Fallback: if no specific trigger is found, focus on the body or a default element
+                $('body').focus();
+            }
+        });
+
+        // ... Your existing custom button and DataTable length code ...
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        // Selection Logic
+        $(document).on('change', '#select-all-orders', function() {
+            $('.order-checkbox').prop('checked', this.checked);
+            toggleBulkDeleteBtn();
+        });
+
+        $(document).on('change', '.order-checkbox', function() {
+            if ($('.order-checkbox:checked').length == $('.order-checkbox').length) {
+                $('#select-all-orders').prop('checked', true);
+            } else {
+                $('#select-all-orders').prop('checked', false);
+            }
+            toggleBulkDeleteBtn();
+        });
+
+        function toggleBulkDeleteBtn() {
+            var checkedCount = $('.order-checkbox:checked').length;
+            if (checkedCount > 0) {
+                $('#bulk-order-btn').removeClass('d-flex').addClass('d-none');
+                $('#bulk-delete-btn').removeClass('d-none').addClass('d-flex');
+                $('#selected-count').text(checkedCount);
+                $('#order-suffix').text(checkedCount === 1 ? 'order' : 'orders');
+            } else {
+                $('#bulk-order-btn').removeClass('d-none').addClass('d-flex');
+                $('#bulk-delete-btn').removeClass('d-flex').addClass('d-none');
+            }
+        }
+
+        // Deletion Logic
+        $(document).on('click', '#confirm-bulk-delete', function() {
+            var selectedIds = [];
+            $('.order-checkbox:checked').each(function() {
+                selectedIds.push($(this).val());
+            });
+            
+            if (selectedIds.length > 0) {
+                $(this).prop('disabled', true).text('Deleting...');
+                
+                fetch('/{{IPOid}}/BulkDeleteOrders/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({order_ids: selectedIds})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                        $(this).prop('disabled', false).text('Delete');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while deleting orders.');
+                    $(this).prop('disabled', false).text('Delete');
+                });
+            }
+        });
+    });
+</script>
+
+
+<script src="{% static 'DataTables/js/jquery-3.7.0.js' %}"></script>
+<script src="{% static 'DataTables/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.fixedHeader.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.bootstrap5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.bootstrap5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/jszip.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.colVis.min.js' %}"></script>
+<script src="{% static 'DataTables/js/pdfmake.min.js' %}"></script>
+<script src="{% static 'DataTables/js/vfs_fonts.js' %}"></script>
+{% comment %} <script src="{% static 'JS/sorttable.js' %}"></script> {% endcomment %}
+{% include 'partials/ipo_shortcuts.html' %}
+{% endblock %}

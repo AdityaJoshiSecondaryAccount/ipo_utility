@@ -1,0 +1,1691 @@
+{% extends 'basic.html' %}
+{% block title %} {{ IPOName }}-SELL {% endblock %}
+{% block css %}
+{% load static %}
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+    body {
+        {% comment %} font-family: Arial; {% endcomment %}
+        color: black;
+    }
+
+    .navbar{
+        padding: 0.5rem 0rem !important;
+    }
+    .form-check-input {
+        position: absolute;
+        margin-top: -0.3rem !important;
+        margin-left: auto !important;
+    }
+    .input-small-font {
+        {% comment %} font-size: 11px; {% endcomment %}
+        height: 38px; /* Match Bootstrap default */
+        line-height: normal;
+    }
+
+    .form-input:hover {
+        background-color: #f0f0f0; /* Light grey background on hover */
+    }
+
+    .h3,
+    h3 {
+        margin: 0px 0px;
+        margin-top: 85px;
+        font-size: 1.75rem;
+        border-block-end: 3px solid #e9ecef;
+    }
+
+    .iponame {
+        background-color: white;
+        height: 45px;
+        margin-top: 35px;
+        width: 100%;
+        text-align: center;
+        text-align: center;
+    }
+
+    .row {
+        margin-top: 1%;
+    }
+
+    .main {
+        margin: 10px 0px;
+    }
+
+    .main2 {
+        margin: 10px 0px;
+    }
+
+    label {
+        font-weight: bold;
+    }
+
+    .labelA {
+        text-align: center;
+        display: block ruby;
+    }
+
+    .form-control2 {
+        width: 80%;
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        padding: 1rem;
+        border-top: 3px solid #e9ecef;
+        
+    }
+
+    .footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: #686868;
+        color: white;
+        text-align: center;
+        padding: 5px 0px;
+        z-index: 999;
+    }
+
+    .button {
+        margin: 0px 10px;
+        color: black;
+        background-color: antiquewhite;
+        width: auto;
+    }   
+
+    .column1 {
+        width: 100%;
+        padding: 0px;
+    }
+
+    .btn-dark.disabled,
+    .btn-dark:disabled {
+        color: #000;
+        background-color: #ffddaf;
+        border-color: #040404;
+    }
+
+    .brd{
+        margin-top: 0%;
+        border-bottom: groove #686868 ;
+        {% comment %} border-color: #686868;  {% endcomment %}
+    }
+
+    .table-bordered {
+        border: 2px solid #0009;
+    }   
+
+    .table thead th {
+        padding: 0px;
+        vertical-align: bottom;
+        border-bottom: 2px solid #0009;
+        border-bottom-width: 2px;
+    }
+
+    .table-bordered td,
+    .table-bordered th {
+        padding: 0px;
+        border: 1px solid #000;
+        border-bottom-color: rgb(0, 0, 0);
+        border-bottom-style: solid;
+        border-bottom-width: 1px;
+    }
+
+    .tablecenter {
+        text-align: center;
+        width: 25%;
+    }
+
+    .tableline {
+        width: 25%;
+    }
+
+    .tablelinel {
+        width: 15%;
+    }
+</style>
+
+<style>
+    @media (min-width: 7612px){
+    }
+    @media (min-width: 4501px) and (max-width: 7612px) {
+    }
+    @media (min-width: 3806px) and (max-width: 4500px) {
+    }
+    @media (min-width: 2538px) and (max-width: 3805px) {
+    }
+    @media (min-width: 2116px) and (max-width: 2537px) {
+    }
+    @media (min-width: 1884px) and (max-width: 2115px) {
+    }
+    @media (min-width: 1758px) and (max-width: 1883px) {
+    }
+    @media (min-width: 1541px) and (max-width: 1757px) {
+    }
+    @media (min-width: 1485px) and (max-width: 1540px) {
+    }
+    @media (min-width: 1316px) and (max-width: 1484px) {
+    }
+    @media (min-width: 1214px) and (max-width: 1315px) {
+    }
+    @media screen and (min-width: 1200px) {
+        .Retailc{
+            text-align: center; 
+                         
+        }
+
+        .SHNIc{
+            text-align: center; 
+            
+        }
+
+        .BHNIc{
+            text-align: center; 
+            
+        }
+        
+        .Kostakc{
+            margin-top: 30px;
+            
+        }
+
+        .pc{
+            margin-top: 30px;
+        }
+
+        .borderc{
+            border-right: 1px solid;
+            margin-left: 4%; 
+            margin-right: 4%;
+        } 
+
+        .Quantityc{
+            margin-left: 4%;            
+        }
+
+        .rlc{
+            margin-left: 10%;            
+        }
+
+        .pql{
+            margin-left: 5%;
+        }
+
+        .prl{
+            margin-left: 11%;
+        }
+
+        .brdc{
+            padding-bottom: 0%;
+            
+        }
+
+        .br{
+            padding-bottom: 2%;
+        }   
+
+        .Retailcc{
+            display : none;
+        }
+
+        .SHNIcc{
+            display: none;
+        }
+
+        .BHNIcc{
+            display: none;
+        }
+
+        .lc{
+            display: none;
+        }
+
+        .ad{
+            display: none;
+        }
+
+        .rl{
+            margin-bottom: 15%;
+        }
+        .dsl{
+            padding-left: 4%;
+            margin-left: 55% !important;
+            margin-top: -6.5% !important;
+            margin-bottom: 15%;
+        }
+    }
+
+    @media screen and (min-width: 992px) and (max-width: 1199px) {
+        .Retailc{
+             
+            margin-left: 12%;             
+        }
+
+        .SHNIc{
+            margin-left: 7%;
+            
+        }
+
+        .BHNIc{
+            margin-left: 6%;
+           
+        }
+        
+        .Kostakc{
+            margin-top: 30px;
+            
+        }
+
+        .pc{
+            margin-top: 30px;
+        }
+
+        .borderc{
+            border-right: 1px solid;
+            margin-left: 5%; 
+            margin-right: 3%;
+        } 
+
+        .riwc{
+            width: 125%;
+        }
+
+        .Quantityc{
+            margin-left: 4%;            
+        }
+
+        .rlc{
+            margin-left: 10%;            
+        }
+        .pql{
+            margin-left: 7%;
+        }
+
+        .prl{
+            margin-left: 19%;
+        }
+
+        .Retailcc{
+            display : none;
+        }
+
+        .SHNIcc{
+            display: none;
+        }
+
+        .BHNIcc{
+            display: none;
+        }
+
+        .lc{
+            display: none;
+        }
+
+        .ad{
+            display: none;
+        }
+
+        .rl{
+            margin-top: 15px;
+            margin-bottom: 15%;
+        }
+        .dsl{
+            padding-left: 3%;
+            margin-left: 156% !important;
+            margin-top: -6.5% !important;
+            margin-bottom: -45%;
+        }
+
+        .pq{
+            padding-left: 1%!important;  
+        }
+        
+    }
+
+    @media screen and (min-width: 768px) and (max-width: 991px) {
+        .navbar-brand.abs {
+            position: absolute;
+            width: auto;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+        }  
+        
+        .Retailc{
+            margin-left: 13%;             
+        }
+
+        .SHNIc{
+            
+            margin-left: 5%;
+        }
+
+        .BHNIc{
+            
+            margin-left: 4%;
+        }
+        
+        .Kostakc{
+            margin-top: 30px;
+            
+        } 
+
+        .pc{
+            margin-top: 30px;
+        }
+
+        .borderc{
+            border-right: 1px solid;
+            margin-left: 4%; 
+            margin-right: 2%;
+            {% comment %} padding-left: 1%; {% endcomment %}
+        } 
+
+        .Quantityc{
+            margin-left: 12%;            
+        }
+
+        .rlc{
+            margin-left: 18%;            
+        }
+        .pql{
+            margin-left: 7%;
+        }
+
+        .prl{
+            margin-left: 11%;
+        }
+
+        .Retailcc{
+            display : none;
+        }
+        
+        .SHNIcc{
+            display: none;
+        }
+
+        .BHNIcc{
+            display: none;
+        }
+
+        .lc{
+            display: none;
+        }
+
+        .ad{
+            display: none;
+        }
+
+        .rl{
+            margin-bottom: 15%;
+            {% comment %} margin-left: 210px;
+            margin-bottom: 0px;
+            margin-top: -130px; {% endcomment %}
+        }
+        .dsl{
+            padding-left: 3%;
+            margin-left: 125% !important;
+            margin-top: -6.5% !important;
+            margin-bottom: -11%;
+        }
+
+        .kqc{
+            padding-left: 3%!important;
+        }
+
+        .riwc{
+            width: 140%;
+        }
+
+        .footer{
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+           
+            z-index: 999;
+        }
+
+        .btnc{
+            padding-left: 4%;
+            padding-right: 2%;
+        }
+
+        .addgc{
+            width: 116%!important;
+        }
+        {% comment %} .riwcc{
+            width: 120%;
+        } {% endcomment %}
+
+        
+            {% comment %} width: 140%; {% endcomment %}
+        
+
+        {% comment %} .sqc{
+            padding-left: 2%!important;
+        } {% endcomment %}
+    } 
+
+    @media screen and (min-width: 576px) and (max-width: 767px) {
+        {% comment %} .pc{
+            text-align: center;
+            margin-bottom: 1%;
+        } {% endcomment %}
+
+        .pc{
+            margin-top: 30px;
+        }
+
+        .pql{
+            margin-left: 8%;
+        }
+
+        .prl{
+            margin-left: 10%;
+        }
+
+        .ac{
+            margin-top: 24%
+        }
+
+        .ad{
+            display: none;
+        }
+
+        .rl{
+            margin-bottom: 3%;
+            margin-left: -35%;
+        }
+        .dsl{
+            padding-left: 3%;
+            margin-left: 125% !important;
+            margin-top: -4.5% !important;
+            margin-bottom: -28%;
+        }
+
+
+        .Retailc{
+            display : none;
+                         
+        }
+
+        .SHNIc{
+            display : none;
+        }
+
+        .BHNIc{
+            display : none;
+        }
+
+        .Kostakc{
+            text-align: center;
+            margin-bottom: 3%;
+        }
+
+        .kkc{
+            margin-bottom: 3%;
+        }
+
+        .Retailcc{
+            margin-top: auto;
+        }
+        
+        .SHNIcc{
+            margin-top: 8%;      
+        }
+
+        .BHNIcc{
+            margin-top: 8%;
+        }
+
+        .Quantityc{
+            margin-left: 10%;            
+        }
+
+        .rlc{
+            margin-left: 10%;            
+        }
+
+        .sc{
+            text-align: center;
+            margin-bottom: 5%;
+        }
+
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+            z-index: 999;
+        }
+    }
+
+    @media screen and (min-width: 683px) and (max-width: 767px) {
+        .rc{
+            margin-top: 14%;
+        }
+
+        .iponame {
+            margin-top: 52px;         
+        }  
+    }
+
+    @media screen and (min-width: 576px) and (max-width: 682px) {
+        .rc{
+            margin-top: 17%;
+        }
+
+        .iponame {
+            margin-top: 52px;         
+        }  
+    }
+
+    @media screen and (min-width: 280px) and (max-width:575px) {
+        .ac{
+            margin-top: 4%;
+        }
+        
+        .pc{
+            margin-top: 30px;
+        } 
+
+        .pql{
+            margin-left: 7%;
+        }
+
+        .prl{
+            margin-left: 11%;
+        }
+
+        .Retailc{
+            display : none;
+                         
+        }
+
+        .SHNIc{
+            display : none;
+        }
+
+        .BHNIc{
+            display : none;
+        }
+
+        .Kostakc{
+            text-align: center;
+            margin-bottom: 3%;
+        }
+
+        .kkc{
+            margin-bottom: 3%;
+        }
+
+        .Retailcc{
+            margin-top: auto;
+        }
+        
+        .SHNIcc{
+            margin-top: 8%;      
+        }
+
+        .BHNIcc{
+            margin-top: 8%;
+        }
+
+        .Quantityc{
+            margin-left: 7%;            
+        }
+
+        .rlc{
+            margin-left: 10%;            
+        }
+
+        .sc{
+            text-align: center;
+            margin-bottom: 5%;
+        }
+
+        .adc{
+            display: none;
+        }
+
+        .footer{
+            position: sticky;
+            top: 100vh;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #686868;
+            color: white;
+            text-align: center;
+            padding: 5px 0px;
+            display: grid;
+            z-index: 999;
+        }
+
+        .rl{
+            margin-left: -40px;            
+        }
+
+    }
+
+    @media screen and (min-width: 505px) and (max-width: 575px) {
+
+        .rc{
+                
+            margin-top: 20%;
+        }
+
+        .iponame {
+            margin-top: 52px;         
+        }  
+
+        .rl{
+            margin-left: -100px; 
+            margin-top: -9px;    
+            margin-bottom: 10px;       
+        }
+        .dsl{
+            padding-left: 3%;
+            {% comment %} margin-left: 125% !important; {% endcomment %}
+            margin-top: -41.5% !important;
+            margin-bottom: -42%;
+        }
+    }
+
+    @media screen and (min-width: 390px) and (max-width: 504px) {
+
+        .rc{
+                
+            margin-top: 25%;
+        }
+
+        .iponame {
+            margin-top: 52px;         
+        }  
+
+        .rl{
+            margin-left: -40px; 
+            margin-top: 37px;   
+            margin-bottom: 10px;           
+        }
+        .dsl{
+            padding-left: 3%;
+            margin-left: -185% !important;
+            margin-top: -13.5% !important;
+            margin-bottom: -35%;
+        }
+    }
+
+    @media screen and (min-width: 280px) and (max-width: 389px) {
+
+        .rc{
+                
+            margin-top: 33%;
+        }
+
+        .iponame {
+            margin-top: 52px;         
+        }  
+
+        .rl{
+            margin-left: -40px; 
+            margin-top: 28px;   
+            margin-bottom: 10px;           
+        }
+        .dsl{
+            {% comment %} padding-left: 3%; {% endcomment %}
+            margin-left: -322% !important;
+            margin-top: 6.5% !important;
+            margin-bottom: -28%;
+        }
+
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+
+<div>
+    <h3 class="fixed-top iponame" style="z-index: 9; ">{{ IPOName }}</h3>
+</div>
+{% comment %} {% if messages %}
+<div class="alert alert-success fixed-top" id="successalerts" style="position:fixed;">
+    <button type="button" class="close" data-dismiss="alert">x</button>
+    {% for message in messages %}
+    <strong>{{message}}</strong><br>
+    {% endfor %}
+
+    <script src="{% static 'JS/jquery.min.js' %}"></script>
+    <script>
+        $("#successalerts").fadeTo(5000, 500).slideUp(500, function () {
+            $("#successalerts").slideUp(500);
+        });
+    </script>
+</div>
+
+    {% endif %} {% endcomment %}
+
+{% for message in messages %}
+    {% if messages %}
+        <div class="alert {{ message.tags }} alert-dismissible  fixed-top" id="successalerts" role="alert" style="position:fixed;">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+            {{ message }}
+        </div>
+    {% endif %}
+{% endfor %}
+
+
+<div class="container rc" style="max-width: 98%; background-color: rgba(220, 53, 69, 0.05); border-radius: 8px; padding-top: 10px; padding-bottom: 10px;">
+
+    <h3 style="color: #dc3545; font-weight: 800;">SELL</h3>
+    <div class="row">
+
+        <div class="col-12 ad">
+            {% comment %} <br> {% endcomment %}
+            <form action="/AddGroup/{{IPOid}}/SELL" method="post" class="needs-validation ac" novalidate>
+                {%csrf_token %}
+                <div  class="form-row">
+                    <div class="form-group col-6">
+                        <input type="text" name="GroupName" class="form-control width" placeholder="Add Group"
+                            aria-label="Rate" required>
+
+                    </div>
+                
+                    <div class="form-group col-6" >
+                        <button type="submit" class="btn btn-outline-primary" style="width: 100%;">Add Group</button>
+                    </div>
+                </div>
+            </form>
+
+        </div> 
+       
+
+        <div class="col-xl-10 col-lg-10 col-md-10 col-sm-9 col-12 brdc">
+            {% comment %} <br> {% endcomment %}
+            <hr/ class="ad">
+            <form method="post" id="placeOrderForm" class="needs-validation form" class="form" novalidate>
+                {% csrf_token %}
+                <div class="form-row">
+                    <label for="validationCustom04" class="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-form-label">Group&nbsp;<font color="red">*</font>
+                    </label>
+                    <div class="form-group col-xl-5 col-lg-7 col-md-7 col-sm-9">
+                        <select class="form-control width" autocomplete="off" id="validationCustom04"  autofocus="autofocus"
+                         name="item_id" required>
+                        <option selected disabled value="">Select Group</option>
+                        {% for i in Group %}
+                        <option {% if selectgroup == i.GroupName%} selected {% endif %}
+                            value="{{ i }}">
+                            {{ i }}
+
+                        </option>
+                        {% endfor %}
+
+                    </select>
+                        <div class="invalid-feedback col-lg-12 col-md-12 col-sm-12">
+                            Please select a valid Group.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row brdc">
+                    <label class="col-xl-1 col-lg-2 col-md-2 col-sm-12 col-form-label">Date and Time</label>
+                    <div class="form-group col-xl-5 col-lg-7 col-md-7 col-sm-9 ">
+                        <input tabindex="-1" type="datetime-local" style="width: 100%;" class="form-control width" step="1" id="datetime" name="datetime" value='{% now "Y-m-d H:i:s" %}' min="2020-01-01T00:00:00" max="2035-12-31T23:59:59" required>
+                        <div class="invalid-feedback" >
+                            Please Enter Valid Date and Time.
+                        </div>
+                    </div>
+                </div>
+                {% comment %} <br> {% endcomment %}
+                <hr/ class="brdc">
+                {% comment %} <br> {% endcomment %}
+                
+                
+
+                <div class="form-row" >
+                    {% comment %} <label class="col-sm-1 col-form-label" ></label> {% endcomment %}
+
+                    <div class="form-group col-xl-4 col-lg-3 col-md-3 col-sm-3 col-3 Retailc ">
+                        {% if IPOName.IPOType == 'MAINBOARD' %}
+                            <label name="Retailinvestor" >Retail ( &lt; 15,000) </label>
+                        {%else%}
+                            <label name="Retailinvestor" >Retail ( &gt; 2 Lakhs) </label>
+                        {%endif%}
+                    </div>
+                    <!-- <div class="form-group col-md-1"></div> -->
+                    {% comment %} <div class="form-group col-md-1"></div> {% endcomment %}
+
+                    {% if IPOName.IPOType == 'MAINBOARD' %}
+                    <div class="form-group col-xl-4 col-lg-3 col-md-3 col-sm-3 col-3 SHNIc" >
+                        
+                        <label name="SHNIinvestor">SHNI ( &gt; 2 Lakhs)</label>
+                        
+                    </div>
+                    <!-- <div class="form-group col-md-1"> </div> -->
+                    {% comment %} <div class="form-group col-md-1"></div> {% endcomment %}
+
+                    <div class="form-group col-xl-4 col-lg-3 col-md-3 col-sm-3 col-3 BHNIc ">
+                        
+                        <label name="BHNIinvestor">BHNI ( &gt; 10 lakhs)</label>
+                        
+                    </div>
+                    {% endif %}
+                    <!-- <div class="form-group col-md-1"></div> -->
+                </div>
+
+                <div class="form-row kkc" >
+                    <label class="col-xl-1 col-lg-1 col-md-1 col-sm-12 col-12 col-form-label Kostakc">Kostak</label>
+                    <div class="form-group col-sm-5 col-5 Retailcc">
+                        {% if IPOName.IPOType == 'MAINBOARD' %}
+                            <label name="Retailinvestor" >Retail ( &lt; 15,000) </label>
+                        {%else%}
+                            <label name="Retailinvestor" >Retail ( &gt; 2 Lakhs) </label>
+                        {%endif%}
+
+                        {% comment %} <label name="Retailinvestor" >( &lt; 15,000) </label> {% endcomment %}
+                    </div>
+                    <div class="form-group col-xl-1 col-lg-1 col-md-1 col-sm-3 col-3 kqc">
+                        <label class="labelA Quantityc">Quantity</label>
+                        <input type="number" name="KostakQTY" min="1" class="form-control" placeholder="Qty" title="Application Qty"
+                            aria-label="Quantity" onkeypress="return event.charCode >= 48 && event.charCode <= 57" >
+
+                        <div class="invalid-feedback">
+                            Enter Valid Quantity.
+                        </div> 
+                    </div>
+                    <div class="form-group col-xl-2 col-lg-1 col-md-1 col-sm-3 col-4">
+                        <label class="labelA rlc">Rate</label>
+                        <input type="text" name="KostakRate" class="form-control  riwc" placeholder="Price per PAN" aria-label="Rate" oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\--*)\-/g, '$1').replace(/(\..*)\./g, '$1');" title="Application Rate">
+                        <div class="invalid-feedback">
+                            Enter Valid Rate.
+                        </div>
+                    </div>
+
+                    {% if IPOName.IPOType == 'MAINBOARD' %}
+                    <div class=" vertical borderc" ></div>
+                    <div class="col-5 SHNIcc">
+                        
+                        <label name="SHNIinvestor">SHNI( &gt; 2 Lakhs)</label>
+                        {% comment %} <label name="SHNIinvestor">( &gt; 2 Lakhs)</label> {% endcomment %}
+                        
+                    </div>
+                    <div class="form-group col-xl-1 col-lg-1 col-md-1 col-sm-3 col-3 sqc">
+                        
+                        <label class="labelA Quantityc" >Quantity</label>
+                        <input  type="number" name="KostakQTYSHNI" min="1" class="form-control riwcc" placeholder="Qty" title="Application Qty"
+                            aria-label="Quantity" onkeypress="return event.charCode >= 48 && event.charCode <= 57" >
+                            {% comment %} {% if request.user.Broker_id is not None%} max={{ Ratelist.KostakBuyQty }} {% endif %} {% endcomment %}
+                        
+                        <div class="invalid-feedback">
+                            Enter Valid Quantity.
+                        </div> 
+                    </div>
+                    <div class="form-group col-xl-2 col-lg-1 col-md-1 col-sm-3 col-4 rw">
+                        
+                        <label class="labelA rlc">Rate</label>
+                        <input type="text" name="KostakRateSHNI" class="form-control riwc" placeholder="Price per PAN" aria-label="Rate" oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\--*)\-/g, '$1').replace(/(\..*)\./g, '$1');" title="Application Rate">
+                        <div class="invalid-feedback">
+                            Enter Valid Rate.
+                        </div>
+                    </div>
+                    
+
+                    <div class="vertical borderc"></div>
+                    <div class="col-5 BHNIcc">
+                        
+                        <label name="BHNIinvestor">BHNI(&gt; 10 lakhs)</label>
+                        {% comment %} <label name="BHNIinvestor">(&gt; 10 lakhs)</label> {% endcomment %}
+                        
+                    </div>
+                    <div class="form-group col-xl-1 col-lg-1 col-md-1 col-sm-3 col-3 sqc">
+                        
+                        <label class="labelA Quantityc">Quantity</label>
+                        <input type="number" name="KostakQTYBHNI" min="1" class="form-control" placeholder="Qty" title="Application Qty"
+                            aria-label="Quantity" onkeypress="return event.charCode >= 48 && event.charCode <= 57" >
+                        
+                        <div class="invalid-feedback">
+                            Enter Valid Quantity.
+                        </div> 
+                            
+                    </div>
+                    <div class="form-group col-xl-2 col-lg-1 col-md-1 col-sm-3 col-3">
+                        
+                        <label class="labelA rlc">Rate</label>
+                        <input type="text" name="KostakRateBHNI" class="form-control riwc" placeholder="Price per PAN" aria-label="Rate" oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\--*)\-/g, '$1').replace(/(\..*)\./g, '$1');" title="Application Rate">
+                        <div class="invalid-feedback">
+                            Enter Valid Rate.
+                        </div>
+                    </div>      
+                    {% endif %}
+                    
+                </div>
+                
+                <div class="form-row">
+                    <label class="col-xl-1 col-lg-1 col-md-1 col-sm-12 col-form-label sc">Subject To</label>
+                    <div class="form-group col-sm-5 col-5 Retailcc">
+                        {% if IPOName.IPOType == 'MAINBOARD' %}
+                            <label name="Retailinvestor" >Retail ( &lt; 15,000) </label>
+                        {%else%}
+                            <label name="Retailinvestor" >Retail ( &gt; 2 Lakhs) </label>
+                        {%endif%}
+                        {% comment %} <label name="Retailinvestor" >( &lt; 15,000) </label> {% endcomment %}
+                    </div>
+                    <div class="form-group col-xl-1 col-lg-1 col-md-1 col-sm-3 col-3 kqc">
+                        <label class="labelA Quantityc lc">Quantity</label>
+                        <input type="number" name="SubjectToQTY" min="1" class="form-control" placeholder="Qty" title="Application Qty"
+                            aria-label="Quantity" onkeypress="return event.charCode >= 48 && event.charCode <= 57" >
+
+                        <div class="invalid-feedback">
+                            Enter Valid Quantity.
+                        </div> 
+
+                    </div>
+                    <div class="form-group col-xl-2 col-lg-1 col-md-1 col-sm-3  col-4" >
+                        <label class="labelA rlc lc">Rate</label>
+                        <div class="d-flex align-items-center">
+                            <input type="text" name="SubjectToRate" class="form-control input-small-font flex-grow-1" id="subjectToRateInputRetail" placeholder="Price per PAN" aria-label="Rate" oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\--*)\-/g, '$1').replace(/(\..*)\./g, '$1');" title="Application Rate">
+                            <div class="p-1">
+                                <input class="form-check-input" type="checkbox" name='subjectToIsPremiumRetail' id="subjectToIsPremiumRetail" onclick="toggleSubjectToRatePlaceholder('Retail')" title="Primium Rate">
+                            </div>
+                        </div>
+                            <!-- value={{ Ratelist.SubjecToBuyRate }} oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\..*)\./g, '$1');"
+                            {% if request.user.Broker_id is not None%} disabled=true {% endif %} > -->
+                            <div class="invalid-feedback">
+                                Enter Valid Rate.
+                            </div>
+                        </div>
+
+                    {% if IPOName.IPOType == 'MAINBOARD' %}
+                    
+                    <div class="vertical borderc" ></div>
+                    <div class="col-5 SHNIcc">
+                        
+                        <label name="SHNIinvestor">SHNI( &gt; 2 Lakhs)</label>
+                        {% comment %} <label name="SHNIinvestor">( &gt; 2 Lakhs)</label> {% endcomment %}
+                        
+                    </div>
+                    <div class="form-group col-xl-1 col-lg-1 col-md-1 col-sm-3 col-3 sqc">
+                       
+                        <label class="labelA Quantityc lc">Quantity</label>
+                        <input type="number" name="SubjectToQTYSHNI" min="1" class="form-control" placeholder="Qty" title="Application Qty"
+                            aria-label="Quantity" onkeypress="return event.charCode >= 48 && event.charCode <= 57" >
+                    
+                        <div class="invalid-feedback">
+                            Enter Valid Quantity.
+                        </div> 
+                            
+                            
+                    </div>
+                    <div class="form-group col-xl-2 col-lg-1 col-md-1 col-sm-3 col-4">
+                        
+                        <label class="labelA rlc lc">Rate</label>
+                        <div class="d-flex align-items-center">
+                            <input type="text" name="SubjectToRateSHNI"  id="subjectToRateInputSHNI"class="form-control form-input riwc input-small-font" placeholder="Price per PAN" aria-label="Rate" oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\--*)\-/g, '$1').replace(/(\..*)\./g, '$1');" title="Application Rate">
+                            <div class="p-1">
+                                <input class="form-check-input" type="checkbox" name='subjectToIsPremiumSHNI' id="subjectToIsPremiumSHNI" onclick="toggleSubjectToRatePlaceholder('SHNI')" style="margin-bottom: 3%;" title="Premium Rate">
+                            </div>
+                        </div>
+                            <!-- value={{ Ratelist.SubjecToBuyRate }} oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\..*)\./g, '$1');"
+                            {% if request.user.Broker_id is not None%} disabled=true {% endif %} > -->
+                            <div class="invalid-feedback">
+                                Enter Valid Rate.
+                            </div> 
+                    </div>
+                    
+                    
+                    <div class="vertical borderc"></div>
+                    <div class="col-5 BHNIcc">
+                       
+                        <label name="BHNIinvestor">BHNI(&gt; 10 lakhs)</label>
+                        {% comment %} <label name="BHNIinvestor">(&gt; 10 lakhs)</label> {% endcomment %}
+                        
+                    </div>
+
+                    <div class="form-group col-xl-1 col-lg-1 col-md-1 col-sm-3 col-3 sqc">
+                        
+                        <label class="labelA Quantityc lc">Quantity</label>
+                        <input type="number" name="SubjectToQTYBHNI" min="1" class="form-control" placeholder="Qty" title="Application Qty"
+                            aria-label="Quantity" onkeypress="return event.charCode >= 48 && event.charCode <= 57" > 
+
+                        <div class="invalid-feedback">
+                            Enter Valid Quantity.
+                        </div> 
+                            
+                            
+                    </div>
+                    <div class="form-group col-xl-2 col-lg-1 col-md-1 col-sm-3 col-4">
+                        
+                        <label class="labelA rlc lc">Rate</label>
+                        <div class="d-flex align-items-center">
+                            <input type="text" name="SubjectToRateBHNI" class="form-control form-input riwc input-small-font" id="subjectToRateInputBHNI" placeholder="Price per PAN"
+                                aria-label="Rate" oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\--*)\-/g, '$1').replace(/(\..*)\./g, '$1');" title="Application Rate">
+                            <div class="p-1">
+                                <input class="form-check-input" type="checkbox" name='subjectToIsPremiumBHNI' id="subjectToIsPremiumBHNI" onclick="toggleSubjectToRatePlaceholder('BHNI')" title="Premium Rate">
+                            </div>
+                        </div>
+                            <!-- value={{ Ratelist.SubjecToBuyRate }} oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\..*)\./g, '$1');"
+                            {% if request.user.Broker_id is not None%} disabled=true {% endif %} > -->
+                            <div class="invalid-feedback">
+                                Enter Valid Rate.
+                            </div>
+                    </div>
+                    
+                    {% endif %}
+                </div>
+
+                <div class="form-row brdc">
+                </div>
+                {% comment %} <br> {% endcomment %}
+                <hr/ class="brdc">
+                {% comment %} <br> {% endcomment %}
+               
+
+
+                <div class="form-row">
+                    <!-- PREMIUM Section -->
+                    <div class="col-md-2">
+                        <label class="col-form-label  text-center w-100">Premium</label><br>
+                        <div class="form-row">
+                            <div class="col-md-6">
+                                <label class="labelA">Quantity</label>
+                                <input type="number" min="1" name="PremiumQTY" class="form-control" placeholder="Qty"
+                                    onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+                                <div class="invalid-feedback">Enter Valid Quantity.</div>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="labelA">Rate</label>
+                                <input type="text" name="PremiumRate" class="form-control" placeholder="Rate"
+                                    oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\..*)\./g, '$1');">
+                                <div class="invalid-feedback">Enter Valid Rate.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class=" vertical borderc"></div>
+                    <!-- CALL Section -->
+                    <div class="col-md-4">
+                        <label class="col-form-label text-center w-100">Call</label><br>
+
+                        <div class="form-row">
+                            <div class="col-md-4">
+                                <label class="labelA">Quantity</label>
+                                <input type="number" min="1" name="CallQTY" class="form-control" placeholder="Qty"
+                                    onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+                                <div class="invalid-feedback">Enter Valid Quantity.</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="labelA">Strike Price</label>
+                                <input type="text" name="CallStrikePrice" class="form-control" placeholder="Strike Price"
+                                    oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\..*)\./g, '$1');">
+                                <div class="invalid-feedback">Enter Valid Strike Price.</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="labelA">Rate</label>
+                                <input type="text" name="CallRate" class="form-control" placeholder="Rate"
+                                    oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\..*)\./g, '$1');">
+                                <div class="invalid-feedback">Enter Valid Rate.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class=" vertical borderc"></div>
+                    <!-- PUT Section -->
+                    <div class="col-md-4">
+                        <label class="col-form-label text-center w-100">Put</label><br>
+                        <div class="form-row">
+                            <div class="col-sm-4">
+                                <label class="labelA">Quantity</label>
+                                <input type="number" min="1" name="PutQTY" class="form-control" placeholder="Qty"
+                                    onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+                                <div class="invalid-feedback">Enter Valid Quantity.</div>
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="labelA">Strike Price</label>
+                                <input type="text" name="PutStrikePrice" class="form-control" placeholder="Strike Price"
+                                    oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\..*)\./g, '$1');">
+                                <div class="invalid-feedback">Enter Valid Strike Price.</div>
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="labelA">Rate</label>
+                                <input type="text" name="PutRate" class="form-control" placeholder="Rate"
+                                    oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\..*)\./g, '$1');">
+                                <div class="invalid-feedback">Enter Valid Rate.</div>
+                            </div>
+                    </div>
+
+                    
+                </div>
+                </div>
+                <hr/ class="brdc">
+                
+                <!-- Remark Section -->
+                <div class="form-row" style="margin-bottom: 1%; align-items: center;">
+                    <div class="col-xl-1 col-lg-1 col-md-2 col-sm-12 col-12" style="padding-right: 0;">
+                        <label for="remarkTemplate" style="margin-bottom: 0; font-weight: bold;">Remark:</label>
+                    </div>
+                    <div class="col-xl-4 col-lg-4 col-md-5 col-sm-12 col-12" style="position: relative; padding-right: 40px;">
+                        <div class="tags-input-container" style="position: relative;">
+                            <div class="tags-display" id="tagsDisplay" style="min-height: 38px; border: 1px solid #ced4da; border-radius: 0.25rem; padding: 4px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; cursor: text; background: white;">
+                                <input type="text" id="remarkInput" class="form-control input-small-font" placeholder="Add remark or select from dropdown" style="border: none; flex: 1; min-width: 150px; outline: none; box-shadow: none; padding: 2px 4px; height: 30px;">
+                            </div>
+                            <button type="button" id="remarkDropdownBtn" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 4px; z-index: 10;">▼</button>
+                            <div id="remarkDropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ced4da; border-radius: 0.25rem; margin-top: 2px; max-height: 200px; overflow-y: auto; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <div class="dropdown-item" data-value="First Day Bidding" style="padding: 8px 12px; cursor: pointer; color: #000;">First Day Bidding</div>
+                                <div class="dropdown-item" data-value="Subject to + Fix Charges Amount:" style="padding: 8px 12px; cursor: pointer; color: #000;">Subject to + Fix Charges Amount:</div>
+                                <div class="dropdown-item" data-value="Profit Sharing" title="Profit Sharing (i.e. 50:50) : 50(own) : 50(client)" style="padding: 8px 12px; cursor: pointer; color: #000;">Profit Sharing</div>
+                                <div class="dropdown-item" data-value="Shareholder Application" style="padding: 8px 12px; cursor: pointer; color: #000;">Shareholder Application</div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="remark_tags" id="remarkTags">
+                        <input type="hidden" name="remark_text" id="remarkText">
+                    </div>
+                    <div class="col-xl-3 col-lg-3 col-md-2 col-sm-6 col-6" style="padding-left: 10px; padding-right: 10px;">
+                        <button class="btn btn-danger" type="button" id="btnPlaceOnly" style="padding: 6px 40px;">Place SELL Order</button>
+                    </div>
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 col-6" style="padding-left: 10px;">
+                        <button class="btn btn-danger" type="button" id="btnPlaceWithTelegram" style="padding: 6px 40px;">Place SELL Order +
+                            <svg width="20" height="20" fill="currentColor" class="bi bi-telegram" viewBox="0 0 16 16" style="vertical-align: middle; margin-left: 4px;">
+                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.287 5.906q-1.168.486-4.666 2.01-.567.225-.595.442c-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294q.39.01.868-.32 3.269-2.206 3.374-2.23c.05-.012.12-.026.166.016s.042.12.037.141c-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8 8 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629q.14.092.27.187c.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.4 1.4 0 0 0-.013-.315.34.34 0 0 0-.114-.217.53.53 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Get both buttons
+                    const btnTelegram = document.getElementById('btnPlaceWithTelegram');
+                    const btnOnly = document.getElementById('btnPlaceOnly');
+
+                    function disableButtons() {
+                        btnTelegram.disabled = true;
+                        btnOnly.disabled = true;
+                        // Optionally, change button styles to indicate disabled state
+                        btnTelegram.classList.add('disabled');
+                        btnOnly.classList.add('disabled');
+                        
+                        if (this === btnTelegram) {
+                            btnTelegram.innerHTML = 'Placing SELL Order... <i class="fa fa-spinner fa-spin"></i>';
+                        } else if (this === btnOnly) {
+                            btnOnly.innerHTML = 'Placing SELL Order... <i class="fa fa-spinner fa-spin"></i>';
+                        }
+                    }
+
+                    // Attach click event listeners
+                    btnTelegram.addEventListener('click', disableButtons);
+                    btnOnly.addEventListener('click', disableButtons);
+                });
+
+                // Tags Input Functionality
+                const tagsDisplay = document.getElementById('tagsDisplay');
+                const remarkInput = document.getElementById('remarkInput');
+                const remarkDropdown = document.getElementById('remarkDropdown');
+                const remarkDropdownBtn = document.getElementById('remarkDropdownBtn');
+                const remarkTags = document.getElementById('remarkTags');
+                const remarkText = document.getElementById('remarkText');
+                let tags = [];
+
+                // Create tag element
+                function createTag(text) {
+                    const tag = document.createElement('span');
+                    tag.className = 'remark-tag';
+                    tag.style.cssText = 'display: inline-flex; align-items: center; background: #007bff; color: white; padding: 4px 8px; border-radius: 4px; font-size: 13px; margin: 2px;';
+                    tag.innerHTML = `${text} \u003cspan style="margin-left: 6px; cursor: pointer; font-weight: bold;" onclick="removeTag(this)"\u003e×\u003c/span\u003e`;
+                    tag.dataset.value = text;
+                    return tag;
+                }
+
+                // Add tag
+                function addTag(text) {
+                    text = text.trim();
+                    if (text && !tags.includes(text)) {
+                        tags.push(text);
+                        const tagElement = createTag(text);
+                        tagsDisplay.insertBefore(tagElement, remarkInput);
+                        updateHiddenField();
+                    }
+                }
+
+                // Remove tag (global function for onclick)
+                window.removeTag = function(closeBtn) {
+                    const tag = closeBtn.parentElement;
+                    const value = tag.dataset.value;
+                    tags = tags.filter(t => t !== value);
+                    tag.remove();
+                    updateHiddenField();
+                };
+
+                // Update hidden fields
+                function updateHiddenField() {
+                    remarkTags.value = JSON.stringify(tags);
+                }
+
+                // Toggle dropdown
+                remarkDropdownBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    remarkDropdown.style.display = remarkDropdown.style.display === 'none' ? 'block' : 'none';
+                });
+
+                // Dropdown item click
+                document.querySelectorAll('#remarkDropdown .dropdown-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        addTag(this.dataset.value);
+                        remarkDropdown.style.display = 'none';
+                    });
+                    // Hover effect
+                    item.addEventListener('mouseenter', function() {
+                        this.style.background = '#f8f9fa';
+                    });
+                    item.addEventListener('mouseleave', function() {
+                        this.style.background = 'white';
+                    });
+                });
+
+                // Update text field on input
+                remarkInput.addEventListener('input', function() {
+                    remarkText.value = this.value;
+                });
+
+                // Input enter key
+                remarkInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (this.value.trim()) {
+                            addTag(this.value);
+                            this.value = '';
+                        }
+                    }
+                });
+
+                // Click on tags display to focus input
+                tagsDisplay.addEventListener('click', function() {
+                    remarkInput.focus();
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.tags-input-container')) {
+                        remarkDropdown.style.display = 'none';
+                    }
+                });
+            </script>
+
+        </div>
+
+        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-3 col-3 adc">
+            {% comment %} <br> {% endcomment %}
+            <form action="/AddGroup/{{IPOid}}/SELL" method="post" class="needs-validation ac" novalidate>
+                {%csrf_token %}
+                <div  class="form-row">
+                    <div class="form-group col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                        <input type="text" name="GroupName" class="form-control width addgc" placeholder="Add Group "
+                            aria-label="Rate" id="GroupName" required>
+                        <div class="invalid-feedback" id="nameError">
+                            Enter Name.
+                        </div>
+                        <script>
+                            const input = document.getElementById("GroupName");
+                            const errorDiv = document.getElementById("nameError");
+
+                            input.addEventListener("input", function () {
+                                if (input.value.includes(",")|| input.value.includes("/")) {
+                                    errorDiv.textContent = "Commas (,) and slashes (/) are not allowed in the group name.";
+                                    errorDiv.style.display = "block";
+                                    input.setCustomValidity("Commas are not allowed.");
+                                    input.classList.add("is-invalid");
+                                } else {
+                                    errorDiv.textContent = "Please Enter Name.";
+                                    input.setCustomValidity("");
+                                    errorDiv.style.display = "none";
+                                    input.classList.remove("is-invalid");
+                                }
+                            });
+                        </script>
+                    </div>
+                
+                    <div class="form-group col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12" >
+                        <button type="submit" class="btn btn-outline-primary addgc" style="width: 100%;">Add Group</button>
+                    </div>
+                </div>
+
+        </div> 
+
+    </div class="adc">
+
+</div>
+
+<div class="container containerhight fc" style=" margin-top: 0%; margin-bottom: 4%; max-width: 98%;">
+    <p class="brd"></p>
+    <div class="table-responsive text-nowrap">
+        
+        
+        <h2 style="margin-top: 0.5%;"> Recent Orders : </h2>
+        <hr/ class="brdc">
+
+        <table id="bootstrapdatatable" class="table table-hover table-bordered" style="text-align: center;">
+            <thead>
+                <tr style="text-align: center;white-space: nowrap;" >
+                    <th scope="col">Sr No.&nbsp;</th>
+                    <th scope="col">Group Name&nbsp;</th>
+                    <th scope="col">Order Type&nbsp;</th>
+                    <th scope="col">Order Category&nbsp;</th>
+                    {%if IPOName.IPOType == "MAINBOARD" %}<th scope="col">Investor Type&nbsp;</th>{%endif%}
+                    <th scope="col">Premium Strike Price&nbsp;</th>
+                    <th scope="col">Qty&nbsp;</th>
+                    <th scope="col">Rate&nbsp;</th>
+                    <th scope="col">Date and Time&nbsp;</th>
+                    <th scope="col">Remark&nbsp;</th>
+                </tr>
+            </thead>
+            <tbody style="text-align: center; white-space: nowrap; font-family: 'Lucida Console', 'Courier New', monospace; font-size:1; ">
+                {% for i in product %}
+                {% if forloop.counter < 6 %}
+                    <tr>
+                        <th scope="row">{{forloop.counter}}</th>
+                        <td style="text-transform: uppercase;">{{ i.OrderGroup.GroupName }}</td>
+                        <td>{{ i.OrderType }}</td>
+                        <td>{{ i.OrderCategory }}</td>
+                        {%if IPOName.IPOType == "MAINBOARD" %}<td>{{ i.InvestorType }}</td>{%endif%}
+                        <td>
+                            {% if i.OrderCategory == "Premium" %}
+                                -
+                            {% else %}
+                                {% if i.Method %}
+                                    {{ i.Method }}
+                                {% else %}
+                                    Application
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        <td><a {%if  i.OrderCategory != 'Premium'%} href="/{{IPOid}}/OrderDetail/{{i.OrderType}}/{{i.OrderGroup.GroupName}}/{{ i.OrderCategory }}/{{i.InvestorType}}/{{ i.OrderDate|date:"Ymd" }}/{{i.OrderTime|time:"His"}}{{i.id}}" style="color:blue; text-decoration: underline; "{%endif%}>{{ i.Quantity|floatformat:0 }}</a></td>
+                        <td>{{ i.Rate|floatformat:2 }}</td>
+                        <td>{{ i.OrderDate }} |&nbsp; {{i.OrderTime|time:"h:i:s A"}} </td>
+                        <td style="white-space: nowrap; max-width: 300px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; outline: none;" 
+                            tabindex="0"
+                            onclick="this.style.whiteSpace=this.style.whiteSpace==='normal'?'nowrap':'normal'"
+                            onblur="this.style.whiteSpace='nowrap'"
+                            title="Click to expand">
+                            {% if i.remark %}
+                                {% if i.remark.tags %}{{ i.remark.tags|join:", " }}{% endif %}{% if i.remark.tags and i.remark.text %} - {% endif %}{% if i.remark.text %}{{ i.remark.text }}{% endif %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endif %} 
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+    <div class="footer fc">
+        {% comment %} <a href="/{{IPOid}}/SetRate" class="btn button btn-dark"><span>Set Rate</span></a> {% endcomment %}
+        <a href="/{{IPOid}}/BUY" class="btn button btn-dark btnc"><span>BUY</span></a>
+        <a href="/{{IPOid}}/SELL" class="btn button btn-dark disabled btnc"><span>SELL</span></a>
+        <a href="/{{IPOid}}/Order" class="btn button btn-dark btnc"><span>Orders</span></a>
+        <a href="/{{IPOid}}/OrderDetail/BUY" class="btn button btn-dark btnc btnv" style="white-space: nowrap;"><span>App. Buy Order (PAN)</span></a>
+        <a href="/{{IPOid}}/OrderDetail/SELL" class="btn button btn-dark btnc" style="white-space: nowrap;"><span>App. Sell Order (PAN)</span></a>
+        <a href="/{{IPOid}}/Billing" class="btn button btn-dark btnc"><span>Client Wise Billing</span></a>
+        <a href="/{{IPOid}}/Status" class="btn button btn-dark btnc"><span>Group Wise Billing</span></a>
+        <a href="/{{IPOid}}/Dashboard/A" class="btn button btn-dark btnc btnv"><span>Analysis</span></a>
+        <!-- <a href="PremiumBilling" class="btn button btn-dark" style="white-space: nowrap;"><span>Premium Billing</span></a> -->
+    </div>
+{% comment %} </div> {% endcomment %}
+
+<script>
+    function toggleSubjectToRatePlaceholder(category) {
+        const checkbox = document.getElementById('subjectToIsPremium' + category);
+        const rateInput = document.getElementById('subjectToRateInput' + category);
+
+        if (checkbox.checked) {
+            rateInput.placeholder = "Price per Share";
+            rateInput.title = "Premium Rate";
+            checkbox.title = "Application Rate";
+        } else {
+            rateInput.placeholder = "Price per PAN";
+            rateInput.title = "Application Rate";
+            checkbox.title = "Premium Rate";
+        }
+    }
+
+    // Enhanced checkbox memory functionality - Persistent across refresh
+    document.addEventListener('DOMContentLoaded', function() {
+        const ipoId = {{ IPOName.id|default:0 }};
+        const premiumCheckboxes = ['subjectToIsPremiumRetail', 'subjectToIsPremiumSHNI', 'subjectToIsPremiumBHNI'];
+        
+        // Check if this is a new IPO
+        const isNewIPO = ipoId === 0 || !localStorage.getItem('ipo_' + ipoId);
+        
+        if (isNewIPO) {
+            // Auto-select all premium rate checkboxes for new IPOs
+            premiumCheckboxes.forEach(function(checkboxId) {
+                const checkbox = document.getElementById(checkboxId);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    const category = checkboxId.replace('subjectToIsPremium', '');
+                    toggleSubjectToRatePlaceholder(category);
+                }
+            });
+            
+            // Mark this IPO as visited
+            if (ipoId !== 0) {
+                localStorage.setItem('ipo_' + ipoId, 'visited');
+            }
+        } else {
+            // For existing IPOs, restore the last checkbox states from localStorage
+            premiumCheckboxes.forEach(function(checkboxId) {
+                const checkbox = document.getElementById(checkboxId);
+                if (checkbox) {
+                    const category = checkboxId.replace('subjectToIsPremium', '');
+                    const storageKey = `checkbox_${ipoId}_${checkboxId}`;
+                    const lastState = localStorage.getItem(storageKey);
+                    
+                    // If we have a stored state, use it; otherwise keep current state
+                    if (lastState !== null) {
+                        checkbox.checked = lastState === 'true';
+                    }
+                    // If no stored state, keep the checkbox as it is (don't change it)
+                    
+                    toggleSubjectToRatePlaceholder(category);
+                }
+            });
+        }
+        
+        // Add event listeners to save checkbox states immediately when changed
+        premiumCheckboxes.forEach(function(checkboxId) {
+            const checkbox = document.getElementById(checkboxId);
+            if (checkbox) {
+                checkbox.addEventListener('change', function() {
+                    const storageKey = `checkbox_${ipoId}_${checkboxId}`;
+                    localStorage.setItem(storageKey, this.checked.toString());
+                    
+                    const category = checkboxId.replace('subjectToIsPremium', '');
+                    toggleSubjectToRatePlaceholder(category);
+                });
+            }
+        });
+        
+        // Also save checkbox states when form is submitted
+        const form = document.querySelector('.form');
+        if (form) {
+            form.addEventListener('submit', function() {
+                premiumCheckboxes.forEach(function(checkboxId) {
+                    const checkbox = document.getElementById(checkboxId);
+                    if (checkbox) {
+                        const storageKey = `checkbox_${ipoId}_${checkboxId}`;
+                        localStorage.setItem(storageKey, checkbox.checked.toString());
+                    }
+                });
+            });
+        }
+    });
+</script>
+<script>
+    const form = document.getElementById("placeOrderForm");
+    const csrfToken = "{{ csrf_token }}";
+    const currentUrl = window.location.href;
+    const cleanOrderUrl = "/{{ IPOid }}/SELL";
+    // 🔹 Place Order Only → directly hit BUY()
+    document.getElementById("btnPlaceOnly").addEventListener("click", function () {
+        let formData = new FormData(form);
+        formData.append('placeOrderOnly', true); 
+        fetch(currentUrl, {
+            method: "POST",
+            body: formData,
+            headers: { "X-CSRFToken": csrfToken }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                window.location.replace(cleanOrderUrl);
+            } else {
+                location.reload();
+            }
+        })
+        .catch(err => {
+            location.reload();
+        });
+    });
+
+    // Set the minimum date and time to current date and time
+    // 🔹 Place Order + Telegram → first send Telegram, then hit BUY()
+    document.getElementById("btnPlaceWithTelegram").addEventListener("click", function () {
+        let formData = new FormData(form);
+        // 1️⃣ Send Telegram
+        fetch(form.action, {
+            method: "POST",
+            body: formData,
+            headers: { "X-CSRFToken": csrfToken }
+        })
+        .then(res => res.json())
+        .then(data => {
+            // 2️⃣ Then place the order
+            return fetch('{% url 'place_order' IPOid order_type %}', {
+                method: "POST",
+                body: formData,
+                headers: { "X-CSRFToken": csrfToken }
+            });
+        })
+        .then(orderRes => orderRes.json())
+        .then(orderData => {
+            window.location.replace(cleanOrderUrl);
+        })
+        .catch(err => {
+            location.reload();
+        });
+    });
+    
+</script>
+<script>
+    form.addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault(); // stop default submit
+            btnPlaceWithTelegram.click();
+        }
+    });
+</script>
+<script>
+    document.querySelector('input').addEventListener('input', e => {
+        const el = e.target || e
+
+        if (el.type == "number" && el.max && el.min) {
+            let value = parseInt(el.value)
+            el.value = value // for 000 like input cleanup to 0
+            let max = parseInt(el.max)
+            let min = parseInt(el.min)
+            if (value > max) el.value = el.max
+            if (value < min) el.value = el.min
+        }
+    });
+    $("#txtNumber").keyup(function () {
+        if ($('#txtNumber').val() < 0 || $('#txtNumber').val() > 10) {
+            $('#errorMsg').show();
+        }
+        else {
+            $('#errorMsg').hide();
+        }
+    });
+</script>
+
+<script>
+    function validateForm() {
+        const datetimeField = document.getElementById("datetime");
+        if (!datetimeField.value) {
+            
+            alert("Please enter a valid date and time.");
+            datetimeField.focus();
+            return false; // Prevents form submission
+        }
+    }
+</script>
+<script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+
+<script src="{% static 'JS/jquery.min.js' %}"></script>
+{% comment %} <script src="{% static 'JS/jquery-3.2.1.slim.min.js' %}"></script> {% endcomment %}
+<script>
+    // Hide only the close button after 5 seconds
+    setTimeout(function() {
+        document.querySelectorAll('.alert').forEach(function(btn) {
+            btn.style.display = 'none';
+        });
+    }, 5000); // 5 seconds
+</script>
+
+<script>
+    function toggleSubjectToRatePlaceholder(category) {
+        const checkbox = document.getElementById('subjectToIsPremium' + category);
+        const rateInput = document.getElementById('subjectToRateInput' + category);
+
+        if (checkbox.checked) {
+            rateInput.placeholder = "Price per Share";
+            rateInput.title = "Premium Rate";
+            checkbox.title = "Application Rate";
+        } else {
+            rateInput.placeholder = "Price per PAN";
+            rateInput.title = "Application Rate";
+            checkbox.title = "Premium Rate";
+        }
+    }
+</script>
+
+
+
+{% include 'partials/ipo_shortcuts.html' %}
+{% endblock %}

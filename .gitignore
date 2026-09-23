@@ -1,0 +1,85 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Django
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+staticfiles/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDEs / Editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+.project
+.pydevproject
+.settings/
+docs/
+
+**/migrations/
+wkhtmltox/
+
+# Isolated browser automation artifacts
+playwright_testing/results/
+playwright_testing/tmp/
+playwright-report/
+playwright/.auth/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Logs
+*.log
+launcher_log.txt
+
+
+
+# --------------------------
+
+
+
+playwright_testing/**
+# Required source files for the remote-only test runners
+!playwright_testing/remote.py
+!playwright_testing/remote_e2e.py
+!playwright_testing/REMOTE_TESTING.md
+
+!playwright_testing/calculation/
+!playwright_testing/calculation/remote_seed.py

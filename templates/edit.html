@@ -1,0 +1,364 @@
+{% extends 'basic.html' %}
+{% block title%} Update IPO Details{% endblock %}
+{% block css %}
+{% load static %}
+
+<!-- NEW CODE CSS -->
+<style>
+    .h3,
+    h3 {
+        font-size: 1.75rem;
+        border-block-end: 3px solid #e9ecef;
+        margin: 0px 13px;
+        margin-top: 60px;
+        margin-bottom: -0px;
+        text-align: center;
+
+    }
+    .navbar{
+        padding: 0.5rem 0rem !important;
+    }
+
+    .col-md-3 {
+        display: inline-block;
+        margin-left: -4px;
+    }
+
+    .col-md-3 {
+        width: 100%;
+        height: auto;
+    }
+
+
+
+    body .no-padding {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .carousel-control-prev-icon {
+        background: black no-repeat center center;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23fff' viewBox='0 0 8 8'%3e%3cpath d='M5.25 0l-4 4 4 4 1.5-1.5-2.5-2.5 2.5-2.5-1.5-1.5z'/%3e%3c/svg%3e");
+    }
+
+    .carousel-control-next-icon {
+        background: black no-repeat center center;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23fff' viewBox='0 0 8 8'%3e%3cpath d='M2.75 0l-1.5 1.5 2.5 2.5-2.5 2.5 1.5 1.5 4-4-4-4z'/%3e%3c/svg%3e");
+
+    }
+
+    body .carousel-indicators {
+        bottom: 0;
+    }
+
+    .carousel-indicators .active {
+        background-color: blue;
+    }
+
+    .modal-footer {
+        display: block;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 1rem;
+        border-top: 3px solid #e9ecef;
+        border-bottom-right-radius: .3rem;
+        border-bottom-left-radius: .3rem;
+    }
+</style>
+
+{% endblock %}
+
+{% block body %}
+<div class="col-md-12">
+    
+
+    <!-- NEW CODE -->
+    <div class="container my-3">
+        <h3>Update IPO Details</h3>
+        <div class="modal-body">
+            <!-- <form method="POST" class="post-form" action="/update/{{employee.IPOName}}"> -->
+            <form action="/update/{{employee.id}}?page{{page_number}}" method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                <div>
+
+                    {% for message in messages %}
+                        {% if messages %}
+                            <div class="alert {{ message.tags }} alert-dismissible  fixed-top" id="successalerts" role="alert" style="position:fixed;">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                                </button>
+                                {{ message }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+
+                    {% comment %} {% if messages %}
+
+                    <div class="alert alert-danger fixed-top" id="success-alert" style="height: 40px;">
+                        {% for message in messages %}
+
+                        <button type=" button" class="close" data-dismiss="alert">x</button>
+                        <strong>{{message}}</strong>
+                        {% endfor %}
+
+                    </div>
+                    {% endif %}
+                    <script src="{% static 'JS/jquery.min.js' %}"></script>
+
+                    <script>
+
+                        $("#success-alert").fadeTo(5000, 500).slideUp(500, function () {
+                            $("#success-alert").slideUp(500);
+                        });
+                    </script>
+                 {% endcomment %}
+                <div>
+                    <label for="name" class="form-label"><b>Name&nbsp;<font color="red">*</font>
+                        </b></label>
+                    <input type="text" class="form-control" placeholder="Enter Name" id="name" name='name'
+                        value="{{ employee.IPOName }}" autofocus="autofocus" onfocus="this.select()" maxlength="50" style="text-transform: uppercase;" required>
+                  
+                    <div class="invalid-feedback">
+                        Please Enter IPO Name.
+                    </div>
+                </div><br>
+
+                <div>
+                    <label for="name" class="form-label"><b>IPO Type&nbsp;<font color="red">*</font>
+                    </b></label>
+                    <select id="category" class="form-control" name="IPOType" onchange="myfunction(this)">
+                        {% comment %} <option {% if employee.IPOType == 'None'%} selected {% endif %} value="none">None</option> {% endcomment %}
+                        <option {% if employee.IPOType == 'MAINBOARD'%} selected {% endif %} value="MAINBOARD" >MAINBOARD</option>
+                        <option {% if employee.IPOType == 'SME'%} selected {% endif %} value="SME" disabled>SME</option>
+                    </select>
+                </div><br>
+
+                <div>
+                    <label for="IPOPrice" class="form-label"><b>IPO Upper Price Band&nbsp;<font color="red">*</font>
+                        </b></label>
+                    <input type="text" class="form-control" placeholder="Enter IPO Upper Price Band" id="IPOPrice"
+                    oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..?)\../g, '$1');" / name='IPOPrice'
+                        value="{{ employee.IPOPrice }}" maxlength="10" required>
+                   
+                    <div class="invalid-feedback">
+                        Please Enter IPO Upper Price Band.
+                    </div>
+                </div><br>
+                <div>
+                    <label for="validationCustom02" class="form-label"><b>Total IPO Size in Cr.&nbsp;<font color="red">*</font></b></label>
+                    <input type="text" class="form-control" placeholder="Enter Total IPO Size"
+                    oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..?)\../g, '$1');" / name='TotalIPOSize'
+                        value="{{ employee.TotalIPOSzie }}" maxlength="10" required>
+                   
+                        <div class="invalid-feedback">
+                            Please Enter Total IPO Size.
+                        </div>
+                </div><br>
+                <div>
+                    <label for="LotSize" class="form-label"><b>IPO Retail Lot Size&nbsp;<font color="red">*</font>
+                        </b></label>
+                    <input type="text" class="form-control" placeholder="Enter IPO Lot Size" id="LotSize"
+                     name='LotSizeRetail' value="{{ employee.LotSizeRetail}}" maxlength="10" required>
+                    
+                    <div class="invalid-feedback">
+                        Please Enter IPO Lot Size.
+                    </div>
+                </div><br>
+
+                <div id="lotshni">
+                    <label for="LotSize" class="form-label"><b>IPO SHNI Lot Size&nbsp;<font color="red">*</font>
+                        </b></label>
+                    <input type="text" class="form-control" placeholder="Enter IPO Lot Size" id="LotSizeS"
+                     name='LotSizeSHNI' value="{% if employee.LotSizeSHNI is none %}{%else%}{{employee.LotSizeSHNI}}{%endif%}" maxlength="10" required>
+                    
+                    <div class="invalid-feedback">
+                        Please Enter IPO Lot Size.
+                    </div>
+                    <br>
+                </div>
+                
+                <div id="lotbhni">
+                    <label for="LotSize" class="form-label"><b>IPO BHNI Lot Size&nbsp;<font color="red">*</font>
+                        </b></label>
+                    <input type="text" class="form-control" placeholder="Enter IPO Lot Size" id="LotSizeB"
+                     name='LotSizeBHNI' value="{% if employee.LotSizeBHNI is none %}{%else%}{{employee.LotSizeBHNI}}{%endif%}" maxlength="10" required>
+                    
+                    <div class="invalid-feedback">
+                        Please Enter IPO Lot Size.
+                    </div>
+                    <br>
+                </div>
+                {% comment %} <div id="lotshni">
+                    <label for="LotSize" class="form-label"><b>IPO SHNI Lot Size&nbsp;<font color="red">*</font>
+                        </b></label>
+                    <input type="text" class="form-control" placeholder="Enter IPO Lot Size" id="LotSizeS"
+                     name='LotSizeSHNI' value="{% if employee.LotSizeSHNI is none %}{%else%}{{employee.LotSizeSHNI}}{%endif%}" maxlength="10" required>
+                    
+                    <div class="invalid-feedback">
+                        Please Enter IPO Lot Size.
+                    </div>
+                    <br>
+                </div> {% endcomment %}
+               
+                
+                <div>
+                    <label for="validationCustom02" class="form-label"><b>Retail Percentage&nbsp;<font color="red">*</font></b></label>
+                    <input type="text" class="form-control" placeholder="Enter Retail Percentage"
+                        onkeypress="return event.charCode >= 48 && event.charCode <= 57" name='RetailPercentage'
+                        value="{{ employee.RetailPercentage }}" maxlength="10" required>
+                   
+                        <div class="invalid-feedback">
+                            Please Enter Retail Percentage.
+                        </div>
+                </div><br>
+
+                
+                <div id="bhni%">
+                    <label for="validationCustom02" class="form-label"><b>BHNI Percentage&nbsp;<font color="red">*</font></b></label>
+                    <input type="text" class="form-control" placeholder="Enter BHNI Percentage"
+                        onkeypress="return event.charCode >= 48 && event.charCode <= 57" name='BHNIPercentage' id="b%"
+                        value="{%if employee.BHNIPercentage == '' %}10{%else%}{{employee.BHNIPercentage}}{%endif%}" maxlength="10" required>
+                   
+                        <div class="invalid-feedback">
+                            Please Enter BHNI Percentage.
+                        </div>
+                        <br>
+                </div>
+                <div id="shni%">
+                    <label for="validationCustom02" class="form-label"><b>SHNI Percentage&nbsp;<font color="red">*</font></b></label>
+                    <input type="text" class="form-control" placeholder="Enter SHNI Percentage"
+                        onkeypress="return event.charCode >= 48 && event.charCode <= 57" name='SHNIPercentage' id="s%"
+                        value="{%if employee.SHNIPercentage == '' %}5{%else%}{{employee.SHNIPercentage}}{%endif%}" maxlength="10" required>
+                   
+                        <div class="invalid-feedback">
+                            Please Enter SHNI Percentage.
+                        </div>
+                        <br>
+                </div>
+                
+
+                <div>
+                    <label class="form-label"><b>Remark :</b></label>
+                    <input type="text" class="form-control" placeholder="Enter Remark" name='Remark'
+                        value="{{ employee.Remark }}" maxlength="100">
+                   
+                </div><br>
+
+
+                <div class="modal-footer">
+                   
+
+                    <div style="display: inline;" align="center;">
+                        <div style="float: right; margin: 0 -17px;">
+                            <button class="btn btn-primary" type="submit"
+                                style="padding: 7px 12px; text-align: center; text-decoration: none; border-radius: 4px; display: inline-block; font-size: 100%;">Submit
+                            </button>
+                        </div>
+                        <div style="float: left; margin: 0 -17px;">
+                            <button onclick="window.location.href='/IPOSETUP';" class="btn btn-primary" type="button"
+                                style="padding: 7px 15px; text-align: center; text-decoration: none; border-radius: 4px; display: inline-block; font-size: 100%;">Back</button>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    var z = document.getElementById('category').value;
+                    if( z == 'SME') {
+                    document.getElementById('lotbhni').style.display = 'none';
+                    document.getElementById('lotshni').style.display = 'none';
+                    document.getElementById('bhni%').style.display = 'none';
+                    document.getElementById('shni%').style.display = 'none'; 
+                    document.getElementById('LotSizeB').removeAttribute("required"); 
+                    document.getElementById('LotSizeS').removeAttribute("required");
+                    document.getElementById('b%').removeAttribute("required"); 
+                    document.getElementById('s%').removeAttribute("required"); 
+                }
+                </script>
+            </form>
+
+        </div>
+
+        <script>
+
+            function myfunction(selectedOption){
+
+                var a = document.getElementById('category').value;
+                if (a == 'MAINBOARD') {
+                    document.getElementById('LotSizeB').setAttribute("required", "required"); 
+                    document.getElementById('LotSizeS').setAttribute("required", "required"); 
+                    document.getElementById('b%').setAttribute("required", "required"); 
+                    document.getElementById('s%').setAttribute("required", "required");
+                         
+                    document.getElementById('lotbhni').style.display = 'block';
+                    document.getElementById('lotshni').style.display = 'block';
+                    document.getElementById('bhni%').style.display = 'block';
+                    document.getElementById('shni%').style.display = 'block';
+                }
+                else if( a == 'SME') {
+                    document.getElementById('LotSizeB').removeAttribute("required"); 
+                    document.getElementById('LotSizeS').removeAttribute("required");
+                    document.getElementById('b%').removeAttribute("required"); 
+                    document.getElementById('s%').removeAttribute("required"); 
+                    document.getElementById('lotbhni').style.display = 'none';
+                    document.getElementById('lotshni').style.display = 'none';
+                    document.getElementById('bhni%').style.display = 'none';
+                    document.getElementById('shni%').style.display = 'none';
+                }
+            }
+
+
+
+        </script>
+
+        <script>
+            // Example starter JavaScript for disabling form submissions if there are invalid fields
+            (function () {
+                'use strict'
+
+                // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                var forms = document.querySelectorAll('.needs-validation')
+
+                // Loop over them and prevent submission
+                Array.prototype.slice.call(forms)
+                    .forEach(function (form) {
+                        form.addEventListener('submit', function (event) {
+                            if (!form.checkValidity()) {
+                                event.preventDefault()
+                                event.stopPropagation()
+                            }
+
+                            form.classList.add('was-validated')
+                        }, false)
+                    })
+            })()
+        </script>
+
+        <!-- JAVASCRIPT FOR ADDIPO FORM WITHOUT ENTERING ANY NUMBER USER CANNOT TO BE NEXT INPUT -->
+        <script>
+            $(document).ready(function () {
+                $('#name, #IPOPrice, #LotSize').focusout(function () {
+                    var thisValue = $(this).val();
+                    if (thisValue.trim() == '') {
+                        $(this).next().show();
+                        $(this).focus();
+                    } else {
+                        $(this).next().hide();
+                    }
+                });
+
+            });
+        </script>
+
+        <script src="{% static 'JS/jquery.min.js' %}"></script>
+            <script>
+                $("#successalerts").fadeTo(3000, 500).slideUp(500, function () {
+                    $("#successalerts").slideUp(500);
+                });
+            </script>
+
+    </div>
+
+
+    <!-- <script src="{% static 'JS/jquery-3.3.1.slim.min.js' %}"></script> -->
+    {% endblock %}
