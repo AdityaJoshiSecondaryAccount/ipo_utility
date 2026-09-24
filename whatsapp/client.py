@@ -85,8 +85,8 @@ def send_order_confirmation(phone_number, ipo_name, order_type, group_name,
         "type": "template",
         "template": {
             # "name": "ipo_order_confirmation",
-            # "name": "ipo_order_formatted",
-            "name": "ipo_order_lines",
+            "name": "ipo_order_formatted",
+            # "name": "ipo_order_lines",
             "language": {"code": "en"},
             "components": components,
         },
@@ -218,6 +218,37 @@ def send_text_message(phone_number, text):
             phone_number=phone_number,
             text=str(text),
             msg_type="text",
+            wamid=wamid
+        )
+    return res
+
+
+def send_document_message(phone_number, media_id=None, caption=None, log_to_fastapi=True):
+    url = f"https://graph.facebook.com/{settings.WHATSAPP_API_VERSION}/{settings.WHATSAPP_PHONE_NUMBER_ID}/messages"
+    headers = _get_api_headers("application/json")
+    
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": phone_number,
+        "type": "document",
+        "document": {
+            "id": str(media_id),
+            "caption": str(caption) if caption else "",
+            "filename": "Orders_Summary.pdf"
+        },
+    }
+    res = requests.post(url, headers=headers, json=payload, timeout=15)
+    
+    if res.ok and log_to_fastapi:
+        try:
+            wamid = res.json().get("messages", [{}])[0].get("id")
+        except Exception:
+            wamid = None
+        _log_outbound_to_fastapi(
+            phone_number=phone_number,
+            text=caption or "",
+            msg_type="document",
+            media_url=str(media_id) if media_id else None,
             wamid=wamid
         )
     return res
