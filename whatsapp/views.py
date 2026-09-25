@@ -148,56 +148,18 @@ def _send_order(request, ipo_id, order_type):
     except Exception:
         formatted_datetime = raw_datetime
 
-    # 1. Build the Kostak String
-    k_parts = []
-    if float(request.POST.get("KostakQTY") or 0) > 0:
-        k_parts.append(f"Retail: {request.POST.get('KostakQTY')}@₹{request.POST.get('KostakRate')}")
-    if float(request.POST.get("KostakQTYSHNI") or 0) > 0:
-        k_parts.append(f"SHNI: {request.POST.get('KostakQTYSHNI')}@₹{request.POST.get('KostakRateSHNI')}")
-    if float(request.POST.get("KostakQTYBHNI") or 0) > 0:
-        k_parts.append(f"BHNI: {request.POST.get('KostakQTYBHNI')}@₹{request.POST.get('KostakRateBHNI')}")
-    kostak_str = " | ".join(k_parts)
-
-    # 2. Build the Subject To String
-    s_parts = []
-    if float(request.POST.get("SubjectToQTY") or 0) > 0:
-        s_parts.append(f"Retail: {request.POST.get('SubjectToQTY')}@₹{request.POST.get('SubjectToRate')}")
-    if float(request.POST.get("SubjectToQTYSHNI") or 0) > 0:
-        s_parts.append(f"SHNI: {request.POST.get('SubjectToQTYSHNI')}@₹{request.POST.get('SubjectToRateSHNI')}")
-    if float(request.POST.get("SubjectToQTYBHNI") or 0) > 0:
-        s_parts.append(f"BHNI: {request.POST.get('SubjectToQTYBHNI')}@₹{request.POST.get('SubjectToRateBHNI')}")
-    subject_str = " | ".join(s_parts)
-
-    # 3. Build Premium String
-    premium_str = ""
-    if float(request.POST.get("PremiumQTY") or 0) > 0:
-        premium_str = f"{request.POST.get('PremiumQTY')}@₹{request.POST.get('PremiumRate')}"
-
-    # 4. Build Options String
-    opt_parts = []
-    if float(request.POST.get("CallQTY") or 0) > 0:
-        opt_parts.append(f"Call: {request.POST.get('CallQTY')}@₹{request.POST.get('CallRate')}")
-    if float(request.POST.get("PutQTY") or 0) > 0:
-        opt_parts.append(f"Put: {request.POST.get('PutQTY')}@₹{request.POST.get('PutRate')}")
-    options_str = " | ".join(opt_parts)
-
-    # Dynamic template name from UI (if sent), otherwise default
-    template_name = request.POST.get("whatsapp_template", "ipo_order_formatted")
-
     try:
-        from .client import send_grouped_order_confirmation
-        response = send_grouped_order_confirmation(
+        from .client import send_order_confirmation
+        response = send_order_confirmation(
             phone_number=phone_number,
             ipo_name=ipo.IPOName,
             order_type=order_type,
             group_name=group.GroupName,
             order_datetime=formatted_datetime,
-            kostak_str=kostak_str,
-            subject_str=subject_str,
-            premium_str=premium_str,
-            options_str=options_str,
-            remark_text=remark_text,
-            template_name=template_name
+            order_details=details,
+            remark_text=full_remark,
+            ipo_id=ipo_id,
+            broker_id=group.user_id if hasattr(group, 'user_id') else None
         )
         response_data = response.json() if response.content else {}
     except requests.RequestException as exc:
