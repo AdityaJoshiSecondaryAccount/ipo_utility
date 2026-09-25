@@ -47,8 +47,12 @@ def handle_flow_action(decrypted_payload: dict, customer_phone: str = None) -> d
     screen = decrypted_payload.get("screen")
     data = decrypted_payload.get("data", {})
     flow_token = decrypted_payload.get("flow_token")
+    
+    # 🚨 SECURITY/ARCHITECTURE FIX: Use flow_token as the verified customer phone number
+    if flow_token:
+        customer_phone = flow_token
 
-    logger.info(f"Flow Request: action={action}, screen={screen}, flow_token={flow_token}")
+    logger.info(f"Flow Request: action={action}, screen={screen}, flow_token={flow_token}, customer_phone={customer_phone}")
 
     # 1. Health Check Ping from Meta Flow Builder
     if action == "ping":

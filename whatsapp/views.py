@@ -1,3 +1,5 @@
+import io
+from PIL import Image
 import hashlib
 import hmac
 import json
@@ -21,6 +23,7 @@ from home.models import CurrentIpoName, GroupDetail, Order
 
 from .client import (
     send_image_message,
+    send_document_message,
     send_order_confirmation,
     send_text_message,
     upload_media,
@@ -145,17 +148,56 @@ def _send_order(request, ipo_id, order_type):
     except Exception:
         formatted_datetime = raw_datetime
 
+    # 1. Build the Kostak String
+    k_parts = []
+    if float(request.POST.get("KostakQTY") or 0) > 0:
+        k_parts.append(f"Retail: {request.POST.get('KostakQTY')}@₹{request.POST.get('KostakRate')}")
+    if float(request.POST.get("KostakQTYSHNI") or 0) > 0:
+        k_parts.append(f"SHNI: {request.POST.get('KostakQTYSHNI')}@₹{request.POST.get('KostakRateSHNI')}")
+    if float(request.POST.get("KostakQTYBHNI") or 0) > 0:
+        k_parts.append(f"BHNI: {request.POST.get('KostakQTYBHNI')}@₹{request.POST.get('KostakRateBHNI')}")
+    kostak_str = " | ".join(k_parts)
+
+    # 2. Build the Subject To String
+    s_parts = []
+    if float(request.POST.get("SubjectToQTY") or 0) > 0:
+        s_parts.append(f"Retail: {request.POST.get('SubjectToQTY')}@₹{request.POST.get('SubjectToRate')}")
+    if float(request.POST.get("SubjectToQTYSHNI") or 0) > 0:
+        s_parts.append(f"SHNI: {request.POST.get('SubjectToQTYSHNI')}@₹{request.POST.get('SubjectToRateSHNI')}")
+    if float(request.POST.get("SubjectToQTYBHNI") or 0) > 0:
+        s_parts.append(f"BHNI: {request.POST.get('SubjectToQTYBHNI')}@₹{request.POST.get('SubjectToRateBHNI')}")
+    subject_str = " | ".join(s_parts)
+
+    # 3. Build Premium String
+    premium_str = ""
+    if float(request.POST.get("PremiumQTY") or 0) > 0:
+        premium_str = f"{request.POST.get('PremiumQTY')}@₹{request.POST.get('PremiumRate')}"
+
+    # 4. Build Options String
+    opt_parts = []
+    if float(request.POST.get("CallQTY") or 0) > 0:
+        opt_parts.append(f"Call: {request.POST.get('CallQTY')}@₹{request.POST.get('CallRate')}")
+    if float(request.POST.get("PutQTY") or 0) > 0:
+        opt_parts.append(f"Put: {request.POST.get('PutQTY')}@₹{request.POST.get('PutRate')}")
+    options_str = " | ".join(opt_parts)
+
+    # Dynamic template name from UI (if sent), otherwise default
+    template_name = request.POST.get("whatsapp_template", "ipo_order_formatted")
+
     try:
-        response = send_order_confirmation(
+        from .client import send_grouped_order_confirmation
+        response = send_grouped_order_confirmation(
             phone_number=phone_number,
             ipo_name=ipo.IPOName,
             order_type=order_type,
             group_name=group.GroupName,
             order_datetime=formatted_datetime,
-            order_details=details,
-            remark_text=full_remark,
-            ipo_id=ipo.id,
-            broker_id=request.user.id,
+            kostak_str=kostak_str,
+            subject_str=subject_str,
+            premium_str=premium_str,
+            options_str=options_str,
+            remark_text=remark_text,
+            template_name=template_name
         )
         response_data = response.json() if response.content else {}
     except requests.RequestException as exc:
@@ -246,6 +288,11 @@ def _extract_button_payload(msg):
 
     return (payload or "").strip(), (text or "").strip()
 
+
+def _is_ipo_flow_action(msg_type, text):
+    if msg_type == "text" and text and text.strip().upper() == "IPO":
+        return True
+    return False
 
 def _is_view_orders_action(msg_type, payload, text):
     """Checks if payload, text, or message type corresponds to button click / View Orders."""
@@ -419,43 +466,49 @@ def webhook(request):
                             f.write(img_buf.getvalue())
                         local_media_url = f"/chat-api/media/local/{filename}"
 
-                        # Upload media to Meta WhatsApp Cloud API
-                        upload_res = upload_media(
-                            img_buf,
-                            mime_type="image/png",
-                            filename=filename
-                        )
-                        print(f"[WA Webhook Upload]: HTTP {upload_res.status_code} -> {upload_res.text}")
-
-                        if upload_res.ok:
-                            media_id = upload_res.json().get("id")
-                            ipo_display = getattr(target_ipo, 'IPOName', 'Orders') if target_ipo else 'Orders'
-                            caption = f"{ipo_display} Status - {group.GroupName}"
-                            send_res = send_image_message(
-                                phone_number=sender_raw,
-                                media_id=media_id,
-                                caption=caption,
-                                log_to_fastapi=False
-                            )
-                            print(f"[WA Webhook Send Image]: HTTP {send_res.status_code} -> {send_res.text}")
-                            if not send_res.ok:
-                                print(f"[WA Webhook ERROR sending image]: {send_res.text}")
-                            else:
-                                try:
-                                    wamid = send_res.json().get("messages", [{}])[0].get("id")
-                                except Exception:
-                                    wamid = None
-                                _log_outbound_to_fastapi(
+                        # 1. COMPRESS TO JPEG FIRST
+                        img = Image.open(img_buf)
+                        if img.mode in ("RGBA", "P"):
+                            img = img.convert("RGB")
+                        
+                        optimized_buf = io.BytesIO()
+                        # Try saving as a highly optimized JPEG
+                        img.save(optimized_buf, format="JPEG", quality=75, optimize=True)
+                        optimized_size = len(optimized_buf.getvalue())
+                        
+                        caption = f"{ipo_display} Status - {group.GroupName}"
+                        upload_res = None
+                        send_res = None
+                        
+                        # 2. CHECK SIZE - IF < 5MB, SEND AS IMAGE
+                        if optimized_size < 5000000:
+                            upload_res = upload_media(optimized_buf, mime_type="image/jpeg", filename="orders.jpg")
+                            if upload_res.ok:
+                                send_res = send_image_message(
                                     phone_number=sender_raw,
-                                    text=caption,
-                                    msg_type="image",
-                                    media_url=local_media_url,
-                                    media_filename=filename,
-                                    wamid=wamid
+                                    media_id=upload_res.json().get("id"),
+                                    image_url=local_media_url,
+                                    caption=caption,
+                                    log_to_fastapi=True
                                 )
-                        else:
-                            print(f"[WA Webhook ERROR uploading media]: {upload_res.text}")
-                            # Fallback to text message if media upload fails
+                        
+                        # 3. 1ST FALLBACK: IF > 5MB OR UPLOAD FAILED, CONVERT TO PDF
+                        if optimized_size >= 5000000 or (upload_res and not upload_res.ok):
+                            print(f"[WA Webhook] JPEG too large or failed. Falling back to PDF...")
+                            pdf_buf = io.BytesIO()
+                            img.save(pdf_buf, format="PDF")
+                            upload_res = upload_media(pdf_buf, mime_type="application/pdf", filename="orders.pdf")
+                            
+                            if upload_res.ok:
+                                send_res = send_document_message(
+                                    phone_number=sender_raw,
+                                    media_id=upload_res.json().get("id"),
+                                    caption=caption
+                                )
+                                
+                        # 4. 2ND FALLBACK: IF PDF FAILS, SEND AS TEXT
+                        if not upload_res or not upload_res.ok or not send_res or not send_res.ok:
+                            print(f"[WA Webhook ERROR] Both Media Uploads Failed. Falling back to text.")
                             send_text_message(
                                 sender_raw,
                                 f"Orders Summary for {group.GroupName}: {orders.count()} active orders."

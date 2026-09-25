@@ -136,3 +136,8 @@ WAB_Interaface/ngrok.exe
 *.png
 *.webp
 *.jfif
+settings.py
+
+playwright_testing/inventory/
+playwright_testing/
+

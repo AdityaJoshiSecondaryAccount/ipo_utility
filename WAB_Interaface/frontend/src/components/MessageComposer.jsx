@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useChat } from '../context/ChatContext';
-import { Send, Paperclip, Zap, Smile, Image as ImageIcon, FileText, Loader2 } from 'lucide-react';
+import { Send, Paperclip, Zap, Smile, Image as ImageIcon, FileText, Loader2, SendHorizonal } from 'lucide-react';
 import { CannedRepliesModal } from './CannedRepliesModal';
 
 export const MessageComposer = () => {
@@ -8,6 +8,7 @@ export const MessageComposer = () => {
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
   const [showCannedModal, setShowCannedModal] = useState(false);
+  const [templateName, setTemplateName] = useState('place_ipo_order');
   const fileInputRef = useRef(null);
   const textareaRef = useRef(null);
 
@@ -82,6 +83,28 @@ export const MessageComposer = () => {
     // Normal text pasting continues default behavior
   };
 
+  const handleSendFlow = async () => {
+    if (!activeConversation?.contact?.phone_number || sending) return;
+    setSending(true);
+    
+    try {
+      const res = await fetch('/chat-api/messages/send-flow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone_number: activeConversation.contact.phone_number,
+          template_name: templateName
+        })
+      });
+      if (!res.ok) throw new Error('Failed to send flow template');
+      // The backend will broadcast the new message via WS, so we don't need to manually update state here
+    } catch (err) {
+      alert(`Send Flow failed: ${err.message}`);
+    } finally {
+      setSending(false);
+    }
+  };
+
   return (
     <div className="composer-container">
       {/* Hidden File Input */}
@@ -109,6 +132,40 @@ export const MessageComposer = () => {
         disabled={sending}
       >
         <Paperclip size={20} />
+      </button>
+
+      {/* Template selection dropdown */}
+      <select 
+        value={templateName} 
+        onChange={(e) => setTemplateName(e.target.value)}
+        className="composer-dropdown"
+        title="Select Template"
+        style={{
+          padding: '4px',
+          borderRadius: '4px',
+          border: '1px solid var(--border-color)',
+          background: 'var(--bg-color)',
+          color: 'var(--text-color)',
+          marginLeft: '4px',
+          marginRight: '4px',
+          fontSize: '0.85rem'
+        }}
+        disabled={sending}
+      >
+        <option value="place_ipo_order">place_ipo_order (Flow)</option>
+        <option value="ipo_order_grouped">ipo_order_grouped</option>
+        <option value="ipo_order_formatted">ipo_order_formatted</option>
+      </select>
+      
+      {/* Send Flow Button */}
+      <button
+        className="composer-btn"
+        onClick={handleSendFlow}
+        title="Send Selected Template"
+        disabled={sending}
+        style={{ color: 'var(--accent-wa)' }}
+      >
+        <SendHorizonal size={20} />
       </button>
 
       {/* Text Area */}

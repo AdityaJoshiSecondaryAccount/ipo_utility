@@ -123,6 +123,120 @@ async def mark_conversation_as_read(
     await manager.broadcast("CONVERSATION_READ", {"conversation_id": conv_id})
     return {"status": "success", "conversation_id": conv_id, "marked_read_count": len(unread_messages)}
 
+from pydantic import BaseModel
+class FlowRequest(BaseModel):
+    phone_number: str
+    template_name: str = "place_ipo_order"
+
+@router.post("/messages/send-flow")
+async def send_flow_template(
+    flow_req: FlowRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    clean_phone = flow_req.phone_number.replace("+", "").replace(" ", "").replace("-", "")
+    
+    # 1. Find or create Contact & Conversation
+    stmt = select(Contact).where(Contact.phone_number == clean_phone)
+    result = await db.execute(stmt)
+    contact = result.scalar_one_or_none()
+    if not contact:
+        contact = Contact(phone_number=clean_phone, name=f"+{clean_phone}")
+        db.add(contact)
+        await db.flush()
+        
+    stmt = select(Conversation).where(Conversation.contact_id == contact.id)
+    result = await db.execute(stmt)
+    conv = result.scalar_one_or_none()
+    if not conv:
+        conv = Conversation(contact_id=contact.id)
+        db.add(conv)
+        await db.flush()
+
+    import httpx
+    from app.config import settings
+    url = f"https://graph.facebook.com/{settings.WHATSAPP_API_VERSION}/{settings.WHATSAPP_PHONE_NUMBER_ID}/messages"
+    headers = {
+        "Authorization": f"Bearer {settings.WHATSAPP_ACCESS_TOKEN}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": clean_phone,
+        "type": "template",
+        "template": {
+            "name": flow_req.template_name,
+            "language": {"code": "en"},
+            "components": [
+                {
+                    "type": "button",
+                    "sub_type": "flow",
+                    "index": "0",
+                    "parameters": [
+                        {
+                            "type": "action",
+                            "action": {
+                                "flow_token": clean_phone
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+    
+    wamid = None
+    status = "sent"
+    error_msg = None
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(url, headers=headers, json=payload, timeout=15)
+            if not resp.is_success:
+                status = "failed"
+                error_msg = resp.text
+            else:
+                data = resp.json()
+                wamid = data.get("messages", [{}])[0].get("id")
+    except Exception as e:
+        status = "failed"
+        error_msg = str(e)
+
+    # 3. Store message in Database
+    now = utcnow()
+    new_msg = Message(
+        conversation_id=conv.id,
+        wamid=wamid,
+        direction="outbound",
+        message_type="template",
+        text="[Sent Flow Template]",
+        status=status,
+        error_message=error_msg,
+        timestamp=now
+    )
+    db.add(new_msg)
+    
+    conv.last_message_text = "[Sent Flow Template]"
+    conv.last_message_time = now
+    conv.last_message_status = status
+    
+    await db.commit()
+    await db.refresh(new_msg)
+    
+    await manager.broadcast("NEW_MESSAGE", {
+        "message": {
+            "id": new_msg.id,
+            "conversation_id": conv.id,
+            "wamid": new_msg.wamid,
+            "direction": new_msg.direction,
+            "message_type": new_msg.message_type,
+            "text": new_msg.text,
+            "status": new_msg.status,
+            "timestamp": new_msg.timestamp.isoformat()
+        },
+        "conversation_id": conv.id
+    })
+    
+    return {"status": status, "message_id": new_msg.id}
 
 @router.post("/messages/send", response_model=MessageResponse)
 async def send_message(

@@ -252,6 +252,9 @@ async def process_webhook_payload(payload: dict, session: AsyncSession):
                     elif body_text and "view your orders" in body_text.lower():
                         logger.info(f"Detected 'View Your Orders' text: {body_text}. Routing to existing ADwealth Django...")
                         await forward_to_existing_django(payload)
+                    elif body_text and body_text.strip().upper() == "IPO":
+                        logger.info(f"Detected 'IPO' keyword. Routing to existing ADwealth Django to trigger Flow...")
+                        await forward_to_existing_django(payload)
 
     except Exception as e:
         logger.error(f"Error processing webhook payload: {e}", exc_info=True)
