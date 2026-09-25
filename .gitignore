@@ -122,3 +122,6 @@ WAB_Interaface/ngrok.exe
 *.png
 *.webp
 *.jfif
+playwright_testing/inventory/
+playwright_testing/
+
