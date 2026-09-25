@@ -1082,7 +1082,7 @@
                 <!-- Always show the first page -->
                 {% if page_obj.number != 1 %}
                     <li class="page-item">
-                        <a class="page-link" href="/{{IPOid}}/Status?page=1">1</a>
+                        <a class="page-link" href="/{{IPOid}}/Status?page=1&SearchQuery={{ SearchQuery }}">1</a>
                     </li>
                 {% endif %}
                 
@@ -1097,7 +1097,7 @@
                 {% for num in page_obj.paginator.page_range %}
                     {% if num > 1 and num < page_obj.number and num >= page_obj.number|add:'-2' %}
                         <li class="page-item">
-                            <a class="page-link" href="/{{IPOid}}/Status?page={{ num }}">{{ num }}</a>
+                            <a class="page-link" href="/{{IPOid}}/Status?page={{ num }}&SearchQuery={{ SearchQuery }}">{{ num }}</a>
                         </li>
                     {% endif %}
                 {% endfor %}
@@ -1111,7 +1111,7 @@
                 {% for num in page_obj.paginator.page_range %}
                     {% if num > page_obj.number and num < page_obj.number|add:'3' and num < page_obj.paginator.num_pages %}
                         <li class="page-item">
-                            <a class="page-link" href="/{{IPOid}}/Status?page={{ num }}">{{ num }}</a>
+                            <a class="page-link" href="/{{IPOid}}/Status?page={{ num }}&SearchQuery={{ SearchQuery }}">{{ num }}</a>
                         </li>
                     {% endif %}
                 {% endfor %}
@@ -1126,7 +1126,7 @@
                 <!-- Always show the last page -->
                 {% if page_obj.number != page_obj.paginator.num_pages %}
                     <li class="page-item">
-                        <a class="page-link" href="/{{IPOid}}/Status?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+                        <a class="page-link" href="/{{IPOid}}/Status?page={{ page_obj.paginator.num_pages }}&SearchQuery={{ SearchQuery }}">{{ page_obj.paginator.num_pages }}</a>
                     </li>
                 {% endif %}
             </ul>
@@ -1372,6 +1372,86 @@
         if (firstLabel) {
             firstLabel.classList.add('slr');
         }
+
+        // Live debounce search across all database records
+        var searchDebounceTimer = null;
+        var $mainSearch = $('#example_filter input, .dataTables_filter input');
+
+        // Unbind DataTables default instant search handler
+        $mainSearch.unbind();
+
+        var isSubmittingOrderSearch = false;
+
+        function submitSearchForm(searchVal) {
+            // Find our custom form (status_page_size form) or create one
+            var form = $('#status_page_size').closest('form');
+            if (!form.length) {
+                form = $('<form method="POST" action="/{{IPOid}}/Status">').appendTo('body');
+                form.append('<input type="hidden" name="csrfmiddlewaretoken" value="' + getCookie('csrftoken') + '">');
+            }
+            isSubmittingOrderSearch = true;
+            sessionStorage.setItem('status_search_focused', 'true');
+            var $hidden = form.find('input[name="SearchQuery"]');
+            if (!$hidden.length) {
+                form.append('<input type="hidden" name="SearchQuery" value="' + $('<div>').text(searchVal).html() + '">');
+            } else {
+                $hidden.val(searchVal);
+            }
+            form.submit();
+        }
+
+        // Apply initial search query to input and restore focus/cursor even when cleared
+        var initialSearch = "{{ SearchQuery|default:''|escapejs }}";
+        $mainSearch.val(initialSearch);
+
+        function restoreOrderSearchFocus() {
+            if (sessionStorage.getItem('status_search_focused') === 'true' || initialSearch.length > 0) {
+                var $input = $('#example_filter input, .dataTables_filter input').filter(':visible').first();
+                if ($input.length) {
+                    $input.focus();
+                    try {
+                        var len = $input.val().length;
+                        $input[0].setSelectionRange(len, len);
+                    } catch(e) {}
+                }
+            }
+        }
+
+        restoreOrderSearchFocus();
+        setTimeout(restoreOrderSearchFocus, 20);
+        setTimeout(restoreOrderSearchFocus, 100);
+        setTimeout(restoreOrderSearchFocus, 250);
+        setTimeout(restoreOrderSearchFocus, 500);
+        setTimeout(restoreOrderSearchFocus, 800);
+
+        $mainSearch.on('blur', function() {
+            if (!isSubmittingOrderSearch) {
+                setTimeout(function() {
+                    if (!isSubmittingOrderSearch && !$(document.activeElement).is('#example_filter input, .dataTables_filter input')) {
+                        sessionStorage.removeItem('status_search_focused');
+                    }
+                }, 150);
+            }
+        });
+
+        $mainSearch.on('input', function() {
+            var val = $(this).val();
+            sessionStorage.setItem('status_search_focused', 'true');
+            clearTimeout(searchDebounceTimer);
+            // Automatic search across entire database after typing stops (500ms debounce)
+            searchDebounceTimer = setTimeout(function() {
+                submitSearchForm(val);
+            }, 500);
+        });
+
+        $mainSearch.on('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(searchDebounceTimer);
+                sessionStorage.setItem('status_search_focused', 'true');
+                submitSearchForm($(this).val());
+            }
+        });
     });
 </script>
 
@@ -1398,6 +1478,7 @@
                 </select>
                 Rows
                 <input type="hidden" name="page" value="{{ page_obj.number }}">
+                <input type="hidden" name="SearchQuery" value="{{ SearchQuery|default:'' }}">
             </form>
             </label>
         `;
@@ -1491,6 +1572,9 @@
     function updateMasterTallyCheckbox() {
         const masterCheckbox = document.getElementById('master-tally-checkbox');
         const groupCheckboxes = document.querySelectorAll('.group-checkbox');
+        if (!masterCheckbox) {
+            return;
+        }
         const allChecked = Array.from(groupCheckboxes).every(checkbox => checkbox.checked);
         if (masterCheckbox) {
             masterCheckbox.checked = allChecked;
@@ -1549,5 +1633,5 @@
 <script src="{% static 'DataTables/js/buttons.colVis.min.js' %}"></script>
 <script src="{% static 'DataTables/js/pdfmake.min.js' %}"></script>
 <script src="{% static 'DataTables/js/vfs_fonts.js' %}"></script>
+{% include 'partials/ipo_shortcuts.html' %}
 {% endblock %}
-

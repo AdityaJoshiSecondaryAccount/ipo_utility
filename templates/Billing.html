@@ -1128,13 +1128,13 @@
 
     <div class="form-row fm">
         <div class="form-group col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                <form method="POST" action="/{{IPOid}}/Billing" name="BillingFilter">
+                <form method="POST" action="/{{IPOid}}/Billing" name="BillingFilter" id="mainBillingFilterForm">
                     {% csrf_token %}
+                    <input type="hidden" name="SearchQuery" value="{{ SearchQuery|default:'' }}">
                     <div class="form-row">
                         <div class="form-group col-xl-2 col-lg-3 col-md-4 col-sm-4 col-5">
                             <label for="category"><b>Group</b></label>
-                            <select  class="form-control custom-select" name="Groupfilter" autofocus="autofocus"
-                                >
+                            <select id="Groupfilter" class="form-control custom-select" name="Groupfilter">
                                 <option {% if Groupfilter == 'All' or Groupfilter == 'None' %} selected {% endif %} value="All">All</option>
                                 {% for i in Group %}
                                 <option {% if Groupfilter == i.GroupName %} selected {%else%} {% endif %} value="{{ i.GroupName }}">
@@ -1242,44 +1242,41 @@
                     </div>
                     <div class="form-row tb">
                         <div class="form-group col-xl-12 col-lg-12 col-md-12 col-sm-12">
-                            <form method="POST" action="BillingFilter" name="BillingFilter">
-                                {% csrf_token %}
-                                <div class="form-row">
-                                     {% comment %} <div style="overflow-x:auto;">   {% endcomment %}
-                                    <div class="table-responsive text-nowrap">
-                                        <table id="bootstrapdatatable" class="table table-bordered table-hover table-striped " style="margin-bottom: 30px; border: 1px solid #dee2e6;">
-                                            <thead>
-                                                <tr>
-                                                    <th style='text-align: inherit; text-align:center;' >
-                                                        Total
-                                                    </th>
-                                                    <th class="tablelinel " style='text-align: inherit; text-align:center;' >
-                                                        IPO Price
-                                                    </th>
-                                                    <th class="tablelinel " style='text-align: inherit; text-align:center;'>
-                                                        Pre-Open Price
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                               
-                                                <tr>
-                                                    <td class="tablecenter">
-                                                        {{total|floatformat:2 }}
-                                                    </td>
-                                                    <td class="tablecenter">
-                                                        {{IPO.IPOPrice|floatformat:2 }}
-                                                    </td>
-                                                    <td class="tablecenter">
-                                                        {{IPO.PreOpenPrice|floatformat:2 }}
-                                                        <i style='color: #007bff;' class="fa fa-pencil-square-o" aria-hidden="true" data-toggle="modal" data-target="#editbtn"></i>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>  
-                                </div>
-                            </form>
+                            <div class="form-row">
+                                 {% comment %} <div style="overflow-x:auto;">   {% endcomment %}
+                                <div class="table-responsive text-nowrap">
+                                    <table id="bootstrapdatatable" class="table table-bordered table-hover table-striped " style="margin-bottom: 30px; border: 1px solid #dee2e6;">
+                                        <thead>
+                                            <tr>
+                                                <th style='text-align: inherit; text-align:center;' >
+                                                    Total
+                                                </th>
+                                                <th class="tablelinel " style='text-align: inherit; text-align:center;' >
+                                                    IPO Price
+                                                </th>
+                                                <th class="tablelinel " style='text-align: inherit; text-align:center;'>
+                                                    Pre-Open Price
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                           
+                                            <tr>
+                                                <td class="tablecenter">
+                                                    {{total|floatformat:2 }}
+                                                </td>
+                                                <td class="tablecenter">
+                                                    {{IPO.IPOPrice|floatformat:2 }}
+                                                </td>
+                                                <td class="tablecenter">
+                                                    {{IPO.PreOpenPrice|floatformat:2 }}
+                                                    <i style='color: #007bff;' class="fa fa-pencil-square-o" aria-hidden="true" data-toggle="modal" data-target="#editbtn"></i>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>  
+                            </div>
                             <!--NEW  Modal FOR EDIT BUTTON-->
                             <div class="modal fade" id="editbtn" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabels"
                                 aria-hidden="true">
@@ -1477,8 +1474,8 @@
                     <td>{{ i.Order.Rate|floatformat:2 }}</td>
                     <td>{{ i.OrderDetailPANNo.PANNo }}</td>
                     <td><a style='color: #007bff;'  aria-hidden="true" data-toggle="modal" data-target="#edit-{{ i.id }}">{% if i.PreOpenPrice != 0.0 %} {{i.PreOpenPrice|floatformat:2 }} {% else %} {{IPO.PreOpenPrice|floatformat:2 }}  {%endif%} </a></td>
-                    <td>{{ i.AllotedQty|floatformat:0 }}</td>
-                    <td>{{ i.Amount|floatformat:1 }}</td>
+                    <td>{% if i.AllotedQty %}{{ i.AllotedQty }}{% endif %}</td>
+                    <td>{% if i.Amount %}{{ i.Amount }}{% endif %}</td>
                     </td>
                 </tr>
                 
@@ -1633,7 +1630,7 @@
                 <!-- Always show the first page -->
                 {% if page_obj.number != 1 %}
                     <li class="page-item">
-                        <a class="page-link" {% if IPOName.IPOType == "MAINBOARD" %} href="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/{{InvestorTypeFilter}}?page=1" {%else%} href="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/All?page=1" {% endif %}>1</a>
+                        <a class="page-link" {% if IPOName.IPOType == "MAINBOARD" %} href="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/{{InvestorTypeFilter}}?page=1{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}" {%else%} href="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/All?page=1{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}" {% endif %}>1</a>
                     </li>
                 {% endif %}
                 
@@ -1648,7 +1645,7 @@
                 {% for num in page_obj.paginator.page_range %}
                     {% if num > 1 and num < page_obj.number and num >= page_obj.number|add:'-2' %}
                         <li class="page-item">
-                            <a class="page-link" {% if IPOName.IPOType == "MAINBOARD" %} href="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/{{InvestorTypeFilter}}?page={{ num }}" {%else%} href="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/All?page={{ num }}"{% endif %}>{{ num }}</a>
+                            <a class="page-link" {% if IPOName.IPOType == "MAINBOARD" %} href="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/{{InvestorTypeFilter}}?page={{ num }}{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}" {%else%} href="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/All?page={{ num }}{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}"{% endif %}>{{ num }}</a>
                         </li>
                     {% endif %}
                 {% endfor %}
@@ -1662,7 +1659,7 @@
                 {% for num in page_obj.paginator.page_range %}
                     {% if num > page_obj.number and num < page_obj.number|add:'3' and num < page_obj.paginator.num_pages %}
                         <li class="page-item">
-                            <a class="page-link" {% if IPOName.IPOType == "MAINBOARD" %}  href="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/{{InvestorTypeFilter}}?page={{ num }}" {%else%} href="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/All?page={{ num }}" {% endif %}>{{ num }}</a>
+                            <a class="page-link" {% if IPOName.IPOType == "MAINBOARD" %}  href="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/{{InvestorTypeFilter}}?page={{ num }}{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}" {%else%} href="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/All?page={{ num }}{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}" {% endif %}>{{ num }}</a>
                         </li>
                     {% endif %}
                 {% endfor %}
@@ -1677,7 +1674,7 @@
                 <!-- Always show the last page -->
                 {% if page_obj.number != page_obj.paginator.num_pages %}
                     <li class="page-item">
-                        <a class="page-link" {% if IPOName.IPOType == "MAINBOARD" %} href="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/{{InvestorTypeFilter}}?page={{ page_obj.paginator.num_pages }}" {%else%} href="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/All?page={{ page_obj.paginator.num_pages }}" {% endif %}>{{ page_obj.paginator.num_pages }}</a>
+                        <a class="page-link" {% if IPOName.IPOType == "MAINBOARD" %} href="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/{{InvestorTypeFilter}}?page={{ page_obj.paginator.num_pages }}{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}" {%else%} href="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/All?page={{ page_obj.paginator.num_pages }}{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}" {% endif %}>{{ page_obj.paginator.num_pages }}</a>
                     </li>
                 {% endif %}
             </ul>
@@ -1717,7 +1714,10 @@
 
         var table = $('#example').DataTable({
             orderCellsTop: true,
-            fixedHeader: true,
+            // fixedHeader: true,
+            scrollX: true,
+            scrollY: "70vh",
+            scrollCollapse: true,
             {% comment %} lengthMenu: [50, 100, 150, 200,-1], {% endcomment %}
             lengthChange: true,
             info:false,
@@ -1821,60 +1821,56 @@
                 var api = this.api();
                 
                 api
-                    .columns('')
+                    .columns(':not(:last-child)')
                     .eq(0)
                     .each(function (colIdx) {
-                        
                         var cell = $('.filters th').eq(
                             $(api.column(colIdx).header()).index()
                         );
-                        if (colIdx !== 0) {
-                            var title = $(cell).text();
-                            var stateSearch = api.column(colIdx).search();
-                            var initialValue = stateSearch ? stateSearch.replace(/^\(\(\(\(/, '').replace(/\)\)\)\)$/, '') : '';
-                            $(cell).html('<input type="text" autocomplete="off" placeholder="' + title + '" value="' + initialValue + '" style="text-align: center ; width: 100%;" />');
-        
-                            
-                            $(
-                                'input',
-                                $('.filters th').eq($(api.column(colIdx).header()).index())
-                            )
-                                .off('keyup change')
-                                .on('change', function (e) {
-                                    
-                                    $(this).attr('title', $(this).val());
-                                    var regexr = '({search})'; //$(this).parents('th').find('select').val();
-        
-                                    var cursorPosition = this.selectionStart;
-                                    
+                        if (colIdx === 0) {
+                            $(cell).html('');
+                            return;
+                        }
+                        var title = $(cell).text();
+                        var existingSearch = api.column(colIdx).search();
+                        var cleanSearch = existingSearch ? existingSearch.replace(/^\(+|\)+$/g, '') : '';
+                        if (cleanSearch === '\\\\s*') cleanSearch = '';
+
+                        $(cell).html('<input class="form-control form-control-sm text-center" type="text" autocomplete="off" placeholder="' + title.trim() + '" value="' + cleanSearch + '" style="text-align: center; width: 100%;" />');
+                        
+                        var colDebounceTimer = null;
+                        $('input', cell)
+                            .off('input keyup change')
+                            .on('input', function (e) {
+                                var inputElem = this;
+                                var val = inputElem.value;
+                                var cursorPosition = inputElem.selectionStart;
+                                $(inputElem).attr('title', val);
+                                clearTimeout(colDebounceTimer);
+                                colDebounceTimer = setTimeout(function() {
+                                    var regexr = '({search})';
                                     api
                                         .column(colIdx)
                                         .search(
-                                            this.value != ''
-                                                ? regexr.replace('{search}', '(((' + this.value + ')))')
+                                            val != ''
+                                                ? regexr.replace('{search}', '(((' + val + ')))')
                                                 : '',
-                                            this.value != '',
-                                            this.value == ''
+                                            val != '',
+                                            val == ''
                                         )
                                         .draw();
-                                })
-                                .on('keyup', function (e) {
-                                    e.stopPropagation();
-        
-                                    $(this).trigger('change');
-                                    $(this)
-                                        .focus()[0]
-                                        .setSelectionRange(cursorPosition, cursorPosition);
-                                });
-                        } 
-                        else {
-                            $(cell).html('');
-                        }
+                                    try {
+                                        $(inputElem).focus()[0].setSelectionRange(cursorPosition, cursorPosition);
+                                    } catch (err) {}
+                                }, 300);
+                            });
                     });
-                    /*var lastCell = $('.filters th').eq(
+                var lastCell = $('.filters th').eq(
                     $(api.column(':last-child').header()).index()
-                    );
-                    $(lastCell).html('');*/
+                );
+                $(lastCell).html('');
+
+                $('.dataTables_scrollBody .filters').empty();
             },
             language: {
                 info: 'Showing _START_ to _END_ of _TOTAL_ Rows',
@@ -1927,7 +1923,84 @@
         firstLabel.classList.add('slr');
         }
 
-        {% comment %} table.page.len({{ Billing_page_size|default:50 }}).draw(); {% endcomment %}
+        // Live debounce search across all database records
+        var searchDebounceTimer = null;
+        var $mainSearch = $('#example_filter input, .dataTables_filter input');
+
+        // Unbind DataTables default instant search handler
+        $mainSearch.unbind();   
+
+        var isSubmittingBillingSearch = false;
+
+        function submitSearchForm(searchVal) {
+            var form = $('#mainBillingFilterForm');
+            if (!form.length) form = $('form[action*="/Billing"]').first();
+            if (form.length) {
+                isSubmittingBillingSearch = true;
+                sessionStorage.setItem('billing_search_focused', 'true');
+                var $hidden = form.find('input[name="SearchQuery"]');
+                if (!$hidden.length) {
+                    form.append('<input type="hidden" name="SearchQuery" value="' + $('<div>').text(searchVal).html() + '">');
+                } else {
+                    $hidden.val(searchVal);
+                }
+                form.submit();
+            }
+        }
+
+        // Apply initial search query to input and restore focus/cursor even when cleared
+        var initialSearch = "{{ SearchQuery|default:''|escapejs }}";
+        $mainSearch.val(initialSearch);
+
+        function restoreBillingSearchFocus() {
+            if (sessionStorage.getItem('billing_search_focused') === 'true' || initialSearch.length > 0) {
+                var $input = $('#example_filter input, .dataTables_filter input, #mainSearchInput').filter(':visible').first();
+                if ($input.length) {
+                    $('select[name="Groupfilter"], #Groupfilter').blur();
+                    $input.focus();
+                    try {
+                        var len = $input.val().length;
+                        $input[0].setSelectionRange(len, len);
+                    } catch(e) {}
+                }
+            }
+        }
+
+        restoreBillingSearchFocus();
+        setTimeout(restoreBillingSearchFocus, 20);
+        setTimeout(restoreBillingSearchFocus, 100);
+        setTimeout(restoreBillingSearchFocus, 250);
+        setTimeout(restoreBillingSearchFocus, 500);
+        setTimeout(restoreBillingSearchFocus, 800);
+
+        $mainSearch.on('blur', function() {
+            if (!isSubmittingBillingSearch) {
+                setTimeout(function() {
+                    if (!isSubmittingBillingSearch && !$(document.activeElement).is('#example_filter input, .dataTables_filter input, #mainSearchInput')) {
+                        sessionStorage.removeItem('billing_search_focused');
+                    }
+                }, 150);
+            }
+        });
+
+        $mainSearch.on('input', function() {
+            var val = $(this).val();
+            sessionStorage.setItem('billing_search_focused', 'true');
+            clearTimeout(searchDebounceTimer);
+            // Automatic search across entire database after typing stops (500ms debounce)
+            searchDebounceTimer = setTimeout(function() {
+                submitSearchForm(val);
+            }, 500);
+        });
+
+        $mainSearch.on('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(searchDebounceTimer);
+                sessionStorage.setItem('billing_search_focused', 'true');
+                submitSearchForm($(this).val());
+            }
+        });
 
         // Fix: Inject search input when a hidden column becomes visible
         table.on('column-visibility.dt', function (e, settings, colIdx, state) {
@@ -1938,24 +2011,28 @@
                 
                 if (cell.find('input').length === 0) {
                     var title = $(api.column(colIdx).header()).text();
-                    cell.html('<input type="text" autocomplete="off" placeholder="' + title + '" style="text-align: center; width: 100%;" />');
+                    cell.html('<input class="form-control form-control-sm text-center" type="text" autocomplete="off" placeholder="' + title.trim() + '" style="text-align: center; width: 100%;" />');
                     
+                    var colDebounceTimer = null;
                     $('input', cell)
-                        .off('keyup change')
-                        .on('change', function (e) {
-                            $(this).attr('title', $(this).val());
-                            var regexr = '({search})';
-                            var cursorPosition = this.selectionStart;
-                            api.column(colIdx).search(
-                                this.value != '' ? regexr.replace('{search}', '(((' + this.value + ')))') : '',
-                                this.value != '',
-                                this.value == ''
-                            ).draw();
-                        })
-                        .on('keyup', function (e) {
-                            e.stopPropagation();
-                            $(this).trigger('change');
-                            $(this).focus()[0].setSelectionRange(cursorPosition, cursorPosition);
+                        .off('input keyup change')
+                        .on('input', function (e) {
+                            var inputElem = this;
+                            var val = inputElem.value;
+                            var cursorPosition = inputElem.selectionStart;
+                            $(inputElem).attr('title', val);
+                            clearTimeout(colDebounceTimer);
+                            colDebounceTimer = setTimeout(function() {
+                                var regexr = '({search})';
+                                api.column(colIdx).search(
+                                    val != '' ? regexr.replace('{search}', '(((' + val + ')))') : '',
+                                    val != '',
+                                    val == ''
+                                ).draw();
+                                try {
+                                    $(inputElem).focus()[0].setSelectionRange(cursorPosition, cursorPosition);
+                                } catch (err) {}
+                            }, 300);
                         });
                 }
             }
@@ -1984,6 +2061,7 @@
         <label class='slr' for="page_size">
             <form method="POST" {% if IPOName.IPOType == "MAINBOARD" %} action="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/{{InvestorTypeFilter}}" {%else%} action="/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/All" {% endif %}> 
                 {% csrf_token %}
+                <input type="hidden" name="SearchQuery" value="{{ SearchQuery|default:'' }}">
                 Show 
                 <select name="Billing_page_size" id="Billing_page_size" onchange="this.form.submit()">
                     <option value="{{Billing_page_size}}" style='display:None;' {% if Billing_page_size|default_if_none:50 == 50 %}selected{% endif %}>{{Billing_page_size}}</option>
@@ -2000,18 +2078,6 @@
     
         // Append the form to a specific element
         $('.dataTables_length').append(formHtml);
-
-        // Update page length when selection is changed
-        {% comment %} $('#Billing_page_size').on('change', function() {
-            var pageSize = $(this).val();
-            if (pageSize === 'All') {
-                table.page.len(-1).draw(); // Show all rows if "All" is selected
-            } else {
-                table.page.len(parseInt(pageSize)).draw(); // Set to selected page length
-            }
-        }); {% endcomment %}
-
-        // Set the initial page length when the page loads (from the server-side)
     });
 </script>
 
@@ -2062,6 +2128,12 @@
         investorTypeFilterInput.value = InvestorTypeFilter; // Or get value from an existing element: document.getElementById('your_investor_type_filter_id').value;
         form.appendChild(investorTypeFilterInput);
 
+        var searchQueryInput = document.createElement('input');
+        searchQueryInput.type = 'hidden';
+        searchQueryInput.name = 'SearchQuery';
+        searchQueryInput.value = '{{ SearchQuery|default:""|escapejs }}';
+        form.appendChild(searchQueryInput);
+
         // Append the form to the body and submit it
         document.body.appendChild(form);
         form.submit();
@@ -2081,5 +2153,5 @@
 <script src="{% static 'DataTables/js/buttons.colVis.min.js' %}"></script>
 <script src="{% static 'DataTables/js/pdfmake.min.js' %}"></script>
 <script src="{% static 'DataTables/js/vfs_fonts.js' %}"></script>
-
+{% include 'partials/ipo_shortcuts.html' %}
 {% endblock %}

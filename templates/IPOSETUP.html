@@ -11,15 +11,17 @@
 <link rel="stylesheet" href="{% static  'DataTables/css/dataTables.bootstrap5.min.css' %}">
 
 <style>
-    {% comment %} body {
+    /*
+    body {
         font-family: Arial, Helvetica, sans-serif;
 
-    } {% endcomment %}
+    }
+    */
     #example_wrapper{
         margin-top: 2% !important;
     }
     #example th{
-        {% comment %} border: 0.1px solid black !important; {% endcomment %}
+        /* border: 0.1px solid black !important; */
         text-align: center;
         width: 10% !important;
     }
@@ -73,9 +75,11 @@
         right : 0px !important;
         width: 1232px !important; 
     }
-    .btn-outline-success{
+    .btn-outline-success, #bulk-delete-btn {
         height: 30px !important;
         text-align: center !important;
+        font-size: 0.875rem !important;
+        padding: 2px 10px !important;
     }
     .bi {
         right: -10rem;
@@ -892,6 +896,33 @@
 
 <div>
     <h3 style="text-align:center;z-index: 9; " class="fixed-top cl">IPOs</h3>
+    <div class="modal fade" id="bulkDeleteModal" tabindex="-1" role="dialog" aria-labelledby="bulkDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header" style="border-bottom: 1px solid black;">
+                    <b>
+                        <h5 class="modal-title" id="bulkDeleteModalLabel">Bulk Delete IPOs</h5>
+                    </b>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" style="white-space: normal;">
+                    <center>
+                        <p>Are you sure you want to delete the selected IPO(s)?</p>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" style="width: 50%;">Cancel</button>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <button type="button" id="confirmBulkDelete" class="btn btn-outline-danger" style="width: 50%;">Delete</button>
+                            </div>
+                        </div>
+                    </center>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="container-fluid fc ft">
@@ -1466,7 +1497,9 @@
     }
 </script>
 <script>
-document.getElementById("deleteIpoBtn").addEventListener("click", function() {
+const deleteIpoButton = document.getElementById("deleteIpoBtn");
+if (deleteIpoButton) {
+deleteIpoButton.addEventListener("click", function() {
     const ipoId = this.getAttribute("data-ipo-id");
 
     fetch(`/delete-ipo/${ipoId}/`, {
@@ -1487,6 +1520,7 @@ document.getElementById("deleteIpoBtn").addEventListener("click", function() {
         alert("An unexpected error occurred.");
     });
 });
+}
 </script>
 <script>
     $(document).ready(function () {
@@ -1500,6 +1534,9 @@ document.getElementById("deleteIpoBtn").addEventListener("click", function() {
         var table = $('#example').DataTable({
             stateSave: true,
             orderCellsTop: true,
+            scrollX: true,
+            scrollY: "70vh",
+            scrollCollapse: true,
             order: [[0, 'desc']],
             {% comment %} fixedHeader: true, {% endcomment %}
             {% comment %} lengthMenu: [50, 100, 150, 200,-1], {% endcomment %}
@@ -1673,11 +1710,14 @@ document.getElementById("deleteIpoBtn").addEventListener("click", function() {
         $(".dt-row:first").addClass("table-responsive");
         $(".buttons-collection").addClass("d-flex justify-content-center align-items-center");
 
-        var customButtonHtml2 =    '<div class="btn-group "><button type="button" class="btn btn-outline-success bi d-flex justify-content-center align-items-center" style="float:right;" data-bs-toggle="modal"'+
-            'data-bs-target="#ADDIPO">'+
-            'ADD IPO'+
-        '</button>'+
-            '</div>';
+        var customButtonHtml2 = '<div class="btn-group " id="ipo-action-group">' +
+            '<button type="button" id="add-ipo-btn" class="btn btn-outline-success bi d-flex justify-content-center align-items-center" style="float:right;" data-bs-toggle="modal" data-bs-target="#ADDIPO">' +
+                'ADD IPO' +
+            '</button>' +
+            '<button type="button" id="bulk-delete-btn" class="btn btn-danger bi d-none justify-content-center align-items-center" style="float:right;" data-bs-toggle="modal" data-bs-target="#bulkDeleteModal" data-toggle="modal" data-target="#bulkDeleteModal">' +
+                'Delete &nbsp;<i class="fa fa-trash" aria-hidden="true" style="font-size:16px;"></i>' +
+            '</button>' +
+        '</div>';
         
         $('.col-sm-12.col-md-6.cw:eq(1)').append(customButtonHtml2);
 
@@ -1693,9 +1733,9 @@ document.getElementById("deleteIpoBtn").addEventListener("click", function() {
         
         // Create the new form HTML for rows per page selection
         var formHtml = `
-            <form method="POST" action="/IPOSETUP"> 
+            <form method="POST" action="/IPOSETUP" style="display: inline-block; margin-bottom: 0;">
                 {% csrf_token %}
-                <label class="slr" for="page_size">Show 
+                <label class="slr" for="page_size" style="margin-bottom: 0;">Show
                 <select name="Ip_page_size" id="Ip_page_size" onchange="this.form.submit()">
                     <option value="{{Ip_page_size}}" style='display:None;' {% if Ip_page_size|default_if_none:50 == 50 %}selected{% endif %}>{{Ip_page_size}}</option>
                     <option value="50" {% if Ip_page_size == 50 %}selected{% endif %}>50</option>
@@ -1710,7 +1750,55 @@ document.getElementById("deleteIpoBtn").addEventListener("click", function() {
         `;
     
         // Append the form to a specific element
-        $('.dataTables_length').append(formHtml);
+        $('.dataTables_length').addClass('d-flex align-items-center').append(formHtml);
+
+        $('#selectAll').on('click', function() {
+            var isChecked = $(this).prop('checked');
+            $('.row-checkbox').prop('checked', isChecked);
+            toggleBulkDeleteBtn();
+        });
+
+        $(document).on('click', '.row-checkbox', function() {
+            if (!$(this).prop('checked')) {
+                $('#selectAll').prop('checked', false);
+            } else if ($('.row-checkbox:checked').length === $('.row-checkbox').length) {
+                $('#selectAll').prop('checked', true);
+            }
+            toggleBulkDeleteBtn();
+        });
+
+        function toggleBulkDeleteBtn() {
+            if ($('.row-checkbox:checked').length > 0) {
+                $('#add-ipo-btn').addClass('d-none').removeClass('d-flex');
+                $('#bulk-delete-btn').removeClass('d-none').addClass('d-flex');
+            } else {
+                $('#bulk-delete-btn').addClass('d-none').removeClass('d-flex');
+                $('#add-ipo-btn').removeClass('d-none').addClass('d-flex');
+            }
+        }
+
+        $('#confirmBulkDelete').on('click', function() {
+            var selectedIds = [];
+            $('.row-checkbox:checked').each(function() {
+                selectedIds.push($(this).val());
+            });
+            if (selectedIds.length > 0) {
+                fetch('/BulkDeleteIPO', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: 'ids[]=' + selectedIds.join('&ids[]=')
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert("Error occurred while deleting");
+                    }
+                });
+            }
+        });
 
         // Update page length when selection is changed
         {% comment %} $('#Ip_page_size').on('change', function() {

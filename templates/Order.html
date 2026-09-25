@@ -2486,7 +2486,7 @@
                                         
                         <!-- Date and Time Display -->
                         <div id="status-datetime" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ddd; padding-bottom: 10px; margin-bottom: 15px;">
-                            <h2 id="ipoStatusModalLabel" title="{{IPOName}} Ipo Status" style="margin: 0; font-weight: bold;">{{IPOName}} Ipo Status</h2>
+                            <h2 id="ipoStatusModalLabel" title="{{IPOName}} IPO Status" style="margin: 0; font-weight: bold;">{{IPOName}} IPO Status</h2>
                             <span id="live-time-display" class="text-muted" style="font-weight: bold; font-size: 16px;"></span>
                         </div>
 
@@ -2808,7 +2808,7 @@
                                 </button>
                                 <!-- Stop dropdown from closing when clicking inside it -->
                                 <div class="dropdown-menu p-3 shadow" aria-labelledby="tableFilterDropdown" style="min-width: 200px; background-color: white; color: black; border: 1px solid #ccc; z-index: 9999;" onclick="event.stopPropagation();">
-                                    <h6 class="dropdown-header px-0" style="color: black; font-weight: bold; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px;">Filter Tables</h6>
+                                    <h6 class="dropdown-header px-0" style="color: black; font-weight: bold; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px;">Filter Orders</h6>
                                     <div class="form-check mb-2" style="display: flex; align-items: center;">
                                         <input class="form-check-input" type="checkbox" checked onchange="toggleStatusTable('kostak-table', this.checked)" id="filterKostak" style="margin-top: 0; margin-right: 8px;">
                                         <label class="form-check-label" for="filterKostak" style="cursor:pointer; margin-bottom: 0;">Kostak</label>
@@ -2823,7 +2823,7 @@
                                     </div>
                                     <div class="form-check" style="display: flex; align-items: center;">
                                         <input class="form-check-input" type="checkbox" checked onchange="toggleStatusTable('strikeprice-table', this.checked)" id="filterStrikePrice" style="margin-top: 0; margin-right: 8px;">
-                                        <label class="form-check-label" for="filterStrikePrice" style="cursor:pointer; margin-bottom: 0;">Strike Price</label>
+                                        <label class="form-check-label" for="filterStrikePrice" style="cursor:pointer; margin-bottom: 0;">Options</label>
                                     </div>
                                 </div>
                             </div>
@@ -2866,13 +2866,13 @@
                                             <font color="red">*</font>Only accepts CSV files.<i class="fa fa-file-excel-o"
                                                 aria-hidden="true" style='font-size:18px;'></i>
                                         
-                                        {% comment %} <a href="/{{IPOid}}/Sempale-Order"> <input type="button" value="Sample-Download" class="fa fa-file-excel-o"
+                                        {% comment %} <a href="/{{IPOid}}/Sample-Order"> <input type="button" value="Sample-Download" class="fa fa-file-excel-o"
                                             style="background: darkslategrey; color: white; height: 38px; width: 30%; margin-left:145px; display: inline-flex; font-size:16px;">
                                     </a> {% endcomment %}
                                     </small><br><br>
 
                                     <div style="display: flex; gap: 5px;">
-                                        <a href="/{{IPOid}}/Sempale-Order" style="text-decoration: none;">
+                                        <a href="/{{IPOid}}/Sample-Order" style="text-decoration: none;">
                                             <input type="button" value="Sample Download" class="fa fa-file-excel-o"
                                                 style="background: darkslategrey; color: white; height: 38px; padding: 0 15px; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; font-size: 16px;">
                                         </a>
@@ -2992,7 +2992,7 @@
                 <!-- Always show the first page -->
                 {% if page_obj.number != 1 %}
                     <li class="page-item">
-                        <a class="page-link" {%if IPOName.IPOType == "MAINBOARD" %} href="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/{{InvestorTypeFilter}}?page=1" {%else%} href="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/All?page=1" {% endif %}>1</a>
+                        <a class="page-link" {%if IPOName.IPOType == "MAINBOARD" %} href="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/{{InvestorTypeFilter}}?page=1{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}" {%else%} href="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/All?page=1{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}" {% endif %}>1</a>
                     </li>
                 {% endif %}
                 
@@ -3007,7 +3007,7 @@
                 {% for num in page_obj.paginator.page_range %}
                     {% if num > 1 and num < page_obj.number and num >= page_obj.number|add:'-2' %}
                         <li class="page-item">
-                            <a class="page-link" {%if IPOName.IPOType == "MAINBOARD" %} href="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/{{InvestorTypeFilter}}?page={{ num }}" {%else%} href="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/All?page={{ num }}" {% endif %}>{{ num }}</a>
+                            <a class="page-link" {%if IPOName.IPOType == "MAINBOARD" %} href="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/{{InvestorTypeFilter}}?page={{ num }}{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}" {%else%} href="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/All?page={{ num }}{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}" {% endif %}>{{ num }}</a>
                         </li>
                     {% endif %}
                 {% endfor %}
@@ -3021,7 +3021,7 @@
                 {% for num in page_obj.paginator.page_range %}
                     {% if num > page_obj.number and num < page_obj.number|add:'3' and num < page_obj.paginator.num_pages %}
                         <li class="page-item">
-                            <a class="page-link" {%if IPOName.IPOType == "MAINBOARD" %} href="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/{{InvestorTypeFilter}}?page={{ num }}" {%else%} href="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/All?page={{ num }}" {% endif %}>{{ num }}</a>
+                            <a class="page-link" {%if IPOName.IPOType == "MAINBOARD" %} href="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/{{InvestorTypeFilter}}?page={{ num }}{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}" {%else%} href="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/All?page={{ num }}{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}" {% endif %}>{{ num }}</a>
                         </li>
                     {% endif %}
                 {% endfor %}
@@ -3036,7 +3036,7 @@
                 <!-- Always show the last page -->
                 {% if page_obj.number != page_obj.paginator.num_pages %}
                     <li class="page-item">
-                        <a class="page-link" {%if IPOName.IPOType == "MAINBOARD" %} href="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/{{InvestorTypeFilter}}?page={{ page_obj.paginator.num_pages }}" {%else%} href="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/All?page= {{ page_obj.paginator.num_pages }}" {% endif %}>{{ page_obj.paginator.num_pages }}</a>
+                        <a class="page-link" {%if IPOName.IPOType == "MAINBOARD" %} href="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/{{InvestorTypeFilter}}?page={{ page_obj.paginator.num_pages }}{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}" {%else%} href="/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/All?page={{ page_obj.paginator.num_pages }}{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}" {% endif %}>{{ page_obj.paginator.num_pages }}</a>
                     </li>
                 {% endif %}
             </ul>
@@ -3419,7 +3419,9 @@
         var table = $('#example').DataTable({
             responsive: true,
             orderCellsTop: true,
-            fixedHeader: true,
+            scrollX: true,
+            scrollY: "70vh",
+            scrollCollapse: true,
             stateSave: true,
             stateLoadParams: function (settings, data) {
                 data.length = pageLength;
@@ -3518,54 +3520,54 @@
             initComplete: function () {
                 var api = this.api();
     
-                
                 api
                     .columns(':not(:last-child)')
                     .eq(0)
                     .each(function (colIdx) {
-                        
                         var cell = $('.filters th').eq(
                             $(api.column(colIdx).header()).index()
                         );
                         var title = $(cell).text();
-                        $(cell).html('<input class="Input" type="text" autocomplete="off" placeholder="' + title + '" style="text-align: center ;" />');
+                        var existingSearch = api.column(colIdx).search();
+                        var cleanSearch = existingSearch ? existingSearch.replace(/^\(+|\)+$/g, '') : '';
+                        if (cleanSearch === '\\\\s*') cleanSearch = '';
+
+                        $(cell).html('<input class="form-control form-control-sm text-center" type="text" autocomplete="off" placeholder="' + title.trim() + '" value="' + cleanSearch + '" style="text-align: center;" />');
                         
-                        $(
-                            'input',
-                            $('.filters th').eq($(api.column(colIdx).header()).index())
-                        )
-                            .off('keyup change')
-                            .on('change', function (e) {
-                                
-                                $(this).attr('title', $(this).val());
-                                var regexr = '({search})'; //$(this).parents('th').find('select').val();
-    
-                                var cursorPosition = this.selectionStart;
-                                
-                                api
-                                    .column(colIdx)
-                                    .search(
-                                        this.value != ''
-                                            ? regexr.replace('{search}', '(((' + this.value + ')))')
-                                            : '',
-                                        this.value != '',
-                                        this.value == ''
-                                    )
-                                    .draw();
-                            })
-                            .on('keyup', function (e) {
-                                e.stopPropagation();
-    
-                                $(this).trigger('change');
-                                $(this)
-                                    .focus()[0]
-                                    .setSelectionRange(cursorPosition, cursorPosition);
+                        var colDebounceTimer = null;
+                        $('input', cell)
+                            .off('input keyup change')
+                            .on('input', function (e) {
+                                var inputElem = this;
+                                var val = inputElem.value;
+                                var cursorPosition = inputElem.selectionStart;
+                                $(inputElem).attr('title', val);
+                                clearTimeout(colDebounceTimer);
+                                colDebounceTimer = setTimeout(function() {
+                                    var regexr = '({search})';
+                                    api
+                                        .column(colIdx)
+                                        .search(
+                                            val != ''
+                                                ? regexr.replace('{search}', '(((' + val + ')))')
+                                                : '',
+                                            val != '',
+                                            val == ''
+                                        )
+                                        .draw();
+                                    try {
+                                        $(inputElem).focus()[0].setSelectionRange(cursorPosition, cursorPosition);
+                                    } catch (err) {}
+                                }, 300);
                             });
                     });
-                    var lastCell = $('.filters th').eq(
+                var lastCell = $('.filters th').eq(
                     $(api.column(':last-child').header()).index()
-                    );
-                    $(lastCell).html('');
+                );
+                $(lastCell).html('');
+
+                // Ensure ScrollBody hidden header doesn't duplicate inputs
+                $('.dataTables_scrollBody .filters').empty();
             },
             language: {
                 info: 'Showing _START_ to _END_ of _TOTAL_ Rows',
@@ -3606,7 +3608,84 @@
         }
         {% comment %} table.page.len({{ Order_page_size|default:50 }}).draw(); {% endcomment %}
 
+        // Live debounce search across all database records
+        var searchDebounceTimer = null;
+        var $mainSearch = $('#example_filter input, .dataTables_filter input');
 
+        // Unbind DataTables default instant search handler
+        $mainSearch.unbind();   
+
+        var isSubmittingOrderSearch = false;
+
+        function submitSearchForm(searchVal) {
+            var form = $('#example_form form');
+            if (!form.length) form = $('form[action*="/Order"]');
+            if (form.length) {
+                isSubmittingOrderSearch = true;
+                sessionStorage.setItem('order_search_focused', 'true');
+                var $hidden = form.find('input[name="SearchQuery"]');
+                if (!$hidden.length) {
+                    form.append('<input type="hidden" name="SearchQuery" value="' + $('<div>').text(searchVal).html() + '">');
+                } else {
+                    $hidden.val(searchVal);
+                }
+                form.submit();
+            }
+        }
+
+        // Apply initial search query to input and restore focus/cursor even when cleared
+        var initialSearch = "{{ SearchQuery|default:''|escapejs }}";
+        $mainSearch.val(initialSearch);
+
+        function restoreOrderSearchFocus() {
+            if (sessionStorage.getItem('order_search_focused') === 'true' || initialSearch.length > 0) {
+                var $input = $('#example_filter input, .dataTables_filter input, #mainSearchInput').filter(':visible').first();
+                if ($input.length) {
+                    $('select[name="Groupfilter"], #Groupfilter').blur();
+                    $input.focus();
+                    try {
+                        var len = $input.val().length;
+                        $input[0].setSelectionRange(len, len);
+                    } catch(e) {}
+                }
+            }
+        }
+
+        restoreOrderSearchFocus();
+        setTimeout(restoreOrderSearchFocus, 20);
+        setTimeout(restoreOrderSearchFocus, 100);
+        setTimeout(restoreOrderSearchFocus, 250);
+        setTimeout(restoreOrderSearchFocus, 500);
+        setTimeout(restoreOrderSearchFocus, 800);
+
+        $mainSearch.on('blur', function() {
+            if (!isSubmittingOrderSearch) {
+                setTimeout(function() {
+                    if (!isSubmittingOrderSearch && !$(document.activeElement).is('#example_filter input, .dataTables_filter input, #mainSearchInput')) {
+                        sessionStorage.removeItem('order_search_focused');
+                    }
+                }, 150);
+            }
+        });
+
+        $mainSearch.on('input', function() {
+            var val = $(this).val();
+            sessionStorage.setItem('order_search_focused', 'true');
+            clearTimeout(searchDebounceTimer);
+            // Automatic search across entire database after typing stops (500ms debounce)
+            searchDebounceTimer = setTimeout(function() {
+                submitSearchForm(val);
+            }, 500);
+        });
+
+        $mainSearch.on('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(searchDebounceTimer);
+                sessionStorage.setItem('order_search_focused', 'true');
+                submitSearchForm($(this).val());
+            }
+        });
     } );
 </script>
 
@@ -3918,4 +3997,5 @@
 <script src="{% static 'DataTables/js/pdfmake.min.js' %}"></script>
 <script src="{% static 'DataTables/js/vfs_fonts.js' %}"></script>
 {% comment %} <script src="{% static 'JS/sorttable.js' %}"></script> {% endcomment %}
+{% include 'partials/ipo_shortcuts.html' %}
 {% endblock %}

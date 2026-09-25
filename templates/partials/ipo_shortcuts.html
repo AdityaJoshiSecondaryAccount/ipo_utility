@@ -1,0 +1,80 @@
+<script>
+(function() {
+    document.addEventListener('keydown', function(event) {
+        // Ignore if modifier keys (Ctrl, Alt, Meta) are pressed (e.g. Ctrl + +, Ctrl + =, Ctrl + -)
+        if (event.ctrlKey || event.metaKey || event.altKey || 
+            (event.getModifierState && (event.getModifierState('Control') || event.getModifierState('Meta') || event.getModifierState('Alt')))) {
+            return;
+        }
+
+        // Ignore if focus is inside an editable input, textarea, or contenteditable element (allow <select>)
+        var target = event.target;
+        if (target) {
+            var tagName = target.tagName;
+            if (tagName === 'INPUT' || tagName === 'TEXTAREA' || target.isContentEditable) {
+                return;
+            }
+        }
+
+        // Ignore if any Bootstrap modal is currently open
+        if (document.querySelector('.modal.show') || document.body.classList.contains('modal-open')) {
+            return;
+        }
+
+        var isBuy = (event.key === '+' || event.key === '=' || event.code === 'NumpadAdd' || event.code === 'Equal');
+        var isSell = (event.key === '-' || event.key === '_' || event.code === 'NumpadSubtract' || event.code === 'Minus');
+
+        if (!isBuy && !isSell) {
+            return;
+        }
+
+        // Determine IPO id
+        var ipoId = "{{ IPOid|default:'' }}" || "{{ IPOName.id|default:'' }}";
+        if (!ipoId) {
+            // Fallback: extract numeric ID from URL path (e.g., /123/Order or /BUY/123/...)
+            var match = window.location.pathname.match(/\/(?:BUY|SELL|Order|OrderDetail|Billing|Status|Dashboard|Cdashboard|Bdashboard)?\/?(\d+)/i) ||
+                        window.location.pathname.match(/\/(\d+)\//);
+            if (match && match[1]) {
+                ipoId = match[1];
+            }
+        }
+
+        if (!ipoId || ipoId === 'None' || ipoId === '0') {
+            return;
+        }
+
+        // Optional group detection from focused row or group dropdown
+        var group = null;
+        var focusedRow = document.querySelector('tr.row-focus') || 
+                         (document.querySelector('td.focus') ? document.querySelector('td.focus').closest('tr') : null);
+        if (focusedRow) {
+            var btnWithGroup = focusedRow.querySelector('[data-group]');
+            if (btnWithGroup) {
+                group = btnWithGroup.getAttribute('data-group');
+            }
+        }
+        if (!group || group === 'None' || group === 'All') {
+            if (target && target.tagName === 'SELECT' && target.value && target.value !== 'All' && target.value !== 'None') {
+                group = target.value;
+            }
+        }
+        if (!group || group === 'None' || group === 'All') {
+            var groupSelect = document.querySelector('#Groupfilter, #groupSelect, select[name="Groupfilter"], select[name="selectgroup"], #validationCustom04, select[name="item_id"]');
+            if (groupSelect && groupSelect.value && groupSelect.value !== 'All' && groupSelect.value !== 'None') {
+                group = groupSelect.value;
+            }
+        }
+
+        var buyUrl = (group && group !== 'None' && group !== 'All') ? '/BUY/' + ipoId + '/' + encodeURIComponent(group) : '/' + ipoId + '/BUY';
+        var sellUrl = (group && group !== 'None' && group !== 'All') ? '/SELL/' + ipoId + '/' + encodeURIComponent(group) : '/' + ipoId + '/SELL';
+
+        if (isBuy) {
+            event.preventDefault();
+            window.location.href = buyUrl;
+        } else if (isSell) {
+            event.preventDefault();
+            window.location.href = sellUrl;
+        }
+    });
+})();
+</script>

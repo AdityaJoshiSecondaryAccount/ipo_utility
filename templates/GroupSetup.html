@@ -1324,7 +1324,7 @@
                 <!-- Always show the first page -->
                 {% if page_obj.number != 1 %}
                     <li class="page-item">
-                        <a class="page-link" href="/GroupSetup?page=1">1</a>
+                        <a class="page-link" href="/GroupSetup?page=1&SearchQuery={{ SearchQuery|default:''|urlencode }}">1</a>
                     </li>
                 {% endif %}
                 
@@ -1339,7 +1339,7 @@
                 {% for num in page_obj.paginator.page_range %}
                     {% if num > 1 and num < page_obj.number and num >= page_obj.number|add:'-2' %}
                         <li class="page-item">
-                            <a class="page-link" href="/GroupSetup?page={{ num }}">{{ num }}</a>
+                            <a class="page-link" href="/GroupSetup?page={{ num }}&SearchQuery={{ SearchQuery|default:''|urlencode }}">{{ num }}</a>
                         </li>
                     {% endif %}
                 {% endfor %}
@@ -1353,7 +1353,7 @@
                 {% for num in page_obj.paginator.page_range %}
                     {% if num > page_obj.number and num < page_obj.number|add:'3' and num < page_obj.paginator.num_pages %}
                         <li class="page-item">
-                            <a class="page-link" href="/GroupSetup?page={{ num }}">{{ num }}</a>
+                            <a class="page-link" href="/GroupSetup?page={{ num }}&SearchQuery={{ SearchQuery|default:''|urlencode }}">{{ num }}</a>
                         </li>
                     {% endif %}
                 {% endfor %}
@@ -1368,7 +1368,7 @@
                 <!-- Always show the last page -->
                 {% if page_obj.number != page_obj.paginator.num_pages %}
                     <li class="page-item">
-                        <a class="page-link" href="/GroupSetup?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+                        <a class="page-link" href="/GroupSetup?page={{ page_obj.paginator.num_pages }}&SearchQuery={{ SearchQuery|default:''|urlencode }}">{{ page_obj.paginator.num_pages }}</a>
                     </li>
                 {% endif %}
             </ul>
@@ -1404,6 +1404,9 @@
     
         var table = $('#example').DataTable({
             orderCellsTop: true,
+            scrollX: true,
+            scrollY: "70vh",
+            scrollCollapse: true,
             {% comment %} fixedHeader: true, {% endcomment %}
             {% comment %} lengthMenu: [50, 100, 150, 200,-1], {% endcomment %}
             lengthChange: true,
@@ -1668,8 +1671,9 @@
         
         // Create the new form HTML for rows per page selection
         var formHtml = `
-            <form method="POST" action="/GroupSetup"> 
+            <form method="POST" action="/GroupSetup" id="filter_form"> 
                 {% csrf_token %}
+                <input type="hidden" name="SearchQuery" id="search_input_hidden" value="{{ SearchQuery|default:'' }}">
                 <label class='slr' for="page_size">Show 
                 <select name="Gp_page_size" id="Gp_page_size" onchange="this.form.submit()">
                     <option value="{{Gp_page_size}}" style='display:None;' {% if Gp_page_size|default_if_none:50 == 50 %}selected{% endif %}>{{Gp_page_size}}</option>
@@ -1686,6 +1690,91 @@
     
         // Append the form to a specific element
         $('.dataTables_length').append(formHtml);
+
+        // Server-side search logic
+        var searchDebounceTimer;
+        var isSubmittingGroupSearch = false;
+        
+        // Wait a small moment to ensure DataTables has rendered its filter input
+        setTimeout(function() { 
+            var $mainSearch = $('#example_filter input, .dataTables_filter input');
+            
+            var initialSearch = "{{ SearchQuery|default:''|escapejs }}";
+            $mainSearch.off(); // Remove default DataTables search behavior
+            $mainSearch.val(initialSearch);
+
+            // Sync URL params to match server-side state after POST reload
+            var currentUrl = new URL(window.location.href);
+            if (initialSearch && currentUrl.searchParams.get('SearchQuery') !== initialSearch) {
+                currentUrl.searchParams.set('SearchQuery', initialSearch);
+                window.history.replaceState({}, '', currentUrl);
+            } else if (!initialSearch && currentUrl.searchParams.has('SearchQuery')) {
+                currentUrl.searchParams.delete('SearchQuery');
+                window.history.replaceState({}, '', currentUrl);
+            }
+
+            function submitSearchForm(searchVal) {
+                var form = $('#filter_form');
+                isSubmittingGroupSearch = true;
+                sessionStorage.setItem('group_search_focused', 'true');
+                $('#search_input_hidden').val(searchVal);
+                form.submit();
+            }
+
+            function restoreGroupSearchFocus() {
+                if (sessionStorage.getItem('group_search_focused') === 'true' || initialSearch.length > 0) {
+                    var $input = $('#example_filter input, .dataTables_filter input').filter(':visible').first();
+                    if ($input.length) {
+                        $input.focus();
+                        try {
+                            var len = $input.val().length;
+                            $input[0].setSelectionRange(len, len);
+                        } catch(e) {}
+                    }
+                }
+            }
+
+            restoreGroupSearchFocus();
+            setTimeout(restoreGroupSearchFocus, 100);
+            setTimeout(restoreGroupSearchFocus, 500);
+            
+            // Preserve search value across DataTables internal redraws (e.g., when column filters trigger a draw)
+            $('#example').on('draw.dt', function() {
+                var searchVal = $('#search_input_hidden').val() || initialSearch;
+                var $currentSearch = $('#example_filter input, .dataTables_filter input');
+                if ($currentSearch.val() !== searchVal) {
+                    $currentSearch.val(searchVal);
+                }
+            });
+
+            $mainSearch.on('blur', function() {
+                if (!isSubmittingGroupSearch) {
+                    setTimeout(function() {
+                        if (!isSubmittingGroupSearch && !$(document.activeElement).is('#example_filter input, .dataTables_filter input')) {
+                            sessionStorage.removeItem('group_search_focused');
+                        }
+                    }, 150);
+                }
+            });
+
+            $mainSearch.on('input', function() {
+                var val = $(this).val();
+                sessionStorage.setItem('group_search_focused', 'true');
+                clearTimeout(searchDebounceTimer);
+                searchDebounceTimer = setTimeout(function() {
+                    submitSearchForm(val);
+                }, 500);
+            });
+
+            $mainSearch.on('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    clearTimeout(searchDebounceTimer);
+                    sessionStorage.setItem('group_search_focused', 'true');
+                    submitSearchForm($(this).val());
+                }
+            });
+        }, 100);
 
         // Update page length when selection is changed
         {% comment %} $('#Gp_page_size').on('change', function() {

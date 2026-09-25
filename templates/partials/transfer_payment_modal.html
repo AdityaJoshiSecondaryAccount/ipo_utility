@@ -438,7 +438,7 @@ $(function () {
 
     function allocationTable(side, items, allocations) {
         const table = $('<table>', {class: 'table table-sm table-bordered mb-0'});
-        table.append('<thead><tr><th>IPO</th><th>Available</th><th>Amount</th><th>Type</th><th>Remark</th><th>Use</th></tr></thead>');
+        table.append('<thead><tr><th>IPO</th><th>Available</th><th>Amount</th><th>Type</th><th>Remark</th><th class="ct-checkbox-cell" style="cursor: pointer;"><div class="d-flex align-items-center gap-1">Use <input type="checkbox" class="ct-select-all m-0" data-side="' + side + '" checked></div></th></tr></thead>');
         const body = $('<tbody>');
 
         if (!items.length) {
@@ -496,7 +496,7 @@ $(function () {
                 maxlength: 250,
                 value: generatedRowRemark(side, false)
             })));
-            row.append($('<td>').append($('<input>', {
+            row.append($('<td class="ct-checkbox-cell" style="cursor: pointer;">').append($('<input>', {
                 type: 'checkbox',
                 class: 'ct-allocation-include',
                 'data-side': side,
@@ -552,7 +552,7 @@ $(function () {
             maxlength: 250,
             value: generatedRowRemark(side, true)
         })));
-        row.append($('<td>').append($('<input>', {
+        row.append($('<td class="ct-checkbox-cell" style="cursor: pointer;">').append($('<input>', {
             type: 'checkbox',
             class: 'ct-allocation-include',
             checked: amount > 0,
@@ -773,10 +773,9 @@ $(function () {
         const sourceGroupSelected = !!$('#ct_source_group').val();
         const destinationGroupSelected = !!$('#ct_destination_group').val();
         const groupsSelected = sourceGroupSelected && destinationGroupSelected;
-        const groupsAreDifferent = $('#ct_source_group').val() !== $('#ct_destination_group').val();
         const expectedSourceNet = $('#ct_source_type').val() === 'credit' ? master : -master;
         const balanced = master > 0 && sourceCount > 0 && destinationCount > 0 &&
-            groupsSelected && groupsAreDifferent && source.gross <= master && destination.gross <= master &&
+            groupsSelected && source.gross <= master && destination.gross <= master &&
             source.net === expectedSourceNet && destination.net === -expectedSourceNet;
 
         let validationMessage = '';
@@ -784,8 +783,6 @@ $(function () {
             validationMessage = 'Select the From Group.';
         } else if (!destinationGroupSelected) {
             validationMessage = 'Select the To Group.';
-        } else if (!groupsAreDifferent) {
-            validationMessage = 'The From Group and To Group must be different.';
         } else if (master <= 0) {
             validationMessage = 'Enter a transfer amount greater than zero.';
         } else if (!$('#ct_date_time').val()) {
@@ -890,6 +887,33 @@ $(function () {
     $('#ct_amount, #ct_source_ipos, #ct_destination_ipos').on('input change', renderAllocations);
     $('#ct_source_group').on('change', function () { loadGroupIPOs('source'); });
     $('#ct_destination_group').on('change', function () { loadGroupIPOs('destination'); });
+    
+    $(document).on('change', '.ct-select-all', function() {
+        const side = $(this).data('side');
+        const isChecked = $(this).is(':checked');
+        const container = side === 'source' ? $('#ct_source_allocations') : $('#ct_destination_allocations');
+        
+        if (isChecked) {
+            renderAllocations();
+        } else {
+            const rows = container.find('.ct-entry-row:not(.ct-jv-row)');
+            rows.find('.ct-allocation-include').prop('checked', false);
+            rows.find('.ct-allocation').val('0.00');
+            rows.attr('data-manually-excluded', '1');
+            
+            recalculateSideJV(side);
+            calculateTotals();
+        }
+    });
+    
+    $(document).on('click', '.ct-checkbox-cell', function(e) {
+        if (e.target.tagName !== 'INPUT') {
+            const checkbox = $(this).find('input[type="checkbox"]');
+            if (checkbox.length && !checkbox.prop('disabled')) {
+                checkbox.prop('checked', !checkbox.prop('checked')).trigger('change');
+            }
+        }
+    });
     $(document).on('input change', '#combinedTransferModal .ct-allocation, #combinedTransferModal .ct-allocation-type, #combinedTransferModal .ct-allocation-include', function (event) {
         if ($(this).hasClass('ct-allocation-include') && event.type === 'input') return;
         if ($(this).hasClass('ct-allocation') && event.type === 'change') return;
@@ -936,6 +960,11 @@ $(function () {
                 row.find('.ct-allocation').val('0.00');
                 redistributeAfterExcludedRow(side, row);
             }
+            // Sync select-all checkbox
+            const container = side === 'source' ? $('#ct_source_allocations') : $('#ct_destination_allocations');
+            const checkboxes = container.find('.ct-allocation-include:not(:disabled)');
+            const allChecked = checkboxes.length > 0 && checkboxes.length === checkboxes.filter(':checked').length;
+            container.find('.ct-select-all').prop('checked', allChecked);
         } else {
             allocationInputError = '';
         }

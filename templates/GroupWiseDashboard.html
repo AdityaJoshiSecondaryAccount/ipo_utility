@@ -1989,10 +1989,16 @@ $(function () {
             // Extract first number (Total value)
             {% comment %} const match = textContent.match(/[-]?\d+(\.\d+)?/);
             const amount = match ? parseFloat(match[0]) : 0; {% endcomment %}
-            const dueMatch = textContent.match(/Due:\s*([-]?\d+(\.\d+)?)/);
+
+            const exactDue = $(this).data('exact-due');
             let dueAmount = 0;
-            if (dueMatch) {
-                dueAmount = parseFloat(dueMatch[1]);
+            if (exactDue !== undefined && exactDue !== "") {
+                dueAmount = parseFloat(exactDue);
+            } else {
+                const dueMatch = textContent.match(/Due:\s*([-]?\d+(\.\d+)?)/);
+                if (dueMatch) {
+                    dueAmount = parseFloat(dueMatch[1]);
+                }
             }
 
             // Set IPO and Group dropdowns
@@ -2135,7 +2141,8 @@ $(function () {
         $(document).on('dblclick', '.due-amount-cell', function () {
             const groupId = $(this).data('group-id');
             const groupName = $(this).data('group-name');
-            const dueAmount = parseFloat($(this).data('due-amount')) || 0;
+            const exactDue = $(this).data('exact-due');
+            const dueAmount = exactDue !== undefined && exactDue !== "" ? parseFloat(exactDue) : (parseFloat($(this).data('due-amount')) || 0);
 
             /* console.log('Opening multiple IPO form for group:', groupName, 'Due amount:', dueAmount); */
             
@@ -2814,6 +2821,11 @@ function deleteIPO(ipoId, pageNumber, btn) {
 
         var table = $('#example').DataTable({
             stateSave: true,
+            stateLoadParams: function (settings, data) {
+                data.length = pageLength;
+                data.start = 0;
+            },
+            lengthMenu: [[50, 100, 200, 250, -1], [50, 100, 200, 250, "All"]],
             "columnDefs": [
                 {
                     "targets": {{ IPOName|length }} + 3,
@@ -2825,7 +2837,6 @@ function deleteIPO(ipoId, pageNumber, btn) {
             scrollY:scrollYHeight,
             autoWidth:false,
             scrollX:true,
-            {% comment %} lengthMenu: [50, 100, 150, 200,-1], {% endcomment %}
             lengthChange: true,
             info:false,
             "pageLength": pageLength,
@@ -3036,12 +3047,11 @@ function deleteIPO(ipoId, pageNumber, btn) {
                 {% csrf_token %}
                 Show 
                 <select name="GWD_page_size" id="GWD_page_size" onchange="this.form.submit()">
-                    <option value="{{GWD_page_size}}" style='display:None;'{% if GWD_page_size|default_if_none:50 == 50 %}selected{% endif %}>{{GWD_page_size}}</option>
-                    <option value="50" {% if GWD_page_size == 50 %}selected{% endif %}>50</option>
-                    <option value="100" {% if GWD_page_size == 100 %}selected{% endif %}>100</option>
-                    <option value="200" {% if GWD_page_size == 200 %}selected{% endif %}>200</option>
-                    <option value="250" {% if GWD_page_size == 250 %}selected{% endif %}>250</option>
-                    <option value="All" {% if GWD_page_size == 'All' %}selected{% endif %}>All</option>
+                    <option value="50" {% if GWD_page_size|stringformat:"s" == "50" %}selected{% endif %}>50</option>
+                    <option value="100" {% if GWD_page_size|stringformat:"s" == "100" %}selected{% endif %}>100</option>
+                    <option value="200" {% if GWD_page_size|stringformat:"s" == "200" %}selected{% endif %}>200</option>
+                    <option value="250" {% if GWD_page_size|stringformat:"s" == "250" %}selected{% endif %}>250</option>
+                    <option value="All" {% if GWD_page_size|stringformat:"s" == "All" %}selected{% endif %}>All</option>
                 </select>
                 Rows
                 <input type="hidden" name="page" value="{{ page_obj.number }}">

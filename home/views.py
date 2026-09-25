@@ -72,6 +72,7 @@ from django.http.response import JsonResponse
 from django.contrib.auth.models import Group, User
 from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from .models import CurrentIpoName, GroupDetail, Order, OrderDetail, ClientDetail, CustomUser, RateList,SharedLink
 from django.http import JsonResponse
 from telethon import TelegramClient
@@ -88,9 +89,9 @@ from .models import CustomUser, CurrentIpoName, GroupDetail
 from .models import Accounting, AccountingAuditLog, CurrentIpoName, GroupDetail
 from django.db.models import Sum, Case, When, F, Value, DecimalField,FloatField , Q,Count
 from django.shortcuts import render, get_object_or_404
-
+import sys
 from django.utils.html import escape, format_html
-
+import html
 from io import BytesIO
 import json
 from django.utils.dateparse import parse_datetime
@@ -176,7 +177,15 @@ def indexforCustomer(request):
     if request.user.is_anonymous:
         return redirect("/login")
     products = CurrentIpoName.objects.filter(user=request.user.Broker_id)
-    params = {'entry': products, 'product': products}
+    ratelist = []
+    for i in products:
+        try:
+            Ratelistitem = RateList.objects.get(
+                user=request.user.Broker_id, RateListIPOName_id=i.id)
+        except:
+            Ratelistitem = 0
+        ratelist.append(Ratelistitem)
+    params = {'entry': zip(products, ratelist), 'product': products}
     return render(request, 'index.html', params)
 
 # <!--- Allotment Check Start
@@ -366,6 +375,65 @@ def solve_6digit_numeric_captcha(image_bytes: bytes) -> str:
     except Exception:
         return ""
 
+def parse_and_eval_math(text: str) -> str:
+    """
+    Parses OCR text containing a math expression (e.g. '11+8=>', '6+4=2', '14x1=？', '12-7=?')
+    and returns the evaluated result as a string.
+    """
+    if not text:
+        return ""
+    
+    cleaned = str(text).lower().replace(' ', '')
+    for delim in ['=', '?', '>', ':', 'z', '？']:
+        if delim in cleaned:
+            cleaned = cleaned.split(delim)[0]
+            break
+            
+    substitutions = {
+        'v': 'x', '×': 'x', 't': '+', 'f': '+', '—': '-', '–': '-', '÷': '/',
+        'o': '0', 'i': '1', 'l': '1', '|': '1'
+    }
+    for k, v in substitutions.items():
+        cleaned = cleaned.replace(k, v)
+        
+    m = re.search(r'(\d{1,2})\s*([\+\-\*x\/])\s*(\d{1,2})', cleaned)
+    if m:
+        try:
+            n1 = int(m.group(1))
+            op = m.group(2)
+            n2 = int(m.group(3))
+            
+            if op == '+':
+                return str(n1 + n2)
+            elif op == '-':
+                return str(n1 - n2)
+            elif op in ('*', 'x'):
+                return str(n1 * n2)
+            elif op == '/':
+                return str(n1 // n2 if n2 != 0 else 0)
+        except Exception:
+            pass
+            
+    return ""
+
+def solve_integrated_math_captcha(image_bytes: bytes) -> str:
+    """
+    Ultra-fast in-memory OCR & math solver for Integrated Registry arithmetic CAPTCHAs.
+    - Execution Time: ~2-5 ms (native C++ via ONNX Runtime in RAM)
+    - Zero external network dependency / pure image-to-solution function.
+    """
+    if not image_bytes:
+        return ""
+    try:
+        ocr = get_ocr()
+        if ocr is None:
+            return ""
+        raw_text = ocr.classification(image_bytes)
+        if not raw_text:
+            return ""
+        return parse_and_eval_math(raw_text)
+    except Exception:
+        return ""
 
 def BigShareDropDown():
     global dropdown_dict
@@ -448,32 +516,48 @@ def SkyLineDropDown():
 
 def IntegratedDropDown():
     global dropdown_dict
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Referer': 'https://www.integratedregistry.in/IRMS_V2/IPOlink_v3.aspx',
+        'Origin': 'https://www.integratedregistry.in',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Accept': '*/*',
+    }
+    data = {'Req': 1, 'Comp': 'IPO'}
+    
     def getDropDown(url):
         try:
-            data = {'Req': 1,'Comp':'IPO'}
-            response = requests.post(url,data= data,verify='pemfile/integrated.pem')
-            if response.status_code == 200:
+            response = requests.post(url, data=data, headers=headers, verify='pemfile/integrated.pem', timeout=15)
+            if response.status_code == 200 and response.text:
                 return response.text
-            else:
-                return None
-        except requests.RequestException as e:
-            print(f"Error: {e}")
-            return None
+        except Exception:
+            try:
+                response = requests.post(url, data=data, headers=headers, verify=False, timeout=15)
+                if response.status_code == 200 and response.text:
+                    return response.text
+            except Exception as e:
+                print(f"Error fetching Integrated DropDown from {url}: {e}")
+        return None
 
-    url = 'https://www.integratedregistry.in/IRMS_V2/RegistrarsToAjax.aspx'
-    html_content = getDropDown(url)
+    html_content = getDropDown('https://www.integratedregistry.in/IRMS_V2/RegistrarsToListingAjax.aspx')
+    if not html_content:
+        html_content = getDropDown('https://www.integratedregistry.in/IRMS_V2/RegistrarsToAjax.aspx')
+
     if html_content:
         soup = BeautifulSoup(html_content, 'html.parser')
         dropdown_dict = {}
 
         for option in soup.find_all('option'):
-            if option['value'] != '0':  # Skip the --select-- option
-                dropdown_dict[option.text.strip()] = option['value']
+            code = str(option.get('value', '')).strip()
+            name = option.text.strip()
+            if code and code != '0' and name and not name.startswith('--'):
+                dropdown_dict[name] = code
         normalized_dict = {
             re.sub(r'\s+', ' ', key.strip()): value
             for key, value in dropdown_dict.items()
         }
         return normalized_dict
+    return {}
 
 def MaashitlaDropDown():
     global dropdown_dict
@@ -678,6 +762,7 @@ def encVal(vl):
     
     return base64.b64encode(encrypted_data)
 
+@allowed_users(allowed_roles=['Broker'])
 def get_options(request):
     PRI_limit  = CustomUser.objects.get(username = request.user)
     is_premium_user = PRI_limit.Allotment_access    
@@ -1454,157 +1539,220 @@ async def solve_captcha(captcha_image_data):
     
     return stqw
     
-async def Integrated_fetch_allotment(user,session, selected_value, panno, result,IPOid,OrderType,ssl_context, retries=3,timeout=5):
-    url = 'https://www.integratedregistry.in/IRMS_V2/NCDAllotmentDetailsdataLaodNew_v2.aspx'
-    
+async def Integrated_fetch_allotment(user, selected_value, panno, result, IPOid, OrderType, ssl_context, pan_index=0, max_retries=4):
+    result['PAN'] = panno
+    result['DPID'] = ''
+    result['Appl.No'] = ''
+    result['Name'] = ''
+    result['Applied'] = ''
+    result['QTY'] = ''
+    result['Category'] = ''
+    result['STATUS'] = 'FAILED'
+    result['REMARK'] = 'ERROR'
+
+    main_page_url = 'https://www.integratedregistry.in/IRMS_V2/IPOlink_v3.aspx'
     captcha_url = 'https://www.integratedregistry.in/IRMS_V2/Captcha_V2.aspx'
-    async with session.get(captcha_url,ssl=ssl_context) as response:
-        captcha_image_data = await response.read()
-        captcha_text = await solve_captcha(captcha_image_data)
-    
-    raw_payload = (
-        f"Req=2&Comp={selected_value}"
-        f"&AppNum="
-        f"&Choice=3"
-        f"&PANNO={panno}"
-        f"&DPClit="
-        f"&TYPE=IPO"
-        f"&Captcha={captcha_text}" # <--- Solved code goes here
-    )
-    
-    raw_payload = encrypt_post_data(raw_payload)
-    payload = {
-        "EncryptedData": raw_payload
+    allotment_url = 'https://www.integratedregistry.in/IRMS_V2/NCDAllotmentDetailsdataLaodNew_Listing.aspx'
+
+    browser_headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Connection': 'keep-alive',
     }
-    
-    for attempt in range(retries):
-        flag = 0
+
+    for attempt in range(max_retries):
+        session_id = f"int_{panno}_{attempt}_{uuid.uuid4().hex[:6]}"
+        proxy = f"http://{DATAIMPULSE_USER}__cr.in__session.{session_id}:{DATAIMPULSE_PASS}@{DATAIMPULSE_GW}"
+
         try:
-            async with session.post(url, data=payload,ssl=ssl_context) as response:
-                text = await asyncio.wait_for(response.text(), timeout)
-                
-                # Check for "Not Found" scenario
-                if "Records Not Found" in text:
-                    result['QTY'] = 'Records Not Found...!!!'
-                    result['REMRAK'] = 'DONE'
-                    return result
-                
-                else:
-                    # --- FIX START: Updated Regex ---
-                    # Use [^>]* to match 'leftdiv', 'leftdiv Newleftdiv', etc.
+            cookie_jar = aiohttp.CookieJar()
+            timeout = aiohttp.ClientTimeout(total=20)
+            async with aiohttp.ClientSession(headers=browser_headers, cookie_jar=cookie_jar, timeout=timeout) as session:
+                # 1. Visit main page to establish session & cookies via Proxy
+                async with session.get(main_page_url, ssl=ssl_context, proxy=proxy) as page_resp:
+                    if page_resp.status != 200:
+                        await asyncio.sleep(0.3)
+                        continue
+
+                # 2. Fetch CAPTCHA within the same session via Proxy
+                ticks = 621355968000000000 + int(time.time() * 10000000)
+                cur_captcha_url = f"{captcha_url}?{ticks}"
+
+                captcha_answer = ""
+                async with session.get(cur_captcha_url, ssl=ssl_context, proxy=proxy) as cap_resp:
+                    if cap_resp.status == 200:
+                        cap_bytes = await cap_resp.read()
+                        captcha_answer = solve_integrated_math_captcha(cap_bytes)
+
+                if not captcha_answer:
+                    await asyncio.sleep(0.3)
+                    continue
+
+                # 3. Post allotment request via the SAME sticky proxy session
+                post_headers = {
+                    'User-Agent': browser_headers['User-Agent'],
+                    'Referer': main_page_url,
+                    'Origin': 'https://www.integratedregistry.in',
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                    'Accept': '*/*',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+
+                payload_str = f"Req=2&Comp={selected_value}&AppNum=&Choice=3&PANNO={panno}&DPClit=&TYPE=IPO&Captcha={captcha_answer}&Session_mail="
+
+                async with session.post(allotment_url, data=payload_str, headers=post_headers, ssl=ssl_context, proxy=proxy) as post_resp:
+                    if post_resp.status != 200:
+                        await asyncio.sleep(0.3)
+                        continue
+
+                    text = await post_resp.text()
+
+                    # Check for Captcha rejection
+                    if "CAPTCHA mismatch" in text or "Invalid Captcha" in text:
+                        await asyncio.sleep(0.3)
+                        continue
+
+                    # Check for Records Not Found
+                    if "Records Not Found" in text or text.startswith("0@@@@") or "no record" in text.lower():
+                        result['Applied'] = ''
+                        result['QTY'] = ''
+                        result['STATUS'] = 'NOT_FOUND'
+                        result['REMARK'] = 'DONE'
+                        return result
+
+                    # Success response prefix clean
+                    if text.startswith("2@@@@"):
+                        text = text.replace("2@@@@", "", 1).strip()
+                    elif text.startswith("1@@@@"):
+                        text = text.replace("1@@@@", "", 1).strip()
+
                     left_div_pattern = re.compile(r"<div class='leftdiv[^>]*'>(.*?)</div>")
-                    
-                    # Handle optional colon and whitespace in the right div
                     right_div_pattern = re.compile(r"<div class='rightdiv'>:?\s*(.*?)</div>")
-                    # --- FIX END ---
 
                     left_divs = left_div_pattern.findall(text)
                     right_divs = right_div_pattern.findall(text)
-                    
-                    # Initialize default values to avoid KeyErrors
-                    result.update({
-                        'Appl.No': '', 'Category': '', 'DPID': '', 
-                        'Name': '', 'Applied': '0', 'QTY': '0'
-                    })
 
+                    found_data = False
                     for left, right in zip(left_divs, right_divs):
                         key = left.strip()
                         val = right.strip()
 
                         if 'Application No' in key:
                             result['Appl.No'] = val
+                            found_data = True
                         elif 'Category' in key:
                             result['Category'] = val
-                        elif 'Dpid Client Id' in key:
+                        elif 'Dpid' in key:
                             result['DPID'] = val
                         elif 'Name' in key:
                             result['Name'] = val
+                            found_data = True
                         elif 'Applied' in key:
-                            result['Applied'] = val
+                            try:
+                                result['Applied'] = int(val)
+                            except Exception:
+                                result['Applied'] = val
                         elif 'Allotted' in key:
-                            result['QTY'] = val
-                            
-                            # Trigger database update if allotment found
-                            if val.isdigit() and int(val) >= 0:
-                                await update_database(user, IPOid, panno, int(val), OrderType)
-                    
-                    result['REMRAK'] = 'DONE'
-                    return result
+                            found_data = True
+                            try:
+                                qty_val = int(val)
+                                result['QTY'] = qty_val
+                                result['STATUS'] = 'ALLOTTED' if qty_val > 0 else 'NON_ALLOTTED'
+                            except Exception:
+                                result['QTY'] = val
+                                result['STATUS'] = 'NON_ALLOTTED'
 
-        except Exception as e:
-            print(f"Error for PAN {panno}: {e}")
-            if attempt == retries - 1:
-                result['REMRAK'] = 'ERROR'
-                return result
+                    if found_data:
+                        result['REMARK'] = 'DONE'
+                        return result
+                    else:
+                        if any(phrase in text.lower() for phrase in ['not found', 'no record', 'not available']):
+                            result['Applied'] = ''
+                            result['QTY'] = ''
+                            result['STATUS'] = 'NOT_FOUND'
+                            result['REMARK'] = 'DONE'
+                            return result
 
-async def Integrated_allotment(user, IPOid, OrderType, ipo_register, ipo_name,Data):
+        except Exception:
+            pass
+        await asyncio.sleep(0.3)
+
+    return result
+
+async def Integrated_allotment(user, IPOid, OrderType, ipo_register, ipo_name, Data):
     entry = Data
-            
     data_length = len(entry)
-    
-    Integrated_company_data = IntegratedDropDown()
-    IPO_options_dict = Integrated_company_data
+
+    Integrated_company_data = await sync_to_async(IntegratedDropDown)()
+    IPO_options_dict = Integrated_company_data if Integrated_company_data else {}
     selected_text = ipo_name
     selected_value = IPO_options_dict.get(selected_text, "")
-    
-    results = []
-    
-    ssl_context = ssl.create_default_context(cafile='pemfile/integrated.pem')
-    
-    async with aiohttp.ClientSession(headers={
-        'Accept-Language': 'en-US,en;q=0.9',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'X-Requested-With': 'XMLHttpRequest'
-    }) as session:
-        tasks = []
-        for i in range(data_length):
-            panno = entry[i]
-            # myobj = {
-            #     'Req':2,
-            #     'Comp': selected_value,
-            #     'AppNum': '',
-            #     'PANNO': panno,
-            #     'Choice': '3',
-            #     'DPClit': '',
-            #     'TYPE':'IPO',
-            #     'Captcha':'undefined'
-            # }
-            result = {'PAN': panno}
-            tasks.append(Integrated_fetch_allotment(user,session, selected_value, panno, result,IPOid,OrderType,ssl_context))
 
-        responses = await asyncio.gather(*tasks)
-        # updates = []
-        # for res in responses:
-        #     if 'QTY' in res:
-        #         if res['QTY'] != 'Records Not Found...!!!' and res['Name'] != '':
-        #             qty_sum = 0
-        #             for key, value in res.items():
-        #                 if key.startswith('QTY'):  # Check if the key starts with 'QTY'
-        #                     qty_sum += int(value)
-                            
-        #             if 'QTY' in res:
-        #                 updates.append({
-        #                     'user': user,
-        #                     'IPOid': IPOid,
-        #                     'panno': res['PAN'],
-        #                     'shares_alloted': qty_sum,
-        #                     'OrderType': OrderType,
-        #                 })
-       
-        # await bulk_create_or_update(updates)
-        results.extend(responses)
-    
+    print(f"[Integrated] Checking {data_length} PANs for '{selected_text}' (Company Code: {selected_value})...")
+
+    # Pre-warm local ONNX OCR model into RAM
+    get_ocr()
+
+    concurrency = min(50, max(1, data_length))
+    semaphore = asyncio.Semaphore(concurrency)
+    results_dict = {}
+
+    try:
+        ssl_context = ssl.create_default_context(cafile='pemfile/integrated.pem')
+    except Exception:
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+
+    async def sem_worker(idx, panno):
+        async with semaphore:
+            result = {'PAN': panno}
+            res = await Integrated_fetch_allotment(user, selected_value, panno, result, IPOid, OrderType, ssl_context, pan_index=idx)
+            results_dict[idx] = res
+
+    tasks = [
+        asyncio.create_task(sem_worker(i, entry[i]))
+        for i in range(data_length)
+    ]
+    await asyncio.gather(*tasks)
+
+    results = [results_dict[i] for i in range(data_length) if i in results_dict]
+
+    # Direct concurrent database updates for all checked PANs in this batch
+    async def safe_db_update(res):
+        panno = res.get('PAN')
+        qty = res.get('QTY')
+        name = res.get('Name')
+        if name and qty is not None:
+            try:
+                qty_int = int(qty) if str(qty).isdigit() else 0
+                if qty_int >= 0:
+                    await update_database(user, IPOid, panno, qty_int, OrderType)
+            except Exception:
+                pass
+
+    await asyncio.gather(*(safe_db_update(r) for r in results))
+
+    allotted_count = sum(1 for r in results if r.get('STATUS') == 'ALLOTTED')
+    non_allotted_count = sum(1 for r in results if r.get('STATUS') == 'NON_ALLOTTED')
+    not_found_count = sum(1 for r in results if r.get('STATUS') == 'NOT_FOUND')
+    failed_count = sum(1 for r in results if r.get('STATUS') == 'FAILED' or r.get('REMARK') == 'ERROR')
+    print(f"[Integrated] Completed {len(results)} PANs: {allotted_count} Allotted, {non_allotted_count} Non-Allotted, {not_found_count} Not Found, {failed_count} Errors.")
+
     df = pd.DataFrame(results)
-    IPO_name = ipo_name
+    IPO_name = ipo_name or "Integrated IPO"
     IPO_NAME = IPO_name.split()
-    ipon = IPO_NAME[0]
+    ipon = IPO_NAME[0] if len(IPO_NAME) > 0 else "Integrated"
+    sub_name = IPO_NAME[1] if len(IPO_NAME) > 1 else "IPO"
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = f'attachment; filename="{ipon}_{IPO_NAME[1]}_IPO_Allotment.xlsx"'
-    
+    response['Content-Disposition'] = f'attachment; filename="{ipon}_{sub_name}_IPO_Allotment.xlsx"'
+
     with pd.ExcelWriter(response, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='IPO Allotment')
-    
+
     return response
 
 async def Maashitla_fetch_allotment(user, session, myobj, panno, result, IPOid, OrderType, ssl_context=None, retries=3, timeout=15):
@@ -2568,6 +2716,7 @@ def IPOSETUP(request):
     df = pd.DataFrame.from_records(Data)
     html_table = "<table >\n"
     html_table = "<thead><tr style='text-align: center;white-space: nowrap; width:100%' >"
+    html_table += "<th scope='col' style='width:30px;'><input type='checkbox' id='selectAll'></th>"
     html_table += "<th scope='col' style='width:90px;'>Sr No. &nbsp;</th>"
     html_table += "<th scope='col'>Name &nbsp;</th>"
     html_table += "<th scope='col'>IPO Type &nbsp;</th>"
@@ -2587,6 +2736,7 @@ def IPOSETUP(request):
 
     for i, row in df.iterrows():
         html_table += "<tr style='text-align: center;'>"
+        html_table += f"<td><input type='checkbox' class='row-checkbox' value='{row.id}'></td>"
         html_table += f"<td>{row.sr_no}</td>"
         html_table += f"<td><a <a href='/{row.id}/Order'>{row.IPOName}</a></td>"
         html_table += f"<td>{row.IPOType}</td>"
@@ -2603,7 +2753,7 @@ def IPOSETUP(request):
         else:
             html_table += f"<td> - </td>"
             html_table += f"<td> - </td>"
-        html_table += f"<td style='white-space: normal; max-width: 250px;'>{row.Remark}</td>"
+        html_table += f"<td style='white-space: normal; max-width: 250px;'>{ str(row.Remark) if (row.Remark and str(row.Remark).lower() not in ('nan','none')) else '-'}</td>"
         html_table += f"<td style='white-space: nowrap;'><button onclick=\"window.location.href='edit/{ row.id }?page={page_number}';\"\
                     class='btn btn-outline-primary' style='width: 72px;'>Edit</button>\
             <button type='button' class='btn btn-outline-danger' \
@@ -2654,15 +2804,29 @@ def IPOSETUP(request):
 def ClientSetup(request, PanNoId='None'):
     Group = GroupDetail.objects.filter(user=request.user)
 
-    page_obj = None
-    try:
-        page_size = request.POST.get('client_page_size')
-        if page_size != '' and page_size != None:
-            request.session['client_page_size'] = page_size
-        else:
-            page_size = request.session['client_page_size']
-    except:
-        page_size = request.session.get('client_page_size', 50)
+    if request.method == 'GET' and not request.GET.get('page'):
+        page_size = 50
+        request.session['client_page_size'] = 50
+        SearchQuery = ''
+        request.session['client_search_query'] = ''
+    else:
+        try:
+            page_size = request.POST.get('client_page_size')
+            if page_size:
+                request.session['client_page_size'] = page_size
+            else:
+                page_size = request.session.get('client_page_size', 50)
+        except:
+            page_size = request.session.get('client_page_size', 50)
+            
+        try:
+            SearchQuery = request.POST.get('SearchQuery')
+            if SearchQuery is not None:
+                request.session['client_search_query'] = SearchQuery
+            else:
+                SearchQuery = request.session.get('client_search_query', '')
+        except:
+            SearchQuery = request.session.get('client_search_query', '')
     
     try:
         group_filter = request.POST.get('group_filter')
@@ -2673,9 +2837,19 @@ def ClientSetup(request, PanNoId='None'):
     except:
         group_filter = request.session.get('client_group_filter', 'All')
 
-    products = ClientDetail.objects.filter(user=request.user)
+    products = ClientDetail.objects.filter(user=request.user).select_related('Group')
     if group_filter != 'All':
         products = products.filter(Group__GroupName=group_filter)
+        
+    if SearchQuery:
+        from django.db.models import Q
+        sq = SearchQuery.strip()
+        products = products.filter(
+            Q(PANNo__icontains=sq) |
+            Q(Name__icontains=sq) |
+            Q(Group__GroupName__icontains=sq) |
+            Q(ClientIdDpId__icontains=sq)
+        )
     
     Data=[]
     if page_size == 'All':
@@ -2692,11 +2866,16 @@ def ClientSetup(request, PanNoId='None'):
         start_index = (page_obj.number - 1) * page_obj.paginator.per_page
         
         for i,order_detail in enumerate(page_obj):
+            try:
+                group_val = order_detail.Group.GroupName if order_detail.Group_id else ''
+            except Exception:
+                group_val = ''
+                
             entry_data = {
                 'id':order_detail.id,
                 'PANNo': order_detail.PANNo,
                 'Name': order_detail.Name,
-                'Group': order_detail.Group,
+                'Group': group_val,
                 'ClientIdDpId': order_detail.ClientIdDpId,
                 'sr_no': start_index + i + 1
             }
@@ -2768,9 +2947,9 @@ def ClientSetup(request, PanNoId='None'):
         employee = ClientDetail.objects.get(
             id=PanNoId, user=request.user)
         params = {'html_table': html_table, 'Group': Group.order_by(
-            'GroupName'), 'employee': employee,'page_obj': page_obj,'client_page_size':page_size, 'client_group_filter': group_filter }
+            'GroupName'), 'employee': employee,'page_obj': page_obj,'client_page_size':page_size, 'client_group_filter': group_filter, 'SearchQuery': SearchQuery }
     else:
-        params = {'html_table': html_table, 'Group': Group.order_by('GroupName'),'page_obj': page_obj,'client_page_size':page_size, 'client_group_filter': group_filter}
+        params = {'html_table': html_table, 'Group': Group.order_by('GroupName'),'page_obj': page_obj,'client_page_size':page_size, 'client_group_filter': group_filter, 'SearchQuery': SearchQuery}
 
     return render(request, 'ClientSetup.html', params)
 
@@ -2806,17 +2985,42 @@ def BulkDeleteClients(request):
 
 @allowed_users(allowed_roles=['Broker'])
 def GroupSetup(request):
+    if request.method == 'GET' and not request.GET.get('page'):
+        page_size = 50
+        request.session['Gp_page_size'] = 50
+        SearchQuery = ''
+        request.session['Gp_search_query'] = ''
+    else:
+        try:
+            page_size = request.POST.get('Gp_page_size')
+            if page_size:
+                request.session['Gp_page_size'] = page_size
+            else:
+                page_size = request.session.get('Gp_page_size', 50)
+        except:
+            page_size = request.session.get('Gp_page_size', 50)
+            
+        try:
+            SearchQuery = request.POST.get('SearchQuery')
+            if SearchQuery is not None:
+                request.session['Gp_search_query'] = SearchQuery
+            else:
+                SearchQuery = request.session.get('Gp_search_query', '')
+        except:
+            SearchQuery = request.session.get('Gp_search_query', '')
+            
     products = GroupDetail.objects.filter(user=request.user)
     
-    page_obj = None
-    try:
-        page_size = request.POST.get('Gp_page_size')
-        if page_size != '' and page_size != None:
-            request.session['Gp_page_size'] = page_size
-        else:
-            page_size = request.session['Gp_page_size']
-    except:
-        page_size = request.session.get('Gp_page_size', 50)
+    if SearchQuery:
+        from django.db.models import Q
+        sq = SearchQuery.strip()
+        products = products.filter(
+            Q(GroupName__icontains=sq) |
+            Q(MobileNo__icontains=sq) |
+            Q(Email__icontains=sq) |
+            Q(Address__icontains=sq) |
+            Q(Remark__icontains=sq)
+        )
     
     Data=[]
     if page_size == 'All':
@@ -2863,7 +3067,7 @@ def GroupSetup(request):
         html_table += f"<td>{row.MobileNo}</td>"
         html_table += f"<td>{row.Email}</td>"
         html_table += f"<td>{row.Address}</td>"
-        html_table += f"<td>{row.Remark}</td>"
+        html_table += f"<td>{ str(row.Remark) if (row.Remark and str(row.Remark).lower() not in ('nan','none')) else '-'}</td>"
         html_table += f"<td style='white-space: nowrap;'><button onclick=\"window.location.href='EditGroup/{ row.id }?page={page_number}';\"\
                     class='btn btn-outline-primary' style='width: 72px;'>Edit</button>\
             <button type='button' class='btn btn-outline-danger' \
@@ -2907,33 +3111,8 @@ def GroupSetup(request):
                         </div>
                     </div>
         """
-    params = {'html_table': html_table,'page_obj': page_obj,'Gp_page_size':page_size}
+    params = {'html_table': html_table,'page_obj': page_obj,'Gp_page_size':page_size, 'SearchQuery': SearchQuery}
     return render(request, 'GroupSetup.html', params)
-
-@allowed_users(allowed_roles=['Broker'])
-def AddCustomerUser(request):
-    group = GroupDetail.objects.filter(user=request.user)
-    if request.method == "POST":
-        try:
-            username = request.POST.get('username', '')
-            password = request.POST.get('password', '')
-            email = request.POST.get('email', '')
-            first_name = request.POST.get('first_name', '')
-            last_name = request.POST.get('last_name', '')
-            Group1 = request.POST.get('Group', '')
-            gid = GroupDetail.objects.get(
-                GroupName=Group1, user=request.user).id
-            user = CustomUser.objects.create_user(
-                username=username, password=password, email=email, last_name=last_name, first_name=first_name, Broker_id=request.user.id, Group_id=gid)
-            user.save()
-            group11 = Group.objects.get(name='Customer')
-            user.groups.add(group11)
-            messages.success(request, "Successfully Added User")
-            return redirect("/")
-
-        except:
-            messages.error(request, 'Error.')
-    return render(request, 'AddCustomerUser.html', {'Group': group.order_by('GroupName')})
 
 @allowed_users(allowed_roles=['Broker'])
 def AddIPO(request):
@@ -3232,6 +3411,7 @@ def EditGroup(request, GroupNameId):
         id=GroupNameId, user=request.user)
     return render(request, 'EditGroup.html', {'employee': employee,'page_number':page_number})
 
+@allowed_users(allowed_roles=['Broker'])
 def EditOrder(request, OrderId,IPOid,Grpf,OrCtf,InTyf):
     page_number = request.GET.get('page')
     order = Order.objects.get(OrderIPOName_id = IPOid,
@@ -3995,6 +4175,58 @@ def destroy(request, IPOid):
         return redirect(url or 'IPOSETUP')
 
 @allowed_users(allowed_roles=['Broker'])
+def BulkDeleteIPO(request):
+    if request.method == "POST":
+        ids = request.POST.getlist('ids[]')
+        
+        success_count = 0
+        blocked_ipos = [] 
+        
+        for ipo_id in ids:
+            try:
+                ipo = CurrentIpoName.objects.get(id=ipo_id, user=request.user)
+                orders = Order.objects.filter(user=request.user, OrderIPOName=ipo_id)
+                transactions = Accounting.objects.filter(
+                    user=request.user, ipo=ipo_id, is_deleted=False
+                )
+                
+                total_amount = round(orders.aggregate(total=Sum('Amount'))['total'] or 0, 1)
+                creditsamount = transactions.filter(amount_type='credit').aggregate(total=Sum('amount'))['total'] or 0
+                debitsamount = transactions.filter(amount_type='debit').aggregate(total=Sum('amount'))['total'] or 0
+                
+                ipo_collection = total_amount - round(float(creditsamount) - float(debitsamount) , 1)
+                
+                if ipo_collection != 0:
+                    blocked_ipos.append(f"{ipo.IPOName} (Collection: {ipo_collection})")
+                else:
+                    # Delete related records
+                    OrderDetail.objects.filter(user=request.user, Order__OrderIPOName_id=ipo_id).delete()
+                    RateList.objects.filter(user=request.user, RateListIPOName_id=ipo_id).delete()
+                    Order.objects.filter(user=request.user, OrderIPOName_id=ipo_id).delete()
+
+                    # Update Accounting: keep ipo_name text, set ipo FK = None
+                    Accounting.objects.filter(ipo=ipo, user=request.user).update(
+                        ipo_name=ipo.IPOName,
+                        status=True,
+                        ipo=None
+                    )
+                    
+                    ipo.delete()
+                    success_count += 1
+            except CurrentIpoName.DoesNotExist:
+                pass
+            except Exception as e:
+                pass
+        
+        if success_count > 0:
+            messages.success(request, f"Successfully deleted {success_count} IPO(s).")
+        if blocked_ipos:
+            messages.error(request, f"{len(blocked_ipos)} IPO(s) could not be deleted (Non-zero collection amount): {', '.join(blocked_ipos)}.")
+            
+        return JsonResponse({"success": True})
+    return JsonResponse({"success": False}, status=400)
+
+@allowed_users(allowed_roles=['Broker'])
 def DeleteClient(request, PANNoId):
     page_number = request.GET.get('page','1')
     query = OrderDetail.objects.filter(user=request.user, OrderDetailPANNo_id=PANNoId)
@@ -4158,6 +4390,9 @@ def DeleteOrder(request, IPOid, OrderId, GrpName, OrderCategory, InvestorType):
         last_order.Telly = "False"
         last_order.save()
     
+    referer = request.META.get('HTTP_REFERER')
+    if referer and 'trades' in referer.lower():
+        return redirect('/trades')
     return redirect(f"/{IPOid}/Order/{GrpName}/{OrderCategory}/{InvestorType}?page={page_number}")
 
 @csrf_exempt
@@ -4220,9 +4455,16 @@ def BUY(request, IPOid, selectgroup=None):
                             SubjecToBuyRate=0, SubjecToBuyQty=0, PremiumBuyRate=0, PremiumBuyQty=0)
     if request.method == "POST":
         user = request.user
-        Group = request.POST.get('item_id', '')
-
-        gid = GroupDetail.objects.get(GroupName=Group, user=userid).id
+        Group = request.POST.get('item_id', '').strip()
+        if not Group:
+            messages.error(request, "Please select a group before placing an order.")
+            return redirect(f'/{IPOid}/BUY')
+            
+        try:
+            gid = GroupDetail.objects.get(GroupName=Group, user=userid).id
+        except GroupDetail.DoesNotExist:
+            messages.error(request, f"The selected group '{Group}' does not exist.")
+            return redirect(f'/{IPOid}/BUY')
         KostakRate = request.POST.get('KostakRate', '')
         SubjectToRate = request.POST.get('SubjectToRate', '')
         PremiumRate = request.POST.get('PremiumRate', '')
@@ -4249,7 +4491,6 @@ def BUY(request, IPOid, selectgroup=None):
         PutRate = request.POST.get('PutRate', '')
         PutStrikePrice = request.POST.get('PutStrikePrice', '')
         placeOrderOnly = request.POST.get('placeOrderOnly', False)
-        placeOrderWithWhatsApp = request.POST.get('placeOrderWithWhatsApp', False)
 
         DateTime = request.POST.get('datetime', '')
         OrderDate = DateTime[0:10]
@@ -4510,9 +4751,7 @@ def BUY(request, IPOid, selectgroup=None):
                 a==0
         
         if a == 1:
-            if placeOrderWithWhatsApp:
-                pass
-            elif placeOrderOnly:
+            if placeOrderOnly:
                 messages.success(request, 'Buy order placed successfully.')
             else:
                 messages.success(request, 'Buy order placed successfully. Telegram message sent successfully ')
@@ -4590,14 +4829,14 @@ def UpdateOrder(request, IPOid, OrderId, Grpf, OrCtf, InTyf):
 
         try:
             if OrderCategory == 'Subject To':
-                print(Order.objects.get(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType=InvestorType, Rate=Rate,
-                        OrderCategory=OrderCategory, OrderType=OrderType, Quantity=Qty, OrderDate=OrderDate, OrderTime=OrderTime,Method=RateOrPremium, remark=remark_final) )
+                Order.objects.get(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType=InvestorType, Rate=Rate,
+                        OrderCategory=OrderCategory, OrderType=OrderType, Quantity=Qty, OrderDate=OrderDate, OrderTime=OrderTime,Method=RateOrPremium, remark=remark_final)
             elif InvestorType == 'OPTIONS' :
-                print(Order.objects.get(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType=InvestorType, Rate=Rate,
-                        OrderCategory=OrderCategory, OrderType=OrderType, Quantity=Qty, OrderDate=OrderDate, OrderTime=OrderTime,Method=Strike_price, remark=remark_final) )
+                Order.objects.get(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType=InvestorType, Rate=Rate,
+                        OrderCategory=OrderCategory, OrderType=OrderType, Quantity=Qty, OrderDate=OrderDate, OrderTime=OrderTime,Method=Strike_price, remark=remark_final)
             else:
-                print(Order.objects.get(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType=InvestorType, Rate=Rate,
-                        OrderCategory=OrderCategory, OrderType=OrderType, Quantity=Qty, OrderDate=OrderDate, OrderTime=OrderTime, remark=remark_final))
+                Order.objects.get(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType=InvestorType, Rate=Rate,
+                        OrderCategory=OrderCategory, OrderType=OrderType, Quantity=Qty, OrderDate=OrderDate, OrderTime=OrderTime, remark=remark_final)
         except:
             var = 0
             entry = Order.objects.get(user=request.user, id=OrderId)
@@ -5211,7 +5450,7 @@ def OrderDetailFunction(request, IPOid, Ordtyp, GrpName=None, OrderCategory=None
                 html_table += f"<td style='width:185px;'><input type='text' disabled style='width:165px; cursor: not-allowed;' name='Application_{row.id}' oninput='sanitizeInput(this)' onblur='checkValidChars(this, \"tooltip_app_{row.id}\")' value='{row.ApplicationNumber}'></td>"
             html_table += f"<td>{formatted_datetime}</td>"
             safe_remark = row.Remark.replace("'", "\\'").replace('"', '&quot;') if row.Remark else ""
-            html_table += f"<td style='white-space: nowrap; max-width: 300px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; outline: none;' tabindex='0' onclick=\"this.style.whiteSpace=this.style.whiteSpace==='normal'?'nowrap':'normal'\" onblur=\"this.style.whiteSpace='nowrap'\" title='{safe_remark}'>{row.Remark}</td>"
+            html_table += f"<td style='white-space: nowrap; max-width: 300px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; outline: none;' tabindex='0' onclick=\"this.style.whiteSpace=this.style.whiteSpace==='normal'?'nowrap':'normal'\" onblur=\"this.style.whiteSpace='nowrap'\" title='{safe_remark}'>{ str(row.Remark) if (row.Remark and str(row.Remark).lower() not in ('nan','none')) else ''}</td>"
             html_table += "</tr>\n"
         
     html_table += "</tbody>"    
@@ -5291,6 +5530,34 @@ def filterfromstatus(request, IPOid, Groupfilter, OrderCategoryFilter, InvestorT
         
     if OrderCategoryFilter == '' or OrderCategoryFilter == None:
         OrderCategoryFilter = 'All'
+    
+    req_data = request.POST if request.method == "POST" else request.GET
+    SearchQuery = req_data.get('SearchQuery', '').strip()
+    if SearchQuery:
+        from django.db.models import Q, CharField
+        from django.db.models.functions import Cast
+        search_date = SearchQuery
+        try:
+            date_part = SearchQuery.split('|')[0].strip()
+            search_date = datetime.strptime(date_part, "%b. %d, %Y").strftime("%Y-%m-%d")
+        except:
+            pass
+            
+        products = products.annotate(
+            rate_str=Cast('Rate', CharField()),
+            qty_str=Cast('Quantity', CharField()),
+            date_str=Cast('OrderDate', CharField()),
+        ).filter(
+            Q(OrderGroup__GroupName__icontains=SearchQuery) |
+            Q(OrderType__icontains=SearchQuery) |
+            Q(OrderCategory__icontains=SearchQuery) |
+            Q(InvestorType__icontains=SearchQuery) |
+            Q(Method__icontains=SearchQuery) |
+            Q(rate_str__icontains=SearchQuery) |
+            Q(qty_str__icontains=SearchQuery) |
+            Q(date_str__icontains=search_date) |
+            Q(remark__icontains=SearchQuery)
+        )
     
     
     OrdCat = ['Kostak','SubjectTo','CALL','PUT']
@@ -5595,9 +5862,7 @@ def filterfromstatus(request, IPOid, Groupfilter, OrderCategoryFilter, InvestorT
         html_table += "<th>InvestorType</th>"
     html_table += "<th> Qty</th>"
     html_table += "<th>Rate</th>"
-    html_table += "<th class='skip-export'>Date and Time</th>"
-    html_table += "<th class='export-only'>Date</th>"
-    html_table += "<th class='export-only'>Time</th>"
+    html_table += "<th>Date and Time</th>"
     html_table += "<th class='remark-col'>Remark</th>"
     html_table += "<th class='skip-export'>Action &nbsp;</th>"
     html_table += "</tr></thead>\n"
@@ -5616,7 +5881,7 @@ def filterfromstatus(request, IPOid, Groupfilter, OrderCategoryFilter, InvestorT
         html_table += f"<td>{row.OrderType}</td>"
         html_table += f"<td ondblclick=\"sendPostRequest('{IPOid}','All','{row.OrderCategory}','All')\" title=\"Double-click to filter by this Order Category\">{row.OrderCategory}</td>"
         if row.OrderCategory != 'Premium':
-            method_value = row.Method if row.Method else 'Application'
+            method_value = str(row.Method) if (row.Method and str(row.Method).lower() not in ('nan', 'none', '')) else 'Application'
             html_table += f"<td>{method_value}</td>"
         else:
             html_table += f"<td>-</td>"
@@ -5629,10 +5894,8 @@ def filterfromstatus(request, IPOid, Groupfilter, OrderCategoryFilter, InvestorT
             html_table += f"<td>{row.Quantity }</td>"
         html_table += f"<td>{row.Rate}</td>"
         html_table += f"<td class='skip-export'>{formatted_datetime}</td>"
-        html_table += f"<td class='export-only'>{export_date}</td>"
-        html_table += f"<td class='export-only'>{export_time}</td>"
-        safe_remark = row.Remark.replace("'", "\\'").replace('"', '&quot;') if row.Remark else ""
-        html_table += f"<td style='white-space: nowrap; max-width: 300px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; outline: none;' tabindex='0' onclick=\"this.style.whiteSpace=this.style.whiteSpace==='normal'?'nowrap':'normal'\" onblur=\"this.style.whiteSpace='nowrap'\" title='{safe_remark}'>{row.Remark}</td>"
+        safe_remark = str(row.Remark).replace("'", "\\'").replace('"', '&quot;') if (row.Remark and str(row.Remark).lower() not in ("nan", "none")) else ""
+        html_table += f"<td style='white-space: nowrap; max-width: 300px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; outline: none;' tabindex='0' onclick=\"this.style.whiteSpace=this.style.whiteSpace==='normal'?'nowrap':'normal'\" onblur=\"this.style.whiteSpace='nowrap'\" title='{safe_remark}'>{ str(row.Remark) if (row.Remark and str(row.Remark).lower() not in ('nan','none')) else ''}</td>"
         if IPOName.IPOType == "MAINBOARD":
             url = f'/{IPOid}/EditOrder/{ row.id }/{Groupfilter}/{OrderCategoryFilter}/{InvestorTypeFilter}?page={page_number}'
         else:
@@ -5645,7 +5908,7 @@ def filterfromstatus(request, IPOid, Groupfilter, OrderCategoryFilter, InvestorT
     html_table += "</tbody></table>"
     
     # return render(request, 'Order.html', {'Group': Group.order_by('GroupName'), 'html_table': html_table, 'IPOid': IPOid, 'IPOName': IPO, 'Groupfilter': Groupfilter,'PremiumSellAmount':PremiumSellAmount,'PremiumNetAmount':PremiumNetAmount,'PremiumBuyAmount':PremiumBuyAmount,'net_count':net_count,'net_avg':net_avg,'net_amount':net_amount  ,'OrderCategoryFilter': OrderCategoryFilter,'InvestorTypeFilter': InvestorTypeFilter, 'dict_count': dict_count, 'dict_avg': dict_avg, 'dict_amount':dict_amount, 'PremiumBuyCount':PremiumBuyCount,'PremiumSellCount':PremiumSellCount,'PremiumNetCount':PremiumNetCount,'PremiumNetAvg':PremiumNetAvg,'PremiumNetAvg':"{:.2f}".format(PremiumNetAvg),'PremiumNetCount':"{:.2f}".format(PremiumNetCount), 'PremiumSellAvg':"{:.2f}".format(PremiumSellAvg),'PremiumBuyAvg':"{:.2f}".format(PremiumBuyAvg),'page_obj': page_obj,'Order_page_size':page_size})
-    return render(request, 'Order.html', {'Group': Group.order_by('GroupName'), 'html_table': html_table, 'IPOid': IPOid, 'IPOName': IPO, 'Groupfilter': Groupfilter, 'OrderCategoryFilter': OrderCategoryFilter,'category_totals': category_totals,'strike_prices': strike_prices,'grand_total': grand_total, 'InvestorTypeFilter': InvestorTypeFilter,'PremiumBuyAmount':PremiumBuyAmount,'PremiumNetAmount':PremiumNetAmount,'PremiumSellAmount':PremiumSellAmount ,'dict_count': dict_count, 'net_count':net_count ,'net_avg':net_avg ,'net_amount':net_amount ,'dict_amount':dict_amount,'dict_avg': dict_avg,'PremiumNetCount':PremiumNetCount,'PremiumNetCount':"{:.2f}".format(PremiumNetCount),'PremiumNetAvg':PremiumNetAvg,'PremiumNetAvg':"{:.2f}".format(PremiumNetAvg), 'PremiumBuyCount':PremiumBuyCount,'PremiumSellCount':PremiumSellCount,'PremiumSellAvg':"{:.2f}".format(PremiumSellAvg),'PremiumBuyAvg':"{:.2f}".format(PremiumBuyAvg),'page_obj': page_obj,'Order_page_size':page_size})
+    return render(request, 'Order.html', {'Group': Group.order_by('GroupName'), 'html_table': html_table, 'IPOid': IPOid, 'IPOName': IPO, 'Groupfilter': Groupfilter, 'OrderCategoryFilter': OrderCategoryFilter,'category_totals': category_totals,'strike_prices': strike_prices,'grand_total': grand_total, 'InvestorTypeFilter': InvestorTypeFilter,'PremiumBuyAmount':PremiumBuyAmount,'PremiumNetAmount':PremiumNetAmount,'PremiumSellAmount':PremiumSellAmount ,'dict_count': dict_count, 'net_count':net_count ,'net_avg':net_avg ,'net_amount':net_amount ,'dict_amount':dict_amount,'dict_avg': dict_avg,'PremiumNetCount':PremiumNetCount,'PremiumNetCount':"{:.2f}".format(PremiumNetCount),'PremiumNetAvg':PremiumNetAvg,'PremiumNetAvg':"{:.2f}".format(PremiumNetAvg), 'PremiumBuyCount':PremiumBuyCount,'PremiumSellCount':PremiumSellCount,'PremiumSellAvg':"{:.2f}".format(PremiumSellAvg),'PremiumBuyAvg':"{:.2f}".format(PremiumBuyAvg),'page_obj': page_obj,'Order_page_size':page_size, 'SearchQuery': SearchQuery})
 
 @allowed_users(allowed_roles=['Broker'])
 def filterfromstatusforsubjectto(request, IPOid, Groupfilter):
@@ -5725,23 +5988,41 @@ def update_telly_status(request):
                 if updateType == 'All':
                     Order_entry = Order.objects.filter(user=request.user,OrderIPOName=IPOId)
                     if Order_entry.exists():
+                        is_tally = (status is True or status == 'True' or status == 'true' or status == 1 or status == '1')
                         update_kwargs = {'Telly': status}
-                        if status is True or status == 'True' or status == 'true' or status == 1 or status == '1':
+                        if is_tally:
                             update_kwargs['tally_timestamp'] = timezone.now()
                         Order_entry.update(**update_kwargs)
-                    return JsonResponse({'success': True})
+                        
+                        from django.db.models import Max
+                        latest_tally_time = Order_entry.aggregate(Max('tally_timestamp'))['tally_timestamp__max']
+                        ts_str = ""
+                        if latest_tally_time:
+                            time_str = timezone.localtime(latest_tally_time).strftime('%d-%m-%Y<br>%H:%M:%S')
+                            ts_str = time_str if is_tally else f"Last: {time_str}"
+                            
+                        return JsonResponse({'success': True, 'ts_str': ts_str})
+                    return JsonResponse({'success': False, 'error': 'Order entry not found'})
                         
                 else:
                     groupname = data.get('groupname')
                     Group_entry =  GroupDetail.objects.get(user=request.user,GroupName =groupname)
                     Order_entry = Order.objects.filter(user=request.user,OrderGroup= Group_entry.id,OrderIPOName=IPOId)
                     if Order_entry.exists():
+                        is_tally = (status is True or status == 'True' or status == 'true' or status == 1 or status == '1')
                         update_kwargs = {'Telly': status}
-                        if status is True or status == 'True' or status == 'true' or status == 1 or status == '1':
+                        if is_tally:
                             update_kwargs['tally_timestamp'] = timezone.now()
                         Order_entry.update(**update_kwargs)
-                        # messages.success(request, 'Tally Status updated successfully.')
-                        return JsonResponse({'success': True})
+                        
+                        from django.db.models import Max
+                        latest_tally_time = Order_entry.aggregate(Max('tally_timestamp'))['tally_timestamp__max']
+                        ts_str = ""
+                        if latest_tally_time:
+                            time_str = timezone.localtime(latest_tally_time).strftime('%d-%m-%Y<br>%H:%M:%S')
+                            ts_str = time_str if is_tally else f"Last: {time_str}"
+                            
+                        return JsonResponse({'success': True, 'ts_str': ts_str})
                     else:
                         # messages.error(request, 'No orders found for this group')
                         return JsonResponse({'success': False, 'error': 'No orders found for this group'})
@@ -5764,7 +6045,11 @@ def update_telly_status(request):
 #groupwise billing fun
 @allowed_users(allowed_roles=['Broker'])
 def Status(request, IPOid):
-    
+    SearchQuery = request.POST.get('SearchQuery', '').strip()
+    print('Received SearchQuery:', repr(SearchQuery))
+    if not SearchQuery:
+        SearchQuery = request.GET.get('SearchQuery', '').strip()
+        
     IPOName = CurrentIpoName.objects.get(id=IPOid, user=request.user)
     orderdetail = OrderDetail.objects.filter(
         user=request.user, Order__OrderIPOName_id=IPOid)
@@ -5823,26 +6108,12 @@ def Status(request, IPOid):
         SellSubjectToAllotedShare = []
         Group_telly_status = {}
         for GroupName in Group:
-            total = 0
-            totalofsubjectto = 0
             entry = order.filter(
                 user=request.user, OrderGroup=GroupName)
-            if len(entry)==0:
+            if not entry.exists():
                 continue
             
-            sme_entry_list.append(GroupName)
-        
-        if page_size == 'All':
-            all_rows = True
-            paginator = Paginator(sme_entry_list,len(sme_entry_list))
-            page_number = request.GET.get('page')
-            page_obj = paginator.get_page(page_number)
-        else:
-            paginator = Paginator(sme_entry_list, page_size)
-            page_number = request.GET.get('page')
-            page_obj = paginator.get_page(page_number)
-            
-        for GroupName in page_obj:
+            # For compatibility with rest of loop logic
             entry = order.filter(
                 user=request.user, OrderGroup=GroupName)
             if entry.exists():
@@ -6045,6 +6316,78 @@ def Status(request, IPOid):
 
             TtotalAmount = total + totalofsubjectto + TtotalAmountpremiumv
             TotalAmount.append(TtotalAmount)
+
+            if SearchQuery:
+                sq = SearchQuery.lower().replace(",", "").strip()
+                float_format_str = "{:.0f}"
+                match = False
+                
+                # Extract GroupName string
+                try:
+                    gn_str = getattr(GroupName, 'GroupName', str(GroupName))
+                except:
+                    gn_str = str(GroupName)
+
+                values_to_check = [
+                    gn_str, no, TotalAllotedKostakt, BUYKostakentrytotal, SELLKostakentrytotal, total,
+                    nosubjectto, TotalAllotedSubjectTot, BUYSubjectToentrytotal, SELLSubjectToentrytotal, totalofsubjectto,
+                    TtotalQtypremiumv, BTotalQty, STotalQty, BTotalAmount, STotalAmount, TtotalAmountpremiumv,
+                    TTotalShare, TTotalKostakAllotedShare, TTotalSubjectToAllotedShare, TtotalAmount,
+                    NOBUYKostakentry, NOSELLKostakentry, NOBUYSubjectToentry, NOSELLSubjectToentry
+                ]
+                for v in values_to_check:
+                    try:
+                        v_str = str(int(float(v))).lower()
+                    except:
+                        v_str = str(v).lower()
+                    if sq in v_str:
+                        match = True
+                        break
+                if not match:
+                    for v in values_to_check:
+                        try:
+                            v_str = float_format_str.format(float(v)).lower()
+                            if sq in v_str:
+                                match = True
+                                break
+                        except:
+                            pass
+                            
+                if not match:
+                    noofapp.pop()
+                    TotalAllotedKostak.pop()
+                    grpname.pop()
+                    BuyKostakApp.pop()
+                    BuyKostakAllotedApp.pop()
+                    BuyKostakAllotedShare.pop()
+                    SellKostakApp.pop()
+                    SellKostakAllotedApp.pop()
+                    SellKostakAllotedShare.pop()
+                    BuyKostakAmount.pop()
+                    SellKostakAmount.pop()
+                    noofappsubjectto.pop()
+                    TotalAllotedSubjectTo.pop()
+                    BuySubjectToApp.pop()
+                    BuySubjectToAllotedApp.pop()
+                    BuySubjectToAllotedShare.pop()
+                    SellSubjectToApp.pop()
+                    SellSubjectToAllotedApp.pop()
+                    SellSubjectToAllotedShare.pop()
+                    BuySubjectToAmount.pop()
+                    SellSubjectToAmount.pop()
+                    TotalKostak.pop()
+                    TotalSubjectTo.pop()
+                    TtotalQtypremium.pop()
+                    BuyPremiumApp.pop()
+                    SellPremiumApp.pop()
+                    BuyPremiumAmount.pop()
+                    SellPremiumAmount.pop()
+                    TtotalAmountpremium.pop()
+                    TotalKostakAllotedShare.pop()
+                    TotalSubjectToAllotedShare.pop()
+                    TotalShare.pop()
+                    TotalAmount.pop()
+
         Data = {
             'noofapp':noofapp,'TotalAllotedKostak':TotalAllotedKostak,'grpname':grpname,'BuyKostakApp':BuyKostakApp,'BuyKostakAllotedApp':BuyKostakAllotedApp,'BuyKostakAllotedShare':BuyKostakAllotedShare,'SellKostakApp':SellKostakApp,'SellKostakAllotedApp':SellKostakAllotedApp,'SellKostakAllotedShare':SellKostakAllotedShare,'BuyKostakAmount':BuyKostakAmount,'SellKostakAmount':SellKostakAmount,'noofappsubjectto':noofappsubjectto,'TotalAllotedSubjectTo':TotalAllotedSubjectTo,'BuySubjectToApp':BuySubjectToApp,'BuySubjectToAllotedApp':BuySubjectToAllotedApp,'BuySubjectToAllotedShare':BuySubjectToAllotedShare,'SellSubjectToApp':SellSubjectToApp,'SellSubjectToAllotedApp':SellSubjectToAllotedApp,'SellSubjectToAllotedShare':SellSubjectToAllotedShare,'BuySubjectToAmount':BuySubjectToAmount,'SellSubjectToAmount':SellSubjectToAmount,'TotalKostak':TotalKostak,'TotalSubjectTo':TotalSubjectTo,'TtotalQtypremium':TtotalQtypremium,'BuyPremiumApp':BuyPremiumApp,'SellPremiumApp':SellPremiumApp,'BuyPremiumAmount':BuyPremiumAmount,'SellPremiumAmount':SellPremiumAmount,'TtotalAmountpremium':TtotalAmountpremium,'TotalKostakAllotedShare':TotalKostakAllotedShare,'TotalSubjectToAllotedShare':TotalSubjectToAllotedShare,'TotalShare':TotalShare,'TotalAmount':TotalAmount
         }   
@@ -6075,7 +6418,20 @@ def Status(request, IPOid):
         html_table += "</tr></thead>"
         float_format = "{:.0f}"
         html_table += "<tbody style='text-align: center;white-space: nowrap;'>"
-        for i, row in df.iterrows():
+        
+        if page_size == 'All':
+            paginator = Paginator(df.index.tolist(), len(df) if len(df) > 0 else 1)
+        else:
+            paginator = Paginator(df.index.tolist(), page_size)
+            
+        page_number = request.GET.get('page')
+        if request.method == 'POST' and request.POST.get('page'):
+            page_number = request.POST.get('page')
+            
+        page_obj = paginator.get_page(page_number)
+        
+        for idx in page_obj.object_list:
+            row = df.iloc[idx]
             html_table += "<tr style='text-align: center;'>"
             is_tallied, tally_time = Group_telly_status.get(row.grpname, (False, ''))
             checked_attr = 'checked' if is_tallied else ''
@@ -6120,7 +6476,7 @@ def Status(request, IPOid):
         html_table += "</tbody></table>"
                 
         return render(request, 'Status.html', { 'html_table':html_table
-            , "IPOName": IPOName, "IPOid": IPOid,'page_obj': page_obj,'status_page_size':page_size})
+            , "IPOName": IPOName, "IPOid": IPOid,'page_obj': page_obj,'status_page_size':page_size, 'SearchQuery': SearchQuery})
     else:
         OrderCategoryList = ['Kostak','Subject To']
         InvestorTypeList = ['RETAIL','SHNI','BHNI']
@@ -6259,15 +6615,8 @@ def Status(request, IPOid):
             
         if page_size == 'All':
             all_rows = True
-            paginator = Paginator(entry_list,len(entry_list))
-            page_number = request.GET.get('page')
-            page_obj = paginator.get_page(page_number)
         else:
-            paginator = Paginator(entry_list, page_size)
-            page_number = request.GET.get('page')
-            page_obj = paginator.get_page(page_number)
-            
-        
+            all_rows = False
         # Aggregate Buy counts
         # buy_aggregates = (
         #     order
@@ -6348,7 +6697,7 @@ def Status(request, IPOid):
         all_sums = (
             orderdetail.filter(
                 ~Q(AllotedQty=None), ~Q(AllotedQty=0),
-                Order__OrderGroup__in=page_obj
+                Order__OrderGroup__in=entry_list
             )
             .values(
                 "Order__OrderGroup",
@@ -6369,13 +6718,13 @@ def Status(request, IPOid):
             for row in all_sums
         }
         
-        all_entries = order.filter(user=request.user, OrderGroup__in=page_obj).values("OrderGroup", "Telly", "tally_timestamp")
+        all_entries = order.filter(user=request.user, OrderGroup__in=entry_list).values("OrderGroup", "Telly", "tally_timestamp")
         
         group_entries = defaultdict(list)
         for e in all_entries:
             group_entries[e["OrderGroup"]].append(e)
         
-        for GroupName in page_obj:
+        for GroupName in entry_list:
             GrpName.append(GroupName)
             telly_values = group_entries.get(GroupName.id, [])
             if telly_values:  # group exists
@@ -6569,7 +6918,51 @@ def Status(request, IPOid):
             SubjectToShares.append(TotalSubjectToShares)
             Totalshares.append(Totalshrs)         
             TotalAmount.append(TotalAmt)
-            i = i + 1
+
+            if SearchQuery:
+                sq = SearchQuery.lower().replace(",", "").strip()
+                float_format_str = "{:.0f}"
+                match = False
+                try:
+                    gn_str = getattr(GroupName, 'GroupName', str(GroupName))
+                except:
+                    gn_str = str(GroupName)
+
+                # Collect latest appended values
+                all_lists = [
+                    KostakRetailBuyShares, KostakBHNIBuyShares, KostakSHNIBuyShares, SubjectToRetailBuyShares, SubjectToBHNIBuyShares, SubjectToSHNIBuyShares, KostakRetailSellShares, KostakBHNISellShares, KostakSHNISellShares, SubjectToRetailSellShares, SubjectToBHNISellShares, SubjectToSHNISellShares, PremiumBuyBilling, PremiumSellBilling, CallSellBilling, CallBuyBilling, PutSellBilling, PutBuyBilling, SubjectToBHNIAllotedSell, SubjectToBHNIBillingBuy, SubjectToBHNIAllotedBuy, SubjectToBHNIBillingSell, SubjectToSHNIAllotedSell, SubjectToSHNIBillingBuy, SubjectToSHNIAllotedBuy, SubjectToSHNIBillingSell, SubjectToRetailAllotedSell, SubjectToRetailBillingBuy, SubjectToRetailAllotedBuy, SubjectToRetailBillingSell, KostakBHNIAllotedSell, KostakBHNIBillingBuy, KostakBHNIAllotedBuy, KostakBHNIBillingSell, KostakSHNIAllotedSell, KostakSHNIBillingBuy, KostakSHNIAllotedBuy, KostakSHNIBillingSell, KostakRetailAllotedSell, KostakRetailBillingBuy, KostakRetailAllotedBuy, KostakRetailBillingSell, KostakShares, SubjectToShares, PremiumBuyShares, PremiumSellShares, SubjectToRetailCountSell, SubjectToSHNICountSell, SubjectToBHNICountSell, SubjectToRetailCountBuy, SubjectToSHNICountBuy, SubjectToBHNICountBuy, KostakRetailCountSell, KostakSHNICountSell, KostakBHNICountSell, KostakRetailCountBuy, KostakSHNICountBuy, KostakBHNICountBuy, Totalshares, TotalAmount, PremiumShares, PremiumBilling, CallBilling, PutBilling, GrpName, KostakRetailCount, KostakRetailAlloted, KostakRetailBilling, KostakSHNICount, KostakSHNIAlloted, KostakSHNIBilling, KostakBHNICount, KostakBHNIAlloted, KostakBHNIBilling, SubjectToRetailCount, SubjectToRetailAlloted, SubjectToRetailBilling, SubjectToSHNICount, SubjectToSHNIAlloted, SubjectToSHNIBilling, SubjectToBHNICount, SubjectToBHNIAlloted, SubjectToBHNIBilling
+                ]
+                values_to_check = [gn_str]
+                for l in all_lists:
+                    if l:
+                        values_to_check.append(l[-1])
+                
+                for v in values_to_check:
+                    try:
+                        v_str = str(int(float(v))).lower()
+                    except:
+                        v_str = str(v).lower()
+                    if sq in v_str:
+                        match = True
+                        break
+                
+                if not match:
+                    for v in values_to_check:
+                        try:
+                            v_str = float_format_str.format(float(v)).lower()
+                            if sq in v_str:
+                                match = True
+                                break
+                        except:
+                            pass
+                            
+                if not match:
+                    for l in all_lists:
+                        if l:
+                            l.pop()
+                            
+            if not SearchQuery or match:
+                i = i + 1
 
         Data = {
             'KostakRetailBuyShares':KostakRetailBuyShares,'KostakBHNIBuyShares':KostakBHNIBuyShares,'KostakSHNIBuyShares':KostakSHNIBuyShares,
@@ -6589,6 +6982,17 @@ def Status(request, IPOid):
         
         all_groups_checked = all(status[0] for status in Group_telly_status.values()) if Group_telly_status else False
         df = pd.DataFrame.from_records(Data)
+        
+        if page_size == 'All':
+            paginator = Paginator(df.index.tolist(), len(df) if len(df) > 0 else 1)
+        else:
+            paginator = Paginator(df.index.tolist(), page_size)
+            
+        page_number = request.GET.get('page')
+        if request.method == 'POST' and request.POST.get('page'):
+            page_number = request.POST.get('page')
+            
+        page_obj = paginator.get_page(page_number)
         
         html_table = "<table id=\"example\" class=\"table table-bordered table-hover table-striped\" style=\"max-width: 100vw;\" >\n"
         html_table += "<thead><tr >"
@@ -6732,7 +7136,7 @@ def Status(request, IPOid):
             html_table += f"<td>{float_format.format(row.TotalAmount)}</td>"
             html_table += "</tr>\n"           
         html_table += "</tbody></table>"
-        return render(request, 'Status.html', {'html_table':html_table,"IPOName": IPOName, "IPOid": IPOid,'page_obj': page_obj,'status_page_size':page_size})
+        return render(request, 'Status.html', {'html_table':html_table,"IPOName": IPOName, "IPOid": IPOid,'page_obj': page_obj,'status_page_size':page_size, 'SearchQuery': SearchQuery})
 
 #group wise dashboard payment fun
 @allowed_users(allowed_roles=['Broker'])
@@ -6749,7 +7153,7 @@ def AddPayment(request):
 
 @allowed_users(allowed_roles=['Broker'])
 def GroupWiseDashboard(request):
-    Group = GroupDetail.objects.filter(user=request.user)
+    Group = GroupDetail.objects.filter(user=request.user).order_by('GroupName')
     IPO = CurrentIpoName.objects.filter(user=request.user)
     ipos = CurrentIpoName.objects.filter(user=request.user)
     groups = GroupDetail.objects.filter(user=request.user).order_by('GroupName')
@@ -6779,7 +7183,7 @@ def GroupWiseDashboard(request):
 
     if page_size == 'All':
         all_rows = True
-        paginator = Paginator(Group,len(Group))
+        paginator = Paginator(Group, max(len(Group), 1))
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
     else:
@@ -7049,9 +7453,9 @@ def GroupWiseDashboard(request):
                 ipo = IPOName[list(df.columns).index(col_name)]
                 
                 accounting_amount1 = accounting_dict.get((index.id, ipo.id), 0)
-                due_amount = float(cell) - float(accounting_amount1)
+                due_amount = round(float(cell) - float(accounting_amount1), 2)
                 
-                html_table += f'<td title= "Double Click To pay" class="amount-cell" data-ipo-id="{ipo.id}" data-ipo-name="{col_name}" data-group-id="{index.id}" data-group-name="{index}">Total: {float_format.format(cell)}<br>Collection: {float_format.format(accounting_amount1)} <br> Due: {float_format.format(due_amount)}</td>'
+                html_table += f'<td title= "Double Click To pay" class="amount-cell" data-ipo-id="{ipo.id}" data-ipo-name="{col_name}" data-group-id="{index.id}" data-group-name="{index}" data-exact-due="{due_amount}">Total: {float_format.format(cell)}<br>Collection: {float_format.format(accounting_amount1)} <br> Due: {float_format.format(due_amount)}</td>'
             elif col_name == 'Collection':
                 # Retained for calculations, but no longer rendered in the dashboard.
                 continue
@@ -7074,9 +7478,9 @@ def GroupWiseDashboard(request):
                 total_value = float(row['Total'])
                 jv_amount = JV_lookup.get(index.id, 0)
                 new_collection_total = float(group_collection_sum) + float(jv_amount)
-                due_amount = total_value - new_collection_total
+                due_amount = round(total_value - new_collection_total, 2)
                 # html_table += f"<td>{float_format.format(due_amount)}</td>"
-                html_table += f'<td title="Double Click to Pay Due Amount" class="due-amount-cell" data-group-id="{index.id}" data-group-name="{index}" data-due-amount="{due_amount}">{float_format.format(due_amount)}</td>'
+                html_table += f'<td title="Double Click to Pay Due Amount" class="due-amount-cell" data-group-id="{index.id}" data-group-name="{index}" data-due-amount="{due_amount}" data-exact-due="{due_amount}">{float_format.format(due_amount)}</td>'
             else:
                 html_table += f"<td>{float_format.format(cell)}</td>"
             
@@ -7131,15 +7535,22 @@ def group_billing_details(request, group_id=None):
     if group_id:
         selected_group = get_object_or_404(GroupDetail, id=group_id, user=request.user)
         groups_to_process = [selected_group]
+        has_next = False
+        offset = 0
     else:
-        groups_to_process = list(groups)
+        offset = int(request.GET.get('offset', 0))
+        groups_to_process = list(groups)[offset:]
+        has_next = False
         
     group_tables = []
     empty_groups = []
+    populated_count = 0
+    groups_processed_count = 0
     
     ipos = CurrentIpoName.objects.filter(user=request.user).order_by('-id')
     
     for current_group in groups_to_process:
+        groups_processed_count += 1
         sme_html_table = ""
         mainboard_html_table = ""
         
@@ -7390,6 +7801,36 @@ def group_billing_details(request, group_id=None):
             put_buy_amt = put_orders.filter(OrderType="BUY").aggregate(Sum('Amount'))['Amount__sum'] or 0
             put_sell_amt = put_orders.filter(OrderType="SELL").aggregate(Sum('Amount'))['Amount__sum'] or 0
             put_billing = put_buy_amt + put_sell_amt
+
+            opt_orders = orders.filter(OrderCategory__in=["CALL", "PUT"])
+            strike_prices = list(opt_orders.values_list('Method', flat=True).distinct())
+
+            options_breakdown = []
+            for sp in strike_prices:
+                sp_label = str(sp) if sp is not None else "-"
+                sp_c = opt_orders.filter(OrderCategory="CALL", Method=sp)
+                sp_c_amt = (sp_c.filter(OrderType="BUY").aggregate(Sum('Amount'))['Amount__sum'] or 0) + \
+                           (sp_c.filter(OrderType="SELL").aggregate(Sum('Amount'))['Amount__sum'] or 0)
+
+                sp_p = opt_orders.filter(OrderCategory="PUT", Method=sp)
+                sp_p_amt = (sp_p.filter(OrderType="BUY").aggregate(Sum('Amount'))['Amount__sum'] or 0) + \
+                           (sp_p.filter(OrderType="SELL").aggregate(Sum('Amount'))['Amount__sum'] or 0)
+
+                # Option net quantity: BUY - SELL
+                sp_orders = opt_orders.filter(Method=sp)
+                sp_buy_qty = sp_orders.filter(OrderType="BUY").aggregate(Sum('Quantity'))['Quantity__sum'] or 0
+                sp_sell_qty = sp_orders.filter(OrderType="SELL").aggregate(Sum('Quantity'))['Quantity__sum'] or 0
+                sp_shares = sp_buy_qty - sp_sell_qty
+                sp_total_amt = sp_c_amt + sp_p_amt
+
+                if sp_c_amt != 0 or sp_p_amt != 0 or sp_shares != 0:
+                    options_breakdown.append({
+                        'strike_price': sp_label,
+                        'call_amount': f"{sp_c_amt:.1f}",
+                        'put_amount': f"{sp_p_amt:.1f}",
+                        'shares': int(sp_shares),
+                        'amount': f"{sp_total_amt:.0f}"
+                    })
         
             total_kostak_shares = (k_retail['buy_alloted_qty'] + k_shni['buy_alloted_qty'] + k_bhni['buy_alloted_qty']) - (k_retail['sell_alloted_qty'] + k_shni['sell_alloted_qty'] + k_bhni['sell_alloted_qty'])
             total_st_shares = (st_retail['buy_alloted_qty'] + st_shni['buy_alloted_qty'] + st_bhni['buy_alloted_qty']) - (st_retail['sell_alloted_qty'] + st_shni['sell_alloted_qty'] + st_bhni['sell_alloted_qty'])
@@ -7424,6 +7865,7 @@ def group_billing_details(request, group_id=None):
                 'put_sell_amt': put_sell_amt,
                 'total_kostak_shares': total_kostak_shares,
                 'total_st_shares': total_st_shares,
+                'options_breakdown': json.dumps(options_breakdown),
             })
         
         # Build Mainboard HTML Table
@@ -7463,7 +7905,8 @@ def group_billing_details(request, group_id=None):
             for row in mainboard_data:
                 tr_class = "archived-ipo" if row.get("is_tally") else ""
                 checked = "checked" if row.get("is_tally") else ""
-                mainboard_html_table += f"<tr class='{tr_class}' style='text-align: center;'>"
+                escaped_opts = html.escape(row.get('options_breakdown', '[]'))
+                mainboard_html_table += f"<tr class='{tr_class}' data-options-breakdown='{escaped_opts}' style='text-align: center;'>"
                 ts_val = row.get('ts_str', '')
                 ts_html = f"<br><span class='tally-ts-span' style='font-size: 0.65rem; font-weight: normal;'>{ts_val}</span>"
                 mainboard_html_table += f"<th style='border-left: 1px solid #555; border-right: 1px solid #555;'><input type='checkbox' class='ipo-archive-checkbox' style='cursor: pointer; margin:0; transform: scale(1.2);' data-id='{row['ipo_id']}' data-group='{current_group.GroupName}' {checked} title='Tally status'>{ts_html}</th>"
@@ -7524,16 +7967,35 @@ def group_billing_details(request, group_id=None):
                 'sme_html_table': sme_html_table,
                 'mainboard_html_table': mainboard_html_table
             })
+            populated_count += 1
         else:
             empty_groups.append(current_group.GroupName)
+
+        if not group_id and populated_count >= 5:
+            has_next = (offset + groups_processed_count) < len(groups)
+            break
+
+    next_offset = offset + groups_processed_count if not group_id else 0
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        from django.template.loader import render_to_string
+        html_content = render_to_string('partials/group_billing_partial.html', {
+            'group_tables': group_tables,
+            'empty_groups': empty_groups,
+            'is_ajax': True
+        })
+        return JsonResponse({'html': html_content, 'has_next': has_next, 'next_offset': next_offset, 'empty_groups': empty_groups})
 
     return render(request, 'group_billing_details.html', {
         'groups': groups,
         'selected_group': selected_group,
         'group_tables': group_tables,
         'empty_groups': empty_groups,
+        'has_next': has_next,
+        'next_offset': next_offset,
     })
 
+@allowed_users(allowed_roles=['Broker'])
 def BackUp(request):
     user = request.user
     entry = CurrentIpoName.objects.filter(user=request.user)
@@ -7591,38 +8053,6 @@ def BackUp(request):
     html_table += "</tbody></table>"
     
     return render(request, 'Backup.html',{'html_table': html_table, 'user': user,'page_obj': page_obj,'Backup_page_size':page_size})
-
-@allowed_users(allowed_roles=['Broker'])
-def panalloted(request):
-    Client = ClientDetail.objects.filter(user=request.user)
-    IPO = CurrentIpoName.objects.filter(user=request.user)
-    grpname = []
-    IPOName = []
-    nlist = []
-    l = []
-    for IpoName in IPO:
-        IPOName.append(IpoName)
-    lenofipo = len(IPOName)
-    for j in range(0, lenofipo):
-        l.append(j)
-    for GroupName in Client:
-        grpname.append(GroupName.PANNo)
-    lenofgroup = len(grpname)
-
-    for ClientPan in Client:
-        IPOTotal = []
-        for IpoName in IPO:
-            try:
-                entry = OrderDetail.objects.get(
-                    user=request.user, OrderDetailPANNo=ClientPan, Order__OrderIPOName=IpoName)
-                a = entry.AllotedQty
-            except:
-                a = None
-            IPOTotal.append(a)
-        nlist.append(IPOTotal)
-
-    df = pd.DataFrame(nlist, columns=IPOName, index=grpname)
-    return render(request, 'panalloted.html', {'entry': grpname, 'lenofipo': l, 'IPOTotal': IPOTotal, 'IPOName': IPOName, 'df': df})
 
 @allowed_users(allowed_roles=['Broker'])
 def autocomplete(request):
@@ -7820,15 +8250,23 @@ async def process_data(request,userid, pan_data, IPOid, OrderType, Groupfilter, 
 
 
 def Update_pann(request,IPOid,OrderType,GrpName=None, OrderCategory=None, InvestorType=None):
-
-    try:
-        if request.user.groups.all()[0].name == 'Broker':
+    # Broker requests use their own data.  Guest requests are only allowed
+    # when the access-link view has established a link owner in the session.
+    if request.user.is_authenticated:
+        if request.user.groups.filter(name='Broker').exists():
             userid = request.user.id
-        else:
+        elif request.user.groups.filter(name='Customer').exists() and request.user.Broker_id:
             userid = request.user.Broker_id
-    except:
-        userid = request.session[f'link_owner_{IPOid}']
-        userid= CustomUser.objects.get(id=userid).id
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Not authorized.'}, status=403)
+    else:
+        link_owner_id = request.session.get(f'link_owner_{IPOid}')
+        if not link_owner_id:
+            return JsonResponse({'status': 'error', 'message': 'Authentication required.'}, status=403)
+        try:
+            userid = CustomUser.objects.get(id=link_owner_id).id
+        except CustomUser.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Invalid access link.'}, status=403)
     # userid = request.user
     pan_data = {}
     page_number = request.GET.get('page','1')
@@ -8152,6 +8590,10 @@ def Billing(request, IPOid):
     IPOTypefilter = 'All'
     InvestorTypeFilter = 'All'
 
+    SearchQuery = request.POST.get('SearchQuery', '').strip()
+    if not SearchQuery:
+        SearchQuery = request.GET.get('SearchQuery', '').strip()
+
     if request.method == "POST":
         Groupfilter = request.POST.get('Groupfilter', '')
         IPOTypefilter = request.POST.get('IPOTypefilter', '')
@@ -8162,7 +8604,6 @@ def Billing(request, IPOid):
             IPOTypefilter = 'All'
             InvestorTypeFilter = 'All'
     
-        total = 0
         if is_valid_queryparam(Groupfilter) and Groupfilter != 'All':
             gid = GroupDetail.objects.get(
                 GroupName=Groupfilter, user=userid).id
@@ -8174,19 +8615,52 @@ def Billing(request, IPOid):
         if is_valid_queryparam(InvestorTypeFilter) and InvestorTypeFilter != 'All':
             entry = entry.filter(Order__InvestorType=InvestorTypeFilter)
             order = order.filter(InvestorType=InvestorTypeFilter)
-        Total1 = order.aggregate(Sum('Amount'))
-        Total = Total1['Amount__sum']
-        if Total == None:
-            Total = 0
-        else:
-            Total = Total
-        totalorder = total + Total
-        Total1 = entry.aggregate(Sum('Amount'))
-        Total = Total1['Amount__sum']
-        if Total == None:
-            Total = 0
-        total = total + Total
-        total = total + totalorder
+
+    if SearchQuery:
+        from django.db.models.functions import Cast
+        from django.db.models import CharField
+
+        entry = entry.annotate(
+            rate_str=Cast('Order__Rate', CharField()),
+            alloted_qty_str=Cast('AllotedQty', CharField()),
+            preopen_str=Cast('PreOpenPrice', CharField()),
+            amount_str=Cast('Amount', CharField()),
+        ).filter(
+            Q(Order__OrderGroup__GroupName__icontains=SearchQuery) |
+            Q(Order__OrderCategory__icontains=SearchQuery) |
+            Q(Order__InvestorType__icontains=SearchQuery) |
+            Q(Order__OrderType__icontains=SearchQuery) |
+            Q(Order__Method__icontains=SearchQuery) |
+            Q(OrderDetailPANNo__PANNo__icontains=SearchQuery) |
+            Q(Order__remark__icontains=SearchQuery) |
+            Q(rate_str__icontains=SearchQuery) |
+            Q(alloted_qty_str__icontains=SearchQuery) |
+            Q(preopen_str__icontains=SearchQuery) |
+            Q(amount_str__icontains=SearchQuery)
+        )
+
+        order = order.annotate(
+            rate_str=Cast('Rate', CharField()),
+            qty_str=Cast('Quantity', CharField()),
+            amount_str=Cast('Amount', CharField()),
+        ).filter(
+            Q(OrderGroup__GroupName__icontains=SearchQuery) |
+            Q(OrderCategory__icontains=SearchQuery) |
+            Q(InvestorType__icontains=SearchQuery) |
+            Q(OrderType__icontains=SearchQuery) |
+            Q(Method__icontains=SearchQuery) |
+            Q(remark__icontains=SearchQuery) |
+            Q(rate_str__icontains=SearchQuery) |
+            Q(qty_str__icontains=SearchQuery) |
+            Q(amount_str__icontains=SearchQuery)
+        )
+
+    Total1 = order.aggregate(Sum('Amount'))
+    Total = Total1['Amount__sum'] or 0
+    totalorder = Total
+    Total1 = entry.aggregate(Sum('Amount'))
+    Total = Total1['Amount__sum'] or 0
+    total = totalorder + Total
     
     page_obj = None
     try:
@@ -8257,7 +8731,6 @@ def Billing(request, IPOid):
             Data = []
 
             for row in entry_page_data:
-                print(row)
                 entry_total_amount += row["Amount"]
 
                 entry_data = {
@@ -8278,7 +8751,7 @@ def Billing(request, IPOid):
         
     if end_index > entry_count:
         if order_count != 0 :
-            order_start = max(0, start_index - order_count)
+            order_start = max(0, start_index - entry_count)
             order_end = end_index - entry_count
             order_page_data = order[order_start:order_end]
 
@@ -8305,7 +8778,6 @@ def Billing(request, IPOid):
     df = pd.DataFrame.from_records(Data)
     if "InvestorType" in df.columns:
         df = df.sort_values(by="InvestorType", key=lambda x: x == "PREMIUM").reset_index(drop=True)
-    html_table = "<table >\n"
     html_table = "<thead><tr style='text-align: center;'>"
     html_table += "<th><input type='checkbox' id='select-all-billing'></th>"
     html_table += "<th>Group</th>"
@@ -8330,7 +8802,7 @@ def Billing(request, IPOid):
         html_table += f"<td ondblclick=\"sendPostRequest('{IPOid}','{row.OrderGroup}','All','All')\" title=\"Double-click to filter by this Group\">{row.OrderGroup}</td>"
         html_table += f"<td ondblclick=\"sendPostRequest('{IPOid}','All','{row.OrderCategory}','All')\" title=\"Double-click to filter by this Order Category\">{row.OrderCategory}</td>"
         if row.OrderCategory != 'Premium':
-            method = row.Method if row.Method else 'Application'
+            method = str(row.Method) if (row.Method and str(row.Method).lower() not in ('nan', 'none', '')) else 'Application'
             html_table += f"<td>{method}</td>"
         else:
             html_table += f"<td>-</td>"
@@ -8362,7 +8834,7 @@ def Billing(request, IPOid):
         html_table += f"<td>{formatted_qty}</td>"
      
         safe_remark = row.Remark.replace("'", "\\'").replace('"', '&quot;') if row.Remark else ""
-        html_table += f"<td style='white-space: nowrap; max-width: 300px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; outline: none;' tabindex='0' onclick=\"this.style.whiteSpace=this.style.whiteSpace==='normal'?'nowrap':'normal'\" onblur=\"this.style.whiteSpace='nowrap'\" title='{safe_remark}'>{row.Remark}</td>"
+        html_table += f"<td style='white-space: nowrap; max-width: 300px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; outline: none;' tabindex='0' onclick=\"this.style.whiteSpace=this.style.whiteSpace==='normal'?'nowrap':'normal'\" onblur=\"this.style.whiteSpace='nowrap'\" title='{safe_remark}'>{ str(row.Remark) if (row.Remark and str(row.Remark).lower() not in ('nan','none')) else ''}</td>"
 
         try:
             amt_val = float(row.Amount)
@@ -8388,7 +8860,6 @@ def Billing(request, IPOid):
     html_table += "<td style='text-align: center;'></td>"
     html_table += f"<th style='text-align: center;'>{float_format.format(entry_total_amount)}</th>"
     html_table += "</tr></tfoot>"
-    html_table += "</table>"
 
     # if entry is not None and entry.exists():
     #     for i, row in df.iterrows():
@@ -8433,9 +8904,9 @@ def Billing(request, IPOid):
     #             </div> 
     #         """
 
-    return render(request, 'Billing.html', {'Group': Group.order_by('GroupName'),'html_table':html_table,'select': IPOTypefilterList, 'select2': InvestorTypeFilterList,"total": "{:.0f}".format(total),'Groupfilter': Groupfilter, "IPOName": IPO, 'IPOTypefilter': IPOTypefilter, 'InvestorTypeFilter': InvestorTypeFilter,  "IPO": IPO, "IPOid": IPOid,'page_obj': page_obj,'Billing_page_size':page_size})
-    return render(request, 'Billing.html', {'Group': Group.order_by('GroupName'),'select': IPOTypefilterList, 'select2': InvestorTypeFilterList,"total": "{:.0f}".format(total),'Groupfilter': Groupfilter, "IPOName": IPO, 'IPOTypefilter': IPOTypefilter, 'InvestorTypeFilter': InvestorTypeFilter,  "IPO": IPO, "IPOid": IPOid,'page_obj': page_obj,'Billing_page_size':page_size})
+    return render(request, 'Billing.html', {'Group': Group.order_by('GroupName'),'html_table':html_table,'select': IPOTypefilterList, 'select2': InvestorTypeFilterList,"total": "{:.0f}".format(total),'Groupfilter': Groupfilter, "IPOName": IPO, 'IPOTypefilter': IPOTypefilter, 'InvestorTypeFilter': InvestorTypeFilter,  "IPO": IPO, "IPOid": IPOid,'page_obj': page_obj,'Billing_page_size':page_size, 'SearchQuery': SearchQuery})
 
+@allowed_users(allowed_roles=['Broker'])
 def FileterBilling(request, IPOid ,group,IPOType,InvestType, Rate='All'):
     if request.user.groups.all()[0].name == 'Broker':
         userid = request.user
@@ -8490,7 +8961,10 @@ def FileterBilling(request, IPOid ,group,IPOType,InvestType, Rate='All'):
     IPOTypefilterList = {'Kostak', 'Subject To','CALL','PUT','Premium'}
     InvestorTypeFilterList = {'RETAIL','SHNI','BHNI','OPTIONS','PREMIUM'}
 
-    total = 0
+    SearchQuery = request.POST.get('SearchQuery', '').strip()
+    if not SearchQuery:
+        SearchQuery = request.GET.get('SearchQuery', '').strip()
+
     if is_valid_queryparam(Groupfilter) and Groupfilter != 'All':
         gid = GroupDetail.objects.get(
             GroupName=Groupfilter, user=userid).id
@@ -8502,19 +8976,52 @@ def FileterBilling(request, IPOid ,group,IPOType,InvestType, Rate='All'):
     if is_valid_queryparam(InvestorTypeFilter) and InvestorTypeFilter != 'All':
         entry = entry.filter(Order__InvestorType=InvestorTypeFilter)
         order = order.filter(InvestorType=InvestorTypeFilter)
+
+    if SearchQuery:
+        from django.db.models.functions import Cast
+        from django.db.models import CharField
+
+        entry = entry.annotate(
+            rate_str=Cast('Order__Rate', CharField()),
+            alloted_qty_str=Cast('AllotedQty', CharField()),
+            preopen_str=Cast('PreOpenPrice', CharField()),
+            amount_str=Cast('Amount', CharField()),
+        ).filter(
+            Q(Order__OrderGroup__GroupName__icontains=SearchQuery) |
+            Q(Order__OrderCategory__icontains=SearchQuery) |
+            Q(Order__InvestorType__icontains=SearchQuery) |
+            Q(Order__OrderType__icontains=SearchQuery) |
+            Q(Order__Method__icontains=SearchQuery) |
+            Q(OrderDetailPANNo__PANNo__icontains=SearchQuery) |
+            Q(Order__remark__icontains=SearchQuery) |
+            Q(rate_str__icontains=SearchQuery) |
+            Q(alloted_qty_str__icontains=SearchQuery) |
+            Q(preopen_str__icontains=SearchQuery) |
+            Q(amount_str__icontains=SearchQuery)
+        )
+
+        order = order.annotate(
+            rate_str=Cast('Rate', CharField()),
+            qty_str=Cast('Quantity', CharField()),
+            amount_str=Cast('Amount', CharField()),
+        ).filter(
+            Q(OrderGroup__GroupName__icontains=SearchQuery) |
+            Q(OrderCategory__icontains=SearchQuery) |
+            Q(InvestorType__icontains=SearchQuery) |
+            Q(OrderType__icontains=SearchQuery) |
+            Q(Method__icontains=SearchQuery) |
+            Q(remark__icontains=SearchQuery) |
+            Q(rate_str__icontains=SearchQuery) |
+            Q(qty_str__icontains=SearchQuery) |
+            Q(amount_str__icontains=SearchQuery)
+        )
+
     Total1 = order.aggregate(Sum('Amount'))
-    Total = Total1['Amount__sum']
-    if Total == None:
-        Total = 0
-    else:
-        Total = Total
-    totalorder = total + Total
+    Total = Total1['Amount__sum'] or 0
+    totalorder = Total
     Total1 = entry.aggregate(Sum('Amount'))
-    Total = Total1['Amount__sum']
-    if Total == None:
-        Total = 0
-    total = total + Total
-    total = total + totalorder
+    Total = Total1['Amount__sum'] or 0
+    total = totalorder + Total
 
     page_obj = None
     try:
@@ -8554,6 +9061,8 @@ def FileterBilling(request, IPOid ,group,IPOType,InvestType, Rate='All'):
     page_obj = paginator.get_page(page_number)
     start_index = page_obj.start_index() - 1
     end_index = page_obj.end_index()
+    
+    entry_page_data = []
     if start_index < entry_count:
         if entry_count != 0 :
             entry_end = min(end_index, entry_count)
@@ -8625,7 +9134,6 @@ def FileterBilling(request, IPOid ,group,IPOType,InvestType, Rate='All'):
     df = pd.DataFrame.from_records(Data)
     if "InvestorType" in df.columns:
         df = df.sort_values(by="InvestorType", key=lambda x: x == "PREMIUM").reset_index(drop=True)
-    html_table = "<table >\n"
     html_table = "<thead><tr style='text-align: center;'>"
     html_table += "<th><input type='checkbox' id='select-all-billing'></th>"
     html_table += "<th>Group</th>"
@@ -8644,16 +9152,14 @@ def FileterBilling(request, IPOid ,group,IPOType,InvestType, Rate='All'):
     # Add rows
     float_format = "{:.0f}"
     html_table += "<tbody style='text-align: center;white-space: nowrap;'>"
-    if len(df) == 0:
-        column_count = 10 + (1 if IPOName.IPOType == "MAINBOARD" else 0)
-        html_table += f"<tr class='odd'><td colspan='{column_count}' valign='top' class='dataTables_empty'>No data available</td></tr>"
+
     for i, row in df.iterrows():
         html_table += "<tr style='text-align: center;'>"
         html_table += f"<td><input type='checkbox' class='billing-row-checkbox' value='{row.id}'></td>"
         html_table += f"<td ondblclick=\"sendPostRequest('{IPOid}','{row.OrderGroup}','All','All')\" title=\"Double-click to filter by this Group\">{row.OrderGroup}</td>"
         html_table += f"<td ondblclick=\"sendPostRequest('{IPOid}','All','{row.OrderCategory}','All')\" title=\"Double-click to filter by this Order Category\">{row.OrderCategory}</td>"
         if row.OrderCategory != 'Premium':
-            method = row.Method if row.Method else 'Application'
+            method = str(row.Method) if (row.Method and str(row.Method).lower() not in ('nan', 'none', '')) else 'Application'
             html_table += f"<td>{method}</td>"
         else:
             html_table += f"<td>-</td>"
@@ -8681,7 +9187,7 @@ def FileterBilling(request, IPOid ,group,IPOType,InvestType, Rate='All'):
         html_table += f"<td>{float_format.format(safe_alloted_qty)}</td>"
      
         safe_remark = row.Remark.replace("'", "\\'").replace('"', '&quot;') if row.Remark else ""
-        html_table += f"<td style='white-space: nowrap; max-width: 300px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; outline: none;' tabindex='0' onclick=\"this.style.whiteSpace=this.style.whiteSpace==='normal'?'nowrap':'normal'\" onblur=\"this.style.whiteSpace='nowrap'\" title='{safe_remark}'>{row.Remark}</td>"
+        html_table += f"<td style='white-space: nowrap; max-width: 300px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; outline: none;' tabindex='0' onclick=\"this.style.whiteSpace=this.style.whiteSpace==='normal'?'nowrap':'normal'\" onblur=\"this.style.whiteSpace='nowrap'\" title='{safe_remark}'>{ str(row.Remark) if (row.Remark and str(row.Remark).lower() not in ('nan','none')) else ''}</td>"
 
         safe_amount = float(row.Amount) if pd.notna(row.Amount) and row.Amount != '' else 0.0
         html_table += f"<td>{float_format.format(safe_amount)}</td>"
@@ -8704,7 +9210,6 @@ def FileterBilling(request, IPOid ,group,IPOType,InvestType, Rate='All'):
     html_table += f"<th style='text-align: center;'>{float_format.format(safe_entry_total)}</th>"
 
     html_table += "</tr></tfoot>"
-    html_table += "</table>"
     
         # for i, row in df.iterrows():
         #     pre_open_price = row.PreOpenPrice if row.PreOpenPrice != 0.0 else IPO.PreOpenPrice
@@ -8748,8 +9253,7 @@ def FileterBilling(request, IPOid ,group,IPOType,InvestType, Rate='All'):
         #         </div> 
         #     """
 
-    return render(request, 'Billing.html', {'Group': Group,'html_table':html_table,'select': IPOTypefilterList, 'select2': InvestorTypeFilterList,"total": "{:.0f}".format(total),'Groupfilter': Groupfilter, "IPOName": IPO, 'IPOTypefilter': IPOTypefilter, 'InvestorTypeFilter': InvestorTypeFilter,  "IPO": IPO, "IPOid": IPOid,'page_obj': page_obj,'Billing_page_size':page_size})
-    # return render(request, 'Billing.html', {'entry': entry, 'order': order, 'Group': Group.order_by('GroupName'), 'select': IPOTypefilterList, 'select2': InvestorTypeFilterList, "total": "{:.0f}".format(total), 'Groupfilter': Groupfilter, "IPOName": IPO, 'IPOTypefilter': IPOTypefilter, 'InvestorTypeFilter': InvestorTypeFilter,  "IPO": IPO, "IPOid": IPOid})
+    return render(request, 'Billing.html', {'Group': Group,'html_table':html_table,'select': IPOTypefilterList, 'select2': InvestorTypeFilterList,"total": "{:.0f}".format(total),'Groupfilter': Groupfilter, "IPOName": IPO, 'IPOTypefilter': IPOTypefilter, 'InvestorTypeFilter': InvestorTypeFilter,  "IPO": IPO, "IPOid": IPOid,'page_obj': page_obj,'Billing_page_size':page_size, 'SearchQuery': SearchQuery})
 
 #client wise biling filter wise download fun
 @allowed_users(allowed_roles=['Broker'])
@@ -8799,6 +9303,7 @@ def exportBillingFilter(request, IPOid, group=None, IPOType=None, InvestorType=N
     return response
 
 #Group Wise Dashboard  billing download PDF fun
+@allowed_users(allowed_roles=['Broker'])
 def exportGroupwise(request):
 
     Group = GroupDetail.objects.filter(user=request.user)
@@ -8867,6 +9372,7 @@ def exportGroupwise(request):
     return response
 
 
+@allowed_users(allowed_roles=['Broker'])
 def exportBillingFilterpdf(request, IPOid, group=None, IPOType=None, InvestorType=None):
     group = unquote(group)
     IPOType = unquote(IPOType)
@@ -9059,6 +9565,7 @@ def Backup(request,IPOid ):
         os.remove(file_path)
     return response
 
+@allowed_users(allowed_roles=['Broker'])
 def AllIpoBackup(request):
     user = request.user
     IPOs = CurrentIpoName.objects.filter(user=user)
@@ -9163,6 +9670,7 @@ def AllIpoBackup(request):
 
     return response
 
+@allowed_users(allowed_roles=['Broker'])
 def AccountingBackup(request):
     user = request.user
     entries = Accounting.objects.filter(user=user).select_related("group", "ipo")
@@ -9845,59 +10353,94 @@ def OrderDetail_upload(request, IPOid, OrderType, GrpName, OrderCategory, Invest
             return redirect(f"/{IPOid}/OrderDetail/{OrderType}")
         return redirect(f"/{IPOid}/OrderDetail/{OrderType}/{GrpName}/{OrderCategory}/{InvestorType}/{OrderDate}/{OrderTime}/{Rate}")
 
-def Sempale_Order(request,IPOid):
+@allowed_users(allowed_roles=['Broker'])
+def Sample_Order(request, IPOid=None):
     response = HttpResponse(content_type='text/csv')
-    IPOName = CurrentIpoName.objects.get(id=IPOid, user=request.user)
-
     writer = csv.writer(response)
-    if IPOName.IPOType == "MAINBOARD":
-        writer.writerow(['GroupName', 'Ordertype', 'OrderCategory', 'InvestorType', 'Quantity', 'Rate','StrikPrice','OrderDate', 'OrderTime', 'Remark'])
+
+    # Trades page: no specific IPO, include IPOName as first column
+    if not IPOid or IPOid == 'trades':
+        writer.writerow(['IPOName', 'GroupName', 'Ordertype', 'OrderCategory', 'InvestorType', 'Quantity', 'Rate', 'StrikPrice', 'OrderDate', 'OrderTime', 'Remark'])
+        response['Content-Disposition'] = 'attachment; filename="Trades-Bulk-Order-Sample.csv"'
     else:
-        writer.writerow(['GroupName', 'Ordertype', 'OrderCategory', 'InvestorType', 'Quantity', 'Rate','StrikPrice','OrderDate', 'OrderTime', 'Remark'])
-    
-    response['Content-Disposition'] = f'attachment; filename="Order-Sample.csv"'
+        IPOName = CurrentIpoName.objects.get(id=IPOid, user=request.user)
+        writer.writerow(['GroupName', 'Ordertype', 'OrderCategory', 'InvestorType', 'Quantity', 'Rate', 'StrikPrice', 'OrderDate', 'OrderTime', 'Remark'])
+        response['Content-Disposition'] = f'attachment; filename="Order-Sample.csv"'
 
     return response
 
-def Order_upload(request, IPOid, Groupfilter, Ordercatagoryfilter, InvestorTypefilter):
+@allowed_users(allowed_roles=['Broker'])
+@require_POST
+def Order_upload(request, IPOid=None, Groupfilter='All', Ordercatagoryfilter='All', InvestorTypefilter='All'):
+    # Detect if this is a multi-IPO trades upload
+    is_trades_upload = not IPOid or IPOid == 'trades'
+
     csv_file = request.FILES['file']
     if not csv_file.name.endswith('.csv'):
         messages.info(request, 'THIS IS NOT A CSV FILE', extra_tags='error')
     else:
         data_set = csv_file.read().decode('windows-1252')
-
         io_string = io.StringIO(data_set)
-        next(io_string)
+        next(io_string)  # skip header row
+
+        uid = request.user
+        user = request.user
+        ipo_cache = {}          # Cache IPOName lookups by name string
+        touched_ipo_ids = set() # Track all IPO IDs modified for batch calculate()
+        column = []             # Scoped outside loop for error handlers
+
+        # For single-IPO upload, pre-fetch the IPOName once
+        if not is_trades_upload:
+            try:
+                IPOName = CurrentIpoName.objects.get(id=IPOid, user=user)
+                PreOpenPrice = IPOName.PreOpenPrice
+            except Exception:
+                messages.error(request, "IPO not found.", extra_tags='error')
+                return redirect(f"/{IPOid}/Order/{Groupfilter}/{Ordercatagoryfilter}/{InvestorTypefilter}")
+
         try:
-            uid = request.user
-            user = request.user
-            IPOName = CurrentIpoName.objects.get(id=IPOid, user=user)
-            PreOpenPrice = IPOName.PreOpenPrice
-        
             for column in csv.reader(io_string, delimiter=',', quotechar="|"):
-            
-                if len(column) >= 6 :
+
+                # --- Multi-IPO: resolve IPOName from column 0, shift remaining cols ---
+                if is_trades_upload:
+                    if len(column) < 7:
+                        messages.error(request, f"Row {column} has error.", extra_tags='error')
+                        continue
+                    ipo_name_str = column[0].strip()
+                    if ipo_name_str not in ipo_cache:
+                        ipo_obj = CurrentIpoName.objects.filter(
+                            IPOName__iexact=ipo_name_str, user=user
+                        ).first()
+                        ipo_cache[ipo_name_str] = ipo_obj
+                    IPOName = ipo_cache[ipo_name_str]
+                    if not IPOName:
+                        messages.error(request, f"IPO '{ipo_name_str}' not found. Row skipped.", extra_tags='error')
+                        continue
+                    PreOpenPrice = IPOName.PreOpenPrice
+                    column = column[1:]  # shift: remaining columns match single-IPO format exactly
+
+                if len(column) >= 6:
                     column_mappings = {
                         1: {'BUY': 'BUY', 'SELL': 'SELL'},
-                        2: {'KOSTAK': 'Kostak', 'SUBJECT TO': 'Subject To', 'PREMIUM': 'Premium','CALL':'CALL','CALL':'CALL'},
-                        3: {'BHNI': 'BHNI', 'PREMIUM': 'PREMIUM', 'RETAIL': 'RETAIL', 'SHNI': 'SHNI','OPTIONS':'OPTIONS'}
+                        2: {'KOSTAK': 'Kostak', 'SUBJECT TO': 'Subject To', 'PREMIUM': 'Premium', 'CALL': 'CALL', 'PUT': 'PUT'},
+                        3: {'BHNI': 'BHNI', 'PREMIUM': 'PREMIUM', 'RETAIL': 'RETAIL', 'SHNI': 'SHNI', 'OPTIONS': 'OPTIONS'}
                     }
 
-                    # Iterate over the columns and apply the mapping
+                    # Apply column normalisation mappings
                     for col_index, mapping in column_mappings.items():
                         column_value = column[col_index].strip().upper()
                         if column_value in mapping:
                             column[col_index] = mapping[column_value]
-                    if (    
+
+                    if (
                         (column[1].strip() in ['BUY', 'SELL']) and
                         (column[2].strip() in ['Kostak', 'Subject To', 'Premium', 'CALL', 'PUT']) and
                         (column[3].strip() in ['BHNI', 'PREMIUM', 'RETAIL', 'SHNI', 'OPTIONS'])
                     ):
-            
                         try:
                             GroupName = column[0].strip().upper()
                             gid = GroupDetail.objects.get(GroupName=GroupName, user=user).id
-                            O_type= column[1]
+                            O_type = column[1]
                             O_Category = column[2]
                             if IPOName.IPOType == "MAINBOARD":
                                 O_InvestorType = column[3].strip()
@@ -9906,28 +10449,22 @@ def Order_upload(request, IPOid, Groupfilter, Ordercatagoryfilter, InvestorTypef
                                     raise ValueError("O_Quantity must be a positive value greater than zero.")
                                 O_Rate = float(column[5].strip())
                                 O_StrikePrice = column[6].strip()
-                                if O_Rate <= 0: 
-                                    raise ValueError("O_Quantity must be a positive value greater than zero.")
+                                if O_Rate <= 0:
+                                    raise ValueError("O_Rate must be a positive value greater than zero.")
                             else:
                                 O_InvestorType = 'RETAIL'
                                 O_Quantity = column[4]
                                 O_Rate = column[5]
                                 O_StrikePrice = column[6].strip()
-                            
-                            # O_Date = datetime.now().strftime("%Y-%m-%d")
-                            # O_Time = datetime.now().strftime("%H:%M:%S")
-                        
+
                             # FLEXIBLE DATE AND TIME PARSING
-                            # ========================================
-                        
-                            # Extract date and time from CSV (columns 7 and 8)
                             if len(column) >= 9:
                                 date_raw = column[7].strip() if len(column) > 7 else ""
                                 time_raw = column[8].strip() if len(column) > 8 else ""
                             else:
                                 date_raw = ""
                                 time_raw = ""
-                            
+
                             # Remark Processing
                             remark_json = {}
                             if len(column) >= 10:
@@ -9939,27 +10476,23 @@ def Order_upload(request, IPOid, Groupfilter, Ordercatagoryfilter, InvestorTypef
                                     if tag in clean_text:
                                         extracted_tags.append(tag)
                                         clean_text = clean_text.replace(tag, "")
-                            
                                 clean_text = clean_text.strip()
-                                # Basic cleanup of punctuation left behind e.g. ", ,"
                                 if clean_text.startswith(','):
                                     clean_text = clean_text[1:].strip()
                                 if clean_text.endswith(','):
                                     clean_text = clean_text[:-1].strip()
-                                
                                 if extracted_tags or clean_text:
                                     remark_json = {'tags': extracted_tags, 'text': clean_text}
-                        
+
                             # Default to current date/time
                             O_Date = datetime.now().strftime("%Y-%m-%d")
                             O_Time = datetime.now().strftime("%H:%M:%S")
                             date_time_warnings = []
-                        
-                            # Try to parse user-provided date
+
                             if date_raw:
                                 try:
                                     parsed_date = None
-                                    # Try DD/MM/YYYY format (e.g., 02/10/2025)
+                                    # Try DD/MM/YYYY format
                                     if "/" in date_raw:
                                         date_parts = date_raw.split("/")
                                         if len(date_parts) == 3:
@@ -9974,107 +10507,28 @@ def Order_upload(request, IPOid, Groupfilter, Ordercatagoryfilter, InvestorTypef
                                             else:  # DD-MM-YYYY
                                                 O_Date = f"{date_parts[2]}-{date_parts[1].zfill(2)}-{date_parts[0].zfill(2)}"
                                             parsed_date = datetime.strptime(O_Date, "%Y-%m-%d").date()
-                                
-                                    # Check if date is in future
                                     if parsed_date and parsed_date > datetime.now().date():
                                         O_Date = datetime.now().strftime("%Y-%m-%d")
                                         date_time_warnings.append("future date detected, using current date")
-                                except Exception as e:
+                                except Exception:
                                     O_Date = datetime.now().strftime("%Y-%m-%d")
                                     date_time_warnings.append(f"invalid date format '{date_raw}', using current date")
-                        
-                            # Try to parse user-provided time (24-hour format HH:MM:SS)
+
                             if time_raw:
                                 try:
-                                    time_raw_clean = time_raw.strip()
-                                    # Parse 24-hour format HH:MM:SS (e.g., 15:30:21 for 3:30 PM)
-                                    time_obj = datetime.strptime(time_raw_clean, "%H:%M:%S")
+                                    time_obj = datetime.strptime(time_raw.strip(), "%H:%M:%S")
                                     O_Time = time_obj.strftime("%H:%M:%S")
-                                except Exception as e:
+                                except Exception:
                                     O_Time = datetime.now().strftime("%H:%M:%S")
                                     date_time_warnings.append(f"invalid time format '{time_raw}', use HH:MM:SS (24-hour)")
-                        
-                            # Show consolidated warning if any date/time issues
+
                             if date_time_warnings:
-                                warning_msg = f"Row {column}: " + "; ".join(date_time_warnings)
-                                messages.warning(request, warning_msg)
-                        
+                                messages.warning(request, f"Row {column}: " + "; ".join(date_time_warnings))
+
+                            current_ipo_id = IPOName.id
+
                             if O_type == 'BUY':
                                 a = 0
-                                if (
-                                        O_Category.strip().upper() != 'PREMIUM'
-                                        and O_InvestorType.strip().upper() != 'PREMIUM'
-                                        and O_InvestorType.strip().upper() != 'CALL'
-                                        and O_Category.strip().upper() != 'PUT'
-                                        and O_InvestorType.strip().upper() != 'OPTIONS'
-                                    ):
-                                    if O_Quantity != '' and O_Quantity != "0" and O_Rate != '':
-                                        # order = Order(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType = O_InvestorType,
-                                        #     OrderCategory=O_Category, OrderType=O_type, Quantity=O_Quantity, Rate=O_Rate, OrderDate=O_Date, OrderTime = O_Time)
-                                        if O_StrikePrice.strip().upper() == 'PREMIUM':
-                                            order = Order(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType = O_InvestorType,
-                                                OrderCategory=O_Category, OrderType=O_type, Quantity=O_Quantity, Rate=O_Rate, OrderDate=O_Date, OrderTime = O_Time, Method='Premium', remark=remark_json)
-                                        else:
-                                            order = Order(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType = O_InvestorType,
-                                                OrderCategory=O_Category, OrderType=O_type, Quantity=O_Quantity, Rate=O_Rate, OrderDate=O_Date, OrderTime = O_Time, remark=remark_json)
-                    
-                                        O_limit  = CustomUser.objects.get( username = user)
-                                        if O_limit.Order_limit is not None :
-                                            BUY_Count = OrderDetail.objects.filter(user=user,Order__OrderIPOName_id= IPOid).count()
-                                            Sum_Qty = int(BUY_Count) + int(O_Quantity)
-                                            Limit  = int(O_limit.Order_limit)
-
-                                            if Sum_Qty >= Limit + 1:
-                                                messages.error(request, f"You have reached the limit of {Limit} Order.")
-                                                return redirect(f'/{IPOid}/BUY')
-                                    
-                                        order.save()
-                                        a = 1           
-                                        Order_Details_update_sync(O_Quantity, uid, order.id, PreOpenPrice)
-                                        # for i in range(0, int(O_Quantity)):
-                                        #     orderdetail = OrderDetail( user=user, Order_id=order.id , PreOpenPrice = PreOpenPrice)
-                                        #     orderdetail.save()
-                                elif O_Category.strip().upper() == 'PREMIUM' and O_InvestorType.strip().upper() == 'PREMIUM':
-                                    if O_Quantity != '' and O_Quantity != "0" and O_Rate != '':
-                                        order = Order(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType ='PREMIUM',
-                                                        OrderCategory='Premium', OrderType="BUY", Quantity=O_Quantity, Rate=O_Rate, OrderDate=O_Date, OrderTime = O_Time, remark=remark_json)
-                                    
-                                        O_limit  = CustomUser.objects.get( username = user)
-                                        if O_limit.Premium_Order_limit is not None :
-                                            Order_type = "Premium"
-                                            Pri_QTY = Order.objects.filter(user=user , OrderIPOName_id= IPOid , OrderCategory=Order_type).aggregate(Sum('Quantity'))['Quantity__sum'] 
-                                            Sum_Qty = int(Pri_QTY) + int(O_Quantity)
-                                            Limit  = int(O_limit.Premium_Order_limit)
-
-                                            if Sum_Qty >= Limit + 1:
-                                                messages.error(request, f"You have reached the limit of {Limit} Order.")
-                                                return redirect(f'/{IPOid}/BUY')
-                                    
-                                        order.save()
-                                elif O_Category.strip().upper() in ('CALL', 'PUT') and O_InvestorType.strip().upper() == 'OPTIONS':    
-                                    if O_Quantity != '' and O_Quantity != "0" and O_Rate != '':
-                                        order = Order(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType ='OPTIONS',
-                                                        OrderCategory= O_Category.strip().upper(), OrderType="BUY", Quantity=O_Quantity, Rate=O_Rate, OrderDate=O_Date, OrderTime = O_Time ,Method = O_StrikePrice, remark=remark_json)
-                                    
-                                        O_limit  = CustomUser.objects.get( username = user)
-                                        if O_limit.Premium_Order_limit is not None :
-                                            Order_type = "Premium"
-                                            Pri_QTY = Order.objects.filter(user=user , OrderIPOName_id= IPOid , OrderCategory=Order_type).aggregate(Sum('Quantity'))['Quantity__sum'] 
-                                            Sum_Qty = int(Pri_QTY) + int(O_Quantity)
-                                            Limit  = int(O_limit.Premium_Order_limit)
-
-                                            if Sum_Qty >= Limit + 1:
-                                                messages.error(request, f"You have reached the limit of {Limit} Order.")
-                                                return redirect(f'/{IPOid}/BUY')
-                                    
-                                        order.save()     
-                            
-                                else:
-                                    column.append('Error')
-                                    messages.error(request, f"Row {column} has error.", extra_tags='error' )
-                            else:
-                                a = 0
-                                # if O_Category != 'Premium' and O_Category != 'premium' and O_Category != 'PREMIUM' and O_InvestorType.strip().upper() != 'PREMIUM':
                                 if (
                                     O_Category.strip().upper() != 'PREMIUM'
                                     and O_InvestorType.strip().upper() != 'PREMIUM'
@@ -10083,88 +10537,144 @@ def Order_upload(request, IPOid, Groupfilter, Ordercatagoryfilter, InvestorTypef
                                     and O_InvestorType.strip().upper() != 'OPTIONS'
                                 ):
                                     if O_Quantity != '' and O_Quantity != "0" and O_Rate != '':
-                                        # order = Order(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType = O_InvestorType,
-                                        #             OrderCategory=O_Category, OrderType="SELL", Quantity=O_Quantity, Rate=O_Rate, OrderDate=O_Date, OrderTime = O_Time)
                                         if O_StrikePrice.strip().upper() == 'PREMIUM':
-                                            order = Order(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType = O_InvestorType,
-                                                        OrderCategory=O_Category, OrderType="SELL", Quantity=O_Quantity, Rate=O_Rate, OrderDate=O_Date, OrderTime = O_Time, Method='Premium', remark=remark_json)
+                                            order = Order(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType=O_InvestorType,
+                                                OrderCategory=O_Category, OrderType=O_type, Quantity=O_Quantity, Rate=O_Rate, OrderDate=O_Date, OrderTime=O_Time, Method='Premium', remark=remark_json)
                                         else:
-                                            order = Order(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType = O_InvestorType,
-                                                        OrderCategory=O_Category, OrderType="SELL", Quantity=O_Quantity, Rate=O_Rate, OrderDate=O_Date, OrderTime = O_Time, remark=remark_json)
-                                    
-                                        O_limit  = CustomUser.objects.get( username = user)
-                                
-                                        if O_limit.Order_limit is not None :
-                                            BUY_Count = OrderDetail.objects.filter(user=user , Order__OrderIPOName_id= IPOid).count()
+                                            order = Order(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType=O_InvestorType,
+                                                OrderCategory=O_Category, OrderType=O_type, Quantity=O_Quantity, Rate=O_Rate, OrderDate=O_Date, OrderTime=O_Time, remark=remark_json)
+                                        O_limit = CustomUser.objects.get(username=user)
+                                        if O_limit.Order_limit is not None:
+                                            BUY_Count = OrderDetail.objects.filter(user=user, Order__OrderIPOName_id=current_ipo_id).count()
                                             Sum_Qty = int(BUY_Count) + int(O_Quantity)
-                                            Limit  = int(O_limit.Order_limit)
-
-                                            if Sum_Qty >= Limit + 1:
-                                                messages.error(request, f"You have reached the limit of {Limit} Order.")
-                                                return redirect(f'/{IPOid}/BUY')
-                                    
+                                            if Sum_Qty >= int(O_limit.Order_limit) + 1:
+                                                messages.error(request, f"You have reached the limit of {O_limit.Order_limit} Order.")
+                                                if is_trades_upload:
+                                                    continue
+                                                return redirect(f'/{current_ipo_id}/BUY')
                                         order.save()
                                         a = 1
                                         Order_Details_update_sync(O_Quantity, uid, order.id, PreOpenPrice)
-                                        # for i in range(0, int(O_Quantity)):
-                                        #     orderdetail = OrderDetail( user=uid, Order_id=order.id, PreOpenPrice=PreOpenPrice)
-                                        #     orderdetail.save()
-                                elif O_Category.strip().upper() == 'PREMIUM' and  O_InvestorType.strip().upper() == 'PREMIUM':
+                                        touched_ipo_ids.add(current_ipo_id)
+                                elif O_Category.strip().upper() == 'PREMIUM' and O_InvestorType.strip().upper() == 'PREMIUM':
                                     if O_Quantity != '' and O_Quantity != "0" and O_Rate != '':
-                                        order = Order(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType ='PREMIUM',
-                                                        OrderCategory='Premium', OrderType="SELL", Quantity=O_Quantity, Rate=O_Rate, OrderDate=O_Date, OrderTime = O_Time , remark=remark_json)
-                                    
-                                        PRI_limit  = CustomUser.objects.get( username = user)
-                                    
-                                        if PRI_limit.Premium_Order_limit is not None :
-                                            Order_type = "Premium"
-                                            Pri_QTY = Order.objects.filter(user=user , OrderIPOName_id= IPOid , OrderCategory=Order_type).aggregate(Sum('Quantity'))['Quantity__sum']
-                                            Sum_Qty = int(Pri_QTY) + int(O_Quantity)
-                                            Limit  = int(PRI_limit.Premium_Order_limit)
-
-                                            if Sum_Qty >= Limit + 1:
-                                                messages.error(request, f"You have reached the limit of {Limit} Order.")
-                                                return redirect(f'/{IPOid}/BUY')
-                                    
+                                        order = Order(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType='PREMIUM',
+                                            OrderCategory='Premium', OrderType="BUY", Quantity=O_Quantity, Rate=O_Rate, OrderDate=O_Date, OrderTime=O_Time, remark=remark_json)
+                                        O_limit = CustomUser.objects.get(username=user)
+                                        if O_limit.Premium_Order_limit is not None:
+                                            Pri_QTY = Order.objects.filter(user=user, OrderIPOName_id=current_ipo_id, OrderCategory="Premium").aggregate(Sum('Quantity'))['Quantity__sum']
+                                            Sum_Qty = int(Pri_QTY or 0) + int(O_Quantity)
+                                            if Sum_Qty >= int(O_limit.Premium_Order_limit) + 1:
+                                                messages.error(request, f"You have reached the limit of {O_limit.Premium_Order_limit} Order.")
+                                                if is_trades_upload:
+                                                    continue
+                                                return redirect(f'/{current_ipo_id}/BUY')
                                         order.save()
-                                    
+                                        touched_ipo_ids.add(current_ipo_id)
                                 elif O_Category.strip().upper() in ('CALL', 'PUT') and O_InvestorType.strip().upper() == 'OPTIONS':
                                     if O_Quantity != '' and O_Quantity != "0" and O_Rate != '':
-                                        order = Order(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType ='OPTIONS',
-                                                        OrderCategory= O_Category.strip().upper(), OrderType="SELL", Quantity=O_Quantity, Rate=O_Rate, OrderDate=O_Date, OrderTime = O_Time ,Method = O_StrikePrice, remark=remark_json)
-                                    
-                                        O_limit  = CustomUser.objects.get( username = user)
-                                        if O_limit.Premium_Order_limit is not None :
-                                            Order_type = "Premium"
-                                            Pri_QTY = Order.objects.filter(user=user , OrderIPOName_id= IPOid , OrderCategory=Order_type).aggregate(Sum('Quantity'))['Quantity__sum'] 
-                                            Sum_Qty = int(Pri_QTY) + int(O_Quantity)
-                                            Limit  = int(O_limit.Premium_Order_limit)
-
-                                            if Sum_Qty >= Limit + 1:
-                                                messages.error(request, f"You have reached the limit of {Limit} Order.")
-                                                return redirect(f'/{IPOid}/BUY')
-                                    
-                                        order.save()     
-                            
+                                        order = Order(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType='OPTIONS',
+                                            OrderCategory=O_Category.strip().upper(), OrderType="BUY", Quantity=O_Quantity, Rate=O_Rate, OrderDate=O_Date, OrderTime=O_Time, Method=O_StrikePrice, remark=remark_json)
+                                        O_limit = CustomUser.objects.get(username=user)
+                                        if O_limit.Premium_Order_limit is not None:
+                                            Pri_QTY = Order.objects.filter(user=user, OrderIPOName_id=current_ipo_id, OrderCategory="Premium").aggregate(Sum('Quantity'))['Quantity__sum']
+                                            Sum_Qty = int(Pri_QTY or 0) + int(O_Quantity)
+                                            if Sum_Qty >= int(O_limit.Premium_Order_limit) + 1:
+                                                messages.error(request, f"You have reached the limit of {O_limit.Premium_Order_limit} Order.")
+                                                if is_trades_upload:
+                                                    continue
+                                                return redirect(f'/{current_ipo_id}/BUY')
+                                        order.save()
+                                        touched_ipo_ids.add(current_ipo_id)
                                 else:
                                     column.append('Error')
-                                    messages.error(request, f"Row {column} has error.", extra_tags='error' )
-                        except:
+                                    messages.error(request, f"Row {column} has error.", extra_tags='error')
+                            else:  # SELL
+                                a = 0
+                                if (
+                                    O_Category.strip().upper() != 'PREMIUM'
+                                    and O_InvestorType.strip().upper() != 'PREMIUM'
+                                    and O_InvestorType.strip().upper() != 'CALL'
+                                    and O_Category.strip().upper() != 'PUT'
+                                    and O_InvestorType.strip().upper() != 'OPTIONS'
+                                ):
+                                    if O_Quantity != '' and O_Quantity != "0" and O_Rate != '':
+                                        if O_StrikePrice.strip().upper() == 'PREMIUM':
+                                            order = Order(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType=O_InvestorType,
+                                                OrderCategory=O_Category, OrderType="SELL", Quantity=O_Quantity, Rate=O_Rate, OrderDate=O_Date, OrderTime=O_Time, Method='Premium', remark=remark_json)
+                                        else:
+                                            order = Order(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType=O_InvestorType,
+                                                OrderCategory=O_Category, OrderType="SELL", Quantity=O_Quantity, Rate=O_Rate, OrderDate=O_Date, OrderTime=O_Time, remark=remark_json)
+                                        O_limit = CustomUser.objects.get(username=user)
+                                        if O_limit.Order_limit is not None:
+                                            BUY_Count = OrderDetail.objects.filter(user=user, Order__OrderIPOName_id=current_ipo_id).count()
+                                            Sum_Qty = int(BUY_Count) + int(O_Quantity)
+                                            if Sum_Qty >= int(O_limit.Order_limit) + 1:
+                                                messages.error(request, f"You have reached the limit of {O_limit.Order_limit} Order.")
+                                                if is_trades_upload:
+                                                    continue
+                                                return redirect(f'/{current_ipo_id}/BUY')
+                                        order.save()
+                                        a = 1
+                                        Order_Details_update_sync(O_Quantity, uid, order.id, PreOpenPrice)
+                                        touched_ipo_ids.add(current_ipo_id)
+                                elif O_Category.strip().upper() == 'PREMIUM' and O_InvestorType.strip().upper() == 'PREMIUM':
+                                    if O_Quantity != '' and O_Quantity != "0" and O_Rate != '':
+                                        order = Order(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType='PREMIUM',
+                                            OrderCategory='Premium', OrderType="SELL", Quantity=O_Quantity, Rate=O_Rate, OrderDate=O_Date, OrderTime=O_Time, remark=remark_json)
+                                        PRI_limit = CustomUser.objects.get(username=user)
+                                        if PRI_limit.Premium_Order_limit is not None:
+                                            Pri_QTY = Order.objects.filter(user=user, OrderIPOName_id=current_ipo_id, OrderCategory="Premium").aggregate(Sum('Quantity'))['Quantity__sum']
+                                            Sum_Qty = int(Pri_QTY or 0) + int(O_Quantity)
+                                            if Sum_Qty >= int(PRI_limit.Premium_Order_limit) + 1:
+                                                messages.error(request, f"You have reached the limit of {PRI_limit.Premium_Order_limit} Order.")
+                                                if is_trades_upload:
+                                                    continue
+                                                return redirect(f'/{current_ipo_id}/BUY')
+                                        order.save()
+                                        touched_ipo_ids.add(current_ipo_id)
+                                elif O_Category.strip().upper() in ('CALL', 'PUT') and O_InvestorType.strip().upper() == 'OPTIONS':
+                                    if O_Quantity != '' and O_Quantity != "0" and O_Rate != '':
+                                        order = Order(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType='OPTIONS',
+                                            OrderCategory=O_Category.strip().upper(), OrderType="SELL", Quantity=O_Quantity, Rate=O_Rate, OrderDate=O_Date, OrderTime=O_Time, Method=O_StrikePrice, remark=remark_json)
+                                        O_limit = CustomUser.objects.get(username=user)
+                                        if O_limit.Premium_Order_limit is not None:
+                                            Pri_QTY = Order.objects.filter(user=user, OrderIPOName_id=current_ipo_id, OrderCategory="Premium").aggregate(Sum('Quantity'))['Quantity__sum']
+                                            Sum_Qty = int(Pri_QTY or 0) + int(O_Quantity)
+                                            if Sum_Qty >= int(O_limit.Premium_Order_limit) + 1:
+                                                messages.error(request, f"You have reached the limit of {O_limit.Premium_Order_limit} Order.")
+                                                if is_trades_upload:
+                                                    continue
+                                                return redirect(f'/{current_ipo_id}/BUY')
+                                        order.save()
+                                        touched_ipo_ids.add(current_ipo_id)
+                                else:
+                                    column.append('Error')
+                                    messages.error(request, f"Row {column} has error.", extra_tags='error')
+                        except Exception:
                             column.append('Error')
-                            messages.error(request, f"Row {column} has error.", extra_tags='error' )
+                            messages.error(request, f"Row {column} has error.", extra_tags='error')
                     else:
                         column.append('Error')
                         messages.error(request, f"Row {column} has error.", extra_tags='error')
                 else:
-                    column.append('Error')
-                    messages.error(request, "File Details are invaild.", extra_tags='error')
+                    messages.error(request, "File Details are invalid.", extra_tags='error')
 
-        except:
-            column.append('Error')
-            messages.error(request, "File Details are invaild.", extra_tags='error')
-        calculate(IPOid, request.user)
+        except Exception:
+            messages.error(request, "File Details are invalid.", extra_tags='error')
 
+        # Run calculate() for every IPO that was touched
+        if is_trades_upload:
+            for ipo_id in touched_ipo_ids:
+                calculate(ipo_id, request.user)
+        else:
+            calculate(IPOid, request.user)
+
+    # Redirect back to appropriate page
+    if is_trades_upload:
+        return redirect('/trades')
     return redirect(f"/{IPOid}/Order/{Groupfilter}/{Ordercatagoryfilter}/{InvestorTypefilter}")
+
 
 #dashboard form fun
 @ allowed_users(allowed_roles=['Broker'])
@@ -11717,8 +12227,16 @@ def sell(request, IPOid,selectgroup=None):
 
     if request.method == "POST":
         user = request.user
-        Group = request.POST.get('item_id', '')
-        gid = GroupDetail.objects.get(GroupName=Group, user=userid).id
+        Group = request.POST.get('item_id', '').strip()
+        if not Group:
+            messages.error(request, "Please select a group before placing an order.")
+            return redirect(f'/{IPOid}/SELL')
+            
+        try:
+            gid = GroupDetail.objects.get(GroupName=Group, user=userid).id
+        except GroupDetail.DoesNotExist:
+            messages.error(request, f"The selected group '{Group}' does not exist.")
+            return redirect(f'/{IPOid}/SELL')
         KostakRate = request.POST.get('KostakRate', '')
         SubjectToRate = request.POST.get('SubjectToRate', '')
         PremiumRate = request.POST.get('PremiumRate', '')
@@ -11742,7 +12260,6 @@ def sell(request, IPOid,selectgroup=None):
         PutRate = request.POST.get('PutRate', '')
         PutStrikePrice = request.POST.get('PutStrikePrice', '')
         placeOrderOnly = request.POST.get('placeOrderOnly', False)
-        placeOrderWithWhatsApp = request.POST.get('placeOrderWithWhatsApp', False)
         DateTime = request.POST.get('datetime', '')
         OrderDate = DateTime[0:10]
         OrderTime = DateTime[11:19]
@@ -12012,9 +12529,7 @@ def sell(request, IPOid,selectgroup=None):
             except:
                 a==0
         if a == 1:
-            if placeOrderWithWhatsApp:
-                pass
-            elif placeOrderOnly:
+            if placeOrderOnly:
                 messages.success(request, 'Sell order placed successfully.')
             else:
                 messages.success(request, 'Sell order placed successfully. Telegram message sent successfully ')
@@ -12062,10 +12577,18 @@ def OrderFunction(request, IPOid):
     dict_avg = {}
     dict_amount = {}
 
-    if request.method == "POST":
-        Groupfilter = request.POST.get('Groupfilter', 'All')
-        OrderCategoryFilter = request.POST.get('OrderCategoryFilter', 'All')
-        InvestorTypeFilter = request.POST.get('InvestorTypeFilter', 'All')
+    req_data = request.POST if request.method == "POST" else request.GET
+    Groupfilter = req_data.get('Groupfilter', 'All')
+    OrderCategoryFilter = req_data.get('OrderCategoryFilter', 'All')
+    InvestorTypeFilter = req_data.get('InvestorTypeFilter', 'All')
+    SearchQuery = req_data.get('SearchQuery', '').strip()
+
+    if Groupfilter == '' or Groupfilter is None:
+        Groupfilter = 'All'
+    if OrderCategoryFilter == '' or OrderCategoryFilter is None:
+        OrderCategoryFilter = 'All'
+    if InvestorTypeFilter == '' or InvestorTypeFilter is None:
+        InvestorTypeFilter = 'All'
 
     # Validate and apply filters
     if is_valid_queryparam(Groupfilter) and Groupfilter != 'All':
@@ -12074,6 +12597,32 @@ def OrderFunction(request, IPOid):
         products = products.filter(OrderCategory=OrderCategoryFilter)
     if is_valid_queryparam(InvestorTypeFilter) and InvestorTypeFilter != 'All':
         products = products.filter(InvestorType=InvestorTypeFilter)
+
+    if SearchQuery:
+        from django.db.models import Q, CharField
+        from django.db.models.functions import Cast
+        search_date = SearchQuery
+        try:
+            date_part = SearchQuery.split('|')[0].strip()
+            search_date = datetime.strptime(date_part, "%b. %d, %Y").strftime("%Y-%m-%d")
+        except:
+            pass
+
+        products = products.annotate(
+            rate_str=Cast('Rate', CharField()),
+            qty_str=Cast('Quantity', CharField()),
+            date_str=Cast('OrderDate', CharField()),
+        ).filter(
+            Q(OrderGroup__GroupName__icontains=SearchQuery) |
+            Q(OrderType__icontains=SearchQuery) |
+            Q(OrderCategory__icontains=SearchQuery) |
+            Q(InvestorType__icontains=SearchQuery) |
+            Q(Method__icontains=SearchQuery) |
+            Q(rate_str__icontains=SearchQuery) |
+            Q(qty_str__icontains=SearchQuery) |
+            Q(date_str__icontains=search_date) |
+            Q(remark__icontains=SearchQuery)
+        )
 
     aggregates = (
         products
@@ -12580,9 +13129,7 @@ def OrderFunction(request, IPOid):
     html_table += "<th>Rate</th>"
     # html_table += "<th>Date and Time</th>"
     # html_table += "<th>Action &nbsp;</th>"
-    html_table += "<th class='skip-export'>Date and Time</th>"
-    html_table += "<th class='export-only'>Date</th>"
-    html_table += "<th class='export-only'>Time</th>"
+    html_table += "<th>Date and Time</th>"
     html_table += "<th class='remark-col'>Remark</th>"
     html_table += "<th class='skip-export'>Action &nbsp;</th>"
     html_table += "</tr></thead>\n"
@@ -12604,7 +13151,7 @@ def OrderFunction(request, IPOid):
         # if row.InvestorType == 'OPTIONS':
         #     html_table += f"<td>{row.Method}</td>"
         if row.OrderCategory != 'Premium':
-            method_value = row.Method if row.Method else 'Application'
+            method_value = str(row.Method) if (row.Method and str(row.Method).lower() not in ('nan', 'none', '')) else 'Application'
             html_table += f"<td>{method_value}</td>"
         else:
             html_table += f"<td>-</td>"
@@ -12616,10 +13163,8 @@ def OrderFunction(request, IPOid):
             html_table += f"<td>{row.Quantity}</td>"
         html_table += f"<td>{row.Rate}</td>"
         html_table += f"<td class='skip-export'>{formatted_datetime}</td>"
-        html_table += f"<td class='export-only'>{export_date}</td>"
-        html_table += f"<td class='export-only'>{export_time}</td>"
-        safe_remark = row.Remark.replace("'", "\\'").replace('"', '&quot;') if row.Remark else ""
-        html_table += f"<td style='white-space: nowrap; max-width: 300px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; outline: none;' tabindex='0' onclick=\"this.style.whiteSpace=this.style.whiteSpace==='normal'?'nowrap':'normal'\" onblur=\"this.style.whiteSpace='nowrap'\" title='{safe_remark}'>{row.Remark}</td>"
+        safe_remark = str(row.Remark).replace("'", "\\'").replace('"', '&quot;') if (row.Remark and str(row.Remark).lower() not in ("nan", "none")) else ""
+        html_table += f"<td style='white-space: nowrap; max-width: 300px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; outline: none;' tabindex='0' onclick=\"this.style.whiteSpace=this.style.whiteSpace==='normal'?'nowrap':'normal'\" onblur=\"this.style.whiteSpace='nowrap'\" title='{safe_remark}'>{ str(row.Remark) if (row.Remark and str(row.Remark).lower() not in ('nan','none')) else ''}</td>"
         if IPOName.IPOType == "MAINBOARD":
             url = f'/{IPOid}/EditOrder/{ row.id }/{Groupfilter}/{OrderCategoryFilter}/{InvestorTypeFilter}?page={page_number}'
         else:
@@ -12630,7 +13175,7 @@ def OrderFunction(request, IPOid):
         html_table += "</tr>\n"
     html_table += "</tbody></table>"
 
-    return render(request, 'Order.html', {'Group': Group.order_by('GroupName'), 'html_table': html_table, 'IPOid': IPOid, 'IPOName': IPO, 'Groupfilter': Groupfilter, 'OrderCategoryFilter': OrderCategoryFilter,'category_totals': category_totals,'strike_prices': strike_prices,'grand_total': grand_total, 'InvestorTypeFilter': InvestorTypeFilter,'PremiumBuyAmount':PremiumBuyAmount,'PremiumNetAmount':PremiumNetAmount,'PremiumSellAmount':PremiumSellAmount ,'dict_count': dict_count, 'net_count':net_count ,'net_avg':net_avg ,'net_amount':net_amount ,'dict_amount':dict_amount,'dict_avg': dict_avg,'PremiumNetCount':PremiumNetCount,'PremiumNetCount':"{:.2f}".format(PremiumNetCount),'PremiumNetAvg':PremiumNetAvg,'PremiumNetAvg':"{:.2f}".format(PremiumNetAvg), 'PremiumBuyCount':PremiumBuyCount,'PremiumSellCount':PremiumSellCount,'PremiumSellAvg':"{:.2f}".format(PremiumSellAvg),'PremiumBuyAvg':"{:.2f}".format(PremiumBuyAvg),'page_obj': page_obj,'Order_page_size':page_size})
+    return render(request, 'Order.html', {'Group': Group.order_by('GroupName'), 'html_table': html_table, 'IPOid': IPOid, 'IPOName': IPO, 'Groupfilter': Groupfilter, 'OrderCategoryFilter': OrderCategoryFilter,'category_totals': category_totals,'strike_prices': strike_prices,'grand_total': grand_total, 'InvestorTypeFilter': InvestorTypeFilter,'PremiumBuyAmount':PremiumBuyAmount,'PremiumNetAmount':PremiumNetAmount,'PremiumSellAmount':PremiumSellAmount ,'dict_count': dict_count, 'net_count':net_count ,'net_avg':net_avg ,'net_amount':net_amount ,'dict_amount':dict_amount,'dict_avg': dict_avg,'PremiumNetCount':PremiumNetCount,'PremiumNetCount':"{:.2f}".format(PremiumNetCount),'PremiumNetAvg':PremiumNetAvg,'PremiumNetAvg':"{:.2f}".format(PremiumNetAvg), 'PremiumBuyCount':PremiumBuyCount,'PremiumSellCount':PremiumSellCount,'PremiumSellAvg':"{:.2f}".format(PremiumSellAvg),'PremiumBuyAvg':"{:.2f}".format(PremiumBuyAvg),'page_obj': page_obj,'Order_page_size':page_size, 'SearchQuery': SearchQuery})
 
 def loginUser(request):
     if request.method == "POST":
@@ -12776,6 +13321,8 @@ def DeleteAllOrders(request, IPOid):
 OTP_SESSIONS = {}
 
 @csrf_exempt
+@allowed_users(allowed_roles=['Broker'])
+@require_POST
 def send_telegram_otp(request):
     if request.method == "POST":
         user = request.user
@@ -12836,6 +13383,8 @@ def send_telegram_otp(request):
             return JsonResponse({'status': 'error', 'message': str(e)})
 
 @csrf_exempt
+@allowed_users(allowed_roles=['Broker'])
+@require_POST
 def verify_telegram_otp(request):
     if request.method == "POST":
         user = request.user
@@ -13508,7 +14057,35 @@ def send_status_to_telegram(request, IPOid):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
+# production
+def get_wkhtmltoimage_config():
+    """
+    Locates wkhtmltoimage executable from PyInstaller bundle, project folder, or system PATH.
+    """
+    # 1. Check system PATH first (Linux package or Windows PATH)
+    exe = shutil.which('wkhtmltoimage') or shutil.which('wkhtmltoimage.exe')
+    if exe:
+        try:
+            return imgkit.config(wkhtmltoimage=exe)
+        except Exception:
+            pass
 
+    # 2. Check PyInstaller bundle (_MEIPASS) and Project root (settings.BASE_DIR)
+    possible_paths = [
+        os.path.join(getattr(sys, '_MEIPASS', ''), "wkhtmltoimage.exe"),
+        os.path.join(settings.BASE_DIR, "wkhtmltoimage.exe"),
+        os.path.join(settings.BASE_DIR, "wkhtmltoimage"),  # Linux binary in project folder
+        r"C:\Program Files\wkhtmltopdf\bin\wkhtmltoimage.exe",
+        r"/usr/bin/wkhtmltoimage",
+    ]
+    for p in possible_paths:
+        if p and os.path.exists(p):
+            try:
+                return imgkit.config(wkhtmltoimage=p)
+            except Exception:
+                pass
+
+    return None
 
 
 def generate_status_image(context):
@@ -13532,6 +14109,131 @@ def generate_status_image(context):
     buf.name = "status_report.png"
     return buf
 
+def generate_status_image(context):
+    html = render_to_string('status_table_template.html', context)
+    options = {
+        'format': 'png',
+        'quality': '100',
+        'encoding': "UTF-8",
+    }
+    config = get_wkhtmltoimage_config()
+    if config:
+        img_bytes = imgkit.from_string(html, False, options=options, config=config)
+    else:
+        img_bytes = imgkit.from_string(html, False, options=options)
+    buf = io.BytesIO(img_bytes)
+    buf.name = "status_report.png"
+    return buf
+
+@login_required
+@csrf_exempt
+def generate_group_share_image(request):
+    """
+    Generates a full-width, crisp PNG image of the group billing details using wkhtmltoimage.
+    """
+    if request.method != "POST":
+        return HttpResponse("Method not allowed", status=405)
+    
+    raw_html = ""
+    try:
+        if request.body:
+            data = json.loads(request.body)
+            raw_html = data.get("html_content", "")
+    except Exception:
+        pass
+    
+    if not raw_html:
+        raw_html = request.POST.get("html_content", "")
+
+    if not raw_html:
+        return HttpResponse("No HTML content provided", status=400)
+
+    # Build clean standalone HTML with exact table layout
+    full_html = f"""<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+    body {{
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background-color: #ffffff;
+        margin: 0;
+        padding: 20px 24px;
+        width: 1450px;
+        box-sizing: border-box;
+    }}
+    table {{
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 14px;
+        margin-bottom: 20px;
+        font-size: 13.5px;
+    }}
+    th, td {{
+        border: 1px solid #000000;
+        padding: 5px 8px;
+        text-align: center;
+        white-space: nowrap;
+    }}
+    thead th {{
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }}
+    h3 {{
+        font-size: 20px;
+        margin: 0 0 12px 0;
+        font-weight: bold;
+    }}
+</style>
+</head>
+<body>
+    {raw_html}
+</body>
+</html>"""
+
+    options = {
+        'format': 'png',
+        'quality': '100',
+        'encoding': 'UTF-8',
+        'width': '1450',
+        'disable-smart-width': '',
+        'quiet': '',
+    }
+
+    try:
+        config = get_wkhtmltoimage_config()
+        if config:
+            img_bytes = imgkit.from_string(full_html, False, options=options, config=config)
+        else:
+            img_bytes = imgkit.from_string(full_html, False, options=options)
+
+        # Autocrop excess white space on right & bottom (e.g. when fewer tables like Premium & Net are shown)
+        # while keeping full width when wide tables (Kostak, Subject To) are present.
+        try:
+            from PIL import ImageChops
+            im = Image.open(io.BytesIO(img_bytes))
+            bg = Image.new('RGB', im.size, (255, 255, 255))
+            diff = ImageChops.difference(im.convert('RGB'), bg)
+            bbox = diff.getbbox()
+            if bbox:
+                # Make right margin exactly match left margin (bbox[0]) and bottom match top margin (bbox[1])
+                left_margin = bbox[0]
+                top_margin = bbox[1]
+                crop_w = min(im.width, bbox[2] + left_margin)
+                crop_h = min(im.height, bbox[3] + top_margin)
+                cropped = im.crop((0, 0, crop_w, crop_h))
+                buf = io.BytesIO()
+                cropped.save(buf, format='PNG')
+                img_bytes = buf.getvalue()
+        except Exception as crop_err:
+            print(f"generate_group_share_image autocrop exception: {crop_err}")
+
+        return HttpResponse(img_bytes, content_type="image/png")
+    except Exception as e:
+        print(f"generate_group_share_image exception: {e}")
+        return HttpResponse(f"Image generation failed: {e}", status=500)
+
+@allowed_users(allowed_roles=['Broker'])
 def get_all_groups(request, IPOid):
     User = request.user
     groups = list(Order.objects.filter(user=User,OrderIPOName=IPOid).values_list('OrderGroup', flat=True).distinct())
@@ -13881,7 +14583,6 @@ def send_status_to_telegram_image(request, IPOid):
                             parse_mode='markdown'
                         )
                         # return {'status': 'success', 'message': f'Status image sent to Telegram successfully for group {group_name}!'}
-                        print(f"Image sent to group {group_name} successfully.")
                     except Exception as e:
                         pass
                         # return {'status': 'error', 'message': f'Error sending to group {group_name}: {str(e)}'}
@@ -14151,9 +14852,16 @@ def accounting_view(request):
                 if batch_user_remark:
                     break
             detail_rows = ""
+            searchable_keywords = set()
             for item in batch_entries:
                 item_ipo = item.ipo.IPOName if item.ipo else "JV"
                 item_group = item.group.GroupName if item.group else (item.group_name or "Deleted")
+                searchable_keywords.add(item_ipo)
+                searchable_keywords.add(item_group)
+                searchable_keywords.add(item.amount_type.upper())
+                searchable_keywords.add(str(item.amount))
+                if item.remark:
+                    searchable_keywords.add(item.remark)
                 item_date = timezone.localtime(item.date_time)
                 detail_style = (
                     "opacity: 0.6; background-color: #ffe6e6;"
@@ -14171,6 +14879,9 @@ def accounting_view(request):
                     {'<td class="no-export"></td>' if not show_deleted else ''}
                 </tr>
                 """
+            
+            searchable_text = " ".join(searchable_keywords)
+
             batch_date = batch_entries[0].date_time
             representative_id = batch_entries[0].id
             batch_action = (
@@ -14191,6 +14902,7 @@ def accounting_view(request):
                 <td>
                     <span class="bulk-transfer-label">
                         <strong>Bulk Transfer</strong>
+                        <span style="display: none;">{escape(searchable_text)}</span>
                         <button type="button" class="bulk-transfer-toggle"
                                 data-transfer-batch="{batch_key}" aria-expanded="false"
                                 aria-label="View {len(batch_entries)} transfer entries"
@@ -14250,6 +14962,7 @@ def accounting_view(request):
                         data-amount="{e.amount}" 
                         data-amount-type="{e.amount_type}" 
                         data-jv="{'1' if e.jv else '0'}"
+                        data-is-legacy="{'1' if (e.ipo_id is None and not e.jv) else '0'}"
                         data-remark="{safe_remark}" 
                         data-datetime="{dt_local}">
                     <i class="fas fa-edit"></i>
@@ -14266,7 +14979,7 @@ def accounting_view(request):
     html_table = "<thead><tr style='text-align: center;white-space: nowrap; width:100%' >"
     if not show_deleted:
         html_table += "<th class='no-export accounting-selection'><input type='checkbox' id='selectAllAccounting' class='form-check-input' aria-label='Select all filtered entries'></th>"
-    html_table += "<th>IPO</th>"
+    html_table += "<th>IPO <i class='fas fa-expand-arrows-alt ms-1' id='toggleAllBulkTransfers' data-expanded='false' style='cursor: pointer; opacity: 0.7;' title='Expand all bulk transfers'></i></th>"
     html_table += "<th>Group</th>"
     html_table += "<th>Amount Type</th>"
     html_table += "<th>Amount</th>"
@@ -14478,6 +15191,7 @@ def accounting_logs_view(request):
 
 
 
+@allowed_users(allowed_roles=['Broker'])
 def get_accounting_entries(request):
     try:
         group_id = request.GET.get("group_id")
@@ -14552,6 +15266,456 @@ def delete_accounting_entries(request):
     
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
+from datetime import date
+from django.core.paginator import Paginator
+
+class DummyIPO:
+    id = 0
+    IPOName = "All Today's Trades"
+    IPOType = "MAINBOARD"
+    
+    def __str__(self):
+        return self.IPOName
+
+from django.db.models import Sum, Count, F
+
+def get_ipo_status_data(products, IPO):
+    OrdCat = ['Kostak','SubjectTo','CALL','PUT']
+    InvTyp = ['RETAIL','SHNI','BHNI','OPTIONS']
+    OrdTyp = ['BUY','SELL']
+
+    strike_dict = {}
+    dict_count = {}
+    dict_avg = {}
+    dict_amount = {}
+
+    aggregates = (
+        products
+        .values("OrderType", "OrderCategory", "InvestorType", "Method")
+        .annotate(
+            total_qty=Sum("Quantity"),
+            total_amt=Sum(F("Rate") * F("Quantity")),
+            total_count=Count("id")
+        )
+    )
+
+    agg_lookup = {}
+    for row in aggregates:
+        key = (row["OrderCategory"], row["InvestorType"], row["OrderType"], row["Method"])
+        agg_lookup[key] = {
+            "count": row["total_qty"] or 0,
+            "amount": row["total_amt"] or 0,
+            "entries": row["total_count"] or 0,
+        }
+
+    for ordertype in OrdTyp:
+        for ordercategory in OrdCat:
+            for investortype in InvTyp:
+                key_category = "Subject To" if ordercategory == "SubjectTo" else ordercategory
+                dict_key_prefix = f"{ordercategory}{investortype}{ordertype}"
+
+                matching_rows = [
+                    v for k, v in agg_lookup.items()
+                    if k[0] == key_category and k[1] == investortype and k[2] == ordertype
+                ]
+
+                total_count = sum(v["count"] for v in matching_rows)
+                total_amount = 0
+
+                for (cat, inv, ot, method), v in agg_lookup.items():
+                    if cat == key_category and inv == investortype and ot == ordertype:
+                        if cat == "Subject To" and method == "Premium":
+                            if investortype == "RETAIL":
+                                lot_size = IPO.LotSizeRetail if hasattr(IPO, 'LotSizeRetail') else 1
+                            elif investortype == "SHNI":
+                                lot_size = IPO.LotSizeSHNI if hasattr(IPO, 'LotSizeSHNI') else 1
+                            elif investortype == "BHNI":
+                                lot_size = IPO.LotSizeBHNI if hasattr(IPO, 'LotSizeBHNI') else 1
+                            else:
+                                lot_size = 1
+                            total_amount += (lot_size * v["amount"])
+                        elif investortype == "OPTIONS" and ordercategory in ["CALL", "PUT"]:
+                            strike = method or "NA"
+                            if strike not in strike_dict:
+                                strike_dict[strike] = {
+                                    "CALL": {"BUY": {"count":0,"amount":0,"avg":0,"net":0},
+                                            "SELL":{"count":0,"amount":0,"avg":0 ,"net":0}},
+                                    "PUT":  {"BUY": {"count":0,"amount":0,"avg":0 ,"net":0},
+                                            "SELL":{"count":0,"amount":0,"avg":0 ,"net":0}}
+                                }
+                            strike_dict[strike][ordercategory][ordertype]["count"] += v["count"]
+                            strike_dict[strike][ordercategory][ordertype]["amount"] += v["amount"]
+                            
+                            c = strike_dict[strike][ordercategory][ordertype]["count"]
+                            a = strike_dict[strike][ordercategory][ordertype]["amount"]
+                            strike_dict[strike][ordercategory][ordertype]["avg"] = (a / c) if c else 0
+                        
+                            buy_amt  = strike_dict[strike][ordercategory]["BUY"]["amount"]
+                            sell_amt = strike_dict[strike][ordercategory]["SELL"]["amount"]
+                            strike_dict[strike][ordercategory]["BUY"]["net"]  = buy_amt - sell_amt
+                            strike_dict[strike][ordercategory]["SELL"]["net"] = sell_amt - buy_amt
+                        
+                            total_amount += v["amount"]
+                        else:
+                            total_amount += v["amount"]
+
+                dict_count[f"{dict_key_prefix}Count"] = total_count
+                dict_avg[f"{dict_key_prefix}Avg"] = (total_amount / total_count) if total_count else 0
+                dict_amount[f"{dict_key_prefix}Amount"] = total_amount
+        
+    net_count = {}
+    net_avg = {}
+    net_amount = {}
+            
+    for ordercategory in OrdCat:
+        for investortype in InvTyp:
+            buy_key_count = f"{ordercategory}{investortype}BUYCount"
+            sell_key_count = f"{ordercategory}{investortype}SELLCount"
+        
+            buy_key_avg = f"{ordercategory}{investortype}BUYAvg"
+            sell_key_avg = f"{ordercategory}{investortype}SELLAvg"
+
+            buy_count = dict_count.get(buy_key_count, 0)
+            sell_count = dict_count.get(sell_key_count, 0)
+            net_c = buy_count - sell_count
+
+            buy_amount = buy_count * dict_avg.get(buy_key_avg, 0)
+            sell_amount = sell_count * dict_avg.get(sell_key_avg, 0)
+            net_amt = buy_amount - sell_amount
+
+            if net_c != 0:
+                net_a = net_amt / net_c
+            else:
+                net_a = 0
+            
+            if net_c == 0:
+                net_amt = sell_amount - buy_amount
+
+            key_prefix = f"{ordercategory}{investortype}Net"
+            net_count[f"{key_prefix}Count"] = net_c
+            net_avg[f"{key_prefix}Avg"] = round(net_a, 2)
+            net_amount[f"{key_prefix}Amount"] = round(net_amt, 2)
+            
+    matching_rows = [
+        v for k, v in agg_lookup.items()
+        if k[0] == "Premium" and k[1] == "PREMIUM" and k[2] == "BUY"
+    ]
+    PremiumBuyCount1 = sum(v["count"] for v in matching_rows)
+    PremiumBuyCount = PremiumBuyCount1 if PremiumBuyCount1 else 0
+
+    PremiumBuyfilter = products.filter(OrderType="BUY",OrderCategory="Premium")
+    PremiumBuyAmount=0
+    for i in PremiumBuyfilter:
+        PremiumBuyAmount=(i.Quantity*i.Rate)+PremiumBuyAmount
+
+    if PremiumBuyCount==0:
+        PremiumBuyAvg=0    
+    else:
+        PremiumBuyAvg=PremiumBuyAmount/PremiumBuyCount
+    
+    matching_rows = [
+        v for k, v in agg_lookup.items()
+        if k[0] == "Premium" and k[1] == "PREMIUM" and k[2] == "SELL"
+    ]
+    PremiumSellCount1 = sum(v["count"] for v in matching_rows)
+    PremiumSellCount = PremiumSellCount1 if PremiumSellCount1 else 0
+
+    PremiumSellfilter = products.filter(OrderType="SELL",OrderCategory="Premium")
+    PremiumSellAmount=0
+    for i in PremiumSellfilter:
+        PremiumSellAmount=(i.Quantity*i.Rate)+PremiumSellAmount
+
+    if PremiumSellCount==0:
+        PremiumSellAvg=0    
+    else:
+        PremiumSellAvg=PremiumSellAmount/PremiumSellCount
+
+    PremiumNetCount = PremiumBuyCount - PremiumSellCount
+    Premiumavg1 = PremiumBuyCount * PremiumBuyAvg
+    Premiumavg2 = PremiumSellCount * PremiumSellAvg
+    pri_net_avg = Premiumavg1 - Premiumavg2
+    if PremiumNetCount != 0:
+        PremiumNetAvg = pri_net_avg / PremiumNetCount
+        PremiumNetAmount = PremiumBuyAmount - PremiumSellAmount
+    else:
+        PremiumNetAvg =  0
+        PremiumNetAmount = PremiumSellAmount - PremiumBuyAmount
+
+    strike_prices = []
+    for strike, cats in strike_dict.items():
+        call_buy_count = cats["CALL"]["BUY"]["count"]
+        call_sell_count = cats["CALL"]["SELL"]["count"]
+        call_buy_amount = cats["CALL"]["BUY"]["amount"]
+        call_sell_amount = cats["CALL"]["SELL"]["amount"]
+
+        call_net_count = call_buy_count - call_sell_count
+        call_avg1 = call_buy_amount - call_sell_amount
+        call_avg2 = call_sell_amount - call_buy_amount
+        call_net_avg = call_avg1 - call_avg2
+        if call_net_count != 0:
+            call_avg = call_net_avg / call_net_count
+            call_net_amount = call_buy_amount - call_sell_amount
+        else:
+            call_avg = 0
+            call_net_amount = call_sell_amount - call_buy_amount
+    
+        put_buy_count = cats["PUT"]["BUY"]["count"]
+        put_sell_count = cats["PUT"]["SELL"]["count"]
+        put_buy_amount = cats["PUT"]["BUY"]["amount"]
+        put_sell_amount = cats["PUT"]["SELL"]["amount"]
+
+        put_net_count = put_buy_count - put_sell_count
+        put_avg1 = put_buy_amount - put_sell_amount
+        put_avg2 = put_sell_amount - put_buy_amount
+        put_net_avg = put_avg1 - put_avg2
+        if put_net_count != 0:
+            put_avg = put_net_avg / put_net_count
+            put_net_amount = put_buy_amount - put_sell_amount
+        else:
+            put_avg = 0 
+            put_net_amount = put_sell_amount - put_buy_amount
+    
+        strike_prices.append({
+            "value": strike,
+            "call_total_count": call_net_count,
+            "call_avg": (call_net_amount / call_net_count) if call_net_count else 0,
+            "call_net_amount": call_net_amount,
+            "put_total_count": put_net_count,
+            "put_avg": (put_net_amount / put_net_count) if put_net_count else 0,
+            "put_net_amount": put_net_amount,
+        })
+        
+    return {
+        'dict_count': dict_count,
+        'dict_avg': dict_avg,
+        'dict_amount': dict_amount,
+        'net_count': net_count,
+        'net_avg': net_avg,
+        'net_amount': net_amount,
+        'strike_prices': strike_prices,
+        'PremiumBuyCount': PremiumBuyCount,
+        'PremiumBuyAvg': PremiumBuyAvg,
+        'PremiumBuyAmount': PremiumBuyAmount,
+        'PremiumSellCount': PremiumSellCount,
+        'PremiumSellAvg': PremiumSellAvg,
+        'PremiumSellAmount': PremiumSellAmount,
+        'PremiumNetCount': PremiumNetCount,
+        'PremiumNetAvg': PremiumNetAvg,
+        'PremiumNetAmount': PremiumNetAmount,
+    }
+
+def trades_page(request):
+    today = date.today()
+    
+    if request.user.groups.all()[0].name == 'Broker':
+        userid = request.user
+        base_orders = Order.objects.filter(user=userid).select_related('OrderIPOName', 'OrderGroup').order_by('-id', '-OrderTime')
+    else:
+        userid = request.user.Broker_id
+        base_orders = Order.objects.filter(user=userid, OrderGroup_id=request.user.Group_id).select_related('OrderIPOName', 'OrderGroup').order_by('-id', '-OrderTime')
+        
+    req_data = request.POST if request.method == "POST" else request.GET
+    
+    StartDate = req_data.get('StartDate', today.strftime('%Y-%m-%d')) if req_data.get('StartDate') else today.strftime('%Y-%m-%d')
+    EndDate = req_data.get('EndDate', today.strftime('%Y-%m-%d')) if req_data.get('EndDate') else today.strftime('%Y-%m-%d')
+    
+    if StartDate and EndDate:
+        if StartDate == 'All' or EndDate == 'All':
+            todays_orders = base_orders
+        else:
+            todays_orders = base_orders.filter(OrderDate__gte=StartDate, OrderDate__lte=EndDate)
+
+    else:
+        todays_orders = base_orders
+    
+    Groupfilter = req_data.get('Groupfilter', 'All')
+    OrderCategoryFilter = req_data.get('OrderCategoryFilter', 'All')
+    InvestorTypeFilter = req_data.get('InvestorTypeFilter', 'All')
+    IPOFilter = req_data.get('IPOFilter', 'All')
+    SearchQuery = req_data.get('SearchQuery', '').strip()
+    
+    if IPOFilter != 'All':
+        todays_orders = todays_orders.filter(OrderIPOName_id=IPOFilter)
+    if Groupfilter != 'All':
+        todays_orders = todays_orders.filter(OrderGroup__GroupName=Groupfilter)
+    if OrderCategoryFilter != 'All':
+        todays_orders = todays_orders.filter(OrderCategory=OrderCategoryFilter)
+    if InvestorTypeFilter != 'All':
+        todays_orders = todays_orders.filter(InvestorType=InvestorTypeFilter)
+        
+    if SearchQuery:
+        from django.db.models import Q, CharField
+        from django.db.models.functions import Cast
+        
+        # Try to parse the UI-formatted date (e.g., "Apr. 08, 2024 | 06:07:10 PM") into a DB-friendly format ("2024-04-08")
+        search_date = SearchQuery
+        try:
+            date_part = SearchQuery.split('|')[0].strip()
+            search_date = datetime.strptime(date_part, "%b. %d, %Y").strftime("%Y-%m-%d")
+        except:
+            pass
+            
+        todays_orders = todays_orders.annotate(
+            rate_str=Cast('Rate', CharField()),
+            qty_str=Cast('Quantity', CharField()),
+            date_str=Cast('OrderDate', CharField()),
+        ).filter(
+            Q(OrderIPOName__IPOName__icontains=SearchQuery) |
+            Q(OrderGroup__GroupName__icontains=SearchQuery) |
+            Q(OrderType__icontains=SearchQuery) |
+            Q(OrderCategory__icontains=SearchQuery) |
+            Q(InvestorType__icontains=SearchQuery) |
+            Q(Method__icontains=SearchQuery) |
+            Q(rate_str__icontains=SearchQuery) |
+            Q(qty_str__icontains=SearchQuery) |
+            Q(date_str__icontains=search_date)
+        )
+    Group = GroupDetail.objects.filter(user=userid)
+        
+    try:
+        page_size = req_data.get('Order_page_size')
+        if page_size != '' and page_size != None:
+            request.session['Order_page_size'] = page_size
+        else:
+            page_size = request.session['Order_page_size']
+    except:
+        page_size = request.session.get('Order_page_size', 50)
+        
+    if page_size == 'All':
+        paginator = Paginator(todays_orders, max(len(todays_orders), 1))
+    else:
+        paginator = Paginator(todays_orders, int(page_size))
+        
+    page_number = request.GET.get('page', '1')
+    try:
+        page_obj = paginator.get_page(page_number)
+    except:
+        page_obj = paginator.get_page(1)
+        
+    Data=[]
+    if todays_orders is not None and todays_orders.exists():
+        start_index = (page_obj.number - 1) * page_obj.paginator.per_page
+        for i, order_detail in enumerate(page_obj):
+            entry_data = {
+                'id':order_detail.id,
+                'OrderGroup': order_detail.OrderGroup.GroupName if order_detail.OrderGroup else '',
+                'IPOName': order_detail.OrderIPOName.IPOName if order_detail.OrderIPOName else '-',
+                'IPOid': order_detail.OrderIPOName_id,
+                'IPOType': order_detail.OrderIPOName.IPOType if order_detail.OrderIPOName else 'MAINBOARD',
+                'OrderType': order_detail.OrderType,
+                'OrderCategory': order_detail.OrderCategory,
+                'InvestorType': order_detail.InvestorType,
+                'Quantity': int(order_detail.Quantity) if order_detail.Quantity else 0,
+                'Method': order_detail.Method,
+                'Rate': order_detail.Rate,
+                'Date':order_detail.OrderDate,
+                'Time':order_detail.OrderTime,
+                'Remark': format_remark(order_detail.remark) if order_detail.remark else "-",
+                'sr_no': start_index + i + 1
+            }
+            Data.append(entry_data)
+        
+    import pandas as pd
+    if Data:
+        df = pd.DataFrame.from_records(Data)
+    else:
+        df = pd.DataFrame(columns=['id', 'IPOName', 'OrderGroup', 'OrderType', 'OrderCategory', 'InvestorType', 'Quantity', 'Method', 'Rate', 'Date', 'Time', 'Remark', 'sr_no'])
+
+    html_table = "<table class=\"table-bordered sortable\" >"
+    html_table = "<thead><tr class='text-center text-nowrap'>"
+    html_table += "<th><input type='checkbox' id='select-all-orders' style='cursor:pointer;'> Sr No.</th>"
+    html_table += "<th>IPO Name</th>"
+    html_table += "<th>Group Name</th>"
+    html_table += "<th>Order Type</th>"
+    html_table += "<th>Order Category</th>"
+    html_table += "<th>Premium Strike Price</th>"
+    html_table += "<th>Investor Type</th>"
+    html_table += "<th> Qty</th>"
+    html_table += "<th>Rate</th>"
+    html_table += "<th>Date and Time</th>"
+    html_table += "<th class='remark-col'>Remark</th>"
+    html_table += "<th class='skip-export'>Action &nbsp;</th>"
+    html_table += "</tr></thead>\n"
+    html_table += "<tbody class='text-center text-nowrap'>"
+    for i, row in df.iterrows():
+        datetime_str  = f"{row.Date} {row.Time}"
+        try:
+            datetime_obj = datetime.strptime(datetime_str , "%Y-%m-%d %H:%M:%S")
+        except:
+            datetime_obj = datetime.now() # Fallback
+        formatted_datetime = datetime_obj.strftime("%b. %d, %Y | %I:%M:%S %p")
+        export_date = datetime_obj.strftime("%d-%m-%Y")
+        export_time = datetime_obj.strftime("%H:%M:%S")
+    
+        html_table += "<tr style='text-align: center;'>"
+        html_table += f"<td><input type='checkbox' class='order-checkbox' value='{row.id}' style='cursor:pointer;'> {row.sr_no}</td>"
+        html_table += f"<td>{row.IPOName}</td>"
+        html_table += f"<td>{row.OrderGroup}</td>"
+        html_table += f"<td >{row.OrderType}</td>"
+        html_table += f"<td>{row.OrderCategory}</td>"
+        
+        if row.OrderCategory != 'Premium':
+            method_value = str(row.Method) if (row.Method and str(row.Method).lower() not in ('nan', 'none', '')) else 'Application'
+            html_table += f"<td>{method_value}</td>"
+        else:
+            html_table += f"<td>-</td>"
+            
+        html_table += f"<td>{row.InvestorType}</td>"
+        row_IPOid = row.IPOid if row.IPOid else 0
+        if row.OrderCategory != 'Premium' and row.InvestorType != 'OPTIONS':
+            html_table += f"<td><a href='/{row_IPOid}/OrderDetail/{row.OrderType}/{row.OrderGroup}/{row.OrderCategory}/{row.InvestorType}/{datetime_obj.strftime('%Y%m%d')}/{datetime_obj.strftime('%H%M%S')}{row.id}' style='color:blue; text-decoration: underline; '> {row.Quantity} </a></td>"
+        else:
+            html_table += f"<td>{row.Quantity}</td>"
+        html_table += f"<td>{row.Rate}</td>"
+        html_table += f"<td class='skip-export'>{formatted_datetime}</td>"
+        safe_remark = str(row.Remark).replace("'", "\\'").replace('"', '&quot;') if (row.Remark and str(row.Remark).lower() not in ("nan", "none")) else ""
+        html_table += f"<td style='white-space: nowrap; max-width: 300px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; outline: none;' tabindex='0' onclick=\"this.style.whiteSpace=this.style.whiteSpace==='normal'?'nowrap':'normal'\" onblur=\"this.style.whiteSpace='nowrap'\" title='{safe_remark}'>{ str(row.Remark) if (row.Remark and str(row.Remark).lower() not in ('nan','none')) else ''}</td>"
+        
+        row_IPOid = row.IPOid if row.IPOid else 0
+        data_attrs = f"data-order-id='{row.id}' data-ipo-id='{row_IPOid}' data-group='{row.OrderGroup}' data-ordertype='{row.OrderType}' data-category='{row.OrderCategory}' data-investortype='{row.InvestorType}' data-qty='{row.Quantity}' data-rate='{row.Rate}' data-date='{row.Date}' data-time='{row.Time}' data-method='{row.Method}'"
+        
+        html_table += f"<td style='white-space: nowrap;'><button type='button' class='btn btn-outline-primary' style='width: 72px;' data-bs-toggle='modal' data-bs-target='#globalEditModal' {data_attrs} onclick='populateGlobalEditModal(this)'>Edit</button></td>"
+        html_table += "</tr>\n"
+    html_table += "</tbody></table>"
+    
+    all_ipos = CurrentIpoName.objects.filter(user=userid).order_by('-id')
+    
+    ipo_status_list = []
+    distinct_ipos = todays_orders.order_by().values('OrderIPOName_id', 'OrderIPOName__IPOName').distinct()
+    
+    for ipo_entry in distinct_ipos:
+        ipo_id = ipo_entry['OrderIPOName_id']
+        ipo_name = ipo_entry['OrderIPOName__IPOName']
+        if not ipo_id:
+            continue
+            
+        ipo_orders = todays_orders.filter(OrderIPOName_id=ipo_id)
+        ipo_obj = CurrentIpoName.objects.filter(id=ipo_id).first()
+        
+        status_data = get_ipo_status_data(ipo_orders, ipo_obj)
+        status_data['ipo_name'] = ipo_name
+        status_data['ipo_type'] = ipo_obj.IPOType if ipo_obj else "MAINBOARD"
+        ipo_status_list.append(status_data)
+
+    context = {
+        'page_obj': page_obj,
+        'html_table': html_table,
+        'product': todays_orders,
+        'IPOid': 0,
+        'IPOName': DummyIPO(),
+        'all_ipos': all_ipos,
+        'Group': Group,
+        'IPOFilter': IPOFilter,
+        'Groupfilter': Groupfilter,
+        'OrderCategoryFilter': OrderCategoryFilter,
+        'InvestorTypeFilter': InvestorTypeFilter,
+        'StartDate': StartDate,
+        'EndDate': EndDate,
+        'SearchQuery': SearchQuery,
+        'Order_page_size': page_size,
+        'ipo_status_list': ipo_status_list,
+    }
+    return render(request, 'trades.html', context)
 
 
 def ipo_transaction(request):
@@ -14820,15 +15984,27 @@ def update_accounting(request):
                     "Use the Bulk Transfer edit button to edit this entry."
                 )
 
-            group = _get_owned_group(request.user, request.POST.get("group_id"))
+            group_id = request.POST.get("group_id")
+            if not group_id:
+                if entry.group_id is None and entry.group_name:
+                    group = None
+                else:
+                    raise ValidationError("Invalid group.")
+            else:
+                group = _get_owned_group(request.user, group_id)
+
             ipo_id = request.POST.get("ipo_id")
             ipo = None
             if entry.jv:
                 ipo_id = None
             else:
                 if not ipo_id:
-                    raise ValidationError("A valid IPO is required.")
-                ipo = _get_owned_ipo(request.user, ipo_id)
+                    if entry.ipo_id is None and entry.ipo_name:
+                        ipo = None
+                    else:
+                        raise ValidationError("A valid IPO is required.")
+                else:
+                    ipo = _get_owned_ipo(request.user, ipo_id)
 
             amount_type = request.POST.get("amount_type")
             if amount_type not in VALID_TRANSACTION_TYPES:
@@ -14837,7 +16013,7 @@ def update_accounting(request):
             remark = _validate_transaction_remark(request.POST.get("remark"))
             edit_reason = _validate_audit_reason(request.POST.get("edit_reason"))
             date_time = _parse_transaction_datetime(request.POST.get("date_time"))
-            if ipo is not None:
+            if ipo is not None and group is not None:
                 _validate_ipo_payment(
                     request.user,
                     group,
@@ -14861,7 +16037,7 @@ def update_accounting(request):
         # Build changes dict for audit log
         changes = {}
         new_ipo_id = ipo.id if ipo else None
-        new_group_id = group.id
+        new_group_id = group.id if group else None
         new_amount = amount
 
         if orig_ipo_id != new_ipo_id:
@@ -15256,9 +16432,12 @@ def _validate_ipo_payment(
             f"{ipo.IPOName} requires a {required_type.title()} payment."
         )
     if amount > abs(outstanding):
-        raise ValidationError(
-            f"{ipo.IPOName} payment cannot exceed its outstanding balance of ₹{abs(outstanding):.2f}."
-        )
+        if amount - abs(outstanding) <= Decimal("1.00"):
+            pass # allow within 1 rupee
+        else:
+            raise ValidationError(
+                f"{ipo.IPOName} payment cannot exceed its outstanding balance of ₹{abs(outstanding):.2f}."
+            )
     return outstanding
 
 
@@ -15283,7 +16462,12 @@ def _create_single_transaction(request, redirect_name):
 
         amount = _parse_transaction_amount(request.POST.get("amount"))
         if ipo is not None:
-            _validate_ipo_payment(request.user, group, ipo, amount, amount_type)
+            outstanding = _validate_ipo_payment(request.user, group, ipo, amount, amount_type)
+            
+            # If the user enters a rounded amount (e.g. 444 or 443) and it's within 1 rupee of the exact decimal due (e.g. 443.81),
+            # auto-adjust the payment amount to exactly match the outstanding so that the final balance becomes perfectly 0.
+            if abs(amount - abs(outstanding)) <= Decimal("1.00"):
+                amount = abs(outstanding)
 
         Accounting.objects.create(
             user=request.user,
@@ -15508,8 +16692,6 @@ def bulk_transfer_transactions(request):
         destination_group = _get_owned_group(
             request.user, payload.get("destination_group_id")
         )
-        if source_group.id == destination_group.id:
-            raise ValidationError("Source and destination groups must be different.")
         transfer_date = _parse_transaction_datetime(payload.get("date_time"))
         user_remark = str(payload.get("remark") or "").strip()[:250]
 
@@ -16201,6 +17383,8 @@ def GroupBillShare(request, IPOid):
         return redirect('Status', IPOid=IPOid)
 
 @csrf_exempt
+@allowed_users(allowed_roles=['Broker'])
+@require_POST
 def Share_AppDetails(request):
     if request.method == 'POST':
         group_name_list_json = request.POST.get('selected_records', 'Default Group') 
@@ -16314,6 +17498,8 @@ def Share_AppDetails(request):
         return JsonResponse('Success', safe=False)
     
 #PAN UPDATE LINK
+@allowed_users(allowed_roles=['Broker'])
+@require_POST
 def generate_shared_link(request):
     if request.method == "POST":
         ipo_id = request.POST.get('ipo_id')
@@ -16646,7 +17832,7 @@ def order_detail_view(request, IPOid, Ordtyp, GrpName=None, OrderCategory=None, 
             html_table += f"<td style='width:185px;'><input type='text' style='width:165px;' name='Application_{row.id}' oninput='sanitizeInput(this)' onblur='checkValidChars(this, \"tooltip_app_{row.id}\")' value='{row.ApplicationNumber}'></td>"
             html_table += f"<td>{formatted_datetime}</td>"
             safe_remark = row.Remark.replace("'", "\\'").replace('"', '&quot;') if row.Remark else ""
-            html_table += f"<td style='white-space: nowrap; max-width: 300px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; outline: none;' tabindex='0' onclick=\"this.style.whiteSpace=this.style.whiteSpace==='normal'?'nowrap':'normal'\" onblur=\"this.style.whiteSpace='nowrap'\" title='{safe_remark}'>{row.Remark}</td>"
+            html_table += f"<td style='white-space: nowrap; max-width: 300px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; outline: none;' tabindex='0' onclick=\"this.style.whiteSpace=this.style.whiteSpace==='normal'?'nowrap':'normal'\" onblur=\"this.style.whiteSpace='nowrap'\" title='{safe_remark}'>{ str(row.Remark) if (row.Remark and str(row.Remark).lower() not in ('nan','none')) else ''}</td>"
             html_table += "</tr>\n"
         
     html_table += "</tbody>"
@@ -16708,6 +17894,7 @@ def resolve_shared_link(request, link_id,order_type=None):
         Rate = Rate
     )
     
+@allowed_users(allowed_roles=['Broker'])
 def get_user_links(request,IPOid,order_type):
     # Filters links created by the current user
     
@@ -16980,6 +18167,8 @@ def update_all_expiries(request, IPOid):
     return JsonResponse({'status': 'error', 'message': 'Invalid request.'}, status=400)
 
 # 2. Send all mails for this IPO
+@allowed_users(allowed_roles=['Broker'])
+@require_POST
 def send_all_link_mails(request, IPOid):
     if request.method == 'POST':
         # Check sender's configuration
@@ -17104,6 +18293,8 @@ async def create_ipo_link(request,user, ipo_id, group_obj, expiry_str, send_emai
     return link
 
 # The View for the Popup
+@allowed_users(allowed_roles=['Broker'])
+@require_POST
 def bulk_generate_links(request, IPOid):
     if request.method == "POST":
         try:
@@ -17185,4 +18376,177 @@ def update_link_status(request):
             }, status=400)
             
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+
+def GlobalUpdateOrder(request, OrderId):
+    page_number = request.GET.get('page')
+    userid = request.user
+    uid = request.user
+    # Grpf and OrCtf are not used in GlobalUpdateOrder
+    entry = GroupDetail.objects.filter(user=userid)
+    order = Order.objects.get( user=userid, id = OrderId)
+    new_ipo_id = request.POST.get('new_ipo_id')
+    IPOid = new_ipo_id
+    IPOName = CurrentIpoName.objects.get(id=IPOid, user=userid)
+    if request.method == "POST":
+        Group = request.POST.get('Group', '')
+        gid = GroupDetail.objects.get(GroupName=Group, user=userid).id
+        OrderType = request.POST.get('OrderType', '')
+        Qty = request.POST.get('Qty', '')
+        if IPOName.IPOType != 'SME':
+            InvestorType = request.POST.get('InvestorType', '')
+        else:
+            InvestorType ='RETAIL'
+        OrderCategory = request.POST.get('OrderCategory', '')
+        if OrderCategory == "Subject To":
+            Rate = request.POST.get('Sub_Rate', '') 
+            RateOrPremium = request.POST.get('subjectToIsPremium','')
+        else:
+            Rate = request.POST.get('Rate', '')
+        
+        if  InvestorType == 'OPTIONS':
+            Strike_price = request.POST.get('optionStrikePrice','')
+            
+        DateTime = request.POST.get('datetime', '')
+        OrderDate = DateTime[0:10]
+        OrderTime = DateTime[11:19]
+        var = 1
+        
+        
+        # Extract remark data
+        remark_tags_str = request.POST.get('remark_tags', '').strip()
+        remark_text = request.POST.get('remark_text', '').strip()
+        
+        remark_json = {}
+        if remark_tags_str:
+            try:
+                import json
+                remark_tags = json.loads(remark_tags_str)
+                if remark_tags:
+                    remark_json['tags'] = remark_tags
+            except:
+                pass
+        if remark_text:
+            remark_json['text'] = remark_text
+        
+        remark_final = remark_json if remark_json else None
+
+        try:
+            if OrderCategory == 'Subject To':
+                Order.objects.get(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType=InvestorType, Rate=Rate,
+                        OrderCategory=OrderCategory, OrderType=OrderType, Quantity=Qty, OrderDate=OrderDate, OrderTime=OrderTime,Method=RateOrPremium, remark=remark_final)
+            elif InvestorType == 'OPTIONS' :
+                Order.objects.get(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType=InvestorType, Rate=Rate,
+                        OrderCategory=OrderCategory, OrderType=OrderType, Quantity=Qty, OrderDate=OrderDate, OrderTime=OrderTime,Method=Strike_price, remark=remark_final)
+            else:
+                Order.objects.get(user=uid, OrderGroup_id=gid, OrderIPOName=IPOName, InvestorType=InvestorType, Rate=Rate,
+                        OrderCategory=OrderCategory, OrderType=OrderType, Quantity=Qty, OrderDate=OrderDate, OrderTime=OrderTime, remark=remark_final)
+        except:
+            var = 0
+            entry = Order.objects.get(user=request.user, id=OrderId)
+            orderdetailfilter = OrderDetail.objects.filter(user=request.user, Order_id=OrderId, OrderDetailPANNo = None)
+            orderdetail = orderdetailfilter.count()
+            entry.OrderGroup_id = gid
+            entry.OrderIPOName = IPOName
+            entry.InvestorType = InvestorType
+            entry.OrderCategory = OrderCategory
+            if OrderCategory == 'Subject To':
+                if RateOrPremium != None and RateOrPremium != '' and RateOrPremium == 'on':
+                    entry.Method = 'Premium'
+                else:
+                    entry.Method = None
+                    
+            if InvestorType == 'OPTIONS':
+                entry.Method = Strike_price
+            
+            entry.OrderType = OrderType
+            entry.Rate = Rate
+            entry.OrderTime = OrderTime
+            entry.OrderDate = OrderDate
+            entry.Telly = False
+            entry.remark = remark_final
+            
+            if order.Quantity == float(Qty):
+                entry.Rate = Rate
+                entry.Quantity = order.Quantity
+                try:
+                    entry.save()
+                except:
+                    var = 3
+            elif order.Quantity < float(Qty):
+                user = request.user
+                O_limit  = CustomUser.objects.get( username = user)
+                if O_limit.Order_limit is not None :
+                    n = int(float(Qty)-order.Quantity)
+                    BUY_Count = OrderDetail.objects.filter(user=user,Order__OrderIPOName_id= IPOid).count()
+                    Sum_Qty = int(BUY_Count) + int(n)
+                    Limit  = int(O_limit.Order_limit)
+                    if Sum_Qty >= Limit + 1:
+                        messages.error(request, f"You have reached the limit of {Limit} OrderDetail.")
+                        return redirect(f"/trades?page={page_number}")    
+
+                entry.Quantity = Qty
+                try:
+                    entry.save()
+                except:
+                    var = 3
+
+                if OrderCategory != 'Premium' and InvestorType != 'OPTIONS':
+                    n = int(float(Qty)-order.Quantity)
+                    for i in range(0, n):
+                        orderdetail1 = OrderDetail(user=uid, Order_id = entry.id)
+                        orderdetail1.save()
+            else:
+                if OrderCategory != 'Premium':
+                    j = 0
+                    k = (order.Quantity-float(Qty))
+
+                    if k <= orderdetail:
+                        for i in orderdetailfilter:       
+                            if j < k:
+                                i.delete()
+                                j+=1
+                        entry.Quantity = Qty
+                        try:
+                            entry.save()
+                        except:
+                            var = 3
+
+                    else:
+                        var = 2
+                        if InvestorType == 'OPTIONS':
+                            entry.Quantity = float(Qty)
+                            var = None
+                        else:
+                            entry.Quantity = order.Quantity
+                        try:
+                            entry.save()
+                        except:
+                            var = 3
+                else:
+                    entry.Quantity = Qty
+                    try:
+                        entry.save()
+                    except:
+                        var=3
+
+            calculate(IPOid, request.user,entry.id)
+
+        if var == 1:
+            messages.error(
+            request, 'Order values are same')
+        elif var == 2:
+            messages.success(request, 'Order Modified') 
+            
+            messages.error(request, 'Error : Only Blank PAN entry in OrderDetail can be deleted')
+            error_message = f"No. of Blank PAN Entry: {orderdetail}"
+            messages.error(request, error_message)
+        elif var == 3:
+            messages.error(
+            request, 'Order Not Modified')
+        else:        
+            messages.success(
+            request, 'Order Modified successfully')
+        
+    return redirect(f"/trades?page={page_number}")    
 

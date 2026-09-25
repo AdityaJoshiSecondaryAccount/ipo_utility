@@ -509,7 +509,9 @@
 
 
 <body style="max-width: 100vw;">
-    <div class="loader"><div class="loader-style-4"></div></div>
+    <div class="loader">
+        <div class="loader-style-4"></div>
+    </div>
 
     <!-- NEW NAVBAR -->
 
@@ -596,6 +598,9 @@
                 <li class="nav-item active">
                     <a class="nav-link" href="/accounting"><b>|</b>&nbsp; Accounting</a>
                 </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="/trades"><b>|</b>&nbsp; Trades</a>
+                </li>
                 {% else %}
                 <span class="nav-link ms-2">
                     <b style="color: #fff;">|</b> &nbsp; Group Wise Dashboard
@@ -603,6 +608,10 @@
 
                 <span class="nav-link ms-2">
                     <b style="color: #fff;">|</b> &nbsp; Positions
+                </span>
+
+                <span class="nav-link ms-2">
+                    <b style="color: #fff;">|</b> &nbsp; Trades
                 </span>
 
                 <span class="nav-link ms-2">
@@ -619,12 +628,14 @@
                 </span>
                 {% endif %}
 
+
                 {% if request.user.is_authenticated %}
                 <li class="nav-item active">
                     <a class="nav-link" href="/chat" style="color: #ffffff;"><b>|</b>&nbsp; WhatsApp Chat</a>
                 </li>
                 {% endif %}
-                
+
+
 
                 {% comment %} <li class="nav-item active">
                     <a class="nav-link" href="/panalloted">IPO Allotment Analysis</a>
@@ -637,7 +648,7 @@
                 </li>
 
                 <!-- <li class="nav-item active">
-                     <a class="nav-link" data-bs-toggle="modal" data-bs-target="#CreateUser">Create User</a> 
+                     <a class="nav-link" data-bs-toggle="modal" data-bs-target="#CreateUser">Create User</a>
                     <a class="nav-link" href="/AddCustomerUser"><b>|</b>&nbsp;&nbsp;Create User</a>
                 </li> -->
                 <li class="nav-item dropdown">

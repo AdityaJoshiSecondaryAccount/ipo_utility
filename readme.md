@@ -1,5 +1,7 @@
 11-09-2026 -> startes
 
+19-09-2026 -> 1. Trades page Started
+22-09-2026 -> Trades page ended
 ## WhatsApp Cloud API
 
 Set these environment variables before starting the application:

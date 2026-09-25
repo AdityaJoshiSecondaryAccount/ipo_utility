@@ -153,8 +153,9 @@
 
     <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2 action-row">
         <!-- Show Rows Dropdown -->
-        <form method="POST" action="/ClientSetup" class="d-flex align-items-center gap-2 mb-0">
+        <form method="POST" action="/ClientSetup" class="d-flex align-items-center gap-2 mb-0" id="filter_form">
                                 {% csrf_token %}
+                                <input type="hidden" name="SearchQuery" id="search_input_hidden" value="{{ SearchQuery|default:'' }}">
             <label for="client_page_size" class="mb-0 me-2">Show</label>
             <select name="client_page_size" id="client_page_size" class="form-select form-select-sm" style="width:auto;" onchange="this.form.submit()">
                 <option value="50" {% if client_page_size|stringformat:"s" == "50" or not client_page_size %}selected{% endif %}>50</option>
@@ -192,7 +193,7 @@
         <!-- Search -->
         <div class="d-flex align-items-center gap-2">
             <label for="table-search" class="mb-0">Search:</label>
-            <input type="search" id="table-search" class="form-control form-control-sm" style="width: 150px;">
+            <input type="search" id="table-search" class="form-control form-control-sm" style="width: 150px;" value="{{ SearchQuery|default:'' }}">
         </div>
     </div>
 
@@ -370,6 +371,9 @@
         
         var table = $('#example').DataTable({
             orderCellsTop: true,
+            scrollX: true,
+            scrollY: "70vh",
+            scrollCollapse: true,
             {% comment %} lengthChange: true, {% endcomment %}
             info: false,
             {% comment %} pageLength: pageLength, {% endcomment %}
@@ -451,9 +455,35 @@
         // Move DataTable buttons to custom container
         table.buttons().container().appendTo('#datatable-buttons');
 
-        // Connect custom search bar to DataTables
-        $('#table-search').on('keyup', function () {
-            table.search(this.value).draw();
+        // Connect custom search bar to server-side search with debounce
+        let timer;
+        $('#table-search').on('input', function () {
+            clearTimeout(timer);
+            sessionStorage.setItem('client_search_focused', 'true');
+            timer = setTimeout(() => {
+                $('#search_input_hidden').val(this.value);
+                $('#filter_form').submit();
+            }, 500);
+        });
+
+        // Restore focus if it was focused before reload
+        if (sessionStorage.getItem('client_search_focused') === 'true') {
+            var $input = $('#table-search');
+            $input.focus();
+            try {
+                var len = $input.val().length;
+                $input[0].setSelectionRange(len, len);
+            } catch(e) {}
+            // Clear the flag so it doesn't auto-focus on completely fresh manual navigations
+            // UNLESS they type again.
+        }
+
+        $('#table-search').on('blur', function() {
+            setTimeout(function() {
+                if (!$(document.activeElement).is('#table-search')) {
+                    sessionStorage.removeItem('client_search_focused');
+                }
+            }, 100);
         });
 
         toggleDeleteSelectedBtn();

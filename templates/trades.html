@@ -1,0 +1,2104 @@
+{% extends 'basic.html' %}
+{% load static %}
+{% block title %} Trades {% endblock %}
+
+{% block css %}
+<!-- DataTables CSS from original -->
+<link rel="stylesheet" href="{% static 'DataTables/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'DataTables/css/buttons.bootstrap5.min.css' %}">
+<link rel="stylesheet" href="{% static 'DataTables/css/dataTables.bootstrap5.min.css' %}">
+<link rel="stylesheet" href="https://cdn.datatables.net/keytable/2.11.0/css/keyTable.bootstrap5.min.css">
+<!-- Flatpickr CSS for custom date format -->
+<link rel="stylesheet" href="{% static 'flatpickr/flatpickr.min.css' %}">
+
+<style>
+
+    /* KeyTable Focus Styling */
+    table.dataTable tbody tr.row-focus td, table.dataTable tbody tr.row-focus th {
+        background-color: #fadfc0 !important;
+        box-shadow: inset 0 2px 0 0 #ffa53e, inset 0 -2px 0 0 #ffa53e !important;
+        border: none !important;
+    }
+    table.dataTable tbody tr.row-focus td:first-child, table.dataTable tbody tr.row-focus th:first-child {
+        box-shadow: inset 0 2px 0 0 #ffa53e, inset 0 -2px 0 0 #ffa53e, inset 2px 0 0 0 #ffa53e !important;
+    }
+    table.dataTable tbody tr.row-focus td:last-child, table.dataTable tbody tr.row-focus th:last-child {
+        box-shadow: inset 0 2px 0 0 #ffa53e, inset 0 -2px 0 0 #ffa53e, inset -2px 0 0 0 #ffa53e !important;
+    }
+    table.dataTable tbody td.focus, table.dataTable tbody th.focus {
+        box-shadow: none !important;
+        outline: none !important;
+    }
+
+    /* Premium Modern Styling for Filters & Headers */
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .page-wrapper {
+        padding: 1rem;
+        animation: fadeIn 0.4s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Headers */
+    .header-section {
+        /* margin-bottom: 1rem; */
+        border-bottom: 2px solid #e9ecef;
+        /* padding-bottom: 1rem; */
+    }
+
+    .header-title {
+        font-weight: 500;
+        color: #000000;
+        font-size: 2.2rem;
+        /* margin-bottom: 0.2rem; */
+        margin-top: 1.2rem;
+    }
+
+    .header-subtitle {
+        font-weight: 500;
+        color: #6c757d;
+        font-size: 1.2rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    /* Filters Card */
+    .filters-card {
+        margin-bottom: 0rem;
+    }
+
+    .filter-label {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.9rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .custom-select-styled {
+        border-radius: .50rem;
+        border: 0.3px solid black;
+        padding: .375rem 1.75rem .375rem .75rem;
+        height: 35px;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+        background-color: #fff;
+    }
+
+    select.custom-select-styled,
+    select.form-control,
+    .filters-card select {
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        appearance: none !important;
+        background: #fff url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3Cpath fill='%23343a40' d='M2 0L0 2h4zm0 5L0 3h4z'/%3E%3C/svg%3E") no-repeat right .75rem center !important;
+        background-size: 8px 10px !important;
+        padding-right: 1.75rem !important;
+        cursor: pointer !important;
+    }
+
+    .custom-select-styled:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
+    }
+
+    /* Flatpickr Date Inputs in Filter Card */
+    .filters-card .flatpickr-date,
+    .filters-card .flatpickr-input {
+        background-color: #ffffff !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23495057' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 10px center !important;
+        background-size: 14px 14px !important;
+        color: #212529 !important;
+        cursor: pointer !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        text-align: left !important;
+        padding: 0.375rem 28px 0.375rem 0.65rem !important;
+        border: 0.3px solid black !important;
+        border-radius: .25rem !important;
+        height: 35px !important;
+    }
+
+    @media (min-width: 1200px) {
+        .filters-card .flatpickr-date,
+        .filters-card .flatpickr-input {
+            width: 140px !important;
+            min-width: 140px !important;
+            max-width: 145px !important;
+        }
+    }
+
+    .filters-card .flatpickr-date:focus,
+    .filters-card .flatpickr-input:focus {
+        background-color: #ffffff !important;
+        border-color: #80bdff !important;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25) !important;
+        outline: none !important;
+    }
+
+    /* Modal Form Inputs & Selects */
+    #globalEditModal .form-control,
+    #globalEditModal .custom-select-styled {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+        height: 38px !important;
+        border: 0.3px solid black !important;
+        border-radius: .25rem !important;
+        font-size: 0.95rem !important;
+        padding: 0.375rem 0.75rem !important;
+        background-color: #ffffff !important;
+    }
+
+    #globalEditModal input.form-control {
+        background-image: none !important;
+        padding: 0.375rem 0.75rem !important;
+    }
+
+    #globalEditModal select.form-control {
+        padding-right: 1.75rem !important;
+    }
+
+    .btn-action {
+        border-radius: 6px;
+        font-weight: 600;
+        padding: 0.4rem 1rem;
+        transition: all 0.2s;
+    }
+
+    /* Table Fixes */
+    .table-responsive {
+        background: white;
+        padding: 1rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.04);
+    }
+
+    table.dataTable {
+        border-collapse: collapse !important;
+        width: 100% !important;
+    }
+
+    /* We hide the inner table output if the backend is doing weird nesting */
+    #example>table {
+        display: contents;
+    }
+    /* Fix DataTables Dropdown Styling */
+    .dt-button-collection.dropdown-menu {
+        background-color: #6c757d !important;
+        border: none;
+        padding: 0.5rem 0;
+    }
+    .dt-button-collection .dropdown-item {
+        color: #ffffff !important;
+        padding: 0.4rem 1.5rem;
+    }
+    .dt-button-collection .dropdown-item:hover,
+    .dt-button-collection .dropdown-item:focus {
+        background-color: #5c636a !important;
+        color: #ffffff !important;
+    }
+    .dt-button-collection .dropdown-item.active {
+        background-color: #5a6268 !important;
+        color: #ffffff !important;
+    }
+    .dt-button-collection .dropdown-item.active::after {
+        color: #ffffff !important;
+    }
+    
+    /* Fix vertical alignment for Search box */
+    .dataTables_filter label {
+        margin-bottom: 0 !important;
+        display: flex;
+        align-items: center;
+    }
+    .dataTables_filter input {
+        margin-left: 0.5rem !important;
+    }
+
+    #exampleModal .table-responsive {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        margin-bottom: 20px !important;
+    }
+
+    #exampleModal table {
+        width: 100%;
+        margin-bottom: 0;
+    }
+    #exampleModal table thead th {
+        min-width: 64px;
+        max-width: 150px;
+        line-height: 1.2;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: normal;
+    }
+    #exampleModal table tbody th {
+        min-width: 44px;
+        white-space: nowrap;
+        overflow-wrap: normal;
+        word-break: normal;
+    }
+    #exampleModal table th,
+    #exampleModal table td {
+        white-space: nowrap;
+        text-align: center !important;
+        vertical-align: middle !important;
+        padding: 5px !important;
+    }
+    #exampleModal .modal-footer {
+        flex: 0 0 auto;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    #exampleModal .modal-footer > .d-flex {
+        min-width: 0;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    @media (max-width: 575.98px) {
+        #exampleModal .modal-dialog {
+            width: calc(100vw - 12px);
+            max-width: calc(100vw - 12px);
+            margin: 6px auto;
+        }
+        #exampleModal .modal-content {
+            max-height: calc(100vh - 12px);
+        }
+        #exampleModal .modal-header {
+            padding: 8px 12px 0;
+        }
+        #exampleModal .modal-body {
+            padding: 0 12px 12px !important;
+        }
+        #status-datetime h2 {
+            flex-basis: 100%;
+            font-size: 1.3rem;
+        }
+        #live-time-display {
+            width: 100%;
+            font-size: 0.8rem !important;
+            text-align: left;
+        }
+        #exampleModal table th,
+        #exampleModal table td {
+            padding: 4px;
+            font-size: 0.8rem;
+        }
+        #exampleModal .modal-footer {
+            justify-content: flex-start;
+            padding: 10px 12px;
+        }
+        #exampleModal .modal-footer > .d-flex {
+            width: 100%;
+            margin-right: 0 !important;
+        }
+    }
+
+    /* A fixed desktop layout used only while generating the copied image. */
+    .status-image-capture {
+        position: fixed !important;
+        top: 0 !important;
+        left: -100000px !important;
+        z-index: -1 !important;
+        display: block !important;
+        width: 1100px !important;
+        max-width: none !important;
+        height: auto !important;
+        max-height: none !important;
+        min-height: 0 !important;
+        padding: 20px !important;
+        overflow: visible !important;
+        background: #fff !important;
+        white-space: normal !important;
+    }
+    .status-image-capture #status-datetime {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+    }
+    .status-image-capture #status-datetime h2 {
+        flex: 1 1 auto !important;
+        font-size: 2rem !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
+    }
+    .status-image-capture #live-time-display {
+        width: auto !important;
+        flex: 0 0 auto !important;
+        font-size: 1rem !important;
+        white-space: nowrap !important;
+        text-align: right !important;
+    }
+    .status-image-capture .table-responsive {
+        width: 100% !important;
+        max-width: none !important;
+        overflow: visible !important;
+    }
+    .status-image-capture table {
+        width: 100% !important;
+        max-width: none !important;
+        table-layout: auto !important;
+    }
+    .status-image-capture table thead th {
+        min-width: 0 !important;
+        max-width: none !important;
+        white-space: normal !important;
+        overflow-wrap: normal !important;
+        word-break: normal !important;
+    }
+    .status-image-capture table tbody th {
+        min-width: 56px !important;
+        white-space: nowrap !important;
+    }
+    .status-image-capture table th,
+    .status-image-capture table td {
+        white-space: nowrap !important;
+        text-align: center !important;
+        vertical-align: middle !important;
+        padding: 5px !important;
+    }
+
+    .export-only {
+        display: none;
+    }
+
+
+</style>
+
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid page-wrapper">
+    <!-- 1. Header Section -->
+    <div class="header-section">
+        <h1 class="header-title text-center">Trade Book</h1>
+        <!-- <div class="header-subtitle text-center">orders</div> -->
+    </div>
+
+    <!-- 2. Filters Section -->
+    <form method="GET" action="/trades" id="filterForm">
+        <div class="filters-card">
+            <div class="row align-items-end">
+                <div class="col-xl-auto col-lg-3 col-md-6 col-sm-6 mb-3">
+                    <label class="filter-label" for="IPOFilter">IPO Name</label>
+                    <select id="IPOFilter" class="form-control custom-select-styled" name="IPOFilter"
+                        onchange="this.form.submit()">
+                        <option value="All" {% if IPOFilter == 'All' %} selected {% endif %}>All</option>
+                        {% for i in all_ipos %}
+                        <option value="{{ i.id }}" {% if IPOFilter|slugify == i.id|slugify %} selected {% endif %}>
+                            {{ i.IPOName }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                
+
+                <div class="col-xl-auto col-lg-3 col-md-6 col-sm-6 mb-3">
+                    <label class="filter-label" for="Groupfilter">Group Name</label>
+                    <select id="Groupfilter" class="form-control custom-select-styled" name="Groupfilter"
+                        onchange="this.form.submit()">
+                        <option value="All" {% if Groupfilter == 'All' %} selected {% endif %}>All</option>
+                        {% for i in Group %}
+                        <option value="{{ i.GroupName }}" {% if Groupfilter == i.GroupName %} selected {% endif %}>
+                            {{ i.GroupName }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-xl-auto col-lg-3 col-md-6 col-sm-6 mb-3">
+                    <label class="filter-label" for="OrderCategoryFilter">Order Category</label>
+                    <select id="OrderCategoryFilter" class="form-control custom-select-styled"
+                        name="OrderCategoryFilter" onchange="this.form.submit()">
+                        <option value="All" {% if OrderCategoryFilter == 'All' %} selected {% endif %}>All</option>
+                        <option value="Kostak" {% if OrderCategoryFilter == 'Kostak' %} selected {% endif %}>Kostak
+                        </option>
+                        <option value="Subject To" {% if OrderCategoryFilter == 'Subject To' %} selected {% endif %}>
+                            Subject To</option>
+                        <option value="CALL" {% if OrderCategoryFilter == 'CALL' %} selected {% endif %}>CALL</option>
+                        <option value="PUT" {% if OrderCategoryFilter == 'PUT' %} selected {% endif %}>PUT</option>
+                        <option value="Premium" {% if OrderCategoryFilter == 'Premium' %} selected {% endif %}>Premium
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-xl-auto col-lg-3 col-md-6 col-sm-6 mb-3">
+                    <label class="filter-label" for="InvestorTypeFilter">Investor Type</label>
+                    <select id="InvestorTypeFilter" class="form-control custom-select-styled" name="InvestorTypeFilter"
+                        onchange="this.form.submit()">
+                        <option value="All" {% if InvestorTypeFilter == 'All' %} selected {% endif %}>All</option>
+                        <option value="RETAIL" {% if InvestorTypeFilter == 'RETAIL' %} selected {% endif %}>Retail
+                        </option>
+                        <option value="SHNI" {% if InvestorTypeFilter == 'SHNI' %} selected {% endif %}>SHNI</option>
+                        <option value="BHNI" {% if InvestorTypeFilter == 'BHNI' %} selected {% endif %}>BHNI</option>
+                        <option value="OPTIONS" {% if InvestorTypeFilter == 'OPTIONS' %} selected {% endif %}>OPTIONS
+                        </option>
+                        <option value="PREMIUM" {% if InvestorTypeFilter == 'PREMIUM' %} selected {% endif %}>Premium
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-xl-auto col-lg-3 col-md-6 col-sm-6 mb-3">
+                    <label class="filter-label" for="StartDate">From Date</label>
+                    <input type="text" id="StartDate" class="form-control custom-select-styled flatpickr-date" name="StartDate" value="{{ StartDate }}">
+                </div>
+                <div class="col-xl-auto col-lg-3 col-md-6 col-sm-6 mb-3">
+                    <label class="filter-label" for="EndDate">To Date</label>
+                    <input type="text" id="EndDate" class="form-control custom-select-styled flatpickr-date" name="EndDate" value="{{ EndDate }}">
+                </div>
+
+
+                <!-- Buttons -->
+                <div class="col-xl-auto col-lg-12 col-md-12 col-sm-12 mb-3 d-flex justify-content-xl-end gap-2 align-items-end flex-wrap"
+                    id="custom-buttons-container">
+                    <button type="button" class="btn btn-outline-secondary btn-action"
+                        onclick="if($.fn.DataTable.isDataTable('#example')) { $('#example').DataTable().state.clear(); } window.location.href='/trades'">Clear filters</button>
+                    <!-- Apply is removed because filters auto-submit on change -->
+                    <button type="button" class="btn btn-secondary btn-action" data-bs-toggle="modal"
+                        data-bs-target="#exampleModal">Status</button>
+                    <button type="button" id="bulk-order-btn" class="btn btn-secondary btn-action"
+                        data-bs-toggle="modal" data-bs-target="#exampleuploadModal">Bulk Order &nbsp;<i
+                            class="fa fa-file-excel-o"></i></button>
+                    <button type="button" id="bulk-delete-btn" class="btn btn-danger btn-action d-none align-items-center"
+                        data-bs-toggle="modal" data-bs-target="#bulkDeleteModal">
+                        Delete &nbsp;<i class="fa fa-trash" aria-hidden="true" style="font-size:18px;"></i>
+                    </button>
+                    <!-- DataTables buttons will be appended here via JS -->
+                </div>
+            </div>
+
+
+
+        </div>
+
+        <!-- 3. Data Table Section -->
+        <div class="table-responsive bg-white p-3 rounded shadow-sm">
+            <!-- Page Size -->
+            <div id="custom-page-length">
+                <div>
+                    <div class="d-flex align-items-center text-muted m-0 p-0" style="font-size: 0.9rem;">
+                        <span>Show</span>
+                        <select name="Order_page_size" class="form-control mx-2 custom-select-styled"
+                            style="width: auto; height: auto; padding: 0.2rem 0.5rem;" onchange="this.form.submit()">
+                            <option value="50" {% if Order_page_size == 50 %}selected{% endif %}>50</option>
+                            <option value="100" {% if Order_page_size == 100 %}selected{% endif %}>100</option>
+                            <option value="200" {% if Order_page_size == 200 %}selected{% endif %}>200</option>
+                            <option value="250" {% if Order_page_size == 250 %}selected{% endif %}>250</option>
+                            <option value="All" {% if Order_page_size == 'All' %}selected{% endif %}>All</option>
+                        </select>
+                        <span class="d-none d-sm-inline">rows per page</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="custom-search">
+                <div class="dataTables_filter">
+                    <label style="margin-bottom: 0 !important; display: flex; align-items: center;">Search:
+                        <input type="search" id="mainSearchInput" name="SearchQuery" value="{{ SearchQuery }}" class="form-control form-control-sm" style="margin-left: 0.5rem !important;" placeholder="Search...">
+                    </label>
+                </div>
+            </div>
+
+            <table id="example" class="table table-hover table-striped mb-0 w-100 table-bordered" style="width:100%;">
+                {{ html_table|safe }}
+            </table>
+
+            {% if page_obj %}
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <!-- Total rows and current range display (left aligned) -->
+                <div class="text-muted" style="font-size: 0.9rem;">
+                    Showing {{ page_obj.start_index|default:0 }} to {{ page_obj.end_index|default:0 }} of {{ page_obj.paginator.count|default:0 }} Rows
+                </div>
+            
+                <ul class="pagination mb-0">
+                    <!-- Always show the first page -->
+                    {% if page_obj.number != 1 %}
+                        <li class="page-item">
+                            <a class="page-link" href="#" onclick="document.getElementById('pageInput').value='1'; document.getElementById('filterForm').submit(); return false;">1</a>
+                        </li>
+                    {% endif %}
+                    
+                    <!-- Show ellipsis if current page is greater than 4 -->
+                    {% if page_obj.number > 4 %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    {% endif %}
+                    
+                    <!-- Display pages before the current page -->
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if num > 1 and num < page_obj.number and num >= page_obj.number|add:'-2' %}
+                            <li class="page-item">
+                                <a class="page-link" href="#" onclick="document.getElementById('pageInput').value='{{ num }}'; document.getElementById('filterForm').submit(); return false;">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <!-- Display current page -->
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_obj.number }}</span>
+                    </li>
+                    
+                    <!-- Display pages after the current page -->
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if num > page_obj.number and num < page_obj.number|add:'3' and num < page_obj.paginator.num_pages %}
+                            <li class="page-item">
+                                <a class="page-link" href="#" onclick="document.getElementById('pageInput').value='{{ num }}'; document.getElementById('filterForm').submit(); return false;">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <!-- Show ellipsis if current page is less than num_pages - 3 -->
+                    {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    {% endif %}
+                    
+                    <!-- Always show the last page -->
+                    {% if page_obj.number != page_obj.paginator.num_pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="#" onclick="document.getElementById('pageInput').value='{{ page_obj.paginator.num_pages }}'; document.getElementById('filterForm').submit(); return false;">{{ page_obj.paginator.num_pages }}</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        <input type="hidden" name="page" id="pageInput" value="{{ page_obj.number }}">
+    </form>
+
+</div>
+
+<div aria-hidden="true" aria-labelledby="ipoStatusModalLabel" class="modal fade" id="exampleModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="border-bottom: none; padding-bottom: 0;">
+                <button aria-label="Close" class="close" data-bs-dismiss="modal" data-dismiss="modal" style="margin-top: -10px;" type="button">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" style="padding-top: 0; max-height: 70vh; overflow-y: auto;">
+                {% for ipo in ipo_status_list %}
+                    <div style="margin-bottom: 30px; position: relative; background: #fff;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ddd; padding-bottom: 10px; margin-bottom: 15px;">
+                            <h2 title="{{ipo.ipo_name}} IPO Status" style="margin: 0; font-weight: bold;">{{ipo.ipo_name}} IPO Status</h2>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="copyIPOAsImage(this)" title="Copy {{ipo.ipo_name}} Tables as Image">
+                                <i class="fa fa-copy"></i> Copy as Image
+                            </button>
+                        </div>
+                {% if ipo.ipo_type == "MAINBOARD" %}
+                <div class="table-responsive text-nowrap kostak-table">
+                    <table style="width: 100%; height: 20px;">
+                    <thead>
+                        <tr style="border: 1px solid black; border-collapse: collapse;">
+                            {% comment %} <th scope="col" style="border: 1px solid black; border-collapse: collapse;" ></th> {% endcomment %}
+                            <th colspan="10" style="border: 1px solid black; border-collapse: collapse;">Kostak</th>                               
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border: 1px solid black; border-collapse: collapse; font-weight: bold;">
+                            <th scope="row" style="border: 1px solid black; border-collapse: collapse;"></th>
+                            <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">Retail</td>
+                            <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">SHNI</td>
+                            <td colspan="3"style="border: 1px solid black; border-collapse: collapse;" >BHNI</td>
+                        </tr>
+                        <tr style="border: 1px solid; border-collapse: collapse; font-weight: bold;">
+                            <th scope="row" style="border: 1px solid black; border-collapse: collapse;"></th>
+                            <td style="border: 1px solid black; border-collapse: collapse;">COUNT</td>
+                            <td style="border: 1px solid black; border-collapse: collapse; padding-right: 16px; padding-left: 16px;">AVG</td>
+                            <td style="border: 1px solid black; border-collapse: collapse;">Amount</td>
+                            <td style="border: 1px solid black; border-collapse: collapse;">COUNT</td>
+                            <td style="border: 1px solid black; border-collapse: collapse; padding-right: 16px; padding-left: 16px;">AVG</td>
+                            <td style="border: 1px solid black; border-collapse: collapse;">Amount</td>
+                            <td style="border: 1px solid black; border-collapse: collapse;">COUNT</td>
+                            <td style="border: 1px solid black; border-collapse: collapse; padding-right: 16px; padding-left: 16px;">AVG</td>     
+                            <td style="border: 1px solid black; border-collapse: collapse;">Amount</td>
+                        </tr>
+                            <tr style="border: 1px solid; border-collapse: collapse;">
+                            <th scope="row" style="border: 1px solid black; border-collapse: collapse;">BUY</th>
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_count.KostakRETAILBUYCount|floatformat:0}}</td>
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_avg.KostakRETAILBUYAvg|floatformat:2}}</td>
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_amount.KostakRETAILBUYAmount|floatformat:2}}</td>
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_count.KostakSHNIBUYCount|floatformat:0}}</td>
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_avg.KostakSHNIBUYAvg|floatformat:2}}</td>
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_amount.KostakSHNIBUYAmount|floatformat:2}}</td>
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_count.KostakBHNIBUYCount|floatformat:0}}</td>
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_avg.KostakBHNIBUYAvg|floatformat:2}}</td>     
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_amount.KostakBHNIBUYAmount|floatformat:2}}</td>               
+                        </tr>
+                        <tr style="border: 1px solid; border-collapse: collapse;">
+                            <th scope="row" style="border: 1px solid black; border-collapse: collapse;">SELL</th>
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_count.KostakRETAILSELLCount|floatformat:0}}</td>
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_avg.KostakRETAILSELLAvg|floatformat:2}}</td>
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_amount.KostakRETAILSELLAmount|floatformat:2}}</td>
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_count.KostakSHNISELLCount|floatformat:0}}</td>
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_avg.KostakSHNISELLAvg|floatformat:2}}</td>
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_amount.KostakSHNISELLAmount|floatformat:2}}</td>
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_count.KostakBHNISELLCount|floatformat:0}}</td>
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_avg.KostakBHNISELLAvg|floatformat:2}}</td>      
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_amount.KostakBHNISELLAmount|floatformat:2}}</td>                
+                        </tr>
+                        <tr style="border: 1px solid; border-collapse: collapse;">
+                            <th scope="row" style="border: 1px solid black; border-collapse: collapse;">NET</th>
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.net_count.KostakRETAILNetCount|floatformat:0}}</td>
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.net_avg.KostakRETAILNetAvg|floatformat:2}}</td>
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.net_amount.KostakRETAILNetAmount|floatformat:2}}</td>
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.net_count.KostakSHNINetCount|floatformat:0}}</td>
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.net_avg.KostakSHNINetAvg|floatformat:2}}</td>
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.net_amount.KostakSHNINetAmount|floatformat:2}}</td>
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.net_count.KostakBHNINetCount|floatformat:0}}</td>
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.net_avg.KostakBHNINetAvg|floatformat:2}}</td>  
+                            <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.net_amount.KostakBHNINetAmount|floatformat:2}}</td>
+                        </tr>
+                    </tbody>
+                    </table>
+                </div>
+                <br>
+                <div class="table-responsive text-nowrap subjectto-table">
+                    <table style="width: 100%; height: 20px;">
+                    <thead>
+                    <tr style="border: 1px solid black; border-collapse: collapse;">
+                    {% comment %} <th scope="col" style="border: 1px solid black; border-collapse: collapse;"></th> {% endcomment %}
+                    <th colspan="10" style="">Subject To</th>                               
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr style="border: 1px solid black; border-collapse: collapse; font-weight: bold;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;"></th>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">Retail</td>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">SHNI</td>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">BHNI</td>                       
+                    </tr>
+                    <tr style="font-weight: bold;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;"></th>
+                    <td style="border: 1px solid black; border-collapse: collapse;">COUNT</td>
+                    <td style="border: 1px solid black; border-collapse: collapse; padding-right: 16px; padding-left: 16px;">AVG</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">Amount</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">COUNT</td>
+                    <td style="border: 1px solid black; border-collapse: collapse; padding-right: 16px; padding-left: 16px;">AVG</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">Amount</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">COUNT</td>
+                    <td style="border: 1px solid black; border-collapse: collapse; padding-right: 16px; padding-left: 16px;">AVG</td> 
+                    <td style="border: 1px solid black; border-collapse: collapse;">Amount</td>                       
+                    </tr>
+                    <tr style="border: 1px solid; border-collapse: collapse;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;">BUY</th>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_count.SubjectToRETAILBUYCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_avg.SubjectToRETAILBUYAvg|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_amount.SubjectToRETAILBUYAmount|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_count.SubjectToSHNIBUYCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_avg.SubjectToSHNIBUYAvg|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_amount.SubjectToSHNIBUYAmount|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_count.SubjectToBHNIBUYCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_avg.SubjectToBHNIBUYAvg|floatformat:2}}</td>  
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_amount.SubjectToBHNIBUYAmount|floatformat:2}}</td>                  
+                    </tr>
+                    <tr style="border: 1px solid; border-collapse: collapse;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;">SELL</th>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_count.SubjectToRETAILSELLCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_avg.SubjectToRETAILSELLAvg|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_amount.SubjectToRETAILSELLAmount|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_count.SubjectToSHNISELLCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_avg.SubjectToSHNISELLAvg|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_amount.SubjectToSHNISELLAmount|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_count.SubjectToBHNISELLCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_avg.SubjectToBHNISELLAvg|floatformat:2}}</td>  
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_amount.SubjectToBHNISELLAmount|floatformat:2}}</td>                    
+                    </tr>
+                    <tr style="border: 1px solid; border-collapse: collapse;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;">NET</th>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.net_count.SubjectToRETAILNetCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.net_avg.SubjectToRETAILNetAvg|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.net_amount.SubjectToRETAILNetAmount|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.net_count.SubjectToSHNINetCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.net_avg.SubjectToSHNINetAvg|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.net_amount.SubjectToSHNINetAmount|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.net_count.SubjectToBHNINetCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.net_avg.SubjectToBHNINetAvg|floatformat:2}}</td>  
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ipo.net_amount.SubjectToBHNINetAmount|floatformat:2}}</td>
+                    </tbody>
+                    </table>
+                </div>
+                <br>
+                {% else %}
+                <div class="table-responsive text-nowrap kostak-table">
+                    <table style="width: 100%; height: 20px;">
+                    <thead>
+                    <tr style="border: 1px solid black; border-collapse: collapse;">
+                    {% comment %} <th scope="col" style="border: 1px solid black; border-collapse: collapse;"></th> {% endcomment %}
+                    <th colspan="7" style="border: 1px solid black; border-collapse: collapse;">Kostak</th>                               
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr style="border: 1px solid black; border-collapse: collapse; font-weight: bold;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;"></th>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">COUNT</td>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse; padding-right: 16px; padding-left: 16px;">AVG</td>      
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">Amount</td>                                                 
+                    </tr>
+                    <tr style="border: 1px solid black; border-collapse: collapse;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;">BUY</th>
+<td colspan="3" style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_count.KostakRETAILBUYCount|floatformat:0}}</td>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{ipo.dict_avg.KostakRETAILBUYAvg|floatformat:2}} </td>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_amount.KostakRETAILBUYAmount|floatformat:2}}</td>
+                    </tr>
+                    <tr style="border: 1px solid black; border-collapse: collapse;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;">SELL</th>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{ipo.dict_count.KostakRETAILSELLCount|floatformat:0}} </td>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{ipo.dict_avg.KostakRETAILSELLAvg|floatformat:2}} </td>  
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_amount.KostakRETAILSELLAmount|floatformat:2}}</td>                                 
+                    </tr>
+                    <tr style="border: 1px solid black; border-collapse: collapse;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;">NET</th>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{ipo.net_count.KostakRETAILNetCount|floatformat:0}} </td>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{ipo.net_avg.KostakRETAILNetAvg|floatformat:2}} </td>  
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">{{ipo.net_amount.KostakRETAILNetAmount|floatformat:2}}</td>
+                    </tr>
+                    </tbody>
+                    </table>
+                </div>
+                <br>
+                <div class="table-responsive text-nowrap subjectto-table">
+                    <table style="width: 100%; height: 20px;">
+                    <thead>
+                    <tr style="border: 1px solid black; border-collapse: collapse;">
+                    {% comment %} <th scope="col" style="border: 1px solid black; border-collapse: collapse;"></th> {% endcomment %}
+                    <th colspan="7" style="border: 1px solid black; border-collapse: collapse;">Subject To</th>                               
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr style="border: 1px solid black; border-collapse: collapse; font-weight: bold;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;"></th>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">COUNT</td>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse; padding-right: 16px; padding-left: 16px;">AVG</td>    
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">Amount</td>                                                   
+                    </tr>
+                    <tr style="border: 1px solid black; border-collapse: collapse;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;">BUY</th>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{ipo.dict_count.SubjectToRETAILBUYCount|floatformat:0}} </td>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{ipo.dict_avg.SubjectToRETAILBUYAvg|floatformat:2}} </td>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_amount.SubjectToRETAILBUYAmount|floatformat:2}}</td>
+                    </tr>
+                    <tr style="border: 1px solid black; border-collapse: collapse;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;">SELL</th>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{ipo.dict_count.SubjectToRETAILSELLCount|floatformat:0}} </td>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{ipo.dict_avg.SubjectToRETAILSELLAvg|floatformat:2}} </td> 
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">{{ipo.dict_amount.SubjectToRETAILSELLAmount|floatformat:2}}</td>                                  
+                    </tr>
+                    <tr style="border: 1px solid black; border-collapse: collapse;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;">NET</th>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{ipo.net_count.SubjectToRETAILNetCount|floatformat:0}} </td>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{ipo.net_avg.SubjectToRETAILNetAvg|floatformat:2}} </td>  
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">{{ipo.net_amount.SubjectToRETAILNetAmount|floatformat:2}}</td>
+                    </tr>
+                    </tbody>
+                    </table>
+                </div>
+                <br>
+                {% endif %}
+                <div class="table-responsive text-nowrap premium-table">
+                    <table style="width: 100%; height: 20px;">
+                    <thead>
+                    <tr style="border: 1px solid black; border-collapse: collapse;">
+                    {% comment %} <th scope="col" style="border: 1px solid black; border-collapse: collapse;"></th> {% endcomment %}
+                    <th colspan="10" style="border: 1px solid black; border-collapse: collapse;">Premium</th>                               
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr style="border: 1px solid black; border-collapse: collapse; font-weight: bold;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;"></th>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">COUNT</td>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse; padding-right: 16px; padding-left: 16px;">AVG</td>                                                       
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">Amount</td>
+                    </tr>
+                    <tr style="border: 1px solid black; border-collapse: collapse;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;">BUY</th>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{ipo.PremiumBuyCount}} </td>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">{{ipo.PremiumBuyAvg|floatformat:2}} </td>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">{{ipo.PremiumBuyAmount|floatformat:2}} </td>
+                    </tr>
+                    <tr style="border: 1px solid black; border-collapse: collapse;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;">SELL</th>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{ipo.PremiumSellCount}} </td>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{ipo.PremiumSellAvg|floatformat:2}} </td>  
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">{{ipo.PremiumSellAmount|floatformat:2}} </td>                                 
+                    </tr>
+                    <tr style="border: 1px solid black; border-collapse: collapse;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;">NET</th>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{ipo.PremiumNetCount}} </td>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{ipo.PremiumNetAvg|floatformat:2}} </td>   
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">{{ipo.PremiumNetAmount|floatformat:2}} </td>                                
+                    </tr>
+                    </tbody>
+                    </table>
+                </div>    
+                <br>
+                <div class="table-responsive text-nowrap strikeprice-table">
+                    <table style="border: 1px solid black; border-collapse: collapse; width:100%;">
+                    <thead>
+                    <tr>
+                    <th rowspan="1" style="border: 1px solid black; text-align:center;">Strike Price</th>
+                    <th colspan="3" style="border: 1px solid black; text-align:center;">CALL</th>
+                    <th colspan="3" style="border: 1px solid black; text-align:center;">PUT</th>
+                    </tr>
+                    <tr>
+                    <th style="border: 1px solid black; text-align:center;"></th>
+                    <th style="border: 1px solid black; text-align:center;">Total Share</th>
+                    <th style="border: 1px solid black; text-align:center;">Average</th>
+                    <th style="border: 1px solid black; text-align:center;">Amount</th>
+                    <th style="border: 1px solid black; text-align:center;">Total Share</th>
+                    <th style="border: 1px solid black; text-align:center;">Average</th>
+                    <th style="border: 1px solid black; text-align:center;">Amount</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for strike in ipo.strike_prices %}
+                    <tr>
+                    <td style="border: 1px solid black; text-align:center;">{{ strike.value }}</td>
+                    <td style="border: 1px solid black; text-align:right;">{{ strike.call_total_count }}</td>
+                    <td style="border: 1px solid black; text-align:right;">{{ strike.call_avg|floatformat:2 }}</td>
+                    <td style="border: 1px solid black; text-align:right;">{{ strike.call_net_amount }}</td>
+                    <td style="border: 1px solid black; text-align:right;">{{ strike.put_total_count }}</td>
+                    <td style="border: 1px solid black; text-align:right;">{{ strike.put_avg|floatformat:2 }}</td>
+                    <td style="border: 1px solid black; text-align:right;">{{ strike.put_net_amount }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% comment %} <tr style="font-weight:bold; background:#e8e8e8;">
+                    <td>NET</td>
+                    <td style="border: 1px solid black; text-align:right;">{{ grand_total.call_total_count }}</td>
+                    <td style="border: 1px solid black; text-align:right;">{{ grand_total.call_avg|floatformat:2 }}</td>
+                    <td style="border: 1px solid black; text-align:right;">{{ grand_total.call_net_amount }}</td>
+                    <td style="border: 1px solid black; text-align:right;">{{ grand_total.put_total_count }}</td>
+                    <td style="border: 1px solid black; text-align:right;">{{ grand_total.put_avg|floatformat:2 }}</td>
+                    <td style="border: 1px solid black; text-align:right;">{{ grand_total.put_net_amount }}</td>
+                    </tr> {% endcomment %}
+                    </tbody>
+                    </table>
+                </div>
+                </div>
+                {% empty %}
+                    <p class="text-center">No trades found to summarize.</p>
+                {% endfor %}
+            </div>
+            <div class="modal-footer">
+                <div class="d-flex align-items-center" style="margin-right: auto;">
+                    <div class="form-check" style="display: flex; align-items: center;">
+                        <input checked="" class="form-check-input" id="hideEmptyTablesToggle"
+                            onchange="toggleEmptyTables(this.checked)"
+                            style="margin-top: 0; margin-right: 8px; cursor: pointer; transform: scale(1.15);" type="checkbox" />
+                        <label class="form-check-label text-muted" for="hideEmptyTablesToggle"
+                            style="cursor: pointer; margin-bottom: 0; user-select: none;">Hide Empty Tables</label>
+                    </div>
+                </div>
+                <button class="btn btn-secondary" data-bs-dismiss="modal" data-dismiss="modal" type="button">Close</button>
+                {% comment %} <button class="btn btn-primary" type="button">Save changes</button> {% endcomment %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div aria-hidden="true" aria-labelledby="exampleModalLabels" class="modal fade" id="exampleuploadModal" role="dialog"
+    tabindex="-1">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="border-bottom: 1px solid black;">
+                <h5 class="modal-title" id="exampleModalLabel">Bulk Order  <i aria-hidden="true"
+                        class="fa fa-file-excel-o" style="font-size:18px;"></i></h5>
+                <button aria-label="Close" class="close" data-bs-dismiss="modal" data-dismiss="modal" type="button">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                {{prompt}}
+                <form action="/trades/upload-csv" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+
+                    {% csrf_token %}
+                    <div
+                        style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; width: 100%;">
+                        <small style="color: red;  font-weight: bold; margin-right: 10px;">
+                            <font color="red">*</font>Only accepts CSV files.<i aria-hidden="true"
+                                class="fa fa-file-excel-o" style="font-size:18px;"></i>
+
+                            {% comment %} <a href="/{{IPOid}}/Sample-Order"> <input class="fa fa-file-excel-o"
+                                    style="background: darkslategrey; color: white; height: 38px; width: 30%; margin-left:145px; display: inline-flex; font-size:16px;"
+                                    type="button" value="Sample-Download" />
+                            </a> {% endcomment %}
+                        </small><br /><br />
+                        <div style="display: flex; gap: 5px;">
+                            <a href="/trades/Sample-Order" style="text-decoration: none;">
+
+                                <input class="fa fa-file-excel-o"
+                                    style="background: darkslategrey; color: white; height: 38px; padding: 0 15px; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; font-size: 16px;"
+                                    type="button" value="Sample Download" />
+                            </a>
+                            <button class="btn btn-danger" data-target="#deleteAllOrdersModal" data-toggle="modal"
+                                id="confirmDeleteAll" style="height: 38px; border-radius: 4px; font-size: 15px;"
+                                type="button">
+                                Delete All Orders
+                            </button>
+                        </div><br />
+                    </div>
+                    <input class="form-control" id="file" name="file" required=""
+                        style="background: darkslategrey; color: white; height: 0%;width: 72%; display: inline-flex;"
+                        type="file" />
+
+                    <button
+                        style="color: whitesmoke; background: darkslategrey; width: 29%; margin: 0px 150x; border: none; padding: 8px 0; border-radius: 2px; height: 38px;"
+                        type="submit">Upload
+                          <i aria-hidden="true" class="fa fa-file-excel-o" style="font-size:18px;"></i></button>
+                    <div class="invalid-feedback">
+                        Choose Your File.
+                    </div>
+                </form>
+                {% for profile in product%}
+                {{profile.name}}
+                {% endfor %}
+                <div style="margin-top: 15px; text-align: right;">
+                    <script>
+                        async function confirmAndDelete(ipoId) {
+                            $('#deleteAllOrdersModal').modal('hide');
+
+                            const deleteUrl = `/${ipoId}/DeleteAllOrders/`;
+
+                            const response = await fetch(deleteUrl, { method: 'GET' });
+                            if (!response.ok) {
+                                alert('Failed to delete orders');
+                                return;
+                            }
+
+                            const blob = await response.blob();
+
+                            // Extract the filename from Content-Disposition header
+                            let filename = 'OrdersBackup.xlsx'; // fallback
+                            const disposition = response.headers.get('Content-Disposition');
+                            if (disposition && disposition.includes('filename=')) {
+                                const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                                if (match != null && match[1]) {
+                                    filename = match[1].replace(/['"]/g, '');
+                                }
+                            }
+
+                            const downloadUrl = window.URL.createObjectURL(blob);
+
+                            const a = document.createElement('a');
+                            a.href = downloadUrl;
+                            a.download = filename;
+                            document.body.appendChild(a);
+                            a.click();
+                            a.remove();
+
+                            window.URL.revokeObjectURL(downloadUrl);
+
+                            const groupFilter = '{{ Groupfilter }}';
+                            const categoryFilter = '{{ OrderCategoryFilter }}';
+                            const investorFilter = '{{ InvestorTypeFilter }}';
+                            const redirectUrl = `/${ipoId}/Order/${groupFilter}/${categoryFilter}/${investorFilter}`;
+
+                            window.location.href = redirectUrl;
+                        }
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Flatpickr JS -->
+<script src="{% static 'flatpickr/flatpickr.min.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        flatpickr(".flatpickr-date", {
+            dateFormat: "Y-m-d", // Server expects Y-m-d
+            altInput: true,
+            altFormat: "d/m/Y",  // User sees d/m/Y
+            onChange: function(selectedDates, dateStr, instance) {
+                // Submit the form automatically when date is selected
+                document.getElementById('filterForm').submit();
+            }
+        });
+    });
+</script>
+<script>
+        // Example starter JavaScript for disabling form submissions if there are invalid fields
+        (function () {
+            'use strict'
+
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.querySelectorAll('.needs-validation')
+
+            // Loop over them and prevent submission
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+        })()
+    </script>
+</div>
+
+<div aria-hidden="true" aria-labelledby="bulkDeleteModalLabel" class="modal fade" id="bulkDeleteModal" role="dialog"
+    tabindex="-1">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="border-bottom: 1px solid black;">
+                <b>
+                    <h5 class="modal-title" id="bulkDeleteModalLabel">Bulk Delete Orders</h5>
+                </b>
+                <button aria-label="Close" class="close" data-bs-dismiss="modal" data-dismiss="modal" type="button">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" style="white-space: normal;">
+                <center>
+                    <p>Are you sure you want to delete the selected <span id="selected-count"
+                            style="font-weight: bold;">0</span> <span id="order-suffix">order</span>?</p>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <button class="btn btn-outline-secondary" data-bs-dismiss="modal" data-dismiss="modal" style="width:50%;"
+                                type="button">Cancel</button>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <button class="btn btn-outline-danger" id="confirm-bulk-delete" style="width:50%;"
+                                type="button">Delete</button>
+                        </div>
+                    </div>
+                </center>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div aria-hidden="true" aria-labelledby="modalLabel" class="modal fade" id="deleteAllOrdersModal" role="dialog"
+    tabindex="-1">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Confirm Deletion</h5>
+                <button aria-label="Close" class="close" data-bs-dismiss="modal" data-dismiss="modal" type="button">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete all orders?
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal" data-dismiss="modal" type="button">Cancel</button>
+                <button class="btn btn-danger" onclick="confirmAndDelete({{ IPOid }})" type="button">
+                    Yes, Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Global Edit Order Modal -->
+<div class="modal fade" id="globalEditModal" tabindex="-1" role="dialog" aria-labelledby="globalEditModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+            <div class="modal-header"
+                style="background: #f8f9fa; border-radius: 12px 12px 0 0; border-bottom: 2px solid #e9ecef;">
+                <h5 class="modal-title font-weight-bold text-dark" id="globalEditModalLabel">Edit Order</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="globalEditForm" method="POST" action="">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="modal_ipo_id" class="filter-label">IPO Name <span
+                                    class="text-danger">*</span></label>
+                            <select class="form-control custom-select-styled" name="new_ipo_id" id="modal_ipo_id"
+                                required>
+                                <option disabled value="">Select IPO</option>
+                                {% for ipo_opt in all_ipos %}
+                                <option value="{{ ipo_opt.id }}">{{ ipo_opt.IPOName }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="modal_group" class="filter-label">Group Name <span
+                                    class="text-danger">*</span></label>
+                            <select class="form-control custom-select-styled" name="Group" id="modal_group" required>
+                                <option disabled value="">Select Group</option>
+                                {% for g in Group %}
+                                <option value="{{ g.GroupName }}">{{ g.GroupName }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="modal_order_type" class="filter-label">Order Type <span
+                                    class="text-danger">*</span></label>
+                            <select class="form-control custom-select-styled" name="OrderType" id="modal_order_type"
+                                required>
+                                <option value="BUY">BUY</option>
+                                <option value="SELL">SELL</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="modal_category" class="filter-label">Order Category <span
+                                    class="text-danger">*</span></label>
+                            <select class="form-control custom-select-styled" name="OrderCategory" id="modal_category"
+                                required onchange="toggleModalFields()">
+                                <option value="Premium">Premium</option>
+                                <option value="Kostak">Kostak</option>
+                                <option value="Subject To">Subject To</option>
+                                <option value="CALL">CALL</option>
+                                <option value="PUT">PUT</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="modal_investor" class="filter-label">Investor Type <span
+                                    class="text-danger">*</span></label>
+                            <select class="form-control custom-select-styled" name="InvestorType" id="modal_investor"
+                                required>
+                                <option value="PREMIUM">PREMIUM</option>
+                                <option value="OPTIONS">OPTIONS</option>
+                                <option value="RETAIL">RETAIL</option>
+                                <option value="HNI">HNI</option>
+                                <option value="SHNI">SHNI</option>
+                                <option value="BHNI">BHNI</option>
+                                <option value="EMPLOYEE">EMPLOYEE</option>
+                                <option value="SHAREHOLDER">SHAREHOLDER</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="modal_qty" class="filter-label">Quantity <span
+                                    class="text-danger">*</span></label>
+                            <input type="number" class="form-control custom-select-styled" name="Qty" id="modal_qty"
+                                required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3" id="div_rate">
+                            <label for="modal_rate" class="filter-label">Rate <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control custom-select-styled" name="Rate" id="modal_rate">
+                        </div>
+                        <div class="col-md-6 mb-3" id="div_sub_rate" style="display:none;">
+                            <label for="modal_sub_rate" class="filter-label">Subject To Rate <span
+                                    class="text-danger">*</span></label>
+                            <input type="number" class="form-control custom-select-styled" name="Sub_Rate"
+                                id="modal_sub_rate">
+                        </div>
+                        <div class="col-md-6 mb-3" id="div_strike" style="display:none;">
+                            <label for="modal_strike" class="filter-label">Strike Price <span
+                                    class="text-danger">*</span></label>
+                            <input type="number" class="form-control custom-select-styled" name="optionStrikePrice"
+                                id="modal_strike">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="modal_datetime" class="filter-label">Date & Time <span
+                                    class="text-danger">*</span></label>
+                            <input type="datetime-local" class="form-control custom-select-styled" name="datetime"
+                                id="modal_datetime" step="1" required>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer px-0 pb-0 mt-3 d-flex justify-content-between" style="border-top: none;">
+                        <button type="button" class="btn btn-danger btn-action shadow-sm" id="modal_delete_btn">Delete</button>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-secondary btn-action" data-bs-dismiss="modal"
+                            data-bs-dismiss="modal" data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary btn-action shadow-sm">Save Changes</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DataTables JS from original -->
+<script src="{% static 'DataTables/js/jquery-3.7.0.js' %}"></script>
+<script src="{% static 'DataTables/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.fixedHeader.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.bootstrap5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.bootstrap5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/jszip.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.colVis.min.js' %}"></script>
+<script src="https://cdn.datatables.net/keytable/2.11.0/js/dataTables.keyTable.min.js"></script>
+
+<script src="{% static 'DataTables/js/pdfmake.min.js' %}"></script>
+<script src="{% static 'DataTables/js/vfs_fonts.js' %}"></script>
+<script src="{% static 'DataTables/js/html2canvas.min.js' %}"></script>
+
+<script>
+    $(document).ready(function () {
+        // We move the contents of the backend table into the properly formatted outer table
+        var thead = $('#table-catch table thead');
+        var tbody = $('#table-catch table tbody');
+        $('#example').append(thead).append(tbody);
+
+        // Clean up empty catch div
+        $('#table-catch').remove();
+
+        // Clone the table header for column filters
+        $('#example thead tr')
+            .clone(true)
+            .addClass('filters')
+            .appendTo('#example thead');
+
+        // Initialize DataTables with old options
+        var table = $('#example').DataTable({
+            keys: true,
+            responsive: true,
+            orderCellsTop: true,
+            scrollX: true,
+            scrollY: "60vh",
+            scrollCollapse: true,
+            stateSave: true,
+            paging: false,
+            info: false,
+            drawCallback: function() {
+                if (typeof highlightFirstRow === 'function') {
+                    highlightFirstRow();
+                }
+            },
+            dom: 'B<"d-flex flex-wrap justify-content-between align-items-center mb-2 gap-2" <"#custom-length-placeholder"> <"#custom-search-placeholder"> >rt',
+            buttons: [
+                {
+                    extend: 'colvis',
+                    text: 'Columns',
+                    className: 'btn btn-secondary btn-action'
+                },
+                {
+                    extend: 'collection',
+                    text: 'Download',
+                    className: 'btn btn-secondary btn-action',
+                    buttons: [
+                        {
+                            extend: 'excel',
+                            text: 'Excel',
+                            exportOptions: {
+                                columns: function (idx, data, node) {
+                                    return !$(node).hasClass('skip-export');
+                                }
+                            },
+                            customize: function(xlsx) {
+                                var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                                $('row:first', sheet).remove();
+                            }
+                        },
+                        {
+                            extend: 'pdf',
+                            text: 'PDF',
+                            exportOptions: {
+                                columns: function (idx, data, node) {
+                                    return !$(node).hasClass('skip-export');
+                                },
+                                rows: ':visible',
+                                modifier: {
+                                    page: 'current'
+                                }
+                            },
+                            customize: function(doc) {
+                                doc.pageOrientation = 'landscape';
+                                doc.styles.tableHeader = {
+                                    fillColor: 'grey',
+                                    color: 'whitesmoke',
+                                    bold: true,
+                                    alignment: 'center',
+                                };
+                                doc.styles.tableBodyEven = {
+                                    alignment: 'center',
+                                    fillColor: 'bisque',
+                                };
+                                doc.styles.tableBodyOdd = {
+                                    alignment: 'center',
+                                    fillColor: 'bisque',
+                                };
+                                
+                                doc.content[1].layout = {
+                                    hLineWidth: function(i, node) {
+                                        return 1; 
+                                    },
+                                    vLineWidth: function(i, node) {
+                                        return 1; 
+                                    },
+                                    hLineColor: function(i, node) {
+                                        return 'black'; 
+                                    },
+                                    vLineColor: function(i, node) {
+                                        return 'black'; 
+                                    },
+                                };
+                            }
+                        }
+                    ]
+                }
+            ],
+
+            lengthChange: false,
+            language: {
+                info: 'Showing _START_ to _END_ of _TOTAL_ Rows',
+                infoFiltered: '(filtered from _MAX_ total Rows)',
+                emptyTable: "No data available",
+            },
+            initComplete: function () {
+                var api = this.api();
+                
+                // Only process visible columns to avoid indexing errors with hidden columns
+                api.columns(':visible').every(function () {
+                    var colIdx = this.index();
+                    var columnHeader = this.header();
+                    
+                    // Scope strictly to the .filters row inside the ScrollHead
+                    var cell = $(columnHeader).closest('thead').find('tr.filters th').eq($(columnHeader).index());
+                    
+                    // Skip the Action column
+                    if ($(columnHeader).text().includes('Action')) {
+                        $(cell).html('');
+                        return;
+                    }
+                    
+                    var title = $(cell).text();
+                    
+                    // Restore existing search text from state
+                    var existingSearch = this.search();
+                    var cleanSearch = existingSearch ? existingSearch.replace(/^\(+|\)+$/g, '') : '';
+                    if (cleanSearch === '\\\\s*') cleanSearch = '';
+
+                    $(cell).html('<input class="form-control form-control-sm text-center" type="text" autocomplete="off" placeholder="' + title.trim() + '" value="' + cleanSearch + '" />');
+
+                    $('input', cell)
+                        .off('keyup change')
+                        .on('change', function (e) {
+                            $(this).attr('title', $(this).val());
+                            var regexr = '({search})';
+                            var cursorPosition = this.selectionStart;
+
+                            api.column(colIdx).search(
+                                this.value != '' ? regexr.replace('{search}', '(((' + this.value + ')))') : '',
+                                this.value != '',
+                                this.value == ''
+                            ).draw();
+                        })
+                        .on('keyup', function (e) {
+                            e.stopPropagation();
+                            $(this).trigger('change');
+                            $(this).focus()[0].setSelectionRange(cursorPosition, cursorPosition);
+                        });
+                });
+                
+                // Ensure ScrollBody hidden header doesn't pop open due to cloned inputs
+                $('.dataTables_scrollBody .filters').empty();
+            }
+        });
+
+        window.tradesTable = table;
+
+        // Move the custom page length dropdown into the DataTables top row
+
+        // Move DataTables buttons to the custom container
+        table.buttons().container().appendTo('#custom-buttons-container');
+        // Fix default dt-buttons group styling
+        $('.dt-buttons').removeClass('btn-group').addClass('d-flex gap-2');
+        $('.dt-buttons .btn').removeClass('btn-secondary').addClass('btn-secondary btn-action');
+
+        $('#custom-page-length').removeClass('row').detach().appendTo('#custom-length-placeholder');
+        $('#custom-search').detach().appendTo('#custom-search-placeholder');
+
+        // Live debounce search across all database records
+        var searchDebounceTimer = null;
+        var isSubmittingTradesSearch = false;
+        var $mainSearch = $('#mainSearchInput, input[name="SearchQuery"]');
+
+        function submitTradesSearch(searchVal) {
+            var form = $('#filterForm');
+            if (form.length) {
+                isSubmittingTradesSearch = true;
+                sessionStorage.setItem('trades_search_focused', 'true');
+                var $input = form.find('input[name="SearchQuery"]');
+                if ($input.length) {
+                    $input.val(searchVal);
+                }
+                var pageInput = document.getElementById('pageInput');
+                if (pageInput) {
+                    pageInput.value = '1';
+                }
+                form.submit();
+            }
+        }
+
+        // Apply initial search query to input and restore focus/cursor even when cleared
+        var initialSearch = "{{ SearchQuery|default:''|escapejs }}";
+        $mainSearch.val(initialSearch);
+
+        function restoreTradesSearchFocus() {
+            if (sessionStorage.getItem('trades_search_focused') === 'true' || initialSearch.length > 0) {
+                var $input = $('#mainSearchInput, input[name="SearchQuery"]').first();
+                if ($input.length) {
+                    $input.focus();
+                    try {
+                        var len = $input.val().length;
+                        $input[0].setSelectionRange(len, len);
+                    } catch(e) {}
+                }
+            }
+        }
+
+        restoreTradesSearchFocus();
+        setTimeout(restoreTradesSearchFocus, 20);
+        setTimeout(restoreTradesSearchFocus, 100);
+        setTimeout(restoreTradesSearchFocus, 250);
+        setTimeout(restoreTradesSearchFocus, 500);
+        setTimeout(restoreTradesSearchFocus, 800);
+
+        $(document).on('blur', '#mainSearchInput, input[name="SearchQuery"]', function() {
+            if (!isSubmittingTradesSearch) {
+                setTimeout(function() {
+                    if (!isSubmittingTradesSearch && !$(document.activeElement).is('#mainSearchInput, input[name="SearchQuery"]')) {
+                        sessionStorage.removeItem('trades_search_focused');
+                    }
+                }, 150);
+            }
+        });
+
+        $(document).on('input', '#mainSearchInput, input[name="SearchQuery"]', function() {
+            var val = $(this).val();
+            sessionStorage.setItem('trades_search_focused', 'true');
+            clearTimeout(searchDebounceTimer);
+            // Automatic search across entire database after typing stops (500ms debounce)
+            searchDebounceTimer = setTimeout(function() {
+                submitTradesSearch(val);
+            }, 500);
+        });
+
+        $(document).on('keydown', '#mainSearchInput, input[name="SearchQuery"]', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(searchDebounceTimer);
+                sessionStorage.setItem('trades_search_focused', 'true');
+                submitTradesSearch($(this).val());
+            }
+        });
+    });
+
+    function populateGlobalEditModal(btn) {
+        let orderId = btn.getAttribute('data-order-id');
+        let form = document.getElementById('globalEditForm');
+        form.action = '/trades/update_order/' + orderId;
+
+        document.getElementById('modal_ipo_id').value = btn.getAttribute('data-ipo-id');
+        document.getElementById('modal_group').value = btn.getAttribute('data-group');
+        document.getElementById('modal_order_type').value = btn.getAttribute('data-ordertype');
+        document.getElementById('modal_category').value = btn.getAttribute('data-category');
+        document.getElementById('modal_investor').value = btn.getAttribute('data-investortype');
+        document.getElementById('modal_qty').value = btn.getAttribute('data-qty');
+
+        let rate = btn.getAttribute('data-rate');
+        let category = btn.getAttribute('data-category');
+        let method = btn.getAttribute('data-method');
+
+        let dt = btn.getAttribute('data-date');
+        let tm = btn.getAttribute('data-time');
+
+        if (dt && tm && dt !== 'None' && tm !== 'None') {
+            document.getElementById('modal_datetime').value = dt + 'T' + tm;
+        }
+
+        toggleModalFields();
+
+        if (category === 'Subject To') {
+            document.getElementById('modal_sub_rate').value = rate;
+        } else {
+            document.getElementById('modal_rate').value = rate;
+        }
+
+        
+        let ipoId = btn.getAttribute('data-ipo-id');
+        let group = btn.getAttribute('data-group');
+        let investorType = btn.getAttribute('data-investortype');
+        
+        let deleteBtn = document.getElementById('modal_delete_btn');
+        if (deleteBtn) {
+            deleteBtn.onclick = function() {
+                if (confirm('Are you sure you want to delete this order?')) {
+                    window.location.href = '/DeleteOrder/' + ipoId + '/' + orderId + '/' + group + '/' + category + '/' + investorType;
+                }
+            };
+        }
+        
+        if (btn.getAttribute('data-investortype') === 'OPTIONS') {
+            document.getElementById('modal_strike').value = method;
+        }
+
+        // Fallback for bootstrap 4 data-toggle vs bootstrap 5 data-bs-toggle
+        if (typeof $ !== 'undefined') {
+            $('#globalEditModal').modal('show');
+        }
+    }
+
+    function toggleModalFields() {
+        let cat = document.getElementById('modal_category').value;
+        let inv = document.getElementById('modal_investor').value;
+        if (cat === 'Subject To') {
+            document.getElementById('div_rate').style.display = 'none';
+            document.getElementById('div_sub_rate').style.display = 'block';
+        } else {
+            document.getElementById('div_rate').style.display = 'block';
+            document.getElementById('div_sub_rate').style.display = 'none';
+        }
+
+        if (inv === 'OPTIONS' || cat === 'CALL' || cat === 'PUT') {
+            document.getElementById('div_strike').style.display = 'block';
+        } else {
+            document.getElementById('div_strike').style.display = 'none';
+        }
+    }
+</script>
+<script>
+
+    function showToast(message, isError = false) {
+        const toast = document.createElement('div');
+        toast.innerText = message;
+        toast.style.position = 'fixed';
+        toast.style.top = '20px';
+        toast.style.right = '20px';
+        toast.style.backgroundColor = isError ? '#dc3545' : '#28a745';
+        toast.style.color = '#fff';
+        toast.style.padding = '12px 20px';
+        toast.style.borderRadius = '4px';
+        toast.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+        toast.style.zIndex = '10000';
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease-in-out';
+        toast.style.fontSize = '14px';
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => toast.style.opacity = '1', 10);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => document.body.removeChild(toast), 300);
+        }, 3000);
+    }
+
+    // IPO Status Modal - Hide/Show Empty Tables
+    function toggleEmptyTables(hideEmpty) {
+        const ipoContainers = document.querySelectorAll('#exampleModal .modal-body > div[style*="margin-bottom"]');
+
+        ipoContainers.forEach(container => {
+            const tableWrappers = container.querySelectorAll('.table-responsive');
+            let ipoHasAnyData = false;
+
+            tableWrappers.forEach(wrapper => {
+                const tbody = wrapper.querySelector('tbody');
+                let tableHasData = false;
+
+                if (tbody) {
+                    const cells = tbody.querySelectorAll('td');
+                    cells.forEach(cell => {
+                        const text = cell.innerText.trim();
+                        if (text !== "" && text !== "-" && text !== "0" && text !== "0.0" && text !== "-0.0") {
+                            const num = Number(text.replace(/,/g, ''));
+                            if (!isNaN(num) && num !== 0) {
+                                tableHasData = true;
+                            }
+                        }
+                    });
+                }
+
+                if (!tableHasData) {
+                    wrapper.style.display = hideEmpty ? 'none' : 'block';
+                    const nextSib = wrapper.nextElementSibling;
+                    if (nextSib && nextSib.tagName === 'BR') {
+                        nextSib.style.display = hideEmpty ? 'none' : 'inline';
+                    }
+                } else {
+                    wrapper.style.display = 'block';
+                    const nextSib = wrapper.nextElementSibling;
+                    if (nextSib && nextSib.tagName === 'BR') {
+                        nextSib.style.display = 'inline';
+                    }
+                    ipoHasAnyData = true;
+                }
+            });
+
+            if (!ipoHasAnyData && hideEmpty) {
+                container.style.display = 'none';
+            } else {
+                container.style.display = 'block';
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggle = document.getElementById('hideEmptyTablesToggle');
+        if (toggle) {
+            toggleEmptyTables(toggle.checked);
+        }
+    });
+
+    if (window.jQuery) {
+        $('#exampleModal').on('show.bs.modal shown.bs.modal', function () {
+            const toggle = document.getElementById('hideEmptyTablesToggle');
+            if (toggle) {
+                toggleEmptyTables(toggle.checked);
+            }
+        });
+    }
+
+    setInterval(() => {
+        const display = document.getElementById('live-time-display');
+        if (display) {
+            const now = new Date();
+            const options = {
+                year: 'numeric', month: 'short', day: 'numeric',
+                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+            };
+            display.innerText = now.toLocaleString('en-IN', options);
+        }
+    }, 1000);
+
+</script>
+<script>
+
+
+    $(document).ready(function () {
+        // ... Your existing DataTable initialization code ...
+        var newDiv = $('<div id="example_form" class=\'form\'></div>');
+        var formHtml = `
+                <form method="GET" action="/trades">
+            <div class="form-row">
+                <div class="form-group col-xl-3 col-lg-3 col-md-3 col-sm-5 col-5 gp">
+                    <label for="IPOFilter" ><b class='gpl '>IPO Name</b></label>
+                    <select id="IPOFilter" class="form-control custom-select gps" name="IPOFilter" onchange="this.form.submit()" style='border: 0.3px solid black;height:  35px;'>
+                        <option value="All" {% if IPOFilter == 'All' %} selected {% endif %}>All</option>
+                        {% for i in all_ipos %}
+                        <option value="{{ i.id }}" {% if IPOFilter|slugify == i.id|slugify %} selected {% endif %}>
+                            {{ i.IPOName }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group col-xl-2 col-lg-2 col-md-2 col-sm-5 col-5 gp">
+                    <label for="Groupfilter" ><b class='gpl '>Group</b></label>
+                    <select id="Groupfilter" class="form-control custom-select gps " name="Groupfilter" autofocus="autofocus" onchange="this.form.submit()" style='border: 0.3px solid black;height:  35px;'>
+                        <option value="All" {% if Groupfilter == 'All' %} selected {% endif %}>All</option>
+                        {% for i in Group %}
+                        <option {% if Groupfilter == i.GroupName %} selected {% endif %}
+                            value="{{ i.GroupName }}">
+                            {{i.GroupName }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group col-xl-2 col-lg-2 col-md-2 col-sm-4 col-7 oc" >
+                    <label for="OrderCategoryFilter"><b class='ocl '>Order Category</b></label>
+                    <select id="OrderCategoryFilter" class="form-control custom-select ocs" name="OrderCategoryFilter" onchange="this.form.submit()" style='border: 0.3px solid black; height:  35px; width: 93%;'>
+                        <option value="All" {% if OrderCategoryFilter == 'All'%} selected {% endif %}>All</option>
+                        <option {% if OrderCategoryFilter == 'Kostak'%} selected {% endif %} value="Kostak">Kostak</option>
+                        <option {% if OrderCategoryFilter == 'Subject To'%} selected {% endif %} value="Subject To">Subject To</option>
+                        <option {% if OrderCategoryFilter == 'CALL'%} selected {% endif %} value="CALL">CALL</option>
+                        <option {% if OrderCategoryFilter == 'PUT'%} selected {% endif %} value="PUT">PUT</option>
+                        <option {% if OrderCategoryFilter == 'Premium'%} selected {% endif %} value="Premium">Premium</option>
+                    </select>
+                </div>
+                <div class="form-group col-xl-2 col-lg-2 col-md-2 col-sm-4 col-5 it">
+                    <label for="InvestorTypeFilter"><b class='itl'>Investor Type</b></label>
+                    <select id="InvestorTypeFilter" class="form-control custom-select its" name="InvestorTypeFilter" onchange="this.form.submit()" style='border: 0.3px solid black; height:  35px; width: 93%;'>
+                        <option value="All" {% if InvestorTypeFilter == 'All'%} selected {% endif %}>All</option>
+                        <option {% if InvestorTypeFilter == 'RETAIL'%} selected {% endif %} value="RETAIL">Retail</option>
+                        <option {% if InvestorTypeFilter == 'SHNI'%} selected {% endif %} value="SHNI">SHNI</option>
+                        <option {% if InvestorTypeFilter == 'BHNI'%} selected {% endif %} value="BHNI">BHNI</option>
+                        <option {% if InvestorTypeFilter == 'OPTIONS'%} selected {% endif %} value="OPTIONS">OPTIONS</option>
+                        <option {% if InvestorTypeFilter == 'PREMIUM' %} selected {% endif %} value="PREMIUM">Premium</option>
+                    </select>
+                </div>
+            </div>
+            </form>
+        `;
+        newDiv.append(formHtml);
+        $('.dataTables_length').append(newDiv);
+        // Add your custom button HTML after the existing buttons
+        var customButtonHtml = '<div class="btn-group st">' +
+            '<button type="button" class="btn btn-secondary d-flex justify-content-center align-items-center" data-bs-toggle="modal" data-bs-target="#exampleModal">' +
+            'Status' +
+            '</button> </div>'
+
+        var customButtonHtml2 = '<div class="btn-group bo"> <button type="button" id="bulk-order-btn" class="btn btn-secondary d-flex justify-content-center align-items-center"  data-bs-toggle="modal" data-bs-target="#exampleuploadModal" >Bulk' +
+            '    Order &nbsp;<i class="fa fa-file-excel-o" aria-hidden="true" style=\'font-size:18px;\'></i> ' +
+            '</button>' +
+            '<button type="button" id="bulk-delete-btn" class="btn btn-danger d-none justify-content-center align-items-center" style="height: 35px;" data-bs-toggle="modal" data-bs-target="#bulkDeleteModal">' +
+            'Delete &nbsp;<i class="fa fa-trash" aria-hidden="true" style="font-size:18px;"></i>' +
+            '</button>' +
+            '</div>';
+
+        $('.dataTables_length').append(customButtonHtml);
+        $('.dataTables_length').append(customButtonHtml2);
+
+        // ... Your existing DataTable initialization code ...
+    });
+    $(document).ready(function () {
+        $(".col-sm-12.col-md-6:first").addClass("custom-width");
+        $(".col-sm-12.col-md-6").addClass("cw");
+        $(".dt-row:first").addClass("table-responsive");
+        $(".buttons-collection").addClass("d-flex justify-content-center align-items-center");
+    });
+
+</script>
+<script>
+
+    $(document).ready(function () {
+        // Selection Logic
+        $(document).on('change', '#select-all-orders', function () {
+            $('.order-checkbox').prop('checked', this.checked);
+            toggleBulkDeleteBtn();
+        });
+
+        $(document).on('change', '.order-checkbox', function () {
+            if ($('.order-checkbox:checked').length == $('.order-checkbox').length) {
+                $('#select-all-orders').prop('checked', true);
+            } else {
+                $('#select-all-orders').prop('checked', false);
+            }
+            toggleBulkDeleteBtn();
+        });
+
+        function toggleBulkDeleteBtn() {
+            var checkedCount = $('.order-checkbox:checked').length;
+            if (checkedCount > 0) {
+                $('#bulk-order-btn').removeClass('d-flex').addClass('d-none');
+                $('#bulk-delete-btn').removeClass('d-none').addClass('d-flex');
+                $('#selected-count').text(checkedCount);
+                $('#order-suffix').text(checkedCount === 1 ? 'order' : 'orders');
+            } else {
+                $('#bulk-order-btn').removeClass('d-none').addClass('d-flex');
+                $('#bulk-delete-btn').removeClass('d-flex').addClass('d-none');
+            }
+        }
+
+        // Deletion Logic
+        $(document).on('click', '#confirm-bulk-delete', function () {
+            var selectedIds = [];
+            $('.order-checkbox:checked').each(function () {
+                selectedIds.push($(this).val());
+            });
+
+            if (selectedIds.length > 0) {
+                $(this).prop('disabled', true).text('Deleting...');
+
+                fetch('/{{IPOid}}/BulkDeleteOrders/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ order_ids: selectedIds })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            location.reload();
+                        } else {
+                            alert('Error: ' + data.message);
+                            $(this).prop('disabled', false).text('Delete');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while deleting orders.');
+                        $(this).prop('disabled', false).text('Delete');
+                    });
+            }
+        });
+        
+        function highlightFirstRow() {
+            var $allRows = $('.dataTables_scrollBody tbody tr, #example tbody tr');
+            var $currentFocus = $allRows.filter('.row-focus:visible');
+
+            if ($currentFocus.length === 1 && !$currentFocus.hasClass('dataTables_empty')) {
+                // Keep the current highlighted row if it is still visible
+                return;
+            }
+
+            $allRows.removeClass('row-focus');
+
+            var isSearchActive = (sessionStorage.getItem('trades_search_focused') === 'true') || 
+                                 $('#mainSearchInput').is(':focus') ||
+                                 $(document.activeElement).is('#mainSearchInput, input[name="SearchQuery"]');
+
+            var dt = window.tradesTable || ($.fn.DataTable.isDataTable('#example') ? $('#example').DataTable() : null);
+            if (dt) {
+                var visibleNodes = dt.rows({ page: 'current', search: 'applied' }).nodes();
+                if (visibleNodes.length > 0) {
+                    var $firstRow = $(visibleNodes[0]);
+                    if ($firstRow.length && !$firstRow.hasClass('dataTables_empty')) {
+                        $firstRow.addClass('row-focus');
+                        if (!isSearchActive) {
+                            try {
+                                dt.cell(':eq(0)', 0, { page: 'current', search: 'applied' }).focus();
+                            } catch (e) {}
+                        }
+                        return;
+                    }
+                }
+            }
+
+            var $firstRow = $allRows.filter(function() {
+                return !$(this).hasClass('dataTables_empty') && $(this).find('td').length > 1 && $(this).is(':visible');
+            }).first();
+
+            if ($firstRow.length) {
+                $firstRow.addClass('row-focus');
+            }
+        }
+
+        // Track the focused row in the table via KeyTable
+        var dt = window.tradesTable || ($.fn.DataTable.isDataTable('#example') ? $('#example').DataTable() : null);
+        if (dt) {
+            dt.on('key-focus', function(e, datatable, cell) {
+                $('.dataTables_scrollBody tbody tr, #example tbody tr').removeClass('row-focus');
+                var tr = $(cell.node()).closest('tr');
+                tr.addClass('row-focus');
+            });
+
+            dt.on('draw', function() {
+                highlightFirstRow();
+            });
+        }
+        
+        // Highlight row on direct click
+        $(document).on('click', '.dataTables_scrollBody tbody tr, #example tbody tr', function() {
+            if (!$(this).hasClass('dataTables_empty') && $(this).find('td').length > 1) {
+                $('.dataTables_scrollBody tbody tr, #example tbody tr').removeClass('row-focus');
+                $(this).addClass('row-focus');
+            }
+        });
+
+        // Auto-highlight first row on initial load and on table redraw
+        highlightFirstRow();
+        setTimeout(highlightFirstRow, 50);
+        setTimeout(highlightFirstRow, 150);
+        setTimeout(highlightFirstRow, 350);
+        setTimeout(highlightFirstRow, 700);
+
+        $(window).on('load', function() {
+            highlightFirstRow();
+            setTimeout(highlightFirstRow, 100);
+        });
+    });
+
+
+
+    // Double click on any cell to apply filter
+    $(document).on('dblclick', '.dataTables_scrollBody tbody td, #example tbody td', function() {
+        var tableAPI = $('#example').DataTable();
+        
+        // Ensure we clicked on a valid cell
+        var cellInfo = tableAPI.cell(this).index();
+        if (!cellInfo) return;
+        
+        var colIdx = cellInfo.column;
+        
+        // Skip Checkbox (0) and Action (11) columns
+        if (colIdx === 0 || colIdx === 11) return;
+        
+        var cellText = $(this).text().trim();
+        
+        // Map column indices to their corresponding global dropdown filter IDs
+        var globalSelectId = null;
+        if (colIdx === 1) globalSelectId = '#IPOFilter';
+        else if (colIdx === 2) globalSelectId = '#Groupfilter';
+        else if (colIdx === 4) globalSelectId = '#OrderCategoryFilter';
+        else if (colIdx === 6) globalSelectId = '#InvestorTypeFilter';
+
+        if (globalSelectId) {
+            // Because there might be multiple forms (e.g., mobile/desktop), get the first match
+            var selectElem = $(globalSelectId).first();
+            if (selectElem.length) {
+                var matched = false;
+                selectElem.find('option').each(function() {
+                    if ($(this).text().trim().toLowerCase() === cellText.toLowerCase()) {
+                        selectElem.val($(this).val());
+                        matched = true;
+                        return false; // break loop
+                    }
+                });
+                
+                if (matched) {
+                    selectElem.closest('form').submit(); // Trigger server-side filtering
+                    return; // Stop here, don't do client-side filter
+                }
+            }
+        }
+    });
+
+    // Global keyboard shortcuts for Buy (+) and Sell (-)
+    document.addEventListener('keydown', function(event) {
+        // Ignore if modifier keys (Ctrl, Alt, Meta) are pressed (e.g. Ctrl + +, Ctrl + =, Ctrl + -, Ctrl + R)
+        if (event.ctrlKey || event.metaKey || event.altKey || 
+            (event.getModifierState && (event.getModifierState('Control') || event.getModifierState('Meta') || event.getModifierState('Alt')))) {
+            return;
+        }
+
+        // Ignore if focus is in an input, textarea, or select field
+        const tagName = event.target.tagName;
+        if (tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT' || event.target.isContentEditable) {
+            return;
+        }
+
+        var ipoId = "{{ IPOFilter }}";
+        var group = null;
+
+        // Try to get data directly from the visually focused row
+        var focusedRow = document.querySelector('tr.row-focus') || (document.querySelector('td.focus') ? document.querySelector('td.focus').closest('tr') : null);
+        if (focusedRow) {
+            var btn = focusedRow.querySelector('button[data-ipo-id]');
+            if (btn) {
+                ipoId = btn.getAttribute('data-ipo-id');
+                group = btn.getAttribute('data-group');
+            }
+        } 
+        
+        // If not found, fallback to "All" filter extraction
+        if (!focusedRow && (ipoId === "All" || ipoId === "" || ipoId === "None")) {
+            var firstRowBtn = document.querySelector('tbody tr:first-child button[data-ipo-id]');
+            if (!firstRowBtn) {
+                return; // If table is completely empty, do not redirect
+            }
+            ipoId = firstRowBtn.getAttribute('data-ipo-id');
+        }
+
+        if (!ipoId || ipoId === "0" || ipoId === "None") {
+            return; // Safety check
+        }
+
+        // Construct URLs (with optional group parameter)
+        var buyUrl = (group && group !== 'None') ? '/BUY/' + ipoId + '/' + encodeURIComponent(group) : '/' + ipoId + '/BUY';
+        var sellUrl = (group && group !== 'None') ? '/SELL/' + ipoId + '/' + encodeURIComponent(group) : '/' + ipoId + '/SELL';
+
+        if (event.key === '+' || event.code === 'NumpadAdd') { 
+            event.preventDefault();
+            window.location.href = buyUrl; // Buy Page
+        } else if (event.key === '-' || event.code === 'NumpadSubtract') {
+            event.preventDefault();
+            window.location.href = sellUrl; // Sell Page
+        }
+    });
+
+
+    
+async function copyIPOAsImage(button) {
+    var container = button.closest('div[style*="margin-bottom: 30px"]');
+    
+    // Temporarily hide ALL copy-as-image buttons within this container so they don't appear in the image
+    var allBtns = container.querySelectorAll('.btn-outline-secondary');
+    var displays = [];
+    allBtns.forEach(btn => {
+        displays.push(btn.style.display);
+        btn.style.display = 'none';
+    });
+
+    const captureBody = container.cloneNode(true);
+    // Remove the 30px margin to make the capture cleaner
+    captureBody.style.marginBottom = '0';
+    captureBody.classList.add('status-image-capture');
+    captureBody.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(captureBody);
+
+    // Restore original buttons so UI doesn't look broken while processing
+    allBtns.forEach((btn, idx) => {
+        btn.style.display = displays[idx];
+    });
+    
+    button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Copying...';
+    button.disabled = true;
+
+    try {
+        if (document.fonts && document.fonts.ready) {
+            await document.fonts.ready;
+        }
+
+        const captureWidth = Math.ceil(captureBody.scrollWidth);
+        const captureHeight = Math.ceil(captureBody.scrollHeight);
+
+        const canvas = await html2canvas(captureBody, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            width: captureWidth,
+            height: captureHeight,
+            windowWidth: captureWidth,
+            windowHeight: captureHeight,
+            scrollX: 0,
+            scrollY: 0
+        });
+
+        const blob = await new Promise((resolve, reject) => {
+            canvas.toBlob(result => {
+                if (result) {
+                    resolve(result);
+                } else {
+                    reject(new Error('The status image could not be created.'));
+                }
+            }, 'image/png');
+        });
+
+        const item = new ClipboardItem({ "image/png": blob });
+        await navigator.clipboard.write([item]);
+        if (typeof showToast === 'function') {
+            var title = container.querySelector('h2') ? container.querySelector('h2').innerText : "IPO";
+            showToast(title + " copied as image!", false);
+        }
+    } catch (err) {
+        console.error("Failed to copy image: ", err);
+        if (typeof showToast === 'function') {
+            showToast("Failed to copy image. Check browser permissions.", true);
+        }
+    } finally {
+        document.body.removeChild(captureBody);
+        
+        button.innerHTML = '<i class="fa fa-check text-success"></i> Copied!';
+        setTimeout(() => {
+            button.innerHTML = '<i class="fa fa-copy"></i> Copy as Image';
+            button.disabled = false;
+        }, 2000);
+    }
+}
+</script>
+{% endblock %}

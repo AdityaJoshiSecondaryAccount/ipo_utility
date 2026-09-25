@@ -690,8 +690,8 @@
                     <div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-6"> 
                     <input type="text" name="ExpecetdRetailApplication" class="form-control ri" onfocus="this.select()"
                         maxlength="50" {% if ExpecetdRetailApplication == '' %} value="2500000" {% else %}
-                        value="{{ ExpecetdRetailApplication }}" {% endif %}  autofocus="autofocus"
-                        onfocus="this.select()" maxlength="50"onkeypress="return event.charCode >= 48 && event.charCode <= 57" 
+                        value="{{ ExpecetdRetailApplication }}" {% endif %}
+                        onfocus="this.select()" maxlength="50"onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                         oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..?)\../g, '$1');" / >
                     </div>   
 
@@ -701,8 +701,8 @@
                     <div  class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-6">  
                         <input type="text" name="ExpecetdSHNIApplication" class="form-control ric" onfocus="this.select()"
                         maxlength="50" {% if ExpecetdSHNIApplication is none %} value="150000" {% else %}
-                        value="{{ ExpecetdSHNIApplication }}" {% endif %}  autofocus="autofocus"
-                        onfocus="this.select()" maxlength="50"onkeypress="return event.charCode >= 48 && event.charCode <= 57" 
+                        value="{{ ExpecetdSHNIApplication }}" {% endif %}
+                        onfocus="this.select()" maxlength="50"onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                         oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..?)\../g, '$1');" / >
                     </div>
 
@@ -712,8 +712,8 @@
                     <div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-6">    
                         <input type="text" name="ExpecetdBHNIApplication" class="form-control ric" onfocus="this.select()"
                         maxlength="50" {% if ExpecetdBHNIApplication is none %} value="50000" {% else %}
-                        value="{{ ExpecetdBHNIApplication }}" {% endif %}  autofocus="autofocus"
-                        onfocus="this.select()" maxlength="50"onkeypress="return event.charCode >= 48 && event.charCode <= 57" 
+                        value="{{ ExpecetdBHNIApplication }}" {% endif %}
+                        onfocus="this.select()" maxlength="50"onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                         oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..?)\../g, '$1');" / >
                     </div>
                 </div>
@@ -1221,5 +1221,6 @@
 
 <!-- Option 1: Bootstrap Bundle with Popper -->
 <script src="{% static 'JS/bootstrap.bundle.min.js' %}"></script>
+{% include 'partials/ipo_shortcuts.html' %}
 
 {% endblock %}

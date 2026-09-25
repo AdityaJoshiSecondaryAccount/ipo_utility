@@ -2403,7 +2403,8 @@
                             const loader = document.querySelector('.loader');
                             const submitButton = document.getElementById('submit_button');
                             if (loader) {
-                                loader.style.display = 'block';
+                                loader.style.display = 'flex';
+                                loader.style.zIndex = '9999';
                                 loader.classList.remove('loader-hidden');
                             }
                             if (submitButton) {
@@ -2444,6 +2445,8 @@
                             let data = await response.json();
 
                            if (ipoRegister == 'BigShare'){
+                                part_num = 50;
+                            }else if (ipoRegister == 'Integrated') {
                                 part_num = 50;
                             }else if (ipoRegister == 'Maashitla'){
                                 part_num = 300;
@@ -2823,7 +2826,7 @@
             </nav>
         </div>
     <div class="table-responsive text-nowrap">
-    <table class="table-bordered table-hover sortable" id="sortable-table">
+    <table class="table-bordered table-hover" id="sortable-table">
         {{ html_table | safe }}
     </table>
     </div>
@@ -4450,4 +4453,5 @@
             });
         }
     </script>
+{% include 'partials/ipo_shortcuts.html' %}
 {% endblock %}

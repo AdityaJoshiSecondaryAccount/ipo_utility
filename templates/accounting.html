@@ -1786,7 +1786,7 @@
                                         {% for ipo in ipos1 %}
                                             <option value="{{ ipo }}" {% if selected_ipo == ipo.IPOName %}selected{% endif %}>{{ ipo }}</option>
                                         {% endfor %}
-                                        <option value="JV">JV</option>
+                                        <option value="JV" {% if selected_ipo == 'JV' %}selected{% endif %}>JV</option>
                                     </select>
                                 </div>
 
@@ -1894,6 +1894,7 @@
                             <a href="{% url 'accounting_logs' %}" class="btn btn-sm btn-outline-info mb-2" title="View Activity Logs">
                                 <i class="fas fa-history"></i> Activity Logs
                             </a>
+
                             {% if not show_deleted %}
                             <button type="button" id="deleteSelectedAccounting" class="btn btn-sm btn-outline-danger mb-2" disabled>
                                 <i class="fas fa-trash"></i> Delete selected (<span id="selectedAccountingCount">0</span>)
@@ -2192,6 +2193,10 @@
                                     const rightHidden = document.getElementById("remark_right");
                                     const rightError = document.getElementById("remark_right_error");
 
+                                    if (!saveBtn || !leftInput || !leftError || !rightInput || !rightHidden || !rightError) {
+                                        return;
+                                    }
+
                                     function validateInputs() {
                                         let leftValid = true, rightValid = true;
 
@@ -2270,8 +2275,11 @@
             document.addEventListener("DOMContentLoaded", function(){
                 const remarkInput = document.getElementById("trans_remark");
                 const errorBox    = document.getElementById("trans_remark_error");
-                const submitBtn = document.getElementById("trans_save_btn");
+                const submitBtn = document.getElementById("saveBtn5");
 
+                if (!remarkInput || !errorBox || !submitBtn) {
+                    return;
+                }
 
                 remarkInput.addEventListener("input", function(){
                     let value = remarkInput.value;
@@ -2744,6 +2752,28 @@
         button.setAttribute('aria-label', (willOpen ? 'Hide ' : 'View ') + rows.length + ' transfer entries');
         button.setAttribute('title', (willOpen ? 'Hide ' : 'View ') + rows.length + ' entries');
     });
+
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.id === 'toggleAllBulkTransfers') {
+            e.stopPropagation(); // Stop it during capture phase before DataTables sees it
+            e.preventDefault();
+            
+            const icon = e.target;
+            const isExpanded = icon.getAttribute('data-expanded') === 'true';
+            const willExpand = !isExpanded;
+            icon.setAttribute('data-expanded', willExpand);
+            icon.className = willExpand 
+                ? 'fas fa-compress-arrows-alt ms-1'
+                : 'fas fa-expand-arrows-alt ms-1';
+            icon.setAttribute('title', willExpand ? 'Collapse all bulk transfers' : 'Expand all bulk transfers');
+
+            document.querySelectorAll('.bulk-transfer-toggle').forEach(function(button) {
+                if (button.getAttribute('aria-expanded') !== String(willExpand)) {
+                    button.click();
+                }
+            });
+        }
+    }, true);
 
     $(document).ready(function () {
             var pageLength = "{{ Billing_page_size|default:'50' }}";
@@ -3297,7 +3327,9 @@
             let ipoId = $(this).data('ipo-id');
             $('#edit_ipo').val(ipoId ? ipoId : "");
             const isJV = String($(this).data('jv')) === '1';
-            $('#edit_ipo').prop('disabled', isJV).prop('required', !isJV);
+            const isLegacy = String($(this).data('is-legacy')) === '1';
+            $('#edit_ipo').prop('disabled', isJV).prop('required', !(isJV || isLegacy));
+            $('#edit_group').prop('required', !isLegacy);
             
             $('#edit_amount_type').val($(this).data('amount-type'));
             $('#edit_amount').val($(this).data('amount'));

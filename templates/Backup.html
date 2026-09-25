@@ -814,7 +814,7 @@
         
         // Create the new form HTML for rows per page selection
         var formHtml = `
-            <form method="POST" action="/BackUp" style="margin-top: -4%;"> 
+            <form method="POST" action="/BackUp" style="margin-top: -4%;">
                 {% csrf_token %}
                 <label for="page_size">Show 
                 <select name="Backup_page_size" id="Backup_page_size" onchange="this.form.submit()">
