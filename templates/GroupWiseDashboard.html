@@ -1,0 +1,3340 @@
+{% extends 'basic.html' %}
+{% block title%}Group Wise Dashboard{% endblock %}
+{% block css %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static  'DataTables/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static  'DataTables/css/buttons.bootstrap5.min.css' %}">
+<link rel="stylesheet" href="{% static  'DataTables/css/dataTables.bootstrap5.min.css' %}">
+<style>
+    .custom-green-switch:checked {
+        background-color: #28a745 !important;
+        border-color: #28a745 !important;
+    }
+    #example_wrapper{
+        margin-top: 4% !important;
+    }
+    #example th{
+        {% comment %} border: 0.1px solid black !important; {% endcomment %}
+        text-align: center;
+        width: 11%;
+    }
+    #example_filter{
+        float: right;
+        width: 50% !important;
+    }
+    .Input{
+        item-align: center;
+        width: 98.5% !important;
+    }
+    .dropdown-menu {
+        min-width: 7rem !important;
+        margin-top: 0 !important;
+        background-color: #6c757d;
+    }
+    .buttons-colvis{
+        left:-11px;
+        width: 95px !important;
+    }
+    .buttons-collection{
+        height: 35px;
+        width: 100px !important;
+    }
+    {% comment %} .modal-backdrop.fade {
+        opacity: 0;
+    } {% endcomment %}
+    #trans_group {
+        appearance: auto;           /* show default OS arrow */
+        -webkit-appearance: auto;   /* for Safari/Chrome */
+        -moz-appearance: auto;      /* for Firefox */
+        background-image: none !important; /* remove any custom icon override */
+        padding-right: 20px !important; /* space for default arrow */
+    }
+    #trans_amount_type {
+        appearance: auto;
+        -webkit-appearance: auto;
+        -moz-appearance: auto;
+        background-image: none !important;
+    }
+    #trans_ipo {
+        appearance: auto;
+        -webkit-appearance: auto;
+        -moz-appearance: auto;
+        background-image: none !important;
+    }
+    .select-modern {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 8px 36px 8px 10px; /* padding-right for arrow space */
+        font-size: 14px;
+        cursor: pointer;
+        background-image: url("data:image/svg+xml;utf8,<svg fill='none' stroke='%23222' stroke-width='2' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path stroke-linecap='round' stroke-linejoin='round' d='M6 9l6 6 6-6'/></svg>");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 16px;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .select-modern:focus {
+        border-color: #86b7fe;
+        outline: none;
+        box-shadow: 0 0 0 0.15rem rgba(13,110,253,.25);
+    }
+    
+    /* Specific styling for JV Amount Type dropdown */
+    .jv-amount-type {
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        background-color: #fff !important;
+        border: 1px solid #ced4da !important;
+        border-radius: 0.25rem !important;
+        padding: 0.375rem 2.25rem 0.375rem 0.75rem !important;
+        font-size: 1rem !important;
+        line-height: 1.5 !important;
+        cursor: pointer !important;
+        background-image: url("data:image/svg+xml;utf8,<svg fill='%23343a40' stroke='%23343a40' stroke-width='0' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 0.75rem center !important;
+        background-size: 16px 12px !important;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
+    }
+    
+    .jv-amount-type:focus {
+        border-color: #86b7fe !important;
+        outline: 0 !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+    }
+    
+    /* Specific styling for IPO Amount Type dropdown */
+    .ipo-amount-type {
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        background-color: #fff !important;
+        border: 1px solid #ced4da !important;
+        border-radius: 0.25rem !important;
+        padding: 0.375rem 2.25rem 0.375rem 0.75rem !important;
+        font-size: 1rem !important;
+        line-height: 1.5 !important;
+        cursor: pointer !important;
+        background-image: url("data:image/svg+xml;utf8,<svg fill='%23343a40' stroke='%23343a40' stroke-width='0' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 0.75rem center !important;
+        background-size: 16px 12px !important;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
+    }
+    
+    .ipo-amount-type:focus {
+        border-color: #86b7fe !important;
+        outline: 0 !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+    }
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .delete-btn {
+        height:20%;
+        position: relative;
+        color: #000;              /* icon color normal */
+        padding: 0.25rem 0.4rem;  /* keep your btn-sm look */
+    }
+    .delete-btn .icon-outline,
+    .delete-btn .icon-solid {
+        font-size: 16px;
+        line-height: 1;
+        transition: opacity 0.15s ease-in-out;
+    }
+
+    /* Start with outline visible, solid hidden */
+    .delete-btn .icon-outline { opacity: 1; }
+    .delete-btn .icon-solid {  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); opacity: 0; }
+
+    /* On hover: swap */
+    .delete-btn:hover .icon-outline { opacity: 0; }
+    .delete-btn:hover .icon-solid  { opacity: 1; }
+
+    
+
+    .flex-wrap {
+        position: relative !important;
+        margin-top: -60px !important; 
+        left: 63% !important; 
+    }
+    .form-control-sm {
+        border: 0.3px solid black;
+        height:30px !important;
+      }
+    .row.dt-row {
+        margin-top: -23px !important; 
+    }
+    .cw {
+        margin-left: -150px;
+        width: 10%;
+    }
+
+    .custom-width {
+        margin-left: 0px !important;
+        right : 0px !important;
+        width: 89% !important;
+    }
+    .dwo{
+        margin-top: -2% !important;
+    }
+    .bi{
+        height: 35px !important;
+        text-align: center !important;
+        margin-top: 1.7% !important;
+    }
+
+    #example_wrapper {
+        margin-top: 5.2% ;
+      }
+
+    table{
+        border-collapse: collapse;
+        border-spacing: 0;
+        width: 100%;
+        border: 1px solid #ddd;
+        margin-bottom: 2%;
+        {% comment %} height : 75vh; {% endcomment %}
+    }
+
+    .container-fluid {
+        width: 100%;
+        margin-right: auto;
+        margin-left: auto;
+    }
+
+    table th:nth-child(n+1){
+        {% comment %} position : sticky;
+        top:0; {% endcomment %}
+        background :rgb(182, 182, 158);
+    } 
+
+    th,
+    td {
+        text-align: center;
+        padding: 15px;
+    }
+    
+
+    table td:nth-child(1){
+        {% comment %} position : sticky; {% endcomment %}
+        background :rgb(182, 182, 158);
+        {% comment %} left : 0; {% endcomment %}
+    }
+    .sticky-col {
+        position: sticky !important;
+        left: 0;
+        background: rgb(182, 182, 158); /* match your Group Name column color */
+        z-index: 3; /* keep above other cells */
+    }
+    thead th {
+        position: sticky !important;
+        left: 0;
+        background-color: #f1f1f1;
+        z-index: 2;
+    }
+    tbody th {
+        position: sticky !important;
+        left: 0;
+        background-color: #f1f1f1;
+        z-index: 1;
+    }
+    tfoot th {
+        position: sticky !important;
+        left: 0;
+        background-color: #f1f1f1;
+        z-index: 1;
+    }
+
+    .h3,
+    h3 {
+        margin: 0px 0px;
+        margin-top: 85px;
+        font-size: 1.75rem;
+        border-block-end: 3px solid #e9ecef;
+    }
+
+    .iponame {
+        position:fixed !important;
+        background-color: white;
+        height: 45px;
+        margin-top: 35px;
+        width: 100%;
+        text-align: center;
+        text-align: center;
+    }
+
+
+    table.table-sortable th.currently-sorted[data-sort-dir="asc"]::after {
+        content: "\25b2";
+
+    }
+
+    table.table-sortable th.currently-sorted[data-sort-dir="desc"]::after {
+        content: "\25bc";
+
+    }
+
+    .cell-total, .cell-collection, .cell-due {
+        display: inline-block;
+        padding: 0px 3px;
+        border-radius: 3px;
+        transition: all 0.15s ease;
+        cursor: pointer;
+    }
+    .cell-total:hover {
+        background-color: rgba(13, 110, 253, 0.15);
+        text-decoration: underline;
+        color: #0d6efd;
+    }
+    .cell-collection:hover {
+        background-color: rgba(25, 135, 84, 0.15);
+        text-decoration: underline;
+        color: #198754;
+    }
+    .cell-due:hover {
+        background-color: rgba(220, 53, 69, 0.15);
+        text-decoration: underline;
+        color: #dc3545;
+    }
+
+    .col-md-3 {
+        display: inline-block;
+        margin-left: -4px;
+    }
+
+    @media (min-width: 1200px){
+        .fc{
+            margin-top: 3%;
+        }
+    }
+    @media (min-width: 3951px) and (max-width: 8000px) {
+        .btn-group.bi {
+            width: 25%;
+        }
+        .fc {
+            margin-top: 2% !important;
+        }
+        .bi{
+            margin-left: 48% !important;
+            margin-top: -0% !important;
+        }
+        #example_wrapper {
+            margin-top: 0.3% !important;
+        }
+        #example_filter{
+            float:left;
+            margin-left: 77% !important;
+            margin-top: 0%;
+        } 
+        .flex-wrap {
+            left: 35% !important;
+        }
+        #example th{
+            text-align: center;
+            width: 11%;
+        }
+    }
+    @media (min-width: 2851px) and (max-width: 3950px) {
+        .btn-group.bi {
+            width: 25%;
+          
+          }
+          .fc {
+            margin-top: 3% !important;
+        }
+        .bi{
+            margin-left: 48% !important;
+            margin-top: -0% !important;
+        }
+        #example_wrapper {
+            margin-top: 0.3% !important;
+        }
+        #example_filter{
+            float:left;
+            margin-left: 77% !important;
+            margin-top: 0%;
+        } 
+        .flex-wrap {
+            left: 35% !important;
+        }
+        #example th{
+            text-align: center;
+            width: 11%;
+        }
+    }
+    @media (min-width: 2480px) and (max-width: 2850px) {
+        .btn-group.bi {
+            width: 25%;
+          
+          }
+          .fc {
+            margin-top: 3.5% !important;
+        }
+        .bi{
+            margin-left: 48% !important;
+            margin-top: -0% !important;
+        }
+        #example_wrapper {
+            margin-top: 0.3% !important;
+        }
+        #example_filter{
+            float:left;
+            margin-left: 72% !important;
+            margin-top: 0%;
+        } 
+        .flex-wrap {
+            left: 35% !important;
+        }
+        #example th{
+            text-align: center;
+            width: 11%;
+        }
+    }
+    @media (min-width: 1951px) and (max-width: 2479px) {
+        .btn-group.bi {
+            width: 25%;
+        }
+        .fc {
+            margin-top: 3.5% !important;
+        }
+        .bi{
+            margin-left: 48% !important;
+            margin-top: -0% !important;
+        }
+        #example_wrapper {
+            margin-top: 1% !important;
+        }
+        #example_filter{
+            float:left;
+            margin-left: 63% !important;
+            margin-top: 0%;
+        } 
+        .flex-wrap {
+            left: 35% !important;
+        }
+        #example th{
+            text-align: center;
+            width: 11%;
+        }
+    }
+
+    @media (min-width: 1541px) and (max-width: 1950px) {
+        .btn-group.bi {
+            width: 25%;
+          
+          }
+          .fc {
+            margin-top: 3.5% !important;
+          }
+        .bi{
+            margin-left: 48% !important;
+            margin-top: -0% !important;
+            margin-bottom: 0% !important;
+        }
+        #example_wrapper {
+            margin-top: 2.3% !important;
+        }
+        #example_filter{
+            margin-right: 1% !important;
+            margin-top: 0%;
+        } 
+        .flex-wrap {
+            left: 35% !important;
+            margin-top: -4% !important;
+        }
+        #example th{
+            text-align: center;
+            width: 11%;
+        }
+    }
+
+    @media (min-width: 1200px) and (max-width: 1540px) {
+        .bi{
+            margin-top: 0% !important;
+            left: 33%;
+            margin: 0% !important;
+        }
+        #example_wrapper {
+            margin-top: 4.6% !important;
+        }
+        #example_filter{
+            margin-right: 32.5% !important;
+            margin-top: 0%;
+        } 
+        .flex-wrap {
+            left: 23% !important;
+          }
+    }
+
+    @media (min-width: 992px) and (max-width: 1199px) {
+        .bi{
+            margin-top: 0% !important;
+            left: 25%;
+            max-width: 17%;
+            margin-bottom: 0% !important;
+        }
+
+        .fc{
+            margin-top: 8%;
+        }
+        .flex-wrap {
+            left: 19% !important;
+          }
+        #example_filter {
+            margin-right: 54%;
+            margin-top: 5% !important;
+        }
+        #example_wrapper {
+            margin-top: 1% !important;
+          
+          }
+    }
+
+    @media (min-width: 768px) and (max-width: 991px) {
+        .fc{
+            margin-top: 11%;
+        }
+
+        .bi{
+            margin-top: 3%!important;
+            max-width: 49% ;
+            left: 38%;
+            margin-bottom: 0% !important;
+        }
+
+        .addipomodal {
+            margin: 0% -22%!important;
+            position: fixed;
+        }
+        .flex-wrap{
+            left: 28% !important;
+            top: 6%;
+        }
+        #example_filter{
+            margin-right: 80% !important;
+            margin-top: -22%;
+        } 
+        #example_wrapper {
+            margin-top: 2% !important;
+          
+        }
+        
+        #navbarNavAltMarkup{
+            font-size: 97%;
+        }
+        .slr{
+            margin-bottom: -3% !important;
+        }
+        {% comment %} .form-control-sm{
+            width: 138% !important;
+        } {% endcomment %}
+    }
+    @media (min-width: 700px) and (max-width: 767px) {
+        .fc{
+            margin-top: 18%;
+        }
+        .bi{
+            top: -0.2rem !important;
+            width: 54% !important;
+            left: -17%;
+        }
+        .pymodel{
+            margin: 1% -49.5% !important;
+            width: 193%;
+        }
+        .iponame{
+            margin-top: 54px;     
+        }
+        #example_wrapper {
+            margin-top: -0.4% !important;
+        }
+        #example_length{
+            margin-right: 46% !important;
+        }
+        #example_filter{
+            margin-right: 139.5% !important;
+            margin-top: 117%;
+            margin-bottom: 10.5% !important;
+        } 
+        .flex-wrap{
+            top: -3%;
+            left: 73% !important;
+            width: auto !important;
+        }
+        .row.dt-row {
+            margin-top: -2% !important;
+        }
+        .slr{
+            position: absolute;
+            top: 56%;
+            left: 1%;
+        }
+    }
+
+
+    @media (min-width: 576px) and (max-width: 699px) {
+        .fc{
+            margin-top: 18%;
+        }
+        .bi{
+            top: 3.2rem !important;
+            width: 54% !important;
+            left: 1%;
+            margin: 0% !important;
+        }
+        .addipomodal {
+            margin: -2% -91.5% !important;
+            width: 193%;
+        }
+        .iponame{
+            margin-top: 54px;     
+        }
+        #example_wrapper {
+            margin-top: -0.4% !important;
+        }
+        #example_length{
+            margin-right: 46% !important;
+        }
+        #example_filter{
+            margin-right: 139.5% !important;
+            margin-top: 117%;
+            margin-bottom: 10.5% !important;
+        } 
+        .flex-wrap{
+            top: 5%;
+            left: 73% !important;
+            width: auto !important;
+        }
+        .row.dt-row {
+            margin-top: -2% !important;
+        }
+        .slr{
+            position: absolute;
+            top: 9%;
+            left: 1%;
+        }
+    }
+
+    @media (min-width: 427px) and (max-width: 575px) {
+        .fc{
+            margin-top: 23%;
+        }
+
+        .bi{
+            top: -16.5% !important;
+            width: 54% !important;
+            left: 1% !important;
+            margin: 0% !important;
+        }
+
+        .addipomodal {
+            margin: 0% -64%!important;
+            position: fixed;
+        }
+
+        .iponame{
+            margin-top: 54px;     
+        }
+        #example_wrapper {
+            margin-top: 4% !important;
+        }
+        #example_length{
+            margin-right: 46% !important;
+        }
+        .flex-wrap{
+            left: 3% !important;
+            top: 37%;
+        }
+        #example_filter{
+            margin-right: 158.5% !important;
+            margin-top: 281%;
+            margin-bottom: -1.5% !important;
+        } 
+        .row.dt-row {
+            margin-top: -2% !important;
+        }
+        .slr{
+            position: absolute;
+            top: 76%;
+            left: 1%;
+        }
+        .jvbtn{
+            max-width: 131% !important;
+            font-size: 96% !important;
+        }
+    }
+    @media (min-width: 400px) and (max-width: 426px) {
+        .fc{
+            margin-top: 26%;
+        }
+        .bi{
+            margin-top: 25.3% !important;
+            width: 98%!important;
+            left: -4%;
+        }
+        .addipomodal {
+            margin: 0% -82%!important;
+            position: fixed;
+        }
+        .iponame{
+            margin-top: 54px;     
+        }
+        #example_wrapper {
+            margin-top: -12% !important;
+        }
+        #example_length{
+            margin-right: 46% !important;
+            margin-top: 12% !important;
+        }
+        .flex-wrap{
+            left: 12% !important;
+            top: -0.5rem;
+            width: auto !important;
+        }
+        .buttons-colvis{
+            left: 0% !important;
+            top: 5% !important;
+            width: 89px !important;
+        }
+        .buttons-collection{
+            top: 4% ;
+            left: 16% ;
+            width:97px ;
+        }
+        #example_filter{
+            margin-right: 3rem !important;
+            margin-top: 8.5rem;
+            margin-bottom: 15.5% !important;
+        } 
+        #example_filter input{
+            width: 200% !important;
+        } 
+        .row.dt-row {
+            margin-top: 0rem !important;
+        }
+        .slr{
+            position: absolute;
+            top: 79%;
+            left: 1%;
+        }
+        .jvbtn{
+            max-width: 83% !important;
+            font-size: 93% !important;
+            bottom: 123% !important;
+            left: 6% !important;
+        }
+        .flex-wrap div .btn-group{
+            max-width: 60% !important;
+            font-size: 68% !important;
+            margin: 0% !important;
+            padding: 0% !important;
+            gap: 0% !important;
+            space-between: 0% !important;
+        }
+    }
+
+    @media (min-width: 385px) and (max-width: 399px) {
+        .fc{
+            margin-top: 33%;
+        }
+
+        .bi{
+            margin-top: -0.7% !important;
+            width: 106%!important;
+            left: 8%;
+        }
+
+        .addipomodal {
+            margin: -2% -48.5% !important;
+            width: 193%;
+        }
+
+        .iponame{
+            margin-top: 54px;     
+        }
+        #example_wrapper {
+            margin-top: 3% !important;
+        }
+        #example_length{
+            margin-right: 46% !important;
+        }
+        .flex-wrap{
+            left: 2% !important;
+            top: 1.7rem;
+            width: auto !important;
+        }
+        .buttons-colvis{
+            left: 0% !important;
+            top: 5% !important;
+            width: 89px !important;
+        }
+        .buttons-collection{
+            top: 4% ;
+            left: 16% ;
+            width:97px ;
+        }
+        #example_filter{
+            margin-right: 0.8rem !important;
+            margin-top: 7.5rem;
+            margin-bottom: -30.5% !important;
+        } 
+        .row.dt-row {
+            margin-top: 0rem !important;
+          
+        }
+        .slr{
+            margin-top: 71%;
+            margin-bottom: -66% !important;
+            margin-left: 4% !important;
+        }
+        .jvbtn{
+            max-width: 85% !important;
+            font-size: 83% !important;
+            bottom: 43% !important;
+            left: -4% !important;
+        }
+        #example_filter input{
+            width: 150% !important;
+        }
+    }
+
+    @media (min-width: 316px) and (max-width: 384px) {
+        .fc{
+            margin-top: 33%;
+        }
+
+        .bi{
+            margin-top: -0.7% !important;
+            width: 106%!important;
+            left: 8%;
+        }
+
+        .addipomodal {
+            margin: -2% -48.5% !important;
+            width: 193%;
+        }
+
+        .iponame{
+            margin-top: 54px;     
+        }
+        #example_wrapper {
+            margin-top: 3% !important;
+        }
+        #example_length{
+            margin-right: 46% !important;
+        }
+        .flex-wrap{
+            left: 2% !important;
+            top: 1.7rem;
+            width: auto !important;
+        }
+        .buttons-colvis{
+            left: 0% !important;
+            top: 5% !important;
+            width: 89px !important;
+        }
+        .buttons-collection{
+            top: 4% ;
+            left: 16% ;
+            width:97px ;
+        }
+        #example_filter{
+            margin-right: 7.8rem !important;
+            margin-top: 8.5rem;
+            margin-bottom: -30.5% !important;
+        } 
+        .row.dt-row {
+            margin-top: 0rem !important;
+          
+        }
+        .slr{
+            margin-top: 37%;
+            margin-bottom: -109% !important;
+            margin-left: 4% !important;
+        }
+        .jvbtn{
+            max-width: 85% !important;
+            font-size: 83% !important;
+            bottom: 43% !important;
+            left: -4% !important;
+        }
+        #example_filter input{
+            width: 150% !important;
+        }
+    }
+
+    @media (min-width: 295px) and (max-width: 315px){ 
+        .bi{
+            margin-top:-15.5%!important;
+            margin-right: 2% !important;
+            width: 100%!important;
+            box-sizing: border-box;
+            display: flex;            /* enable flex */
+            flex-direction: column;
+        }
+
+        .addipomodal {
+            margin: -2% -48.5% !important;
+            width: 193%;
+        }
+
+        .iponame{
+            margin-top: 54px;     
+        }
+
+        .fc{
+            margin-top: 33%;
+        }
+        #example_wrapper {
+            margin-top: 4% !important;
+        }
+        #example_length{
+            margin-right: 46% !important;
+        }
+        .flex-wrap{
+            left: 6% !important;
+            top: 7.5rem;
+            width: auto !important;
+        }
+        .buttons-colvis{
+            left: 0% !important;
+            top: 5% !important;
+            width: 89px !important;
+        }
+        .buttons-collection{
+            top: 4% ;
+            left: 16% ;
+            width:97px ;
+        }
+        #example_filter{
+            margin-right: 5.8rem !important;
+            margin-top: 12.5rem;
+            margin-bottom: 5.5% !important;
+        } 
+        .row.dt-row {
+            margin-top: 0rem !important;
+          
+          }
+          .pysubbtn {
+            font-size: 73%;
+            width: 126%;
+        }
+        .slr{
+            margin-top: 10%;
+            margin-bottom: -269% !important;
+            margin-left: 15% !important;
+        }
+    }
+
+    @media (min-width: 280px) and (max-width: 294px){ 
+        .bi{
+            margin-top: -3.5% !important;
+            width: 100% !important;
+            display: flex;            /* enable flex */
+            flex-direction: column;
+        }
+
+        .addipomodal {
+            margin: -2% -48.5% !important;
+            width: 193%;
+        }
+
+        .iponame{
+            margin-top: 54px;
+            height: 74px;    
+        }
+        .pysubbtn {
+            font-size: 73%;
+            width: 126%;
+        }
+
+        .fc{
+            margin-top: 48%;
+        }
+        .custom-width {
+            margin-left: 0px !important;
+            left: 0.2rem !important;
+            width: 89% !important;
+        }
+        h5 {
+            font-size: 77.25%;
+        }
+        .slr{
+            margin-top: -97%;
+            margin-bottom: -269% !important;
+            margin-left: 0% !important;
+        }
+        #example_filter{
+            margin-right: 5.8rem !important;
+            margin-top: 13.5rem;
+            margin-bottom: 106.5% !important;
+        }
+        .flex-wrap{
+            left: 6% !important;
+            top: 7.5rem;
+            width: auto !important;
+        }
+    }
+    .dataTables_wrapper .dt-buttons {
+        text-align: center !important;
+        margin-bottom: 10px;
+    }
+    
+    .dataTables_wrapper .dataTables_filter {
+        text-align: center !important;
+        margin: 10px 0;
+    }
+    
+    .dataTables_wrapper .dataTables_filter input {
+        margin: 0 auto;
+        display: inline-block;
+    }
+    
+    .dataTables_wrapper .dataTables_length {
+        display: flex;
+        {% comment %} justify-content: center; {% endcomment %}
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    /* Simple Multiple IPO Modal Styles */
+    #multipleIPOModal .modal-content {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+    }
+
+    #multipleIPOModal .modal-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        padding: 15px 20px;
+    }
+
+    #multipleIPOModal .modal-title {
+        font-weight: 500;
+        color: #495057;
+    }
+
+    #multipleIPOModal .modal-body {
+        padding: 20px;
+    }
+
+    #multipleIPOModal .form-group {
+        margin-bottom: 20px;
+    }
+
+    #multipleIPOModal .form-group label {
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 5px;
+    }
+
+    #multipleIPOModal .form-control {
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        padding: 8px 12px;
+    }
+
+    #multipleIPOModal .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    #multipleIPOModal .form-control[readonly] {
+        background-color: #e9ecef;
+        opacity: 1;
+    }
+
+    #multipleIPOModal .alert-info {
+        background-color: #d1ecf1;
+        border-color: #bee5eb;
+        color: #0c5460;
+        border-radius: 4px;
+        padding: 12px 15px;
+    }
+
+    #multipleIPOModal .modal-footer {
+        background-color: #f8f9fa;
+        border-top: 1px solid #dee2e6;
+        padding: 15px 20px;
+    }
+
+    #multipleIPOModal .btn {
+        border-radius: 4px;
+        padding: 8px 16px;
+        font-weight: 400;
+    }
+
+    /* IPO Payment List Simple Styling */
+    {% comment %} #ipoPaymentsList {
+        background-color: #ffffff;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 15px;
+        margin-bottom: 10px;
+    } {% endcomment %}
+
+    {% comment %} #ipoPaymentsList .jv-entry-row {
+        background-color: #fff3cd;
+        border-color: #ffeaa7;
+    } {% endcomment %}
+
+    #ipoPaymentsList .totals-row {
+        background-color: #d1ecf1;
+        border-color: #bee5eb;
+        font-weight: 500;
+    }
+
+    /* Simple responsive adjustments */
+    @media (max-width: 768px) {
+        #multipleIPOModal .modal-body {
+            padding: 15px;
+        }
+        
+        #multipleIPOModal .modal-header,
+        #multipleIPOModal .modal-footer {
+            padding: 12px 15px;
+        }
+    }
+</style>
+
+
+
+<!-- <link rel="stylesheet" href="{% static 'JS/jquery-ui.css' %}"> -->
+
+{% endblock %}
+{% block body %}
+
+{% csrf_token %}
+
+{% comment %} <script src="{% static 'JS/bootstrap.min.js' %}"></script>
+<script src="{% static 'JS/jquery-1.11.1.min.js' %}"></script>
+<script src="{% static 'JS/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'JS/dataTables.bootstrap4.min.js' %}"></script> {% endcomment %}
+{% for message in messages %}
+    {% if messages %}
+        <div class="alert {{ message.tags }} alert-dismissible  fixed-top" id="successalerts" role="alert" style="position:fixed;">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+            {{ message }}
+        </div>
+    {% endif %}
+{% endfor %}
+
+<h3 class="fixed-top iponame" style="z-index: 9; ">Group Wise Dashboard</h3>
+
+
+<script src="{% static 'JS/sorttable.js' %}"></script>
+
+{% comment %} <div class="card" style="margin: 5% 0%; border: none;"> {% endcomment %}
+    {% comment %} <div class="card-body tscroll"> {% endcomment %}
+<div class="container-fluid fc">
+
+    <div class="table-responsive text-nowrap table-wrapper-scroll-x table-wrapper-scroll-y my-custom-scrollbar"> 
+        <table id="example" class="table-bordered table-hover table-sortable" style='width:100%;'>
+
+            {% comment %} <thead>
+                <tr style="text-align: center; white-space: nowrap;">
+                    <th scope="col" style="width:90px;">Group Name</th>
+                    {% for col in df.columns %}
+                    <th scope="col">{{col}}</th>
+                    {% endfor %}
+                </tr>
+            </thead> {% endcomment %}
+            <div>
+                <!-- BUTTON OF EDIT MODAL -->
+                {% comment %} <button type="button" class="btn btn-outline-primary bi d-flex justify-content-center align-items-center" style="float:right; margin: 12px 16px; width: 9.5%;" data-bs-toggle="modal"
+                    onclick="document.getElementById('edit').style.display='block'" data-bs-target="#edit">Payment</button> {% endcomment %}
+                <!--NEW  Modal FOR EDIT MODAL-->
+                <div class="modal pymodel fade addipomodal" id="edit" tabindex="-1" role="dialog"
+                    aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog1" role="document" style="padding: 0 60px; margin: 5px auto;">
+                        <div class="modal-content"
+                            style="text-align: justify; background-color: whitesmoke; border-radius: 40px; border: 1px solid black;">
+                            <div class="modal-body">
+                                <div class="modal-header"
+                                    style="background: rgb(49, 183, 183); color: white; border-radius: 40px; border: 3px solid black; text-align: center; display: block;">
+                                    <b>
+                                        <h5 class="modal-title" id="exampleModalLabel">Payment</h5>
+                                    </b>
+                                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
+                                        style="margin: -45px 0;">X</button>
+                                </div>
+                                <form action="/AddPayment" method="post" class="needs-validation"
+                                    style="margin: 10px 20px;" novalidate>{% csrf_token %}
+                                    <div class="form-group">
+                                        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> -->
+    
+                                        {% comment %} <script>
+    
+                                            $("#success-alert").fadeTo(5000, 500).slideUp(500, function () {
+                                                $("#success-alert").slideUp(500);
+                                            });
+                                        </script> {% endcomment %}
+    
+                                        <label for="Group" class="form-label"><b>Group&nbsp;<font color="red">*</font></b></label>
+                                        <select class="form-control" name="Group" autocomplete="off" id="Group" required>
+                                            <option disabled selected value="">Select Group</option>
+                                            {% for j in entry_sorted %}
+                                            <option value="{{ j.GroupName }}">{{ j.GroupName }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="invalid-feedback">
+                                            Please Select A Valid Group.
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="IPOPrice" class="form-label"><b>Amount&nbsp;<font color="red">*</font>
+                                                </b></label>
+                                        <input type="text" class="form-control" placeholder="Enter Amount" id="IPOPrice"
+                                            oninput="this.value=this.value.replace(/[^0-9.]/g,'');if((this.value.match(/\./g)||[]).length>1)this.value=this.value.slice(0,-1);if(this.value.includes('.')){let p=this.value.split('.');if(p[1].length>2)this.value=p[0]+'.'+p[1].slice(0,2);}"
+                                            name='Amount' maxlength="10" required>
+                                        <div class="invalid-feedback">
+                                            Please Enter Amount.
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-footer" style="border-top: 1px solid black;">
+                                        <button type="button" class="btn btn-outline-secondary"
+                                            data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-outline-primary pysubbtn">Submit Form</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <!-- JAVASCRIPT FOR ADDGROUP FORM VALIDATION -->
+                            <script>
+                                // Example starter JavaScript for disabling form submissions if there are invalid fields
+                                (function () {
+                                    'use strict'
+
+                                    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                                    var forms = document.querySelectorAll('.needs-validation')
+
+                                    // Loop over them and prevent submission
+                                    Array.prototype.slice.call(forms)
+                                        .forEach(function (form) {
+                                            form.addEventListener('submit', function (event) {
+                                                if (!form.checkValidity()) {
+                                                    event.preventDefault()
+                                                    event.stopPropagation()
+                                                }
+
+                                                form.classList.add('was-validated')
+                                            }, false)
+                                        })
+                                })()
+                            </script>
+                            <!-- JAVASCRIPT FOR ADDGROUP FORM WITHOUT ENTERING ANY NUMBER USER CANNOT TO BE NEXT INPUT -->
+                            <script>
+                                $(document).ready(function () {
+                                    $('#GroupName').focusout(function () {
+                                        var thisValue = $(this).val();
+                                        if (thisValue.trim() == '') {
+                                            $(this).next().show();
+                                            $(this).focus();
+                                        } else {
+                                            $(this).next().hide();
+                                        }
+                                    });
+
+                                });
+                            </script>
+                           
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div style ="margin-top:5px;">
+                <!-- BUTTON OF EDIT MODAL -->
+                {% comment %} <button type="button" class="btn btn-secondary dwo" data-toggle="modal" style="float:right; margin: 24px 15px; width: 10%;"
+                                data-target="#exampleModals">Download &nbsp; <i class="fa fa-download" aria-hidden="true"
+                                    style='font-size:18px;'></i>
+                </button> {% endcomment %}
+                <!--NEW  Modal FOR EDIT MODAL-->
+                <div class="modal fade" id="exampleModals" tabindex="-1" role="dialog"
+                    aria-labelledby="exampleModalLabels" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header" style="border-bottom: 1px solid black;">
+                                <h5 class="modal-title" id="exampleModalLabels">Download File &nbsp; <i
+                                        class="fa fa-download" aria-hidden="true" style='font-size:18px;'></i></h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                {{prompt}}
+                                <form method="POST"     {% if IPOName.IPOType == "MAINBOARD" %} action="download-Groupwise" 
+                                {%else%}  action="download-Groupwise" {%endif%} >
+                                    {% csrf_token %}
+                                    <label><b style="margin: 0 12px;"> Download File :</b></label>
+                                    <button type="submit" class="btn btn-primary"> Download &nbsp;<i
+                                            class="fa fa-file-excel-o" aria-hidden="true"
+                                            style='font-size:18px;'></i></button>
+                                </form>
+                                {% for profile in entry%}
+                                {{profile.name}}
+                                {% endfor %}
+                            </div>
+                            {% comment %} <div class="modal-body">
+                                {{prompt}}
+                                <form method="POST" {% if IPOName.IPOType == "MAINBOARD" %} action="download-Billing-Pdf" 
+                                {%else%}  action="download-Billing-Pdf" {%endif%} >
+                                    {% csrf_token %}
+                                    <label><b style="margin: 0 12px;"> Download PDF :</b></label>
+                                    <button type="submit" class="btn btn-primary"> Download &nbsp;<i
+                                            class="fa fa-file-pdf-o" aria-hidden="true"
+                                            style='font-size:18px;'></i></button>
+                                </form>
+                                {% for profile in entry%}
+                                {{profile.name}}
+                                {% endfor %}
+                            </div> {% endcomment %}
+                        </div>
+                    </div>
+                </div>                            
+            </div>
+            {% include "partials/add_payment_modal.html" %}
+            {% include "partials/transfer_payment_modal.html" %}
+            {% comment %} <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const select = document.getElementById('trans_ipo');
+                    const options = Array.from(select.options)
+                        .slice(1) // exclude "All"
+                        .sort((a, b) => a.text.localeCompare(b.text)); // A-Z sort
+
+                    select.options.length = 1; // keep only the first "All" option
+                    options.forEach(opt => select.add(opt));
+                });
+            </script> {% endcomment %}
+
+            <script>
+                function toggleIpoField() {
+                    {% comment %} const ipoField = document.getElementById('trans_ipo').closest('.form-group');
+                    ipoField.style.display = document.getElementById('trans_jv').checked ? 'none' : 'block'; {% endcomment %}
+                    const ipoElement = document.getElementById('trans_ipo');
+                    const jvElement = document.getElementById('trans_jv');
+                    
+                    if (ipoElement && jvElement) {
+                        const ipoField = ipoElement.closest('.form-group');
+                        if (ipoField) {
+                            ipoField.style.display = jvElement.checked ? 'none' : 'block';
+                        }
+                    }
+                }
+
+                // Initialize on page load
+                document.addEventListener('DOMContentLoaded', function() {
+                    toggleIpoField();
+                });
+            </script>
+            <div class="modal fade" id="transactionModal1" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <form id="nonJVForm" method="post" action="{% url 'save_transaction_group' %}">
+                            {% csrf_token %}
+                            <div class="modal-header">
+                                <h5 class="modal-title">Add Payment (Non-JV)</h5>
+                                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                            </div> 
+
+                            <div class="modal-body">
+                                <div class="row">
+                                    <!-- Left Side (User fills) -->
+                                    <div class="col-md-6">
+                                        <label>Group Name</label>
+                                        <select name="group_id" id="group_id" class="form-select" required>
+                                            <option value="" disabled selected>All</option>
+                                            {% for group in groups %}
+                                                <option value="{{ group.id }}">{{ group.GroupName }}</option>
+                                                {% comment %} <option value="{{ group.id }}" {% if forloop.first %}selected{% endif %}>{{ group.GroupName }}</option> {% endcomment %}
+                                            {% endfor %}
+                                        </select>
+
+                                        <label>IPO Name</label>
+                                        <select name="ipo_id" id="ipo_id" class="form-select" required>
+                                            <option value="" disabled selected>All</option>
+                                            {% for ipo in ipos %}
+                                                <option value="{{ ipo.id }}">{{ ipo.IPOName }}</option>
+                                                {% comment %} <option value="{{ ipo.id }}" {% if forloop.first %}selected{% endif %}>{{ ipo.IPOName }}</option> {% endcomment %}
+                                            {% endfor %}
+                                        </select>
+
+                                        
+                                        <label>Amount</label>
+                                        <input type="number" name="amount" id="amount" step="0.01" class="form-control" oninput="this.value = this.value.replace(/[^0-9.]/g,'');if ((this.value.match(/\./g) || []).length > 1) {this.value = this.value.slice(0, -1);}this.value = Math.abs(this.value);)" onkeydown="if (event.key === '-' || event.key === 'e' || event.key === 'E'|| event.key === '+') event.preventDefault();" required>
+                                        {% comment %} <input type="text" name="amount" id="amount" step="0.01" class="form-control" oninput="this.value=this.value.replace(/[^0-9.]/g,'');if((this.value.match(/\./g)||[]).length>1)this.value=this.value.slice(0,-1);if(this.value.includes('.')){let p=this.value.split('.');if(p[1].length>2)this.value=p[0]+'.'+p[1].slice(0,2);}" required> {% endcomment %}
+                                        
+                                        <label>Amount Type</label>
+                                        <select name="amount_type" id="amount_type" class="form-select" required>
+                                            <option value="credit">Credit</option>
+                                            <option value="debit">Debit</option>
+                                        </select>
+
+                                        {% comment %} <label>Remark</label>
+                                        <input type="text" name="remark" id="remark" class="form-control"> {% endcomment %}
+                                        <label for="remark">Remark</label>
+                                        <input type="text" name="remark" id="remark" class="form-control">
+                                        <div id="remark_error" class="text-danger small" style="display:none; margin-top:2px;">
+                                            Maximum 250 characters allowed!
+                                        </div>
+
+                                        <label>Date & Time</label>
+                                        {% comment %} <input type="datetime-local" id="date_time" name="date_time"
+                                            class="form-control"
+                                            value="{{ now|date:'Y-m-d\\TH:i' }}"> {% endcomment %}
+                                        <input tabindex="-1" type="datetime-local" style="width: 100%;" class="form-control width" step="1" name="date_time" id="date_time_jv" value='{% now "Y-m-d H:i:s" %}' min="2020-01-01T00:00:00" max="2035-12-31T23:59:59" required>
+                                    </div>
+
+                                    <!-- Right Side (Auto JV) -->
+                                    <div class="col-md-6">
+                                        <label>Group Name</label>
+                                        <select id="jv_group" name="jv_group_id" class="form-select" required>
+                                            <option value="" disabled selected>All</option>
+                                            {% for group in groups %}
+                                                <option value="{{ group.id }}">{{ group.GroupName }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <h6> </h6></br>
+
+                                        
+                                        <input class="form-check-input" type="checkbox" id="jv_checkbox" name="jv_checkbox" checked disabled>
+                                        <label class="form" for="jv_checkbox">
+                                            JV Entry 
+                                        </label></br>
+                                        
+
+                                        
+                                        {% comment %} <input type="hidden" id="jv_group" name="jv_group_id"> {% endcomment %}
+
+                                        <label>Amount</label>
+                                        <input type="number" id="jv_amount_display" name="jv_amount" step="0.01" class="form-control" readonly>
+                                        <input type="hidden" id="jv_amount" name="jv_amount">
+
+                                        <label>Amount Type</label>
+                                        <input type="text" id="jv_amount_type_display" name="jv_amount_type" class="form-control" readonly>
+                                        <input type="hidden" id="jv_amount_type" name="jv_amount_type">
+
+                                        {% comment %} <label>Remark</label>
+                                        <input type="text" id="jv_remark_display" name="jv_remark" class="form-control" >
+                                        <input type="hidden" id="jv_remark" name="jv_remark"> {% endcomment %}
+                                        <label>Remark</label>
+                                        <input type="text" id="jv_remark_display" name="jv_remark" class="form-control">
+                                        <input type="hidden" id="jv_remark" name="jv_remark">
+                                        <div id="jv_remark_error" class="text-danger small" style="display:none; margin-top:2px;">
+                                            Maximum 250 characters allowed!
+                                        </div>
+
+                                        <label>Date & Time</label>
+                                        
+                                        <input tabindex="-1" type="datetime-local" style="width: 100%;" class="form-control width" step="1" name="date_time" id="date_time" value='{% now "Y-m-d H:i:s" %}' min="2020-01-01T00:00:00" max="2035-12-31T23:59:59" readonly>
+
+
+                                        <!-- Flag to tell Django this is JV mode -->
+                                        <input type="hidden" name="jv_entry" value="true">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary" id="saveBtn2">Save</button>
+                            </div>
+                        </form>
+                        <script>
+                            // Default JV remark template
+                            function getDefaultJVRemark() {
+                                const amount = document.getElementById('amount').value;
+                                const amountType = document.getElementById('amount_type').value;
+                                const groupName = document.getElementById('group_id').selectedOptions[0].text;
+                                const ipoName = document.getElementById('ipo_id').selectedOptions[0].text;
+
+                                // Build your default remark string
+                                return `JV from ${groupName} for ${ipoName}`;
+                            }
+                            function getDefaultRemark() {
+                                const groupName = document.getElementById('jv_group').selectedOptions[0].text;
+                                const ipoName = document.getElementById('ipo_id').selectedOptions[0].text;
+                                return `JV To ${groupName} for ${ipoName}`;
+                            }
+
+                            function updateJVDisplay() {
+                                // Update amount
+                                const amount = document.getElementById('amount').value;
+                                document.getElementById('jv_amount_display').value = amount;
+                                document.getElementById('jv_amount').value = amount;
+
+                                // Update amount type (opposite of selected)
+                                const amountType = document.getElementById('amount_type').value;
+                                const jvAmountType = amountType === 'credit' ? 'debit' : 'credit';
+                                document.getElementById('jv_amount_type_display').value = jvAmountType.charAt(0).toUpperCase() + jvAmountType.slice(1);
+                                document.getElementById('jv_amount_type').value = jvAmountType;
+                                
+
+                                // Update remark
+                                const jvRemarkInput = document.getElementById('jv_remark_display');
+                                const jvHiddenRemark = document.getElementById('jv_remark');
+
+                                const defaultRemark = getDefaultJVRemark();
+
+                                if (!jvRemarkInput.dataset.edited) {
+                                    // Set default remark if user hasn't edited manually
+                                    jvRemarkInput.value = defaultRemark;
+                                    jvHiddenRemark.value = defaultRemark;
+                                } else {
+                                    // If user edited, append default remark at the end
+                                    jvHiddenRemark.value = jvRemarkInput.value ;
+                                }
+                                const mainRemarkInput = document.getElementById('remark');
+                                if (!mainRemarkInput.dataset.edited) {
+                                    mainRemarkInput.value = getDefaultRemark();
+                                }
+                            }
+
+                            document.addEventListener('DOMContentLoaded', function() {
+                                updateJVDisplay();
+
+                                document.getElementById('amount').addEventListener('input', updateJVDisplay);
+                                document.getElementById('amount_type').addEventListener('change', updateJVDisplay);
+                                document.getElementById('group_id').addEventListener('change', updateJVDisplay);
+                                document.getElementById('jv_group').addEventListener('change', updateJVDisplay);
+                                document.getElementById('ipo_id').addEventListener('change', updateJVDisplay);
+
+                                const jvRemarkInput = document.getElementById('jv_remark_display');
+                                jvRemarkInput.addEventListener('input', function() {
+                                    jvRemarkInput.dataset.edited = true;
+                                    document.getElementById('jv_remark').value = jvRemarkInput.value;
+                                });
+
+                                const modal = document.getElementById('transactionModal1');
+                                if (modal) {
+                                    modal.addEventListener('shown.bs.modal', function() {
+                                        updateJVDisplay();
+                                    });
+                                }
+                                document.getElementById('remark').addEventListener('input', function() {
+                                    this.dataset.edited = true;
+                                });
+                            });
+                        </script>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="transactionModal2" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <form id="IPOForm" method="post" action="{% url 'ipo_transaction1' %}">
+                            {% csrf_token %}
+                            <div class="modal-header">
+                                <h5 class="modal-title">Add Payment</h5>
+                                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                            </div> 
+
+                            <div class="modal-body">
+                            <div class="row">
+
+                                <!-- Left Side -->
+                                <div class="col-md-6">
+                                
+
+                                <label>Group Name</label>
+                                <select name="group_id_left" id="group_id_left" class="form-select" required>
+                                    <option value="" selected disabled>All</option>
+                                    {% for group in groups %}
+                                    <option value="{{ group.id }}">{{ group.GroupName }}</option>
+                                    {% endfor %}
+                                </select>
+
+                                <label>IPO Name</label>
+                                <select name="ipo_id_left" id="ipo_id_left" class="form-select" required>
+                                    <option value="" selected disabled>All</option>
+                                    {% for ipo in ipos %}
+                                    <option value="{{ ipo.id }}">{{ ipo.IPOName }}</option>
+                                    {% endfor %}
+                                </select>
+
+                                <label>Amount</label>
+                                <input type="number" name="amount" id="amount_left" step="0.01" class="form-control" oninput="this.value = this.value.replace(/[^0-9.]/g,'');if ((this.value.match(/\./g) || []).length > 1) {this.value = this.value.slice(0, -1);}this.value = Math.abs(this.value);)" onkeydown="if (event.key === '-' || event.key === 'e' || event.key === 'E'|| event.key === '+') event.preventDefault();" required>
+                                {% comment %} <input type="text" name="amount" id="amount_left" step="0.01" class="form-control" oninput="this.value=this.value.replace(/[^0-9.]/g,'');if((this.value.match(/\./g)||[]).length>1)this.value=this.value.slice(0,-1);if(this.value.includes('.')){let p=this.value.split('.');if(p[1].length>2)this.value=p[0]+'.'+p[1].slice(0,2);}" required> {% endcomment %}
+
+                                <label>Amount Type</label>
+                                <select name="amount_type" id="amount_type_left" class="form-select" required>
+                                    <option value="credit">Credit</option>
+                                    <option value="debit">Debit</option>
+                                </select>
+
+                                {% comment %} <label>Remark</label>
+                                <textarea name="remark_left" id="remark_left" class="form-control" rows="3" maxlength="250"></textarea> {% endcomment %}
+
+                                <label>Remark</label>
+                                <textarea name="remark_left" id="remark_left" class="form-control" rows="3"></textarea>
+                                <div id="remark_left_error" class="text-danger small" style="display:none; margin-top:2px;">
+                                    Maximum 250 characters allowed!
+                                </div>   
+
+                                <label>Date & Time</label>
+                                <input type="datetime-local" class="form-control" step="1" name="date_time" id="date_time_left" value='{% now "Y-m-d H:i:s" %}' required>
+                                </div>
+
+                                <!-- Right Side -->
+                                <div class="col-md-6">
+                                <label>Group Name</label>
+                                <select id="group_id_right" name="group_id_right" class="form-select" required>
+                                    <option value="" selected disabled>All</option>
+                                    {% for group in groups %}
+                                    <option value="{{ group.id }}">{{ group.GroupName }}</option>
+                                    {% endfor %}
+                                </select>
+
+                                <label>IPO Name</label>
+                                <select name="ipo_id_right" id="ipo_id_right" class="form-select" required>
+                                    <option value="" selected disabled>All</option>
+                                    {% for ipo in ipos %}
+                                    <option value="{{ ipo.id }}">{{ ipo.IPOName }}</option>
+                                    {% endfor %}
+                                </select>
+
+                                
+                                <label>Amount</label>
+                                <input type="number" id="amount_right_display" class="form-control" readonly>
+                                <input type="hidden" id="amount_right" name="amount_right">
+
+                                <label>Amount Type</label>
+                                <input type="text" id="amount_type_right_display" class="form-control" readonly>
+                                <input type="hidden" id="amount_type_right" name="amount_type_right">
+
+                                {% comment %} <label>Remark</label>
+                                <textarea id="remark_right_display" name="remark_right" class="form-control" rows="3" maxlength="250"></textarea>
+                                <input type="hidden" id="remark_right" name="remark_right"> {% endcomment %}
+                                <label>Remark</label>
+                                <textarea id="remark_right_display" name="remark_right" class="form-control" rows="3"></textarea>
+                                <input type="hidden" id="remark_right" name="remark_right">
+                                <div id="remark_right_error" class="text-danger small" style="display:none; margin-top:2px;">
+                                    Maximum 250 characters allowed!
+                                </div>
+
+                                <label>Date & Time</label>
+                                <input type="datetime-local" class="form-control" step="1" name="date_time_right" id="date_time_right" value='{% now "Y-m-d H:i:s" %}' readonly>
+                                </div>
+                            </div>
+                            </div>
+
+                            <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary" id="saveBtn1">Save</button> 
+                            </div>
+                        </form>
+                        
+                        <script>
+                            function getDefaultLeftRemark() {
+                                const amountType = document.getElementById('amount_type_left').value;
+                                const rightGroup = document.getElementById('group_id_right').selectedOptions[0]?.text || "";
+                                const leftIPO = document.getElementById('ipo_id_left').selectedOptions[0]?.text || "";
+                                const rightIPO = document.getElementById('ipo_id_right').selectedOptions[0]?.text || "";
+
+                                if(amountType === 'credit') return `Given to ${rightGroup} for ${rightIPO}`;
+                                if(amountType === 'debit') return `Received from ${rightGroup} for ${rightIPO}`;
+                                return '';
+                            }
+
+
+                            function getDefaultRightRemark() {
+                                const amountType = document.getElementById('amount_type_left').value; // opposite of left
+                                const leftGroup = document.getElementById('group_id_left').selectedOptions[0]?.text || "";
+                                const leftIPO = document.getElementById('ipo_id_left').selectedOptions[0]?.text || "";
+
+                                if(amountType === 'credit') return `Received from ${leftGroup} for ${leftIPO}`;
+                                if(amountType === 'debit') return `Given to ${leftGroup} for ${leftIPO}`;
+                                return '';
+                            }
+
+                            function updateRemarksAndAmount() {
+                                // Mirror Amount to right side
+                                const amount = document.getElementById('amount_left').value;
+                                document.getElementById('amount_right_display').value = amount;
+                                document.getElementById('amount_right').value = amount;
+
+                                // Mirror Amount Type to right side (opposite)
+                                const leftType = document.getElementById('amount_type_left').value;
+                                const rightType = leftType === 'credit' ? 'debit' : 'credit';
+                                document.getElementById('amount_type_right_display').value = rightType.charAt(0).toUpperCase() + rightType.slice(1);
+                                document.getElementById('amount_type_right').value = rightType;
+
+                                // Left Remark
+                                const leftRemarkInput = document.getElementById('remark_left');
+                                const defaultLeft = getDefaultLeftRemark();
+                                if(!leftRemarkInput.dataset.edited){
+                                    leftRemarkInput.value = defaultLeft.substring(0,250);
+                                } 
+
+                                // Right Remark
+                                const rightRemarkInput = document.getElementById('remark_right_display');
+                                const rightRemarkHidden = document.getElementById('remark_right');
+                                const defaultRight = getDefaultRightRemark();
+                                if(!rightRemarkInput.dataset.edited){
+                                    rightRemarkInput.value = defaultRight.substring(0,250);
+                                    rightRemarkHidden.value = defaultRight.substring(0,250);
+                                } 
+                            }
+
+                            document.addEventListener('DOMContentLoaded', function() {
+                                updateRemarksAndAmount();
+
+                                // Update whenever relevant fields change
+                                ['amount_left','amount_type_left','group_id_left','ipo_id_left','group_id_right','ipo_id_right'].forEach(id=>{
+                                    const el = document.getElementById(id);
+                                    if(el){
+                                        el.addEventListener('input', updateRemarksAndAmount);
+                                        el.addEventListener('change', updateRemarksAndAmount);
+                                    }
+                                });
+
+                                // Track edits for left remark
+                                const leftRemarkInput = document.getElementById('remark_left');
+                                leftRemarkInput.addEventListener('input', function(){
+                                    this.dataset.edited = true;
+                                    {% comment %} this.value = this.value.substring(0,250); {% endcomment %}
+                                });
+
+                                // Track edits for right remark
+                                const rightRemarkInput = document.getElementById('remark_right_display');
+                                rightRemarkInput.addEventListener('input', function(){
+                                    this.dataset.edited = true;
+                                    document.getElementById('remark_right').value = this.value;
+                                });
+                            });
+                        </script>
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function(){
+                                const saveBtn = document.getElementById("saveBtn1");
+
+                                // Elements
+                                const leftInput = document.getElementById("remark_left");
+                                const leftError = document.getElementById("remark_left_error");
+
+                                const rightInput = document.getElementById("remark_right_display");
+                                const rightHidden = document.getElementById("remark_right");
+                                const rightError = document.getElementById("remark_right_error");
+
+                                function validateInputs() {
+                                    let leftValid = true, rightValid = true;
+
+                                    // Validate left
+                                    if(leftInput.value.length > 250){
+                                        leftInput.value = leftInput.value.substring(0, 250);
+                                        leftError.style.display = "block";
+                                        leftValid = false;
+                                    } else {
+                                        leftError.style.display = "none";
+                                    }
+
+                                    // Validate right
+                                    let rightValue = rightInput.value;
+                                    if(rightValue.length > 250){
+                                        rightValue = rightValue.substring(0, 250);
+                                        rightError.style.display = "block";
+                                        rightValid = false;
+                                    } else {
+                                        rightError.style.display = "none";
+                                    }
+
+                                    // Update right hidden input
+                                    rightInput.value = rightValue;
+                                    rightHidden.value = rightValue;
+
+                                    // Disable submit if either invalid
+                                    saveBtn.disabled = !(leftValid && rightValid);
+                                }
+
+                                // Bind events
+                                leftInput.addEventListener("input", validateInputs);
+                                rightInput.addEventListener("input", validateInputs);
+
+                                // Initial validation
+                                validateInputs();
+                            });
+                        </script>
+
+
+
+                    </div>
+                </div>
+            </div>
+            
+        {{ html_table | safe }}
+            
+            {% comment %} <tbody>
+                {% for index, row in df.iterrows %}
+                <tr>
+                    <td>
+                        {{index}}
+                    </td>
+                    {% for cell in row %}
+                    <td>
+                        {{cell|floatformat:1}}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+
+            <tfoot>
+                <tr>
+                    <th style="width:90px;">Total</th>
+                    {% for cell in IPOAmount %}
+                    <td>
+                        {{cell|floatformat:1}}
+                    </td>
+                    {% endfor %}
+                    
+                    <td>{{Total|floatformat:1}}</td>
+                    <td>{{SumCollection|floatformat:1}}</td>
+                    <td>{{DueAmountSum|floatformat:1}}</td>
+                </tr>
+            </tfoot>  {% endcomment %}
+
+        </table>
+    </div>
+    <!-- Delete Modal -->
+    {% for ipo in IPOName %}
+        <div class="modal fade" id="deleteModal-{{ ipo.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel-{{ ipo.id }}" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel-{{ ipo.id }}">Delete IPO</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete IPO <strong>{{ ipo.IPOName }}</strong>?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary " class="close-btn" data-dismiss="modal">Cancel</button>
+                    <a href="{% url 'destroy' ipo.id %}?url={{ request.path }}" class="btn btn-danger">Delete</a>
+                </div>
+            </div>
+        </div>
+        </div>
+    {% endfor %}
+        {% comment %} html_table += f"""
+                <!-- Delete Modal -->
+                <div class="modal fade" id="deleteModal-{ipo.id}" tabindex="-1" role="dialog"
+                    aria-labelledby="deleteModalLabel-{ipo.id}" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="deleteModalLabel-{ipo.id}">Delete IPO</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                Are you sure you want to delete IPO <b>{ipo.IPOName}</b>?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-outline-danger"
+                                    onclick="er}window.location.href='/delete/{ipo.id}?page={page_numb';">
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            """ {% endcomment %}
+
+    <div class="row">
+        <div class="col-md-6">
+            <!-- Total rows and current range display (left aligned) -->
+            <p class="text-left">
+                Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} Rows
+            </p>
+        </div>
+
+        <div class="col-md-6">
+            <ul class="pagination justify-content-end text-left" style="margin: 0; margin-right:2%;">
+                <!-- Always show the first page -->
+                {% if page_obj.number != 1 %}
+                    <li class="page-item">
+                        <a class="page-link" href="/GroupWiseDashboard?page=1{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}">1</a>
+                    </li>
+                {% endif %}
+                
+                <!-- Show ellipsis if current page is greater than 4 -->
+                {% if page_obj.number > 4 %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+                
+                <!-- Display pages before the current page -->
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num > 1 and num < page_obj.number and num >= page_obj.number|add:'-2' %}
+                        <li class="page-item">
+                            <a class="page-link" href="/GroupWiseDashboard?page={{ num }}{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                <!-- Display current page -->
+                <li class="page-item active">
+                    <span class="page-link">{{ page_obj.number }}</span>
+                </li>
+                
+                <!-- Display pages after the current page -->
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num > page_obj.number and num < page_obj.number|add:'3' and num < page_obj.paginator.num_pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="/GroupWiseDashboard?page={{ num }}{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                <!-- Show ellipsis if current page is less than num_pages - 3 -->
+                {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+                
+                <!-- Always show the last page -->
+                {% if page_obj.number != page_obj.paginator.num_pages %}
+                    <li class="page-item">
+                        <a class="page-link" href="/GroupWiseDashboard?page={{ page_obj.paginator.num_pages }}{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}">{{ page_obj.paginator.num_pages }}</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
+</div> 
+
+{% comment %} <script>
+    $(document).ready(function () {
+        $('#bootstrapdatatable').DataTable({
+            "aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
+            "iDisplayLength": 25
+        }
+        );
+    });
+</script>
+{% endcomment %}
+<script>
+$(function () {
+    // Existing JV/IPO toggle code here ...
+
+    // --- Group summary preview updater ---
+    function updateGroupSummary() {
+        const groupName = $('#trans_group option:selected').text() || 'All';
+        const amountType = $('#trans_amount_type option:selected').text() || 'Credit';
+        const amount = $('#trans_amount').val() || '0.00';
+        let text = `${amountType} to ${groupName}`;
+        if (amount) text += `  ₹${amount}`;
+
+        // Update footer div
+        $('#groupSummaryPreview').text(text);
+    }
+
+    // Initialize once on load
+    updateGroupSummary();
+
+    // Update on field changes
+    $('#trans_group, #trans_amount_type').on('change', updateGroupSummary);
+    $('#trans_amount').on('input', updateGroupSummary);
+
+    // Also reapply when modal opens
+    $('#transactionModal').on('shown.bs.modal', updateGroupSummary);
+});
+</script>
+
+<script>
+    $(document).ready(function() {
+        // 1. Double-click on Total -> navigate to /<ipoId>/Billing with Groupfilter
+        $(document).on('dblclick', '.cell-total', function(e) {
+            e.stopPropagation();
+            const cell = $(this).closest('.amount-cell');
+            const ipoId = cell.data('ipo-id');
+            const groupName = cell.data('group-name');
+
+            if (ipoId) {
+                let url = '/' + encodeURIComponent(ipoId) + '/Billing';
+                if (groupName) {
+                    url += '?Groupfilter=' + encodeURIComponent(groupName);
+                }
+                window.location.href = url;
+            }
+        });
+
+        // 2. Double-click on Collection -> navigate to /accounting with group_name and ipo_name filters
+        $(document).on('dblclick', '.cell-collection', function(e) {
+            e.stopPropagation();
+            const cell = $(this).closest('.amount-cell');
+            const groupName = cell.data('group-name');
+            const ipoName = cell.data('ipo-name');
+
+            let params = [];
+            if (groupName) {
+                params.push('group_name=' + encodeURIComponent(groupName));
+            }
+            if (ipoName) {
+                params.push('ipo_name=' + encodeURIComponent(ipoName));
+            }
+
+            const url = '/accounting/' + (params.length ? '?' + params.join('&') : '');
+            window.location.href = url;
+        });
+
+        // 3. Double-click on Due -> open transaction modal to pay Due amount
+        $(document).on('dblclick', '.cell-due', function(e) {
+            e.stopPropagation();
+            // Get data from the parent cell
+            const cell = $(this).closest('.amount-cell');
+            const ipoId = cell.data('ipo-id');
+            const ipoName = cell.data('ipo-name');
+            const groupId = cell.data('group-id');
+            const groupName = cell.data('group-name');
+            const textContent = cell.text();
+
+            const exactDue = cell.data('exact-due');
+            let dueAmount = 0;
+            if (exactDue !== undefined && exactDue !== "") {
+                dueAmount = parseFloat(exactDue);
+            } else {
+                const dueMatch = textContent.match(/Due:\s*([-]?\d+(\.\d+)?)/);
+                if (dueMatch) {
+                    dueAmount = parseFloat(dueMatch[1]);
+                } 
+            }
+
+            // Set IPO and Group dropdowns
+            $('#trans_ipo').val(ipoId).trigger('change');
+            $('#trans_group').val(groupId).trigger('change');
+
+            // Set Amount (always positive)
+            const amountNum = Math.abs(dueAmount);
+            $('#trans_amount').val(amountNum);
+
+            // Set debit/credit based on sign
+            if (dueAmount < 0) {
+                $('#trans_amount_type').val('debit');
+            } else {
+                $('#trans_amount_type').val('credit');
+            }
+
+            // Set default remark (optional)
+            {% comment %} $('#trans_remark').val(`Transaction for ${groupName} - ${ipoName}`); {% endcomment %}
+
+            // Show the modal
+            $('#transactionModal').modal('show');
+
+            // Focus remark after opening
+            setTimeout(function() {
+                $('#trans_remark').focus();
+            }, 300);
+        });
+        $(document).on('dblclick', '.jv-cell', function () {
+            const groupId = $(this).data('group-id');
+            const jvAmount = parseFloat($(this).data('jv-amount')) || 0;
+
+            // Fill modal fields
+            $('#trans_group').val(groupId).trigger('change');
+            $('#trans_amount').val(Math.abs(jvAmount));
+            $('#trans_amount_type').val(jvAmount < 0 ? 'debit' : 'credit');
+
+            // Automatically check JV checkbox
+            $('#trans_jv').prop('checked', true).trigger('change');
+
+            // Optional: clear IPO selection since JV hides it anyway
+            $('#trans_ipo').val('');
+
+            // Open the same modal
+            {% comment %} const modalEl = document.getElementById('transactionModal');
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show(); {% endcomment %}
+            $('#transactionModal').modal('show');
+
+            // Focus remark field after opening
+            setTimeout(function () {
+                $('#trans_remark').focus();
+            }, 300);
+        });
+        
+        // Double-click handler for Total column - Multiple IPO entries
+        $(document).on('dblclick', '.total-cell-multi', function () {
+            const groupId = $(this).data('group-id');
+            const groupName = $(this).data('group-name');
+            const totalAmount = parseFloat($(this).data('total-amount')) || 0;
+            const ipoBreakdownJson = $(this).data('ipo-breakdown');
+
+            // Parse JSON string to array (handle HTML escaped data)
+            let ipoBreakdown;
+            try {
+                if (typeof ipoBreakdownJson === 'string') {
+                    // Decode HTML entities if present
+                    const decodedJson = $('<div>').html(ipoBreakdownJson).text();
+                    ipoBreakdown = JSON.parse(decodedJson);
+                } else {
+                    ipoBreakdown = ipoBreakdownJson;
+                }
+            } catch (e) {
+                console.error('Error parsing IPO data:', e, 'Raw data:', ipoBreakdownJson);
+                alert('Error parsing IPO data: ' + e.message);
+                return;
+            }
+
+            if (!ipoBreakdown || ipoBreakdown.length === 0) {
+                alert('No IPO due amounts available for this group.');
+                return;
+            }
+
+            // Build confirmation message with IPO details
+            let confirmMsg = `This will create ${ipoBreakdown.length} separate IPO-wise payment entries for ${groupName}:\n\n`;
+            ipoBreakdown.forEach(function(ipo) {
+                confirmMsg += `• ${ipo.ipo_name}: ₹${ipo.due_amount.toFixed(2)} (Due Amount)\n`;
+            });
+            confirmMsg += `\nContinue?`;
+            
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+
+            // Create multiple transactions
+            createMultipleIPOTransactions(groupId, groupName, ipoBreakdown);
+        });
+
+        // Function to create multiple IPO transactions
+        function createMultipleIPOTransactions(groupId, groupName, ipoBreakdown) {
+            const transactions = [];
+            
+            // Prepare transaction data for each IPO based on due amounts
+            ipoBreakdown.forEach(function(ipo) {
+                transactions.push({
+                    group_id: groupId,
+                    ipo_id: ipo.ipo_id,
+                    amount: ipo.due_amount, // Use due amount instead of total amount
+                    amount_type: 'credit', // Default to credit for payments
+                    remark: `Payment for ${groupName} - ${ipo.ipo_name} (Due: ${ipo.due_amount})`,
+                    date_time: new Date().toISOString().slice(0, 16)
+                });
+            });
+
+            // Send bulk transaction request
+            $.ajax({
+                url: '/bulk_ipo_transactions/',
+                method: 'POST',
+                data: {
+                    'transactions': JSON.stringify(transactions),
+                    'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        location.reload(); // Refresh to show updated data
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    const message = xhr.responseJSON && xhr.responseJSON.message
+                        ? xhr.responseJSON.message
+                        : error;
+                    alert('Error creating transactions: ' + message);
+                }
+            });
+        }
+
+        // Double-click handler for Due Amount column - Multiple IPO Form
+        $(document).on('dblclick', '.due-amount-cell', function () {
+            const groupId = $(this).data('group-id');
+            const groupName = $(this).data('group-name');
+            const exactDue = $(this).data('exact-due');
+            const dueAmount = exactDue !== undefined && exactDue !== "" ? parseFloat(exactDue) : (parseFloat($(this).data('due-amount')) || 0);
+
+            /* console.log('Opening multiple IPO form for group:', groupName, 'Due amount:', dueAmount); */
+            
+            // Always try to open the form and let loadIPODataForGroup handle the validation
+            /* console.log('Attempting to open form for group:', groupName); */
+            
+            // Get IPO breakdown data for this group
+            showMultipleIPOPaymentForm(groupId, groupName, dueAmount);
+        });
+
+        // Helper function to get local datetime in correct format
+        function getLocalDateTime() {
+            const now = new Date();
+            const localTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+            return localTime.toISOString().slice(0, 16);
+        }
+
+        // Function to show multiple IPO payment form
+        function showMultipleIPOPaymentForm(groupId, groupName, totalDueAmount) {
+            // Create a custom modal for multiple IPO payments
+            const modalHtml = `
+                <div class="modal fade" id="multipleIPOModal" tabindex="-1" role="dialog" aria-labelledby="multipleIPOModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="multipleIPOModalLabel">Add Multiple IPO Payments - ${groupName}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="multipleIPOForm">
+                                    <div class="form-group">
+                                        <div class="row col-md-12">
+                                        <div class="col-md-3">
+                                            <label for="multi_group_name">Group Name :</label>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <input type="text" class="form-control" id="multi_group_name" value="${groupName}" readonly>
+                                            <input type="hidden" id="multi_group_id" value="${groupId}">
+                                        </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>IPO-wise Payments</label>
+                                        <div id="ipoPaymentsList">
+                                            <div class="text-center">
+                                                <i class="fas fa-spinner fa-spin"></i> Loading IPO data...
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row col-md-12" style="margin-left:0%; background-color: #e9ecef">
+                                        <div class="col-md-4">
+                                            <div class="form-group" >
+                                                <label for="multi_date_time">Date & Time</label>
+                                                <input type="datetime-local" class="form-control" id="multi_date_time">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="form-group">
+                                                <label for="multi_remark" style="cursor: pointer;">Common Remark</label>
+                                                <textarea class="form-control" id="multi_remark" rows="1" title="Add your Common remarks here..." placeholder="Add your additional remarks here..."></textarea>
+                                                
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" id="saveMultipleIPOPayments">Save All Payments</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove existing modal if present
+            $('#multipleIPOModal').remove();
+            
+            // Add modal to body
+            $('body').append(modalHtml);
+            
+            // Show modal
+            $('#multipleIPOModal').modal('show');
+            
+            // Set local datetime as default
+            $('#multi_date_time').val(getLocalDateTime());
+            
+            // Load IPO data for this group
+            loadIPODataForGroup(groupId, groupName);
+        }
+
+        // Function to load IPO data for a specific group
+        function loadIPODataForGroup(groupId, groupName) {
+            /* console.log('Loading IPO data for group:', groupName, 'ID:', groupId); */
+            
+            // Try to find the Total column with IPO breakdown data first
+            let groupRow = $(`th:contains("${groupName}")`).closest('tr');
+            if (groupRow.length === 0) {
+                // Try finding by exact text match
+                groupRow = $('th').filter(function() {
+                    return $(this).text().trim() === groupName;
+                }).closest('tr');
+            }
+            
+            /* console.log('Found group row:', groupRow.length > 0 ? 'Yes' : 'No'); */
+            
+            let ipoData = [];
+            
+            if (groupRow.length > 0) {
+                // First try to get IPO breakdown from Total column (if available)
+                const totalCell = groupRow.find('.total-cell-multi');
+                if (totalCell.length > 0) {
+                    /* console.log('Found Total column with IPO breakdown data'); */
+                    const ipoBreakdownJson = totalCell.data('ipo-breakdown');
+                    
+                    if (ipoBreakdownJson) {
+                        try {
+                            let ipoBreakdown;
+                            if (typeof ipoBreakdownJson === 'string') {
+                                // Decode HTML entities if present
+                                const decodedJson = $('<div>').html(ipoBreakdownJson).text();
+                                ipoBreakdown = JSON.parse(decodedJson);
+                            } else {
+                                ipoBreakdown = ipoBreakdownJson;
+                            }
+                            
+                            /* console.log('Parsed IPO breakdown:', ipoBreakdown); */
+                            
+                            // Use the IPO breakdown data - include both positive and negative amounts
+                            if (ipoBreakdown && ipoBreakdown.length > 0) {
+                                ipoData = ipoBreakdown.filter(ipo => ipo.due_amount != 0);
+                                /* console.log('Filtered IPOs with due amounts != 0:', ipoData.length); */
+                            }
+                        } catch (e) {
+                            console.error('Error parsing IPO breakdown:', e);
+                        }
+                    }
+                }
+                
+                // If no IPO breakdown data found, fall back to extracting from individual cells
+                if (ipoData.length === 0) {
+                    /* console.log('No IPO breakdown found, trying to extract from individual cells'); */
+                    
+                    groupRow.find('.amount-cell').each(function() {
+                        const ipoId = $(this).data('ipo-id');
+                        const ipoName = $(this).data('ipo-name');
+                        const cellText = $(this).text();
+                        
+                        /* console.log('Processing IPO:', ipoName, 'Cell text:', cellText); */
+                        
+                        // Extract due amount from cell text - try multiple patterns
+                        let dueAmount = 0;
+                        
+                        // Pattern 1: "Due: 1234.5"
+                        let dueMatch = cellText.match(/Due:\s*([-]?\d+(?:\.\d+)?)/);
+                        if (dueMatch) {
+                            dueAmount = parseFloat(dueMatch[1]);
+                        } else {
+                            // Pattern 2: Look for numbers after "Due"
+                            dueMatch = cellText.match(/Due[:\s]*([-]?\d+(?:\.\d+)?)/);
+                            if (dueMatch) {
+                                dueAmount = parseFloat(dueMatch[1]);
+                            }
+                        }
+                        
+                        /* console.log('Extracted due amount:', dueAmount, 'for IPO:', ipoName); */
+                        
+                        // Include IPOs with any due amount (positive or negative)
+                        if (ipoId && ipoName && dueAmount != 0) {
+                            ipoData.push({
+                                ipo_id: ipoId,
+                                ipo_name: ipoName,
+                                due_amount: dueAmount
+                            });
+                        }
+                    });
+                }
+            }
+            
+            /* console.log('Total IPOs found with due amounts:', ipoData.length); */
+            
+            // Extract JV amount from the table
+            let jvAmount = 0;
+            let jvAmountType = 'credit';
+            
+            if (groupRow.length > 0) {
+                // Look for JV cell in the group row
+                const jvCell = groupRow.find('.jv-cell');
+                if (jvCell.length > 0) {
+                    const jvAmountData = parseFloat(jvCell.data('jv-amount')) || 0;
+                    jvAmount = Math.abs(jvAmountData);
+                    jvAmountType = jvAmountData < 0 ? 'debit' : 'credit';
+                    /* console.log('Found JV amount:', jvAmountData, 'Absolute:', jvAmount, 'Type:', jvAmountType); */
+                }
+            }
+            
+            // Generate IPO payment form
+            let ipoFormHtml = '';
+            if (ipoData.length === 0 && jvAmount === 0) {
+                ipoFormHtml = '<div class="alert alert-info">No IPO due amounts or JV amounts found for this group.</div>';
+            } else {
+                // Add JV Entry row at the top (only if JV amount > 0)
+                if (jvAmount > 0) {
+                    ipoFormHtml += `
+                        <div class="row mb-3 jv-entry-row" style="width: 99.5%;margin-left: 0px; padding: 10px; border: 1px solid #dee2e6;">
+                            <div class="col-md-4">
+                                <label><strong>JV Entry</strong></label>
+                                <input type="text" class="form-control" value="Journal Voucher Entry" readonly>
+                            </div>
+                            <div class="col-md-3">
+                                <label>Amount</label>
+                                <input type="number" class="form-control jv-amount" value="${jvAmount}" step="0.01" min="0" placeholder="Enter JV amount" oninput="this.value = Math.abs(this.value)" onkeydown="if(event.key === '-' || event.key === 'e' || event.key === 'E') event.preventDefault()">
+                                {% comment %} <input type="text" class="form-control jv-amount" value="${jvAmount.toFixed(2)}" oninput="formatAmountInput(this)" onkeydown="handleAmountKeydown(event)" onblur="finalizeAmountInput(this)"> {% endcomment %}
+                                {% comment %} <small class="text-muted">Current JV: ${jvAmount}</small> {% endcomment %}
+                                <small class="text-muted">Current JV: ${jvAmountType === 'debit' ? -jvAmount : jvAmount}</small>
+                            </div>
+                            <div class="col-md-3">
+                                <label>Amount Type</label>
+                                <select class="form-control select-modern jv-amount-type">
+                                    <option value="credit" ${jvAmountType === 'credit' ? 'selected' : ''}>Credit</option>
+                                    <option value="debit" ${jvAmountType === 'debit' ? 'selected' : ''}>Debit</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label>&nbsp;</label>
+                                <div>
+                                    <input type="checkbox" class="jv-include" checked> Include JV
+                                </div>
+                            </div>
+                            <div class="col-md-12 mt-2">
+                                <small class="text-muted"><strong>Remark:</strong></small>
+                                <div class="jv-remark-preview"
+                                    contenteditable="true"
+                                    data-jv="Journal Voucher Entry"
+                                    data-amount="${jvAmount}"
+                                    title="Edit Your JV remark"
+                                    style="font-size: 0.85em; background-color: #f8f9fa;
+                                            padding: 5px; border-radius: 3px; 
+                                            min-height: 30px; outline: none; cursor: text;">
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                    `;
+                }
+                
+                // Add single container for all IPO payment rows
+                if (ipoData.length > 0) {
+                    ipoFormHtml += `<div class="card mb-3" style="border: 1px solid #dee2e6; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <div class="card-body" style="padding: 15px;">`;
+                }
+                
+                ipoData.forEach(function(ipo, index) {
+                    // Handle negative amounts (credit balances)
+                    const absoluteAmount = Math.abs(ipo.due_amount);
+                    const defaultAmountType = ipo.due_amount < 0 ? 'debit' : 'credit';
+                    
+                    ipoFormHtml += `
+                        <div class="row mb-3 ipo-payment-row" data-ipo-id="${ipo.ipo_id}" data-original-amount="${ipo.due_amount}">
+                            <div class="col-md-4">
+                                <label>IPO Name</label>
+                                <input type="text" class="form-control" value="${ipo.ipo_name}" readonly>
+                            </div>
+                            <div class="col-md-3">
+                                <label>Due Amount</label>
+                                <input type="number" class="form-control ipo-amount" value="${absoluteAmount}" step="0.01" min="0" oninput="this.value = Math.abs(this.value)" onkeydown="if(event.key === '-' || event.key === 'e' || event.key === 'E') event.preventDefault()">
+                                {% comment %} <input type="text" class="form-control ipo-amount" value="${absoluteAmount.toFixed(2)}" oninput="formatAmountInput(this)" onkeydown="handleAmountKeydown(event)" onblur="finalizeAmountInput(this)"> {% endcomment %}
+                                <small class="text-muted">Original: ₹${ipo.due_amount}</small>
+                            </div>
+                            <div class="col-md-3">
+                                <label>Amount Type </label>
+                                <select class="form-control ipo-amount-type">
+                                    <option value="credit" ${defaultAmountType === 'credit' ? 'selected' : ''}>Credit</option>
+                                    <option value="debit" ${defaultAmountType === 'debit' ? 'selected' : ''}>Debit</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label>&nbsp;</label>
+                                <div>
+                                    <input type="checkbox" class="ipo-include" checked> Include
+                                </div>
+                            </div>
+                            <div class="col-md-12 mt-2">
+                                <small class="text-muted"><strong>Remark:</strong></small>
+                                <div class="ipo-remark-preview"
+                                    contenteditable="true"
+                                    data-ipo="${ipo.ipo_name}"
+                                    data-amount="${ipo.due_amount}"
+                                    title="Edit Your IPO remark"
+                                    style="font-size: 0.85em; background-color: #f8f9fa;
+                                            padding: 5px; border-radius: 3px;
+                                            min-height: 30px; outline: none; cursor: text;">
+                                </div>
+                            </div>
+                        </div>
+                        ${index < ipoData.length - 1 ? '<hr>' : ''}
+                    `;
+                });
+                
+                // Close the single container for all IPO entries
+                if (ipoData.length > 0) {
+                    ipoFormHtml += `</div></div>`;
+                }
+                
+                // Add totals row at the bottom
+                ipoFormHtml += `
+                    <div class="row mb-3 totals-row" style="width: 99.5%;margin-left: 0px; background-color: #e9ecef; padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">
+                        {% comment %} <div class="col-md-4">
+                            <label><strong>TOTALS</strong></label>
+                            <input type="text" class="form-control" value="Summary" readonly>
+                        </div> {% endcomment %}
+                        <div class="col-md-6">
+                            <label>Total Amount</label>
+                            <input type="text" class="form-control total-amount" value="0" readonly>
+                            <small class="text-muted">
+                                <span class="total-credit">Credit: 0</span> | 
+                                <span class="total-debit">Debit: 0</span>|
+                                <span class="Net-amount">Net Amount: 0</span>
+                            </small>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Balance</label>
+                            <input type="text" class="form-control balance-display" value="Balanced" readonly>
+                        </div>
+                        
+                    </div>
+                `;
+            }
+            
+            $('#ipoPaymentsList').html(ipoFormHtml);
+            
+            // Add event listeners for real-time totals calculation
+            updateTotals();
+            updateIPORemarkPreviews();
+            
+            // Update totals when amounts or checkboxes change
+            $(document).on('input change', '.ipo-amount, .jv-amount, .ipo-amount-type, .jv-amount-type, .ipo-include, .jv-include', function() {
+                updateTotals();
+            });
+            
+            // Update IPO remark previews when additional remarks change
+            $(document).on('input', '#multi_remark', function() {
+                updateIPORemarkPreviews();
+            });
+            
+            // Show/hide totals row
+            $(document).on('change', '.show-totals', function() {
+                if ($(this).is(':checked')) {
+                    $('.totals-row').show();
+                } else {
+                    $('.totals-row').hide();
+                }
+            });
+        }
+        
+        // Function to update IPO remark previews
+        function updateIPORemarkPreviews() {
+            const groupName = $('#multi_group_name').val();
+            const userRemark = $('#multi_remark').val().trim();
+            
+            if (groupName) {
+                // Update each IPO remark preview
+                $('.ipo-payment-row').each(function() {
+                    let finalRemark = '';
+                    if (userRemark) {
+                        finalRemark = userRemark;
+                    }
+                    // If no userRemark, keep it blank
+                    
+                    // Find the remark preview within the same row
+                    $(this).find('.ipo-remark-preview').text(finalRemark);
+                });
+                
+                // Update JV remark preview
+                $('.jv-remark-preview').each(function() {
+                    let finalRemark = '';
+                    if (userRemark) {
+                        finalRemark = userRemark;
+                    }
+                    // If no userRemark, keep it blank
+                    
+                    $(this).text(finalRemark);
+                });
+            }
+        }
+        
+        // Function to calculate and update totals
+        function updateTotals() {
+            let totalCredit = 0;
+            let totalDebit = 0;
+            
+            // Calculate IPO totals
+            $('.ipo-payment-row').each(function() {
+                const isIncluded = $(this).find('.ipo-include').is(':checked');
+                if (isIncluded) {
+                    const amount = parseFloat($(this).find('.ipo-amount').val()) || 0;
+                    const amountType = $(this).find('.ipo-amount-type').val();
+                    
+                    if (amount > 0) {
+                        if (amountType === 'credit') {
+                            totalCredit += amount;
+                        } else {
+                            totalDebit += amount;
+                        }
+                    }
+                }
+            });
+            
+            // Calculate JV totals
+            const jvIncluded = $('.jv-include').is(':checked');
+            if (jvIncluded) {
+                const jvAmount = parseFloat($('.jv-amount').val()) || 0;
+                const jvAmountType = $('.jv-amount-type').val();
+                
+                if (jvAmount > 0) {
+                    if (jvAmountType === 'credit') {
+                        totalCredit += jvAmount;
+                    } else {
+                        totalDebit += jvAmount;
+                    }
+                }
+            }
+            
+            // Update display
+            $('.total-credit').text(`Credit: ${totalCredit.toFixed(2)}`);
+            $('.total-debit').text(`Debit: ${totalDebit.toFixed(2)}`);
+            $('.Net-amount').text(`Net Amount: ${(totalCredit - totalDebit).toFixed(2)}`);
+            
+            const netAmount = totalCredit - totalDebit;
+            $('.total-amount').val(Math.abs(netAmount).toFixed(2));
+            
+            // Update balance display
+            if (Math.abs(netAmount) < 0.01) {
+                $('.balance-display').val('Balanced').css('background-color', '#d4edda');
+            } else if (netAmount > 0) {
+                $('.balance-display').val(`Credit Balance: ${netAmount.toFixed(2)}`).css('background-color', '#fff3cd');
+            } else {
+                $('.balance-display').val(`Debit Balance: ${Math.abs(netAmount).toFixed(2)}`).css('background-color', '#f8d7da');
+            }
+        }
+
+        // Handle save multiple IPO payments
+        $(document).on('click', '#saveMultipleIPOPayments', function() {
+            const groupId = $('#multi_group_id').val();
+            const groupName = $('#multi_group_name').val();
+            const dateTime = $('#multi_date_time').val();
+            const userRemark = $('#multi_remark').val().trim();
+            
+            // Generate default remark with group name
+            const defaultRemark = `Payment Done by ${groupName}`;
+            
+            const transactions = [];
+            
+            // Collect JV entry if included
+            const jvIncluded = $('.jv-include').is(':checked');
+            if (jvIncluded) {
+                const jvAmount = parseFloat($('.jv-amount').val()) || 0;
+                const jvAmountType = $('.jv-amount-type').val();
+                
+                if (jvAmount > 0) {
+                    // Get the edited remark from the JV remark preview div
+                    const jvRemarkDiv = $('.jv-remark-preview');
+                    let jvRemark = jvRemarkDiv.text().trim();
+                    
+                    // If JV remark preview is empty, keep it blank
+                    if (!jvRemark) {
+                        jvRemark = '';
+                    }
+                        
+                    transactions.push({
+                        group_id: groupId,
+                        ipo_id: null, // JV entries don't have specific IPO
+                        amount: jvAmount,
+                        amount_type: jvAmountType,
+                        remark: jvRemark,
+                        date_time: dateTime,
+                        jv: 1 // IMPORTANT: Mark as JV entry in database (jv column = 1)
+                    });
+                }
+            }
+            
+            // Collect data from each IPO row
+            $('.ipo-payment-row').each(function() {
+                const isIncluded = $(this).find('.ipo-include').is(':checked');
+                if (isIncluded) {
+                    const ipoId = $(this).data('ipo-id');
+                    const ipoName = $(this).find('input[readonly]').val();
+                    const amount = parseFloat($(this).find('.ipo-amount').val()) || 0;
+                    const amountType = $(this).find('.ipo-amount-type').val();
+                    
+                    if (amount > 0) {
+                        // Get the edited remark from the editable preview div
+                        const editableRemarkDiv = $(this).find('.ipo-remark-preview');
+                        let finalRemark = editableRemarkDiv.text().trim();
+                        
+                        // If remark preview is empty, keep it blank
+                        if (!finalRemark) {
+                            finalRemark = '';
+                        }
+                            
+                        transactions.push({
+                            group_id: groupId,
+                            ipo_id: ipoId,
+                            amount: amount,
+                            amount_type: amountType,
+                            remark: finalRemark,
+                            date_time: dateTime,
+                            jv: 0 // IMPORTANT: Regular IPO entry in database (jv column = 0)
+                        });
+                    }
+                }
+            });
+            
+            if (transactions.length === 0) {
+                location.reload();
+                message.error('Please select at least one entry (IPO or JV) with amount > 0');
+                {% comment %} alert('Please select at least one entry (IPO or JV) with amount > 0'); {% endcomment %}
+                return;
+            }
+            
+            // Send bulk transaction request (reuse existing function)
+            $.ajax({
+                url: '/bulk_ipo_transactions/',
+                method: 'POST',
+                data: {
+                    'transactions': JSON.stringify(transactions),
+                    'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        $('#multipleIPOModal').modal('hide');
+                        location.reload(); // Refresh to show updated data
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    const message = xhr.responseJSON && xhr.responseJSON.message
+                        ? xhr.responseJSON.message
+                        : error;
+                    alert('Error creating transactions: ' + message);
+                }
+            });
+        });
+
+        // Clean up modal when closed
+        $(document).on('hidden.bs.modal', '#multipleIPOModal', function () {
+            $(this).remove();
+        });
+
+        // Fix backdrop issue
+        {% comment %} $('#transactionModal, #paymentModal').on('hidden.bs.modal', function() {
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
+        }); {% endcomment %}
+
+        // Fix backdrop issue when closing modal
+        $('#transactionModal').on('hidden.bs.modal', function() {
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+        const submitBtn = document.getElementById("saveBtn2");
+
+        // Remark input
+        const remarkInput = document.getElementById("remark");
+        const remarkError = document.getElementById("remark_error");
+
+        remarkInput.addEventListener("input", function(){
+            if(remarkInput.value.length > 250){
+                {% comment %} remarkInput.value = remarkInput.value.substring(0,250); // truncate {% endcomment %}
+                remarkError.style.display = "block";
+                submitBtn.disabled = true;
+            } else {
+                remarkError.style.display = "none";
+                submitBtn.disabled = false;
+            }
+        });
+
+        // JV Remark input
+        const jvDisplay = document.getElementById("jv_remark_display");
+        const jvHidden  = document.getElementById("jv_remark");
+        const jvError   = document.getElementById("jv_remark_error");
+
+        jvDisplay.addEventListener("input", function(){
+            let value = jvDisplay.value;
+
+            if(value.length > 250){
+                {% comment %} value = value.substring(0,250); // truncate {% endcomment %}
+                jvError.style.display = "block";
+                submitBtn.disabled = true;
+            } else {
+                jvError.style.display = "none";
+                submitBtn.disabled = false;
+            }
+
+            // Always update hidden input for form submission
+            jvHidden.value = value;
+            jvDisplay.value = value;
+        });
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        $(".alert").each(function() {
+            var alert = $(this);
+            setTimeout(function() {
+                alert.fadeOut(500, function() {
+                    alert.remove();
+                });
+            }, 3000); // 5000 milliseconds = 5 seconds
+        });
+    });
+</script>
+
+{% comment %} 
+<script>
+function deleteIPO(ipoId, pageNumber, btn) {
+    if (!confirm("Are you sure you want to delete this IPO?")) {
+        return false;
+    }
+
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = "Deleting...";
+    }
+
+    fetch(`/delete/${ipoId}/?page=${pageNumber}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+        }
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("Network response was not ok");
+        return res.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert("IPO deleted successfully!");
+            location.reload(); // refresh table
+        } else {
+            alert("Error: " + (data.error || "Unknown error occurred"));
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("Something went wrong while deleting IPO.");
+    })
+    .finally(() => {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = "Delete";
+        }
+    });
+}
+</script> {% endcomment %}
+
+<script>
+    $(document).ready(function () {
+        {% comment %} $('#example thead tr')
+            .clone(true)
+            .addClass('filters')
+            .appendTo('#example thead'); {% endcomment %}
+        
+        var scrollYHeight = window.innerHeight * 0.65;
+
+        var pageLength = "{{ GWD_page_size|default:'50' }}";
+        pageLength = pageLength === "All" ? -1 : parseInt(pageLength, 10);
+
+        var table = $('#example').DataTable({
+            stateSave: true,
+            stateLoadParams: function (settings, data) {
+                data.length = pageLength;
+                data.start = 0;
+                if (data.search) {
+                    data.search.search = '';
+                }
+                if (Array.isArray(data.columns)) {
+                    data.columns.forEach(function (column) {
+                        if (column.search) {
+                            column.search.search = '';
+                        }
+                    });
+                }
+            },
+            stateSaveParams: function (settings, data) {
+                if (data.search) {
+                    data.search.search = '';
+                }
+            },
+            lengthMenu: [[50, 100, 200, 250, -1], [50, 100, 200, 250, "All"]],
+            "columnDefs": [
+                {
+                    "targets": {{ IPOName|length }} + 3,
+                    "visible": false
+                }
+            ],
+            orderCellsTop: true,
+            {% comment %} fixedHeader: true, {% endcomment %}
+            scrollY:scrollYHeight,
+            autoWidth:false,
+            scrollX:true,
+            lengthChange: true,
+            info:false,
+            "pageLength": pageLength,
+            buttons: [ {
+                text: 'Columns', 
+                extend: 'colvis',
+                prefixButtons: [
+                    {
+                        text: '<div class="d-flex justify-content-between align-items-center w-100" style="pointer-events: none;"><span>Toggle All IPOs</span><div class="form-check form-switch ms-3 mb-0" style="pointer-events: none;"><input class="form-check-input custom-blue-switch" type="checkbox" id="toggleAllIposSwitch" checked></div></div>',
+                        action: function ( e, dt, node, config ) {
+                            var numIPOs = {{ IPOName|length }};
+                            var cols = [];
+                            for (var i = 1; i <= numIPOs; i++) cols.push(i);
+                            
+                            var anyHidden = false;
+                            dt.columns(cols).every(function() {
+                                if (!this.visible()) anyHidden = true;
+                            });
+                            
+                            dt.columns(cols).visible(anyHidden);
+                            
+                            var cb = document.getElementById('toggleAllIposSwitch');
+                            if (cb) cb.checked = anyHidden;
+                        }
+                    }
+                ]
+            },
+            {   
+                extend: 'collection',
+                text: 'Download',
+                buttons:[
+                    {
+                        extend: 'excel',
+                        text: 'Excel',
+                        /*exportOptions: {
+                            columns: [1, 2, 3, 4,5,6,7,8,9,10,11,12],
+                        },*/
+                        customize: function(xlsx) {
+                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                    
+                            {% comment %} $('row:first', sheet).remove(); {% endcomment %}
+                        }
+                    },
+                    {% comment %} {
+                        extend: 'pdf',
+                        text: 'PDF',
+                        exportOptions: {
+                            /*columns: [0, 1, 2, 3, 4,5,6,7,8,9,10,11,12],*/
+                            rows: ':visible',
+                            modifier: {
+                                page: 'current'
+                            }
+                        },
+                        customize: function(doc) {
+                           doc.pageMargins = [0, 50, 100, 100];
+                           doc.styles.tableHeader = {
+                                fillColor: 'grey',
+                                color: 'whitesmoke',
+                                bold: true,
+                                alignment: 'center',
+                            };
+                            doc.styles.tableBodyEven = {
+                                alignment: 'center',
+                                fillColor: 'bisque',
+                            };
+                            doc.styles.tableBodyOdd = {
+                                alignment: 'center',
+                                fillColor: 'bisque',
+                            };
+                            
+                            /*doc.pageSize = 'A4'; 
+                            doc.content[1].table.widths = [50, 100, 100, 100, 100];
+                            doc.content[1].table.heights = Array(table.rows({ page: 'current' }).count() + 1).join('*').split('');*/
+
+                            doc.content[1].layout = {
+                                hLineWidth: function(i, node) {
+                                    return 1; 
+                                },
+                                vLineWidth: function(i, node) {
+                                    return 1; 
+                                },
+                                hLineColor: function(i, node) {
+                                    return 'black'; 
+                                },
+                                vLineColor: function(i, node) {
+                                    return 'black'; 
+                                },
+                            };
+                        }
+                    } {% endcomment %}
+                ]
+            },                
+                
+            ],
+            initComplete: function () {
+                var api = this.api();
+    
+                api.on('column-visibility.dt', function(e, settings, column, state) {
+                    var numIPOs = {{ IPOName|length }};
+                    if (column >= 1 && column <= numIPOs) {
+                        var allVisible = true;
+                        for (var i = 1; i <= numIPOs; i++) {
+                            if (!api.column(i).visible()) {
+                                allVisible = false;
+                                break;
+                            }
+                        }
+                        var cb = document.getElementById('toggleAllIposSwitch');
+                        if (cb) cb.checked = allVisible;
+                    }
+                });
+                
+                api
+                    .columns('')
+                    .eq(0)
+                    .each(function (colIdx) {
+                        
+                        var cell = $('.filters th').eq(
+                            $(api.column(colIdx).header()).index()
+                        );
+                        var title = $(cell).text();
+                        var stateSearch = api.column(colIdx).search();
+                        var initialValue = stateSearch ? stateSearch.replace(/^\(\(\(\(/, '').replace(/\)\)\)\)$/, '') : '';
+                        $(cell).html('<input class="Input" type="text" placeholder="' + title + '" value="' + initialValue + '" style="text-align: center ;  width: auto;" />');
+                        
+                        $(
+                            'input',
+                            $('.filters th').eq($(api.column(colIdx).header()).index())
+                        )
+                            .off('keyup change')
+                            .on('change', function (e) {
+                                
+                                $(this).attr('title', $(this).val());
+                                var regexr = '({search})'; //$(this).parents('th').find('select').val();
+    
+                                var cursorPosition = this.selectionStart;
+                                
+                                api
+                                    .column(colIdx)
+                                    .search(
+                                        this.value != ''
+                                            ? regexr.replace('{search}', '(((' + this.value + ')))')
+                                            : '',
+                                        this.value != '',
+                                        this.value == ''
+                                    )
+                                    .draw();
+                            })
+                            .on('keyup', function (e) {
+                                e.stopPropagation();
+    
+                                $(this).trigger('change');
+                                $(this)
+                                    .focus()[0]
+                                    .setSelectionRange(cursorPosition, cursorPosition);
+                            });
+                    });
+                    
+            },
+            language: {
+                info: 'Showing _START_ to _END_ of _TOTAL_ Rows',
+                infoFiltered: '(filtered from _MAX_ total Rows)',
+                emptyTable: "No data available",
+                lengthMenu: 'Show <select>' +
+                    '<option value="50">50</option>' +
+                    '<option value="100">100</option>' +
+                    '<option value="150">150</option>' +
+                    '<option value="200">200</option>' +
+                    '<option value="-1">All</option>' +
+                    '</select> Rows',
+                search: 'Search:',
+                paginate: {
+                    first: 'First',
+                    last: 'Last',
+                    next: 'Next',
+                    previous: 'Previous'
+                }
+            },
+        });
+
+        $('select[name="example_length"] option[value="-1"]').text('All');
+        
+        table.buttons().container()
+            .appendTo( '#example_wrapper .col-md-6:eq(0)' );
+
+        var table = $('#example').DataTable();
+
+        var dataTableLengthDiv = document.getElementById('example_length');
+
+        var firstLabel = dataTableLengthDiv.querySelector('label');
+
+        if (firstLabel) {
+        firstLabel.classList.add('slr');
+        }
+    } );
+</script>
+<script>
+    $(document).ready(function() {
+        // Initialize DataTables instance
+        // Remove the existing rows selection dropdown and pagination if needed
+        $('.slr').remove();
+        $('#example_paginate').remove();
+        
+        // Create the new form HTML for rows per page selection
+        var formHtml = `
+            <label class='slr' for="page_size">
+            <form method="POST" action="/GroupWiseDashboard"> 
+                {% csrf_token %}
+                Show 
+                <select name="GWD_page_size" id="GWD_page_size" onchange="this.form.submit()">
+                    <option value="50" {% if GWD_page_size|stringformat:"s" == "50" %}selected{% endif %}>50</option>
+                    <option value="100" {% if GWD_page_size|stringformat:"s" == "100" %}selected{% endif %}>100</option>
+                    <option value="200" {% if GWD_page_size|stringformat:"s" == "200" %}selected{% endif %}>200</option>
+                    <option value="250" {% if GWD_page_size|stringformat:"s" == "250" %}selected{% endif %}>250</option>
+                    <option value="All" {% if GWD_page_size|stringformat:"s" == "All" %}selected{% endif %}>All</option>
+                </select>
+                Rows
+                <input type="hidden" name="page" value="{{ page_obj.number }}">
+                {% if SearchQuery %}<input type="hidden" name="SearchQuery" value="{{ SearchQuery }}">{% endif %}
+            </form>
+            </label>
+        `;
+    
+        // Append the form to a specific element
+        $('.dataTables_length').append(formHtml);
+
+        // Update page length when selection is changed
+        {% comment %} $('#GWD_page_size').on('change', function() {
+            var pageSize = $(this).val();
+            if (pageSize === 'All') {
+                table.page.len(-1).draw(); // Show all rows if "All" is selected
+            } else {
+                table.page.len(parseInt(pageSize)).draw(); // Set to selected page length
+            }
+        });
+
+        // Set the initial page length when the page loads (from the server-side)
+        // table.page.len({{ GWD_page_size|default:50 }}).draw(); {% endcomment %}
+        
+        // Search debounce logic on DataTables native search box
+        var searchDebounceTimer = null;
+        var initialSearch = "{{ SearchQuery|default:''|escapejs }}";
+        
+        function restoreDashboardSearchFocus() {
+            var $input = $('#example_filter input');
+            if ($input.length) {
+                // Remove DataTables default client-side filtering events
+                $input.off('keyup search input paste cut');
+                
+                // Always keep the input strictly synchronized with the server's SearchQuery
+                if ($input.val() !== initialSearch) {
+                    $input.val(initialSearch);
+                }
+                
+                if (sessionStorage.getItem('gwd_search_focused') === 'true' || initialSearch.length > 0) {
+                    $input.focus();
+                    try {
+                        var len = $input.val().length;
+                        $input[0].setSelectionRange(len, len);
+                    } catch(e) {}
+                }
+            }
+        }
+        
+        restoreDashboardSearchFocus();
+        setTimeout(restoreDashboardSearchFocus, 100);
+        setTimeout(restoreDashboardSearchFocus, 500);
+
+        function triggerDashboardSearch(val) {
+            clearTimeout(searchDebounceTimer);
+            sessionStorage.setItem('gwd_search_focused', 'true');
+            var form = $('<form method="GET" action="/GroupWiseDashboard"></form>');
+            form.append($('<input type="hidden" name="SearchQuery">').val(val));
+            $('body').append(form);
+            form.submit();
+        }
+
+        $(document).on('input search', '#example_filter input', function() {
+            sessionStorage.setItem('gwd_search_focused', 'true');
+            var val = $(this).val();
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(function() {
+                triggerDashboardSearch(val);
+            }, 500);
+        });
+
+        $(document).on('keydown', '#example_filter input', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(searchDebounceTimer);
+                triggerDashboardSearch($(this).val());
+            }
+        });
+
+        $(document).on('blur', '#example_filter input', function() {
+            setTimeout(function() {
+                sessionStorage.removeItem('gwd_search_focused');
+            }, 150);
+        });
+    });
+</script>
+
+
+<script>
+    function deleteIPO(ipoId, pageNumber, btn) {
+        if (!confirm("Are you sure you want to delete this IPO?")) {
+            return false;
+        }
+
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = "Deleting...";
+        }
+
+        fetch(`/delete/${ipoId}/?page=${pageNumber}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            }
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("Network response was not ok");
+            return res.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alert("IPO deleted successfully!");
+                location.reload(); // refresh table
+            } else {
+                alert("Error: " + (data.error || "Unknown error occurred"));
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("Something went wrong while deleting IPO.");
+        })
+        .finally(() => {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = "Delete";
+            }
+        });
+    }
+</script>
+
+<script>
+    
+    $(document).ready(function() {
+        $(".col-sm-12.col-md-6:first").addClass("custom-width");
+        $(".col-sm-12.col-md-6").addClass("cw");
+        $(".dt-row:first").addClass("table-responsive");
+        $(".buttons-collection").addClass("d-flex justify-content-center align-items-center");
+
+        
+        var buttonGroup = '<div class="btn-group jvbtn bi d-flex" style="float:right; margin: 12px 16px; gap: 5px;">' +
+            
+            // Add Transaction button
+            '<button type="button" class="btn btn-sm btn-outline-secondary jvbtn d-flex justify-content-center align-items-center" ' +
+            'style="width: 140px;" data-toggle="modal" data-target="#transactionModal" data-bs-toggle="modal" data-bs-target="#transactionModal">' +
+            'Payment' +
+            '</button>' +
+            '<button type="button" class="btn btn-sm btn-outline-primary jvbtn d-flex justify-content-center align-items-center" ' +
+            'style="width: 160px;" data-toggle="modal" data-target="#combinedTransferModal" data-bs-toggle="modal" data-bs-target="#combinedTransferModal">' +
+            'JV Payment' +
+            '</button>' +
+            '</div>';
+            
+        $('.dataTables_length').append(buttonGroup);
+        
+    });
+</script>
+{% comment %} <script>
+    // Function to format amount input with automatic decimal point before last 2 digits
+    function formatAmountInput(input) {
+        let value = input.value;
+        
+        // Remove any non-digit characters except decimal point
+        value = value.replace(/[^\d.]/g, '');
+        
+        // If no decimal point and has 3+ digits, add decimal before last 2 digits
+        if (value.indexOf('.') === -1 && value.length >= 3) {
+            // Insert decimal point before last 2 digits: 12021 -> 120.21
+            value = value.slice(0, -2) + '.' + value.slice(-2);
+        }
+        
+        // Ensure only one decimal point
+        let parts = value.split('.');
+        if (parts.length > 2) {
+            value = parts[0] + '.' + parts.slice(1).join('');
+        }
+        
+        // Limit to 2 decimal places
+        if (parts[1] && parts[1].length > 2) {
+            value = parts[0] + '.' + parts[1].substring(0, 2);
+        }
+        
+        input.value = value;
+    }
+    
+    // Function to handle keydown events for amount input
+    function handleAmountKeydown(event) {
+        const input = event.target;
+        const key = event.key;
+        
+        // Allow: backspace, delete, tab, escape, enter
+        if ([8, 9, 27, 13, 46].indexOf(event.keyCode) !== -1 ||
+            // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+            (event.keyCode === 65 && event.ctrlKey === true) ||
+            (event.keyCode === 67 && event.ctrlKey === true) ||
+            (event.keyCode === 86 && event.ctrlKey === true) ||
+            (event.keyCode === 88 && event.ctrlKey === true) ||
+            // Allow: home, end, left, right
+            (event.keyCode >= 35 && event.keyCode <= 39)) {
+            return;
+        }
+        
+        // Prevent: negative sign, 'e', 'E'
+        if (key === '-' || key === 'e' || key === 'E') {
+            event.preventDefault();
+            return;
+        }
+        
+        // Allow only digits and decimal point
+        if (!/[\d.]/.test(key)) {
+            event.preventDefault();
+            return;
+        }
+        
+        // Prevent multiple decimal points
+        if (key === '.' && input.value.indexOf('.') !== -1) {
+            event.preventDefault();
+            return;
+        }
+    }
+    
+    // Function to finalize amount input formatting on blur
+    function finalizeAmountInput(input) {
+        let value = input.value;
+        
+        if (value === '' || value === '.') {
+            input.value = '0.00';
+            return;
+        }
+        
+        // Convert to number and back to ensure proper formatting
+        const numValue = parseFloat(value);
+        if (isNaN(numValue)) {
+            input.value = '0.00';
+        } else {
+            input.value = numValue.toFixed(2);
+        }
+    }
+</script> {% endcomment %}
+<script src="{% static 'DataTables/js/jquery-3.7.0.js' %}"></script>
+<script src="{% static 'DataTables/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.fixedHeader.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.bootstrap5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.bootstrap5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/jszip.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.colVis.min.js' %}"></script>
+<script src="{% static 'DataTables/js/pdfmake.min.js' %}"></script>
+<script src="{% static 'DataTables/js/vfs_fonts.js' %}"></script>
+
+{% endblock %}

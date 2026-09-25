@@ -1,0 +1,10 @@
+{
+  "name": "ipo-utility-e2e",
+  "private": true,
+  "scripts": {
+    "test:menu": ".venv/bin/python testing.py",
+    "test:e2e": ".venv/bin/python playwright_testing/run_e2e.py",
+    "test:e2e:headed": ".venv/bin/python playwright_testing/run_e2e.py --headed",
+    "test:e2e:report": ".venv/bin/python playwright_testing/run_e2e.py --report"
+  }
+}
