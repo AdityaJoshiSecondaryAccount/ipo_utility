@@ -13,22 +13,26 @@
         align-items: center;
         justify-content: space-between;
     }
+
     .dataTables_filter input {
         margin-left: 0.5em;
         display: inline-block;
         width: auto;
     }
+
     .dataTables_length select {
         width: auto;
         display: inline-block;
         margin: 0 0.5em;
     }
+
     .Input {
         width: 100%;
         box-sizing: border-box;
         padding: 2px;
         font-size: 0.75rem;
     }
+
     .container-fluid {
         margin-top: -31px;
         width: 100%;
@@ -37,46 +41,60 @@
         margin-right: auto;
         margin-left: auto;
     }
+
     .fm {
         margin-top: 15px;
         margin-bottom: 15px;
     }
+
     table {
         border-collapse: collapse;
         border-spacing: 0;
         width: 100%;
         border: 1px solid #ddd;
-        margin-bottom: 1%;  
-        font-size: 0.75rem; /* Shrink font to fit more columns */
+        margin-bottom: 1%;
+        font-size: 0.75rem;
+        /* Shrink font to fit more columns */
     }
-    th, td {
+
+    th,
+    td {
         text-align: center;
-        padding: 2px 4px; /* Minimize padding */
-        white-space: nowrap; /* Keep data on single lines to save vertical space, or use normal if it's too wide. Actually, nowrap for data, normal for headers is best, but let's just make it compact */
+        padding: 2px 4px;
+        /* Minimize padding */
+        white-space: nowrap;
+        /* Keep data on single lines to save vertical space, or use normal if it's too wide. Actually, nowrap for data, normal for headers is best, but let's just make it compact */
     }
+
     thead th {
         background-color: #f1f1f1;
         position: sticky !important;
         top: 0;
         z-index: 11;
     }
+
     tr:nth-child(even) {
         background-color: #f2f2f2
     }
+
     .table-wrapper-scroll-x {
         display: block;
         width: 100%;
         overflow-x: auto;
         -ms-overflow-style: -ms-autohiding-scrollbar;
     }
+
     .btn-secondary {
         margin-bottom: 4px;
     }
-    .archived-ipo, 
-    .archived-ipo > td, 
-    .archived-ipo > th {
-        background-color: #cbd5e1 !important; /* Visible grey but light enough for blue text */
+
+    .archived-ipo,
+    .archived-ipo>td,
+    .archived-ipo>th {
+        background-color: #cbd5e1 !important;
+        /* Visible grey but light enough for blue text */
     }
+
     .positions-toolbar {
         position: sticky !important;
         top: var(--positions-navbar-height, 40px);
@@ -85,41 +103,51 @@
         padding-top: 15px;
         background-color: #fff;
     }
+
     .positions-page {
         margin-top: var(--positions-navbar-height, 40px);
     }
+
     .positions-title {
         display: inline-block;
         margin-right: 20px;
     }
+
     .positions-toggle {
         position: relative;
         top: -4px;
     }
+
     .positions-actions {
         text-align: right;
     }
+
     .group-table-scroll,
     .table-responsive,
     .dataTables_wrapper {
         width: 100%;
         max-width: 100%;
     }
+
     .table-responsive {
         overflow-x: auto;
         overflow-y: visible;
         -webkit-overflow-scrolling: touch;
     }
+
     table[id^="mainboardBillingTable_"] {
         min-width: 1500px;
     }
-    table[id^="mainboardBillingTable_"] > thead > tr:first-child > th {
+
+    table[id^="mainboardBillingTable_"]>thead>tr:first-child>th {
         border-top: 1px solid #555 !important;
     }
-    table[id^="mainboardBillingTable_"] > tbody > tr:last-child > th,
-    table[id^="mainboardBillingTable_"] > tbody > tr:last-child > td {
+
+    table[id^="mainboardBillingTable_"]>tbody>tr:last-child>th,
+    table[id^="mainboardBillingTable_"]>tbody>tr:last-child>td {
         border-bottom: 1px solid #555 !important;
     }
+
     table[id^="smeBillingTable_"] {
         min-width: 800px;
     }
@@ -129,40 +157,45 @@
     table[id^="smeBillingTable_"] {
         --frozen-tally-width: 72px;
     }
-    table[id^="mainboardBillingTable_"] > thead > tr:first-child > th:first-child,
-    table[id^="mainboardBillingTable_"] > tbody > tr > :first-child,
-    table[id^="smeBillingTable_"] > thead > tr:first-child > th:first-child,
-    table[id^="smeBillingTable_"] > tbody > tr > :first-child {
+
+    table[id^="mainboardBillingTable_"]>thead>tr:first-child>th:first-child,
+    table[id^="mainboardBillingTable_"]>tbody>tr> :first-child,
+    table[id^="smeBillingTable_"]>thead>tr:first-child>th:first-child,
+    table[id^="smeBillingTable_"]>tbody>tr> :first-child {
         position: sticky !important;
         left: 0;
     }
-    table[id^="mainboardBillingTable_"] > thead > tr:first-child > th:nth-child(2),
-    table[id^="mainboardBillingTable_"] > tbody > tr > :nth-child(2),
-    table[id^="smeBillingTable_"] > thead > tr:first-child > th:nth-child(2),
-    table[id^="smeBillingTable_"] > tbody > tr > :nth-child(2) {
+
+    table[id^="mainboardBillingTable_"]>thead>tr:first-child>th:nth-child(2),
+    table[id^="mainboardBillingTable_"]>tbody>tr> :nth-child(2),
+    table[id^="smeBillingTable_"]>thead>tr:first-child>th:nth-child(2),
+    table[id^="smeBillingTable_"]>tbody>tr> :nth-child(2) {
         position: sticky !important;
         left: var(--frozen-tally-width);
     }
-    table[id^="mainboardBillingTable_"] > thead > tr:first-child > th:first-child,
-    table[id^="mainboardBillingTable_"] > thead > tr:first-child > th:nth-child(2),
-    table[id^="smeBillingTable_"] > thead > tr:first-child > th:first-child,
-    table[id^="smeBillingTable_"] > thead > tr:first-child > th:nth-child(2) {
+
+    table[id^="mainboardBillingTable_"]>thead>tr:first-child>th:first-child,
+    table[id^="mainboardBillingTable_"]>thead>tr:first-child>th:nth-child(2),
+    table[id^="smeBillingTable_"]>thead>tr:first-child>th:first-child,
+    table[id^="smeBillingTable_"]>thead>tr:first-child>th:nth-child(2) {
         z-index: 14;
         background-color: #f1f1f1;
         background-clip: padding-box;
     }
-    table[id^="mainboardBillingTable_"] > tbody > tr > :first-child,
-    table[id^="mainboardBillingTable_"] > tbody > tr > :nth-child(2),
-    table[id^="smeBillingTable_"] > tbody > tr > :first-child,
-    table[id^="smeBillingTable_"] > tbody > tr > :nth-child(2) {
+
+    table[id^="mainboardBillingTable_"]>tbody>tr> :first-child,
+    table[id^="mainboardBillingTable_"]>tbody>tr> :nth-child(2),
+    table[id^="smeBillingTable_"]>tbody>tr> :first-child,
+    table[id^="smeBillingTable_"]>tbody>tr> :nth-child(2) {
         z-index: 4;
         background-color: #fff;
         background-clip: padding-box;
     }
-    table[id^="mainboardBillingTable_"] > tbody > tr:nth-child(odd) > :first-child,
-    table[id^="mainboardBillingTable_"] > tbody > tr:nth-child(odd) > :nth-child(2),
-    table[id^="smeBillingTable_"] > tbody > tr:nth-child(odd) > :first-child,
-    table[id^="smeBillingTable_"] > tbody > tr:nth-child(odd) > :nth-child(2) {
+
+    table[id^="mainboardBillingTable_"]>tbody>tr:nth-child(odd)> :first-child,
+    table[id^="mainboardBillingTable_"]>tbody>tr:nth-child(odd)> :nth-child(2),
+    table[id^="smeBillingTable_"]>tbody>tr:nth-child(odd)> :first-child,
+    table[id^="smeBillingTable_"]>tbody>tr:nth-child(odd)> :nth-child(2) {
         background-color: #f2f2f2;
     }
 
@@ -171,12 +204,14 @@
             padding-right: 10px;
             padding-left: 10px;
         }
+
         .positions-toolbar {
             margin-right: 0;
             margin-left: 0;
             margin-bottom: 12px;
             padding: 8px 0 10px;
         }
+
         .positions-toolbar-left,
         .positions-actions {
             width: 100%;
@@ -185,65 +220,80 @@
             padding-right: 0;
             padding-left: 0;
         }
+
         .positions-title {
             display: block;
             margin: 0 0 6px;
             font-size: 1.6rem;
         }
+
         .positions-toggle {
             display: flex !important;
             align-items: center;
             top: 0 !important;
             margin-bottom: 10px;
         }
+
         .positions-toggle label {
             line-height: 1.2;
         }
+
         .positions-actions {
             display: flex;
             flex-direction: column;
             align-items: stretch;
             text-align: left !important;
         }
+
         .positions-group-filter {
             display: flex !important;
             flex-direction: column;
             width: 100%;
             margin: 0 0 8px !important;
         }
+
         .positions-group-filter label {
             margin: 0 0 4px !important;
         }
+
         .positions-group-filter select,
         .positions-dashboard-button {
             width: 100% !important;
         }
+
         .positions-dashboard-button {
             margin: 0 !important;
         }
+
         .group-section {
             margin-bottom: 12px !important;
         }
-        .group-section > div {
+
+        .group-section>div {
             margin-top: 0 !important;
         }
+
         .group-section h4 {
             margin: 8px 0;
             font-size: 1.35rem;
         }
+
         .group-section table {
             margin-bottom: 0;
         }
+
         .table-responsive {
             scrollbar-width: thin;
         }
+
         thead th {
             position: static !important;
         }
-        table[id^="mainboardBillingTable_"] > thead > tr:first-child > th:first-child,
-        table[id^="mainboardBillingTable_"] > thead > tr:first-child > th:nth-child(2),
-        table[id^="smeBillingTable_"] > thead > tr:first-child > th:first-child,
-        table[id^="smeBillingTable_"] > thead > tr:first-child > th:nth-child(2) {
+
+        table[id^="mainboardBillingTable_"]>thead>tr:first-child>th:first-child,
+        table[id^="mainboardBillingTable_"]>thead>tr:first-child>th:nth-child(2),
+        table[id^="smeBillingTable_"]>thead>tr:first-child>th:first-child,
+        table[id^="smeBillingTable_"]>thead>tr:first-child>th:nth-child(2) {
             top: auto;
         }
     }
@@ -256,8 +306,11 @@
         <div class="col-md-6 positions-toolbar-left">
             <h3 class="positions-title">Positions</h3>
             <div class="d-inline-block positions-toggle" title="Toggle to show or hide old/archived IPOs">
-                <input type="checkbox" id="showArchivedToggle" style="cursor: pointer; vertical-align: middle; transform: scale(1.2);">
-                <label for="showArchivedToggle" style="cursor:pointer; font-weight:bold; vertical-align: middle; margin-left: 5px; margin-bottom: 0;">Show Tallied/Completed IPOs</label>
+                <input type="checkbox" id="showArchivedToggle"
+                    style="cursor: pointer; vertical-align: middle; transform: scale(1.2);">
+                <label for="showArchivedToggle"
+                    style="cursor:pointer; font-weight:bold; vertical-align: middle; margin-left: 5px; margin-bottom: 0;">Show
+                    Tallied/Completed IPOs</label>
             </div>
         </div>
         <div class="col-md-6 positions-actions">
@@ -266,87 +319,95 @@
                 <select id="groupSelect" class="form-control-sm custom-select" style="width: 250px;">
                     <option value="all" {% if not selected_group %}selected{% endif %}>All Groups</option>
                     {% for grp in groups %}
-                    <option value="{{ grp.id }}" {% if selected_group and selected_group.id == grp.id %}selected{% endif %}>{{ grp.GroupName }}</option>
+                    <option value="{{ grp.id }}" {% if selected_group and selected_group.id==grp.id %}selected{% endif
+                        %}>{{ grp.GroupName }}</option>
                     {% endfor %}
                 </select>
             </div>
-            <a href="/" class="btn btn-secondary btn-sm positions-dashboard-button" style="margin-left: 15px;">Back to Dashboard</a>
+            <a href="/" class="btn btn-secondary btn-sm positions-dashboard-button" style="margin-left: 15px;">Back to
+                Dashboard</a>
         </div>
     </div>
-    
+
     <!-- <hr> -->
-    
+
     {% if group_tables or empty_groups %}
-        {% for table_data in group_tables %}
-        <div class="group-section" style="margin-bottom: 5px;">
-            {% if table_data.sme_html_table %}
-            <div>
-                <h4 class="text-center">
-                    Group : {{ table_data.group.GroupName }} (SME IPOs)
-                    <button class="btn btn-sm btn-outline-primary ms-2" onclick="openGroupShareModal(this, '{{ table_data.group.GroupName }}', 'SME')" title="Share">
-                        <i class="fa fa-share-alt"></i> Share
-                    </button>
-                </h4>
-                {{ table_data.sme_html_table | safe }}
-            </div>
-            {% endif %}
-
-            {% if table_data.mainboard_html_table %}
-            <div style="margin-top: 5px;">
-                <h4 class="text-center">
-                    Group : {{ table_data.group.GroupName }}
-                    <button class="btn btn-sm btn-outline-primary ms-2" onclick="openGroupShareModal(this, '{{ table_data.group.GroupName }}', 'Mainboard')" title="Share">
-                        <i class="fa fa-share-alt"></i> Share
-                    </button>
-                </h4>
-                {{ table_data.mainboard_html_table | safe }}
-            </div>
-            {% endif %}
-        </div>
-        {% endfor %}
-
-        {% if empty_groups %}
-        <div class="alert alert-info text-center mt-2">
-            <strong>No billing records found for:</strong> {{ empty_groups|join:", " }}
+    {% for table_data in group_tables %}
+    <div class="group-section" style="margin-bottom: 5px;">
+        {% if table_data.sme_html_table %}
+        <div>
+            <h4 class="text-center">
+                Group : {{ table_data.group.GroupName }} (SME IPOs)
+                <button class="btn btn-sm btn-outline-primary ms-2"
+                    onclick="openGroupShareModal(this, '{{ table_data.group.GroupName }}', 'SME')" title="Share">
+                    <i class="fa fa-share-alt"></i> Share
+                </button>
+            </h4>
+            {{ table_data.sme_html_table | safe }}
         </div>
         {% endif %}
-    {% else %}
-        <div class="alert alert-warning text-center mt-4" style="margin-top: 30px;">
-            No groups or billing records found.
+
+        {% if table_data.mainboard_html_table %}
+        <div style="margin-top: 5px;">
+            <h4 class="text-center">
+                Group : {{ table_data.group.GroupName }}
+                <button class="btn btn-sm btn-outline-primary ms-2"
+                    onclick="openGroupShareModal(this, '{{ table_data.group.GroupName }}', 'Mainboard')" title="Share">
+                    <i class="fa fa-share-alt"></i> Share
+                </button>
+            </h4>
+            {{ table_data.mainboard_html_table | safe }}
         </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    {% if empty_groups %}
+    <div class="alert alert-info text-center mt-2">
+        <strong>No billing records found for:</strong> {{ empty_groups|join:", " }}
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="alert alert-warning text-center mt-4" style="margin-top: 30px;">
+        No groups or billing records found.
+    </div>
     {% endif %}
 </div>
 
+
+
 <!-- Share Modal -->
 <div class="modal fade" id="shareGroupModal" tabindex="-1" aria-labelledby="shareGroupModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header align-items-center">
-        <h5 class="modal-title mb-0" id="shareGroupModalLabel">Share Group Details</h5>
-        <div class="d-flex align-items-center ml-auto">
-            
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin:-1rem -1rem -1rem auto;">
-              <span aria-hidden="true">&times;</span>
-            </button>
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header align-items-center">
+                <h5 class="modal-title mb-0" id="shareGroupModalLabel">Share Group Details</h5>
+                <div class="d-flex align-items-center ml-auto">
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+                        style="margin:-1rem -1rem -1rem auto;">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body" id="shareGroupModalBody">
+                <!-- Table will be cloned here -->
+            </div>
+            <div class="modal-footer">
+                <div class="custom-control custom-switch mr-4" data-html2canvas-ignore="true">
+                    <input type="checkbox" class="custom-control-input" id="hideEmptyRowsToggle" checked>
+                    <label class="custom-control-label text-muted" style="cursor:pointer; margin-bottom:0;"
+                        for="hideEmptyRowsToggle">Hide Empty Rows/Tables</label>
+                </div>
+                <button type="button" class="btn btn-info" id="copyGroupImageBtn" onclick="copyGroupImage()">
+                    <i class="fa fa-copy"></i> Copy Image
+                </button>
+                <button type="button" class="btn btn-primary" id="shareGroupImageBtn" onclick="shareGroupImage()">
+                    <i class="fa fa-share-alt"></i> Share via System
+                </button>
+            </div>
         </div>
-      </div>
-      <div class="modal-body" id="shareGroupModalBody">
-          <!-- Table will be cloned here -->
-      </div>
-      <div class="modal-footer">
-        <div class="custom-control custom-switch mr-4" data-html2canvas-ignore="true">
-            <input type="checkbox" class="custom-control-input" id="hideEmptyRowsToggle" checked>
-            <label class="custom-control-label text-muted" style="cursor:pointer; margin-bottom:0;" for="hideEmptyRowsToggle">Hide Empty Rows/Tables</label>
-        </div>
-        <button type="button" class="btn btn-info" id="copyGroupImageBtn" onclick="copyGroupImage()">
-            <i class="fa fa-copy"></i> Copy Image
-        </button>
-        <button type="button" class="btn btn-primary" id="shareGroupImageBtn" onclick="shareGroupImage()">
-            <i class="fa fa-share-alt"></i> Share via System
-        </button>
-      </div>
     </div>
-  </div>
 </div>
 
 <script src="{% static 'JS/jquery.min.js' %}"></script>
@@ -355,7 +416,7 @@
     function openGroupShareModal(buttonElement, groupName, type) {
         const containerDiv = buttonElement.closest('div');
         const tableToClone = containerDiv.querySelector('table');
-        
+
         if (!tableToClone) return;
 
         const modalBody = document.getElementById('shareGroupModalBody');
@@ -366,11 +427,11 @@
         titleContainer.style.justifyContent = 'space-between';
         titleContainer.style.alignItems = 'center';
         titleContainer.style.marginBottom = '1rem';
-        
+
         const title = document.createElement('h3');
         title.className = 'font-weight-bold m-0';
         title.innerText = 'Group : ' + groupName + (type === 'SME' ? ' (SME IPOs)' : '');
-        
+
         const timeDisplay = document.createElement('span');
         timeDisplay.className = 'text-muted';
         timeDisplay.style.fontWeight = 'bold';
@@ -482,7 +543,7 @@
             rows.forEach(tr => {
                 const cells = Array.from(tr.querySelectorAll('th, td'));
                 if (cells.length < 25) return;
-                
+
                 const ipoName = extractText(cells[1]);
 
                 const makeRowAndCheckEmpty = (tableObj, data) => {
@@ -491,7 +552,7 @@
                         const v = val.replace(/,/g, ''); // handle commas if any
                         return v === '0' || v === '0.0' || v === '-0.0' || v === '' || v === '-';
                     });
-                    
+
                     if (hideEmpty && isAllZeros) return; // Skip this row
 
                     const trHTML = document.createElement('tr');
@@ -535,9 +596,9 @@
         // Render initially with the current toggle state
         const toggleEl = document.getElementById('hideEmptyRowsToggle');
         renderTables(toggleEl.checked);
-        
+
         // Listen to toggle changes (use onchange to avoid duplicate listeners)
-        toggleEl.onchange = function() {
+        toggleEl.onchange = function () {
             renderTables(this.checked);
         };
 
@@ -550,7 +611,7 @@
     async function renderGroupImage() {
         const modalDialog = document.querySelector('#shareGroupModal .modal-dialog');
         const modalBody = document.getElementById('shareGroupModalBody');
-        
+
         // Save old styles to restore later
         const oldDialogClass = modalDialog.className;
         const oldBodyOverflow = modalBody.style.overflow;
@@ -662,7 +723,7 @@
         });
     }
 
-    document.getElementById('groupSelect').addEventListener('change', function() {
+    document.getElementById('groupSelect').addEventListener('change', function () {
         var groupId = this.value;
         if (groupId && groupId !== 'all') {
             window.location.href = '/group-billing-details/' + groupId + '/';
@@ -671,20 +732,20 @@
         }
     });
 
-    $(document).ready(function() {
+    $(document).ready(function () {
         // Sync visibility on page load using localStorage
         var showArchived = localStorage.getItem('showArchivedIpos') === 'true';
         $('#showArchivedToggle').prop('checked', showArchived);
 
         // Toggle global visibility of archived IPOs
-        $('#showArchivedToggle').on('change', function() {
+        $('#showArchivedToggle').on('change', function () {
             var isChecked = $(this).is(':checked');
             localStorage.setItem('showArchivedIpos', isChecked);
             // DataTables api.draw() will handle showing/hiding via the custom search filter
         });
 
         // Handle individual checkbox clicks
-        $('.ipo-archive-checkbox').on('change', function() {
+        $('.ipo-archive-checkbox').on('change', function () {
             var checkbox = $(this);
             var ipoId = checkbox.data('id');
             var groupName = checkbox.data('group');
@@ -701,7 +762,7 @@
                 tr.removeClass('archived-ipo');
                 tr.show();
             }
-            
+
             function getCookie(name) {
                 let cookieValue = null;
                 if (document.cookie && document.cookie !== '') {
@@ -731,7 +792,7 @@
                     IPO_id: ipoId
                 }),
                 contentType: 'application/json',
-                success: function(response) {
+                success: function (response) {
                     if (!response.success) {
                         alert('Error updating status.');
                         // Revert UI if error
@@ -740,19 +801,19 @@
                         window.location.reload();
                     }
                 },
-                error: function() {
+                error: function () {
                     alert('Network error while updating status.');
                     // Revert UI if error
                     checkbox.prop('checked', !isChecked).trigger('change');
                 }
             });
         });
-        
+
         // DataTables numeric sorting for links and formatted numbers
-        jQuery.extend( jQuery.fn.dataTableExt.oSort, {
-            "num-html-pre": function ( a ) {
+        jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+            "num-html-pre": function (a) {
                 // strip html tags
-                var x = String(a).replace( /<[\s\S]*?>/g, "" ).trim();
+                var x = String(a).replace(/<[\s\S]*?>/g, "").trim();
                 // replace non-numeric chars except minus, dot
                 var numStr = x.replace(/[^\d\.-]/g, '');
                 // fallback to string if no valid number found (e.g., IPO Names)
@@ -761,17 +822,17 @@
                 }
                 return parseFloat(numStr) || 0;
             },
-            "num-html-asc": function ( a, b ) {
+            "num-html-asc": function (a, b) {
                 return ((a < b) ? -1 : ((a > b) ? 1 : 0));
             },
-            "num-html-desc": function ( a, b ) {
+            "num-html-desc": function (a, b) {
                 return ((a < b) ? 1 : ((a > b) ? -1 : 0));
             }
         });
-        
+
         // DataTables sorting for checkbox column
-        $.fn.dataTable.ext.order['dom-checkbox'] = function ( settings, col ) {
-            return this.api().column( col, {order:'index'} ).nodes().map( function ( td, i ) {
+        $.fn.dataTable.ext.order['dom-checkbox'] = function (settings, col) {
+            return this.api().column(col, { order: 'index' }).nodes().map(function (td, i) {
                 return $('input', td).prop('checked') ? '1' : '0';
             });
         }
@@ -779,7 +840,7 @@
         // Initialize DataTable function
         function initDataTable(tableId) {
             var table = $('#' + tableId);
-            if(table.length == 0) return;
+            if (table.length == 0) return;
 
             function syncFrozenColumnOffset() {
                 var tallyHeader = table.find('thead > tr:first-child > th:first-child');
@@ -788,7 +849,7 @@
                     table[0].style.setProperty('--frozen-tally-width', Math.ceil(tallyWidth) + 'px');
                 }
             }
-            
+
             var dt = table.DataTable({
                 "dom": "<'table-responsive'tr>",
                 "paging": false,
@@ -808,10 +869,10 @@
                 ],
                 initComplete: function () {
                     var api = this.api();
-                    
+
                     // Trigger custom search to hide archived IPOs correctly
                     $.fn.dataTable.ext.search.push(
-                        function(settings, data, dataIndex, rowData, counter) {
+                        function (settings, data, dataIndex, rowData, counter) {
                             if (settings.nTable.id !== tableId) return true;
                             var tr = $(settings.aoData[dataIndex].nTr);
                             var showArchived = $('#showArchivedToggle').is(':checked');
@@ -821,17 +882,17 @@
                             return true;
                         }
                     );
-                    
+
                     // Force an initial draw so the filter applies immediately on page load
                     api.draw();
-                    
+
                     // Re-draw table when toggle changes
-                    $('#showArchivedToggle').on('change', function() {
+                    $('#showArchivedToggle').on('change', function () {
                         api.draw();
                     });
-                    
+
                     // Re-draw table when checkbox changes so search extension triggers
-                    table.on('change', '.ipo-archive-checkbox', function() {
+                    table.on('change', '.ipo-archive-checkbox', function () {
                         api.draw();
                     });
                 }
@@ -842,13 +903,13 @@
             $(window).on('resize.frozenColumns-' + tableId, syncFrozenColumnOffset);
         }
         // Initialize all dynamically generated tables
-        $('table.table').each(function() {
+        $('table.table').each(function () {
             var id = $(this).attr('id');
-            if(id) {
+            if (id) {
                 initDataTable(id);
             }
         });
-        
+
     });
 </script>
 <script src="{% static 'DataTables/js/jquery.dataTables.min.js' %}"></script>
