@@ -166,6 +166,10 @@ function MainLayout() {
           <a href="https://hostinger.ipoutility.in/accounting" style={{ color: 'white', textDecoration: 'none' }}>
             <b style={{ color: '#fff' }}>|</b> &nbsp; Accounting
           </a>
+
+          <a href="https://hostinger.ipoutility.in/trades" style={{ color: 'white', textDecoration: 'none' }}>
+            <b style={{ color: '#fff' }}>|</b> &nbsp; Trades
+          </a>
           
           <a href="https://hostinger.ipoutility.in/BackUp" style={{ color: 'white', textDecoration: 'none' }}>
             <b style={{ color: '#fff' }}>|</b> &nbsp; Backup
