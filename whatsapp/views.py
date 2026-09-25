@@ -1,3 +1,5 @@
+import io
+from PIL import Image
 import hashlib
 import hmac
 import json
@@ -21,6 +23,7 @@ from home.models import CurrentIpoName, GroupDetail, Order
 
 from .client import (
     send_image_message,
+    send_document_message,
     send_order_confirmation,
     send_text_message,
     upload_media,
@@ -286,6 +289,11 @@ def _extract_button_payload(msg):
     return (payload or "").strip(), (text or "").strip()
 
 
+def _is_ipo_flow_action(msg_type, text):
+    if msg_type == "text" and text and text.strip().upper() == "IPO":
+        return True
+    return False
+
 def _is_view_orders_action(msg_type, payload, text):
     """Checks if payload, text, or message type corresponds to button click / View Orders."""
     if msg_type in ("button", "interactive"):
@@ -458,43 +466,49 @@ def webhook(request):
                             f.write(img_buf.getvalue())
                         local_media_url = f"/chat-api/media/local/{filename}"
 
-                        # Upload media to Meta WhatsApp Cloud API
-                        upload_res = upload_media(
-                            img_buf,
-                            mime_type="image/png",
-                            filename=filename
-                        )
-                        print(f"[WA Webhook Upload]: HTTP {upload_res.status_code} -> {upload_res.text}")
-
-                        if upload_res.ok:
-                            media_id = upload_res.json().get("id")
-                            ipo_display = getattr(target_ipo, 'IPOName', 'Orders') if target_ipo else 'Orders'
-                            caption = f"{ipo_display} Status - {group.GroupName}"
-                            send_res = send_image_message(
-                                phone_number=sender_raw,
-                                media_id=media_id,
-                                caption=caption,
-                                log_to_fastapi=False
-                            )
-                            print(f"[WA Webhook Send Image]: HTTP {send_res.status_code} -> {send_res.text}")
-                            if not send_res.ok:
-                                print(f"[WA Webhook ERROR sending image]: {send_res.text}")
-                            else:
-                                try:
-                                    wamid = send_res.json().get("messages", [{}])[0].get("id")
-                                except Exception:
-                                    wamid = None
-                                _log_outbound_to_fastapi(
+                        # 1. COMPRESS TO JPEG FIRST
+                        img = Image.open(img_buf)
+                        if img.mode in ("RGBA", "P"):
+                            img = img.convert("RGB")
+                        
+                        optimized_buf = io.BytesIO()
+                        # Try saving as a highly optimized JPEG
+                        img.save(optimized_buf, format="JPEG", quality=75, optimize=True)
+                        optimized_size = len(optimized_buf.getvalue())
+                        
+                        caption = f"{ipo_display} Status - {group.GroupName}"
+                        upload_res = None
+                        send_res = None
+                        
+                        # 2. CHECK SIZE - IF < 5MB, SEND AS IMAGE
+                        if optimized_size < 5000000:
+                            upload_res = upload_media(optimized_buf, mime_type="image/jpeg", filename="orders.jpg")
+                            if upload_res.ok:
+                                send_res = send_image_message(
                                     phone_number=sender_raw,
-                                    text=caption,
-                                    msg_type="image",
-                                    media_url=local_media_url,
-                                    media_filename=filename,
-                                    wamid=wamid
+                                    media_id=upload_res.json().get("id"),
+                                    image_url=local_media_url,
+                                    caption=caption,
+                                    log_to_fastapi=True
                                 )
-                        else:
-                            print(f"[WA Webhook ERROR uploading media]: {upload_res.text}")
-                            # Fallback to text message if media upload fails
+                        
+                        # 3. 1ST FALLBACK: IF > 5MB OR UPLOAD FAILED, CONVERT TO PDF
+                        if optimized_size >= 5000000 or (upload_res and not upload_res.ok):
+                            print(f"[WA Webhook] JPEG too large or failed. Falling back to PDF...")
+                            pdf_buf = io.BytesIO()
+                            img.save(pdf_buf, format="PDF")
+                            upload_res = upload_media(pdf_buf, mime_type="application/pdf", filename="orders.pdf")
+                            
+                            if upload_res.ok:
+                                send_res = send_document_message(
+                                    phone_number=sender_raw,
+                                    media_id=upload_res.json().get("id"),
+                                    caption=caption
+                                )
+                                
+                        # 4. 2ND FALLBACK: IF PDF FAILS, SEND AS TEXT
+                        if not upload_res or not upload_res.ok or not send_res or not send_res.ok:
+                            print(f"[WA Webhook ERROR] Both Media Uploads Failed. Falling back to text.")
                             send_text_message(
                                 sender_raw,
                                 f"Orders Summary for {group.GroupName}: {orders.count()} active orders."

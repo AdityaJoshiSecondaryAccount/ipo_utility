@@ -56,6 +56,12 @@ docs/*
 !docs/playwright*.md
 !docs/playwright*.json
 
+**/migrations/
+wkhtmltox/
+
+# Isolated browser automation artifacts
+playwright_testing/results/
+playwright_testing/tmp/
 tmp/playwright-e2e-*/
 test-results/
 playwright-report/
@@ -96,6 +102,7 @@ whatsapp/flow_keys/
 *.env*
 .env*
 
+# --------------------------
 # Backup & Scratch Files
 *views2.py
 home/views2.py
@@ -107,8 +114,15 @@ scratch/
 # WAB_Interaface/
 WAB_Interaface/public_sign_readme.txt
 
+playwright_testing/**
+# Required source files for the remote-only test runners
+!playwright_testing/remote.py
+!playwright_testing/remote_e2e.py
+!playwright_testing/REMOTE_TESTING.md
 WAB_Interaface/public_sign_readme.txt
 
+!playwright_testing/calculation/
+!playwright_testing/calculation/remote_seed.py
 # WhatsApp Inbox Microservice
 WAB_Interaface/backend/.env
 WAB_Interaface/backend/wab_inbox.db
@@ -122,6 +136,8 @@ WAB_Interaface/ngrok.exe
 *.png
 *.webp
 *.jfif
+settings.py
+
 playwright_testing/inventory/
 playwright_testing/
 
