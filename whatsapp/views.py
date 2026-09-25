@@ -250,6 +250,11 @@ def _extract_button_payload(msg):
     return (payload or "").strip(), (text or "").strip()
 
 
+def _is_ipo_flow_action(msg_type, text):
+    if msg_type == "text" and text and text.strip().upper() == "IPO":
+        return True
+    return False
+
 def _is_view_orders_action(msg_type, payload, text):
     """Checks if payload, text, or message type corresponds to button click / View Orders."""
     if msg_type in ("button", "interactive"):
@@ -437,18 +442,19 @@ def webhook(request):
                         send_res = None
                         
                         # 2. CHECK SIZE - IF < 5MB, SEND AS IMAGE
-                        if optimized_size < 10:
+                        if optimized_size < 5000000:
                             upload_res = upload_media(optimized_buf, mime_type="image/jpeg", filename="orders.jpg")
                             if upload_res.ok:
                                 send_res = send_image_message(
                                     phone_number=sender_raw,
                                     media_id=upload_res.json().get("id"),
+                                    image_url=local_media_url,
                                     caption=caption,
-                                    log_to_fastapi=False
+                                    log_to_fastapi=True
                                 )
                         
                         # 3. 1ST FALLBACK: IF > 5MB OR UPLOAD FAILED, CONVERT TO PDF
-                        if optimized_size >= 10 or (upload_res and not upload_res.ok):
+                        if optimized_size >= 5000000 or (upload_res and not upload_res.ok):
                             print(f"[WA Webhook] JPEG too large or failed. Falling back to PDF...")
                             pdf_buf = io.BytesIO()
                             img.save(pdf_buf, format="PDF")

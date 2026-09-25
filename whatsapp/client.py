@@ -52,16 +52,16 @@ def send_order_confirmation(phone_number, ipo_name, order_type, group_name,
             {"type": "text", "parameter_name": "order_type", "text": str(order_type)},
             {"type": "text", "parameter_name": "group_name", "text": str(group_name)},
             {"type": "text", "parameter_name": "order_datetime", "text": str(order_datetime)},
-            {"type": "text", "parameter_name": "item_1", "text": str(order_details[0])},
-            {"type": "text", "parameter_name": "item_2", "text": str(order_details[1])},
-            {"type": "text", "parameter_name": "item_3", "text": str(order_details[2])},
-            {"type": "text", "parameter_name": "item_4", "text": str(order_details[3])},
-            {"type": "text", "parameter_name": "item_5", "text": str(order_details[4])},
-            {"type": "text", "parameter_name": "item_6", "text": str(order_details[5])},
-            {"type": "text", "parameter_name": "item_7", "text": str(order_details[6])},
-            {"type": "text", "parameter_name": "item_8", "text": str(order_details[7])},
-            {"type": "text", "parameter_name": "item_9", "text": str(order_details[8])},
-            {"type": "text", "parameter_name": "remark_text", "text": str(remark_text)},
+            {"type": "text", "parameter_name": "item_1", "text": str(order_details[0]) if order_details[0] else "\u200B"},
+            {"type": "text", "parameter_name": "item_2", "text": str(order_details[1]) if order_details[1] else "\u200B"},
+            {"type": "text", "parameter_name": "item_3", "text": str(order_details[2]) if order_details[2] else "\u200B"},
+            {"type": "text", "parameter_name": "item_4", "text": str(order_details[3]) if order_details[3] else "\u200B"},
+            {"type": "text", "parameter_name": "item_5", "text": str(order_details[4]) if order_details[4] else "\u200B"},
+            {"type": "text", "parameter_name": "item_6", "text": str(order_details[5]) if order_details[5] else "\u200B"},
+            {"type": "text", "parameter_name": "item_7", "text": str(order_details[6]) if order_details[6] else "\u200B"},
+            {"type": "text", "parameter_name": "item_8", "text": str(order_details[7]) if order_details[7] else "\u200B"},
+            {"type": "text", "parameter_name": "item_9", "text": str(order_details[8]) if order_details[8] else "\u200B"},
+            {"type": "text", "parameter_name": "remark_text", "text": str(remark_text) if remark_text else "\u200B"},
         ],
     }]
 
@@ -86,6 +86,7 @@ def send_order_confirmation(phone_number, ipo_name, order_type, group_name,
         "template": {
             # "name": "ipo_order_confirmation",
             "name": "ipo_order_formatted",
+            # "name": "three_var_second ",
             # "name": "ipo_order_lines",
             "language": {"code": "en"},
             "components": components,
@@ -223,7 +224,7 @@ def send_text_message(phone_number, text):
     return res
 
 
-def send_document_message(phone_number, media_id=None, caption=None, log_to_fastapi=True):
+def send_document_message(phone_number, media_id=None, image_url=None, caption=None, log_to_fastapi=True):
     url = f"https://graph.facebook.com/{settings.WHATSAPP_API_VERSION}/{settings.WHATSAPP_PHONE_NUMBER_ID}/messages"
     headers = _get_api_headers("application/json")
     
@@ -248,7 +249,107 @@ def send_document_message(phone_number, media_id=None, caption=None, log_to_fast
             phone_number=phone_number,
             text=caption or "",
             msg_type="document",
-            media_url=str(media_id) if media_id else None,
+            media_url=image_url or str(media_id) if media_id else None,
+            wamid=wamid
+        )
+    return res
+
+def send_ipo_flow_to_user(phone_number, log_to_fastapi=True):
+    """
+    Sends the WhatsApp Flow template to the user.
+    Critically, it injects the phone_number into the flow_token so that
+    when the user opens the flow, we know exactly who they are!
+    """
+    url = f"https://graph.facebook.com/{settings.WHATSAPP_API_VERSION}/{settings.WHATSAPP_PHONE_NUMBER_ID}/messages"
+    headers = _get_api_headers("application/json")
+    
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": phone_number,
+        "type": "template",
+        "template": {
+            "name": "place_ipo_order",  # <--- Make sure this matches your Meta Template Name!
+            "language": {"code": "en"},
+            "components": [
+                {
+                    "type": "button",
+                    "sub_type": "flow",
+                    "index": "0",
+                    "parameters": [
+                        {
+                            "type": "action",
+                            "action": {
+                                "flow_token": str(phone_number)  # <--- THE MAGIC STICKY NOTE!
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+    
+    res = requests.post(url, headers=headers, json=payload, timeout=15)
+    
+    if res.ok and log_to_fastapi:
+        try:
+            wamid = res.json().get("messages", [{}])[0].get("id")
+        except Exception:
+            wamid = None
+        _log_outbound_to_fastapi(
+            phone_number=phone_number,
+            text="IPO Order Form (Flow)",
+            msg_type="template",
+            wamid=wamid
+        )
+    return res
+
+def send_grouped_order_confirmation(
+    phone_number, ipo_name, order_type, group_name, order_datetime,
+    kostak_str, subject_str, premium_str, options_str, remark_text,
+    template_name="ipo_order_formatted"
+):
+    url = f"https://graph.facebook.com/{settings.WHATSAPP_API_VERSION}/{settings.WHATSAPP_PHONE_NUMBER_ID}/messages"
+    headers = _get_api_headers("application/json")
+    
+    components = [{
+        "type": "body",
+        "parameters": [
+            {"type": "text", "text": str(ipo_name)},
+            {"type": "text", "text": str(order_type)},
+            {"type": "text", "text": str(group_name)},
+            {"type": "text", "text": str(order_datetime)},
+            {"type": "text", "text": kostak_str if kostak_str else "\u200B"},
+            {"type": "text", "text": subject_str if subject_str else "\u200B"},
+            {"type": "text", "text": premium_str if premium_str else "\u200B"},
+            {"type": "text", "text": options_str if options_str else "\u200B"},
+            {"type": "text", "text": remark_text if remark_text else "\u200B"},
+        ],
+    }]
+
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": phone_number,
+        "type": "template",
+        "template": {
+            "name": template_name,
+            "language": {"code": "en"},
+            "components": components,
+        },
+    }
+    
+    res = requests.post(url, headers=headers, json=payload, timeout=15)
+    
+    # Log to FastAPI
+    if res.ok:
+        try:
+            wamid = res.json().get("messages", [{}])[0].get("id")
+        except:
+            wamid = None
+        exact_text = f"Order Confirmation\nIPO: {ipo_name}\nOrder Type: {order_type}\nGroup: {group_name}\nDate: {order_datetime}\n\nKostak: {kostak_str}\nSubject To: {subject_str}\nPremium: {premium_str}\nOptions: {options_str}\nRemarks: {remark_text}"
+        _log_outbound_to_fastapi(
+            phone_number=phone_number,
+            text=exact_text,
+            msg_type="template",
             wamid=wamid
         )
     return res
