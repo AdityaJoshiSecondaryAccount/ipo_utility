@@ -206,12 +206,20 @@
                         <b>|</b>&nbsp; Accounting
                     </a>
                 </li>
+                <li className="nav-item active">
+                    <a className="nav-link" href="/trades">
+                        <b>|</b>&nbsp; Trades
+                    </a>
+                </li>
                 {"{"}% else %{"}"}
                 <span className="nav-link ms-2">
                     <b style={{ color: "#fff" }}>|</b> &nbsp; Group Wise Dashboard
                 </span>
                 <span className="nav-link ms-2">
                     <b style={{ color: "#fff" }}>|</b> &nbsp; Positions
+                </span>
+                <span className="nav-link ms-2">
+                    <b style={{ color: "#fff" }}>|</b> &nbsp; Trades
                 </span>
                 <span className="nav-link ms-2">
                     <b style={{ color: "#fff" }}>|</b> &nbsp; Accounting
@@ -250,7 +258,7 @@
             >
                 <li className="nav-item active"></li>
                 {/* <li class="nav-item active">
-               <a class="nav-link" data-bs-toggle="modal" data-bs-target="#CreateUser">Create User</a> 
+               <a class="nav-link" data-bs-toggle="modal" data-bs-target="#CreateUser">Create User</a>
               <a class="nav-link" href="/AddCustomerUser"><b>|</b>&nbsp;&nbsp;Create User</a>
           </li> */}
                 <li className="nav-item dropdown">
