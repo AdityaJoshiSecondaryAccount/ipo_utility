@@ -59,31 +59,36 @@ def _whatsapp_number(value):
     return digits
 
 
-def _order_details(post_data):
-    details = []
-    for label, quantity_field, rate_field in ORDER_DETAIL_FIELDS:
-        quantity = (post_data.get(quantity_field) or "").strip()
-        rate = (post_data.get(rate_field) or "").strip()
-        
-        strike = ""
-        if label == "Call":
-            strike = (post_data.get("CallStrikePrice") or "").strip()
-        elif label == "Put":
-            strike = (post_data.get("PutStrikePrice") or "").strip()
-            
-        if quantity or rate or strike:
-            parts = [label]
-            if strike:
-                parts.append(f"Strike: {strike}")
-            if quantity:
-                parts.append(f"Qty: {quantity}")
-            if rate:
-                parts.append(f"Rate: {rate}")
-            details.append(" - ".join(parts))
-        else:
-            details.append(f"{label} - None")
-            
-    return details
+def _grouped_order_details(post_data):
+    def get_val(label, qty_f, rate_f, strike_f=None):
+        q = (post_data.get(qty_f) or "").strip()
+        r = (post_data.get(rate_f) or "").strip()
+        s = (post_data.get(strike_f) or "").strip() if strike_f else ""
+        if q or r or s:
+            parts = []
+            if s: parts.append(f"Strike: {s}")
+            if q: parts.append(f"Qty: {q}")
+            if r: parts.append(f"Rate: {r}")
+            return f"{label} - " + " - ".join(parts)
+        return ""
+
+    k_ret = get_val("Kostak Retail", "KostakQTY", "KostakRate")
+    k_shni = get_val("Kostak SHNI", "KostakQTYSHNI", "KostakRateSHNI")
+    k_bhni = get_val("Kostak BHNI", "KostakQTYBHNI", "KostakRateBHNI")
+    kostak = ", ".join(filter(None, [k_ret, k_shni, k_bhni])) or "None"
+
+    s_ret = get_val("Subject To Retail", "SubjectToQTY", "SubjectToRate")
+    s_shni = get_val("Subject To SHNI", "SubjectToQTYSHNI", "SubjectToRateSHNI")
+    s_bhni = get_val("Subject To BHNI", "SubjectToQTYBHNI", "SubjectToRateBHNI")
+    subject = ", ".join(filter(None, [s_ret, s_shni, s_bhni])) or "None"
+
+    premium = get_val("Premium", "PremiumQTY", "PremiumRate") or "None"
+
+    call = get_val("Call", "CallQTY", "CallRate", "CallStrikePrice")
+    put = get_val("Put", "PutQTY", "PutRate", "PutStrikePrice")
+    options = ", ".join(filter(None, [call, put])) or "None"
+
+    return kostak, subject, premium, options
 
 
 def _send_order(request, ipo_id, order_type):
@@ -123,17 +128,17 @@ def _send_order(request, ipo_id, order_type):
         }, status=400)
 
     ipo = get_object_or_404(CurrentIpoName, id=ipo_id, user=request.user)
-    details = _order_details(request.POST)
+    kostak_str, subject_str, premium_str, options_str = _grouped_order_details(request.POST)
     
     remark_tags = request.POST.get("remark_tags", "").strip()
     remark_text = request.POST.get("remark_text", "").strip()
     remark_parts = [r for r in (remark_tags, remark_text) if r]
     
-    full_remark = "📝 Remark: None"
+    full_remark = "None"
     if remark_parts:
-        full_remark = "📝 Remark: " + " ".join(remark_parts)
+        full_remark = " ".join(remark_parts)
             
-    if all(" - None" in d for d in details):
+    if kostak_str == "None" and subject_str == "None" and premium_str == "None" and options_str == "None":
         messages.error(request, "Order placed successfully, but WhatsApp order details were empty.")
         return JsonResponse({
             "status": "error",
@@ -156,7 +161,10 @@ def _send_order(request, ipo_id, order_type):
             order_type=order_type,
             group_name=group.GroupName,
             order_datetime=formatted_datetime,
-            order_details=details,
+            kostak_str=kostak_str,
+            subject_str=subject_str,
+            premium_str=premium_str,
+            options_str=options_str,
             remark_text=full_remark,
             ipo_id=ipo_id,
             broker_id=group.user_id if hasattr(group, 'user_id') else None
