@@ -321,7 +321,8 @@
                 <select id="groupSelect" class="form-control-sm custom-select" style="width: 250px;">
                     <option value="all" {% if not selected_group %}selected{% endif %}>All Groups</option>
                     {% for grp in groups %}
-                    <option value="{{ grp.id }}" {% if selected_group and selected_group.id == grp.id %}selected{% endif %}>{{ grp.GroupName }}</option>
+                    <option value="{{ grp.id }}" {% if selected_group and selected_group.id==grp.id %}selected{% endif
+                        %}>{{ grp.GroupName }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -352,6 +353,8 @@
     </div>
     {% endif %}
 </div>
+
+
 
 <!-- Share Modal -->
 <div class="modal fade" id="shareGroupModal" tabindex="-1" aria-labelledby="shareGroupModalLabel" aria-hidden="true">
