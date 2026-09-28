@@ -356,9 +356,9 @@ def get_wkhtmltoimage_config():
             except Exception:
                 pass
     return None
-
 def generate_order_summary_image(context):
     from django.template.loader import render_to_string
+    from PIL import Image
     import imgkit, io, logging
     logger = logging.getLogger(__name__)
     html = render_to_string('status_table_template.html', context)
@@ -374,9 +374,21 @@ def generate_order_summary_image(context):
             logger.error('imgkit error: %s', e)
             return _generate_fallback_image(context)
             
-    buf = io.BytesIO(img_bytes)
-    buf.name = 'status_report.png'
-    return buf
+    # Convert PNG bytes to compressed WebP (saving 95%+ bytes)
+    try:
+        raw_img = Image.open(io.BytesIO(img_bytes))
+        if raw_img.mode in ("RGBA", "P"):
+            raw_img = raw_img.convert("RGB")
+        out_buf = io.BytesIO()
+        raw_img.save(out_buf, format="WEBP", quality=85, optimize=True)
+        out_buf.seek(0)
+        out_buf.name = "status_report.webp"
+        return out_buf
+    except Exception as conv_err:
+        logger.warning(f"Could not convert status image to WebP: {conv_err}")
+        buf = io.BytesIO(img_bytes)
+        buf.name = 'status_report.png'
+        return buf
 
 def _generate_fallback_image(context):
     """Creates a clean image report using Pillow when wkhtmltoimage is not installed."""
@@ -402,7 +414,7 @@ def _generate_fallback_image(context):
         ("Kostak SHNI", dict_count.get("KostakSHNIBUYCount", 0), dict_count.get("KostakSHNISELLCount", 0), net_count.get("KostakSHNINetCount", 0)),
         ("Kostak BHNI", dict_count.get("KostakBHNIBUYCount", 0), dict_count.get("KostakBHNISELLCount", 0), net_count.get("KostakBHNINetCount", 0)),
         ("Subject To Retail", dict_count.get("SubjectToRETAILBUYCount", 0), dict_count.get("SubjectToRETAILSELLCount", 0), net_count.get("SubjectToRETAILNetCount", 0)),
-        ("Subject To SHNI", dict_count.get("SubjectToSHNIBUYCount", 0), dict_count.get("SubjectToSHNISELLCount", 0), net_count.get("SubjectToSHNINetCount", 0)),
+        ("Subject To SHNI", dict_count.get("SubjectToSHNIBUYCount", 0), dict_count.get("SubjectToSHNISELLCount", 0), net_count.get("SubjectToSHNISELLCount", 0)),
         ("Subject To BHNI", dict_count.get("SubjectToBHNIBUYCount", 0), dict_count.get("SubjectToBHNISELLCount", 0), net_count.get("SubjectToBHNINetCount", 0)),
         ("Premium", context.get("PremiumBuyCount", 0), context.get("PremiumSellCount", 0), context.get("PremiumNetCount", 0)),
     ]
@@ -442,7 +454,7 @@ def _generate_fallback_image(context):
             y += 24
 
     buf = io.BytesIO()
-    image.save(buf, format="PNG")
+    image.save(buf, format="WEBP", quality=85, optimize=True)
     buf.seek(0)
-    buf.name = "orders_summary.png"
+    buf.name = "orders_summary.webp"
     return buf

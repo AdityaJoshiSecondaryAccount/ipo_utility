@@ -18,8 +18,8 @@ class Settings(BaseSettings):
     # Internal routing
     EXISTING_DJANGO_WEBHOOK_URL: str = "http://127.0.0.1:8000/whatsapp/webhook/"
     
-    # Database
-    DATABASE_URL: str = f"sqlite+aiosqlite:///{BASE_DIR}/inbox.db"
+    # Database (Unified with Django IPO Utility db.sqlite3)
+    DATABASE_URL: str = f"sqlite+aiosqlite:///{PROJECT_ROOT.parent}/db.sqlite3"
     
     # Server ports
     HOST: str = "0.0.0.0"

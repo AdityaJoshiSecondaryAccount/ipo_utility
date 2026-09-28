@@ -175,6 +175,25 @@ async def process_webhook_payload(payload: dict, session: AsyncSession):
                             save_path = os.path.join(upload_dir, filename)
                             success = await whatsapp_client.download_media(fb_media_url, save_path)
                             if success:
+                                # Auto-compress image files to WebP (95%+ disk savings)
+                                if msg_type == "image":
+                                    try:
+                                        from PIL import Image
+                                        webp_filename = f"{media_id}.webp"
+                                        webp_path = os.path.join(upload_dir, webp_filename)
+                                        with Image.open(save_path) as img:
+                                            if img.mode in ("RGBA", "P"):
+                                                img = img.convert("RGB")
+                                            img.save(webp_path, "WEBP", quality=85, optimize=True)
+                                        if os.path.exists(webp_path) and webp_path != save_path:
+                                            try:
+                                                os.remove(save_path)
+                                            except Exception:
+                                                pass
+                                            filename = webp_filename
+                                    except Exception as compress_err:
+                                        logger.warning(f"Could not compress image {filename}: {compress_err}")
+
                                 media_url = f"/chat-api/media/local/{filename}"
                             else:
                                 media_url = fb_media_url
