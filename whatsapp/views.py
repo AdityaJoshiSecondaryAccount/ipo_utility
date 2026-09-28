@@ -59,31 +59,36 @@ def _whatsapp_number(value):
     return digits
 
 
-def _order_details(post_data):
-    details = []
-    for label, quantity_field, rate_field in ORDER_DETAIL_FIELDS:
-        quantity = (post_data.get(quantity_field) or "").strip()
-        rate = (post_data.get(rate_field) or "").strip()
-        
-        strike = ""
-        if label == "Call":
-            strike = (post_data.get("CallStrikePrice") or "").strip()
-        elif label == "Put":
-            strike = (post_data.get("PutStrikePrice") or "").strip()
-            
-        if quantity or rate or strike:
-            parts = [label]
-            if strike:
-                parts.append(f"Strike: {strike}")
-            if quantity:
-                parts.append(f"Qty: {quantity}")
-            if rate:
-                parts.append(f"Rate: {rate}")
-            details.append(" - ".join(parts))
-        else:
-            details.append(f"{label} - None")
-            
-    return details
+def _grouped_order_details(post_data):
+    def get_val(label, qty_f, rate_f, strike_f=None):
+        q = (post_data.get(qty_f) or "").strip()
+        r = (post_data.get(rate_f) or "").strip()
+        s = (post_data.get(strike_f) or "").strip() if strike_f else ""
+        if q or r or s:
+            parts = []
+            if s: parts.append(f"Strike: {s}")
+            if q: parts.append(f"Qty: {q}")
+            if r: parts.append(f"Rate: {r}")
+            return f"{label} - " + " - ".join(parts)
+        return ""
+
+    k_ret = get_val("Kostak Retail", "KostakQTY", "KostakRate")
+    k_shni = get_val("Kostak SHNI", "KostakQTYSHNI", "KostakRateSHNI")
+    k_bhni = get_val("Kostak BHNI", "KostakQTYBHNI", "KostakRateBHNI")
+    kostak = ", ".join(filter(None, [k_ret, k_shni, k_bhni])) or "None"
+
+    s_ret = get_val("Subject To Retail", "SubjectToQTY", "SubjectToRate")
+    s_shni = get_val("Subject To SHNI", "SubjectToQTYSHNI", "SubjectToRateSHNI")
+    s_bhni = get_val("Subject To BHNI", "SubjectToQTYBHNI", "SubjectToRateBHNI")
+    subject = ", ".join(filter(None, [s_ret, s_shni, s_bhni])) or "None"
+
+    premium = get_val("Premium", "PremiumQTY", "PremiumRate") or "None"
+
+    call = get_val("Call", "CallQTY", "CallRate", "CallStrikePrice")
+    put = get_val("Put", "PutQTY", "PutRate", "PutStrikePrice")
+    options = ", ".join(filter(None, [call, put])) or "None"
+
+    return kostak, subject, premium, options
 
 
 def _send_order(request, ipo_id, order_type):
@@ -123,17 +128,17 @@ def _send_order(request, ipo_id, order_type):
         }, status=400)
 
     ipo = get_object_or_404(CurrentIpoName, id=ipo_id, user=request.user)
-    details = _order_details(request.POST)
+    kostak_str, subject_str, premium_str, options_str = _grouped_order_details(request.POST)
     
     remark_tags = request.POST.get("remark_tags", "").strip()
     remark_text = request.POST.get("remark_text", "").strip()
     remark_parts = [r for r in (remark_tags, remark_text) if r]
     
-    full_remark = "📝 Remarks: None"
+    full_remark = "None"
     if remark_parts:
-        full_remark = "📝 Remarks: " + " ".join(remark_parts)
+        full_remark = " ".join(remark_parts)
             
-    if all(" - None" in d for d in details):
+    if kostak_str == "None" and subject_str == "None" and premium_str == "None" and options_str == "None":
         messages.error(request, "Order placed successfully, but WhatsApp order details were empty.")
         return JsonResponse({
             "status": "error",
@@ -148,51 +153,9 @@ def _send_order(request, ipo_id, order_type):
     except Exception:
         formatted_datetime = raw_datetime
 
-    # 1. Build the Kostak String
-    k_parts = []
-    if float(request.POST.get("KostakQTY") or 0) > 0:
-        k_parts.append(f"Retail: {request.POST.get('KostakQTY')}@₹{request.POST.get('KostakRate')}")
-    if float(request.POST.get("KostakQTYSHNI") or 0) > 0:
-        k_parts.append(f"SHNI: {request.POST.get('KostakQTYSHNI')}@₹{request.POST.get('KostakRateSHNI')}")
-    if float(request.POST.get("KostakQTYBHNI") or 0) > 0:
-        k_parts.append(f"BHNI: {request.POST.get('KostakQTYBHNI')}@₹{request.POST.get('KostakRateBHNI')}")
-    kostak_str = ""
-    if k_parts:
-        kostak_str = "*Kostak*- " + " | ".join(k_parts)
-
-    # 2. Build the Subject To String
-    s_parts = []
-    if float(request.POST.get("SubjectToQTY") or 0) > 0:
-        s_parts.append(f"Retail: {request.POST.get('SubjectToQTY')}@₹{request.POST.get('SubjectToRate')}")
-    if float(request.POST.get("SubjectToQTYSHNI") or 0) > 0:
-        s_parts.append(f"SHNI: {request.POST.get('SubjectToQTYSHNI')}@₹{request.POST.get('SubjectToRateSHNI')}")
-    if float(request.POST.get("SubjectToQTYBHNI") or 0) > 0:
-        s_parts.append(f"BHNI: {request.POST.get('SubjectToQTYBHNI')}@₹{request.POST.get('SubjectToRateBHNI')}")
-    subject_str = ""
-    if s_parts:
-        subject_str = "*Subject To*- " + " | ".join(s_parts)
-
-    # 3. Build Premium String
-    premium_str = ""
-    if float(request.POST.get("PremiumQTY") or 0) > 0:
-        premium_str = f"*Premium*- {request.POST.get('PremiumQTY')}@₹{request.POST.get('PremiumRate')}"
-
-    # 4. Build Options String
-    opt_parts = []
-    if float(request.POST.get("CallQTY") or 0) > 0:
-        opt_parts.append(f"Call: {request.POST.get('CallQTY')}@₹{request.POST.get('CallRate')}")
-    if float(request.POST.get("PutQTY") or 0) > 0:
-        opt_parts.append(f"Put: {request.POST.get('PutQTY')}@₹{request.POST.get('PutRate')}")
-    options_str = ""
-    if opt_parts:
-        options_str = "*Options*- " + " | ".join(opt_parts)
-
-    # Dynamic template name from UI (if sent), otherwise default
-    template_name = request.POST.get("whatsapp_template", "ipo_order")
-
     try:
-        from .client import send_grouped_order_confirmation
-        response = send_grouped_order_confirmation(
+        from .client import send_order_confirmation
+        response = send_order_confirmation(
             phone_number=phone_number,
             ipo_name=ipo.IPOName,
             order_type=order_type,
@@ -202,8 +165,9 @@ def _send_order(request, ipo_id, order_type):
             subject_str=subject_str,
             premium_str=premium_str,
             options_str=options_str,
-            remark_text=remark_text,
-            template_name=template_name
+            remark_text=full_remark,
+            ipo_id=ipo_id,
+            broker_id=group.user_id if hasattr(group, 'user_id') else None
         )
         response_data = response.json() if response.content else {}
     except requests.RequestException as exc:
