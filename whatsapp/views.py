@@ -129,9 +129,9 @@ def _send_order(request, ipo_id, order_type):
     remark_text = request.POST.get("remark_text", "").strip()
     remark_parts = [r for r in (remark_tags, remark_text) if r]
     
-    full_remark = "📝 Remark: None"
+    full_remark = "📝 Remarks: None"
     if remark_parts:
-        full_remark = "📝 Remark: " + " ".join(remark_parts)
+        full_remark = "📝 Remarks: " + " ".join(remark_parts)
             
     if all(" - None" in d for d in details):
         messages.error(request, "Order placed successfully, but WhatsApp order details were empty.")
@@ -156,7 +156,9 @@ def _send_order(request, ipo_id, order_type):
         k_parts.append(f"SHNI: {request.POST.get('KostakQTYSHNI')}@₹{request.POST.get('KostakRateSHNI')}")
     if float(request.POST.get("KostakQTYBHNI") or 0) > 0:
         k_parts.append(f"BHNI: {request.POST.get('KostakQTYBHNI')}@₹{request.POST.get('KostakRateBHNI')}")
-    kostak_str = " | ".join(k_parts)
+    kostak_str = ""
+    if k_parts:
+        kostak_str = "*Kostak*- " + " | ".join(k_parts)
 
     # 2. Build the Subject To String
     s_parts = []
@@ -166,12 +168,14 @@ def _send_order(request, ipo_id, order_type):
         s_parts.append(f"SHNI: {request.POST.get('SubjectToQTYSHNI')}@₹{request.POST.get('SubjectToRateSHNI')}")
     if float(request.POST.get("SubjectToQTYBHNI") or 0) > 0:
         s_parts.append(f"BHNI: {request.POST.get('SubjectToQTYBHNI')}@₹{request.POST.get('SubjectToRateBHNI')}")
-    subject_str = " | ".join(s_parts)
+    subject_str = ""
+    if s_parts:
+        subject_str = "*Subject To*- " + " | ".join(s_parts)
 
     # 3. Build Premium String
     premium_str = ""
     if float(request.POST.get("PremiumQTY") or 0) > 0:
-        premium_str = f"{request.POST.get('PremiumQTY')}@₹{request.POST.get('PremiumRate')}"
+        premium_str = f"*Premium*- {request.POST.get('PremiumQTY')}@₹{request.POST.get('PremiumRate')}"
 
     # 4. Build Options String
     opt_parts = []
@@ -179,10 +183,12 @@ def _send_order(request, ipo_id, order_type):
         opt_parts.append(f"Call: {request.POST.get('CallQTY')}@₹{request.POST.get('CallRate')}")
     if float(request.POST.get("PutQTY") or 0) > 0:
         opt_parts.append(f"Put: {request.POST.get('PutQTY')}@₹{request.POST.get('PutRate')}")
-    options_str = " | ".join(opt_parts)
+    options_str = ""
+    if opt_parts:
+        options_str = "*Options*- " + " | ".join(opt_parts)
 
     # Dynamic template name from UI (if sent), otherwise default
-    template_name = request.POST.get("whatsapp_template", "ipo_order_formatted")
+    template_name = request.POST.get("whatsapp_template", "ipo_order")
 
     try:
         from .client import send_grouped_order_confirmation

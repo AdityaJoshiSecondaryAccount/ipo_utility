@@ -306,46 +306,146 @@ def send_ipo_flow_to_user(phone_number, log_to_fastapi=True):
 def send_grouped_order_confirmation(
     phone_number, ipo_name, order_type, group_name, order_datetime,
     kostak_str, subject_str, premium_str, options_str, remark_text,
-    template_name="ipo_order_formatted"
+    template_name="ipo_order"
 ):
     url = f"https://graph.facebook.com/{settings.WHATSAPP_API_VERSION}/{settings.WHATSAPP_PHONE_NUMBER_ID}/messages"
     headers = _get_api_headers("application/json")
     
-    components = [{
-        "type": "body",
-        "parameters": [
-            {"type": "text", "text": str(ipo_name)},
-            {"type": "text", "text": str(order_type)},
-            {"type": "text", "text": str(group_name)},
-            {"type": "text", "text": str(order_datetime)},
-            {"type": "text", "text": kostak_str if kostak_str else "\u200B"},
-            {"type": "text", "text": subject_str if subject_str else "\u200B"},
-            {"type": "text", "text": premium_str if premium_str else "\u200B"},
-            {"type": "text", "text": options_str if options_str else "\u200B"},
-            {"type": "text", "text": remark_text if remark_text else "\u200B"},
-        ],
-    }]
+    # Meta WhatsApp Cloud API forbids newlines (\n), tabs (\t), or >4 consecutive spaces inside parameter values!
+    def clean_param(val):
+        if not val:
+            return "\u200B"
+        cleaned = str(val).replace("\r\n", "\n").replace("\r", "\n").replace("\n", ", ").replace("\t", " ")
+        import re
+        cleaned = re.sub(r" {5,}", "    ", cleaned).strip()
+        return cleaned if cleaned else "\u200B"
 
-    payload = {
-        "messaging_product": "whatsapp",
-        "to": phone_number,
-        "type": "template",
-        "template": {
-            "name": template_name,
-            "language": {"code": "en"},
-            "components": components,
-        },
-    }
-    
-    res = requests.post(url, headers=headers, json=payload, timeout=15)
-    
+    clean_ipo = clean_param(ipo_name)
+    clean_order_type = clean_param(order_type)
+    clean_group = clean_param(group_name)
+    clean_datetime = clean_param(order_datetime)
+    clean_kostak = clean_param(kostak_str)
+    clean_subject = clean_param(subject_str)
+    clean_premium = clean_param(premium_str)
+    clean_options = clean_param(options_str)
+    clean_remarks = clean_param(remark_text)
+
+    # Candidate 1: 9 Named parameters (matches user's approved 'ipo_order' template: remarks)
+    params_9_named_remarks = [
+        {"type": "text", "parameter_name": "ipo_name", "text": clean_ipo},
+        {"type": "text", "parameter_name": "order_type", "text": clean_order_type},
+        {"type": "text", "parameter_name": "group_name", "text": clean_group},
+        {"type": "text", "parameter_name": "order_datetime", "text": clean_datetime},
+        {"type": "text", "parameter_name": "kostak", "text": clean_kostak},
+        {"type": "text", "parameter_name": "subject", "text": clean_subject},
+        {"type": "text", "parameter_name": "premium", "text": clean_premium},
+        {"type": "text", "parameter_name": "options", "text": clean_options},
+        {"type": "text", "parameter_name": "remarks", "text": clean_remarks},
+    ]
+
+    # Candidate 2: 9 Named parameters with 'remark_text'
+    params_9_named_remark_text = [
+        {"type": "text", "parameter_name": "ipo_name", "text": clean_ipo},
+        {"type": "text", "parameter_name": "order_type", "text": clean_order_type},
+        {"type": "text", "parameter_name": "group_name", "text": clean_group},
+        {"type": "text", "parameter_name": "order_datetime", "text": clean_datetime},
+        {"type": "text", "parameter_name": "kostak", "text": clean_kostak},
+        {"type": "text", "parameter_name": "subject", "text": clean_subject},
+        {"type": "text", "parameter_name": "premium", "text": clean_premium},
+        {"type": "text", "parameter_name": "options", "text": clean_options},
+        {"type": "text", "parameter_name": "remark_text", "text": clean_remarks},
+    ]
+
+    # Candidate 3: 9 Named parameters with 'order_date' instead of 'order_datetime'
+    params_9_named_order_date = [
+        {"type": "text", "parameter_name": "ipo_name", "text": clean_ipo},
+        {"type": "text", "parameter_name": "order_type", "text": clean_order_type},
+        {"type": "text", "parameter_name": "group_name", "text": clean_group},
+        {"type": "text", "parameter_name": "order_date", "text": clean_datetime},
+        {"type": "text", "parameter_name": "kostak", "text": clean_kostak},
+        {"type": "text", "parameter_name": "subject", "text": clean_subject},
+        {"type": "text", "parameter_name": "premium", "text": clean_premium},
+        {"type": "text", "parameter_name": "options", "text": clean_options},
+        {"type": "text", "parameter_name": "remarks", "text": clean_remarks},
+    ]
+
+    # Candidate 4: 9 Positional parameters (for templates with positional variables {{1}}..{{9}})
+    params_9_positional = [
+        {"type": "text", "text": clean_ipo},
+        {"type": "text", "text": clean_order_type},
+        {"type": "text", "text": clean_group},
+        {"type": "text", "text": clean_datetime},
+        {"type": "text", "text": clean_kostak},
+        {"type": "text", "text": clean_subject},
+        {"type": "text", "text": clean_premium},
+        {"type": "text", "text": clean_options},
+        {"type": "text", "text": clean_remarks},
+    ]
+
+    # Candidate 5: 14 Named parameters ('ipo_order_formatted')
+    params_14_named = [
+        {"type": "text", "parameter_name": "ipo_name", "text": clean_ipo},
+        {"type": "text", "parameter_name": "order_type", "text": clean_order_type},
+        {"type": "text", "parameter_name": "group_name", "text": clean_group},
+        {"type": "text", "parameter_name": "order_datetime", "text": clean_datetime},
+        {"type": "text", "parameter_name": "item_1", "text": clean_kostak},
+        {"type": "text", "parameter_name": "item_2", "text": clean_subject},
+        {"type": "text", "parameter_name": "item_3", "text": clean_premium},
+        {"type": "text", "parameter_name": "item_4", "text": clean_options},
+        {"type": "text", "parameter_name": "item_5", "text": "\u200B"},
+        {"type": "text", "parameter_name": "item_6", "text": "\u200B"},
+        {"type": "text", "parameter_name": "item_7", "text": "\u200B"},
+        {"type": "text", "parameter_name": "item_8", "text": "\u200B"},
+        {"type": "text", "parameter_name": "item_9", "text": "\u200B"},
+        {"type": "text", "parameter_name": "remark_text", "text": clean_remarks},
+    ]
+
+    # Order candidates depending on requested template
+    if template_name == "ipo_order_formatted":
+        candidates = [params_14_named, params_9_named_remarks, params_9_named_remark_text, params_9_positional]
+    else:
+        candidates = [params_9_named_remarks, params_9_named_remark_text, params_9_named_order_date, params_9_positional, params_14_named]
+
+    res = None
+    for idx, params in enumerate(candidates, 1):
+        payload = {
+            "messaging_product": "whatsapp",
+            "to": phone_number,
+            "type": "template",
+            "template": {
+                "name": template_name,
+                "language": {"code": "en"},
+                "components": [{"type": "body", "parameters": params}],
+            },
+        }
+        res = requests.post(url, headers=headers, json=payload, timeout=15)
+        print(f"[WHATSAPP_DEBUG] Candidate #{idx} for '{template_name}': status={res.status_code}, response={res.text}", flush=True)
+        if res.ok:
+            break
+        try:
+            err_code = res.json().get("error", {}).get("code")
+            if err_code not in (100, 132000, 132001, 132005, 132007, 132018):
+                break
+        except Exception:
+            pass
+
     # Log to FastAPI
-    if res.ok:
+    if res and res.ok:
         try:
             wamid = res.json().get("messages", [{}])[0].get("id")
-        except:
+        except Exception:
             wamid = None
-        exact_text = f"Order Confirmation\nIPO: {ipo_name}\nOrder Type: {order_type}\nGroup: {group_name}\nDate: {order_datetime}\n\nKostak: {kostak_str}\nSubject To: {subject_str}\nPremium: {premium_str}\nOptions: {options_str}\nRemarks: {remark_text}"
+        sections = [s for s in [kostak_str, subject_str, premium_str, options_str, remark_text] if s and s.strip()]
+        details_block = "\n".join(sections)
+        exact_text = (
+            "Order Confirmation\n"
+            f"📢 IPO Name: *{ipo_name}*\n"
+            f"📦 Order: *{order_type}*\n"
+            f"👥 Group: *{group_name}*\n"
+            f"🕒 Date & Time: {order_datetime}\n\n"
+            f"{details_block}\n\n"
+            "> Disclaimer: This is an automated order confirmation message. Please verify your order carefully. For any discrepancy, please contact us."
+        )
         _log_outbound_to_fastapi(
             phone_number=phone_number,
             text=exact_text,
