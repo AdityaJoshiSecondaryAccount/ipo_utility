@@ -191,8 +191,11 @@ def _send_order(request, ipo_id, order_type):
     template_name = request.POST.get("whatsapp_template", "ipo_order")
 
     try:
-        from .client import send_grouped_order_confirmation
-        response = send_grouped_order_confirmation(
+        # --- SMART 24-HOUR WINDOW / CUSTOM FREE TEXT DISPATCHER ---
+        # Toggle between 24hr Smart Dispatcher and Standard Template sending by commenting / uncommenting below:
+        from .client import send_smart_order_confirmation, send_grouped_order_confirmation
+
+        response = send_smart_order_confirmation(
             phone_number=phone_number,
             ipo_name=ipo.IPOName,
             order_type=order_type,
@@ -203,8 +206,25 @@ def _send_order(request, ipo_id, order_type):
             premium_str=premium_str,
             options_str=options_str,
             remark_text=remark_text,
-            template_name=template_name
+            template_name=template_name,
+            ipo_id=ipo_id,
+            broker_id=group.user_id if hasattr(group, 'user_id') else None
         )
+
+        # TO DISABLE 24-HR WINDOW FEATURE & FORCE TEMPLATE ALWAYS, UNCOMMENT THIS & COMMENT ABOVE:
+        # response = send_grouped_order_confirmation(
+        #     phone_number=phone_number,
+        #     ipo_name=ipo.IPOName,
+        #     order_type=order_type,
+        #     group_name=group.GroupName,
+        #     order_datetime=formatted_datetime,
+        #     kostak_str=kostak_str,
+        #     subject_str=subject_str,
+        #     premium_str=premium_str,
+        #     options_str=options_str,
+        #     remark_text=remark_text,
+        #     template_name=template_name
+        # )
         response_data = response.json() if response.content else {}
     except requests.RequestException as exc:
         messages.error(request, "Order placed successfully, but the WhatsApp message failed.")

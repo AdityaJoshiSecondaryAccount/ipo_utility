@@ -453,3 +453,225 @@ def send_grouped_order_confirmation(
             wamid=wamid
         )
     return res
+
+
+# ==============================================================================
+# 24-HOUR FREE WINDOW & CUSTOM FREE-TEXT FORMATTING HELPERS
+# ==============================================================================
+
+from datetime import timedelta
+from django.utils import timezone
+
+
+def is_within_24hr_window(phone_number: str) -> bool:
+    """
+    Checks if a contact sent an inbound WhatsApp message within the last 24 hours (86,400 seconds).
+    If True, free-form custom text messages can be sent without Meta template restrictions.
+    """
+    try:
+        from .models import Conversation, Message
+        clean_number = "".join(filter(str.isdigit, str(phone_number)))
+        last10 = clean_number[-10:] if len(clean_number) >= 10 else clean_number
+
+        if not last10:
+            return False
+
+        # 1. Check Conversation.last_inbound_time
+        conv = Conversation.objects.filter(contact__phone_number__endswith=last10).first()
+        if conv and conv.last_inbound_time:
+            if timezone.now() - conv.last_inbound_time < timedelta(hours=24):
+                return True
+
+        # 2. Fallback check directly on Message direction='inbound'
+        last_inbound_msg = Message.objects.filter(
+            conversation__contact__phone_number__endswith=last10,
+            direction="inbound"
+        ).order_by("-timestamp").first()
+
+        if last_inbound_msg and last_inbound_msg.timestamp:
+            return timezone.now() - last_inbound_msg.timestamp < timedelta(hours=24)
+
+    except Exception as e:
+        logger.warning(f"Error checking 24hr window for {phone_number}: {e}")
+
+    return False
+
+
+def format_24hr_order_message(
+    ipo_name: str,
+    order_type: str,
+    group_name: str,
+    order_datetime: str,
+    kostak_str: str = "",
+    subject_str: str = "",
+    premium_str: str = "",
+    options_str: str = "",
+    remark_text: str = ""
+) -> str:
+    """
+    Formats a clean, rich-markdown WhatsApp message matching exact design specifications.
+    Uses bold labels, emojis, line breaks between item headers & values, and disclaimer footer.
+    """
+    def clean_val(val: str, prefix: str):
+        if not val or not val.strip() or val.strip() == "None":
+            return ""
+        s = val.strip()
+        if s.startswith(prefix):
+            s = s[len(prefix):].strip()
+        # Add clean space around @ if needed (e.g., 1@₹100 -> 1 @ ₹100)
+        s = s.replace("@₹", " @ ₹")
+        return s
+
+    k = clean_val(kostak_str, "*Kostak*- ")
+    sub = clean_val(subject_str, "*Subject To*- ")
+    prem = clean_val(premium_str, "*Premium*- ")
+    opt = clean_val(options_str, "*Options*- ")
+
+    breakdown_parts = []
+    if k:
+        breakdown_parts.append(f"📌 *Kostak*\n{k}")
+    if sub:
+        breakdown_parts.append(f"📌 *Subject To*\n{sub}")
+    if prem:
+        breakdown_parts.append(f"📌 *Premium:* {prem}")
+    if opt:
+        breakdown_parts.append(f"📌 *Options*\n{opt}")
+
+    breakdown_block = "\n\n".join(breakdown_parts) if breakdown_parts else "📌 Standard Order"
+
+    rem = remark_text.strip() if remark_text and remark_text.strip() and remark_text != "None" else ""
+    remark_line = f"\n\n📝 *Remarks:* {rem}" if rem else ""
+
+    message = (
+        "*✅ ORDER CONFIRMATION*\n\n"
+        f"📢 *IPO:* {ipo_name}\n"
+        f"🛒 *Order:* {order_type}\n"
+        f"👥 *Group:* {group_name}\n"
+        f"🕐 *Date & Time:* {order_datetime}\n\n"
+        "*📋 ORDER BREAKDOWN*\n\n"
+        f"{breakdown_block}"
+        f"{remark_line}\n\n"
+        "━━━━━━━━━━━━━━━━━━\n\n"
+        "⚠️ *Please verify your order carefully.*\n"
+        "For any discrepancy, please contact us immediately."
+    )
+    return message
+
+
+def send_free_text_message(phone_number: str, text: str, button_title: str = None, button_payload: str = None):
+    """
+    Sends a custom free-form text message to a contact via Meta API (usable inside 24-hour window).
+    If button_title and button_payload are provided, sends as an Interactive Quick Reply Button message!
+    """
+    url = (
+        "https://graph.facebook.com/"
+        f"{settings.WHATSAPP_API_VERSION}/"
+        f"{settings.WHATSAPP_PHONE_NUMBER_ID}/messages"
+    )
+    headers = _get_api_headers("application/json")
+
+    if button_title and button_payload:
+        payload = {
+            "messaging_product": "whatsapp",
+            "recipient_type": "individual",
+            "to": phone_number,
+            "type": "interactive",
+            "interactive": {
+                "type": "button",
+                "body": {
+                    "text": text
+                },
+                "action": {
+                    "buttons": [
+                        {
+                            "type": "reply",
+                            "reply": {
+                                "id": str(button_payload),
+                                "title": str(button_title)[:20]  # Meta button title limit: 20 chars
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    else:
+        payload = {
+            "messaging_product": "whatsapp",
+            "to": phone_number,
+            "type": "text",
+            "text": {
+                "preview_url": False,
+                "body": text
+            }
+        }
+
+    res = requests.post(url, headers=headers, json=payload, timeout=15)
+    
+    if res.ok:
+        try:
+            wamid = res.json().get("messages", [{}])[0].get("id")
+        except Exception:
+            wamid = None
+        _log_outbound_to_fastapi(
+            phone_number=phone_number,
+            text=text,
+            msg_type="interactive" if (button_title and button_payload) else "text",
+            wamid=wamid
+        )
+    return res
+
+
+def send_smart_order_confirmation(
+    phone_number, ipo_name, order_type, group_name,
+    order_datetime, kostak_str="", subject_str="", premium_str="", options_str="",
+    remark_text="", template_name="ipo_order_grouped", ipo_id=None, broker_id=None
+):
+    """
+    Smart Dispatcher:
+    - If customer is INSIDE 24hr free window: Sends custom rich-markdown free text + Quick Reply Button (0 cost).
+    - If customer is OUTSIDE 24hr free window: Automatically falls back to Meta pre-approved template message.
+    """
+    if is_within_24hr_window(phone_number):
+        logger.info(f"[24HR_WINDOW] Customer {phone_number} is INSIDE 24hr window. Sending free-text message with Interactive Button.")
+        formatted_text = format_24hr_order_message(
+            ipo_name=ipo_name,
+            order_type=order_type,
+            group_name=group_name,
+            order_datetime=order_datetime,
+            kostak_str=kostak_str,
+            subject_str=subject_str,
+            premium_str=premium_str,
+            options_str=options_str,
+            remark_text=remark_text
+        )
+        button_payload = None
+        button_title = None
+        if ipo_id:
+            button_payload = f"view_orders_{ipo_id}_{broker_id}" if broker_id else f"view_orders_{ipo_id}"
+            button_title = "View Order History"
+
+        return send_free_text_message(
+            phone_number=phone_number,
+            text=formatted_text,
+            button_title=button_title,
+            button_payload=button_payload
+        )
+    else:
+        logger.info(f"[24HR_WINDOW] Customer {phone_number} is OUTSIDE 24hr window. Falling back to template message.")
+        return send_grouped_order_confirmation(
+            phone_number=phone_number,
+            ipo_name=ipo_name,
+            order_type=order_type,
+            group_name=group_name,
+            order_datetime=order_datetime,
+            kostak_str=kostak_str,
+            subject_str=subject_str,
+            premium_str=premium_str,
+            options_str=options_str,
+            remark_text=remark_text,
+            template_name=template_name,
+            ipo_id=ipo_id,
+            broker_id=broker_id
+        )
+
+
