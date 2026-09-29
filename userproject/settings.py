@@ -192,6 +192,17 @@ if os.path.normpath(STATIC_DIR) != os.path.normpath(STATIC_ROOT):
     ]
 
 
+# STATIC_URL = '/static/'
+# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# AUTH_USER_MODEL = "home.CustomUser"
+
+# STATIC_DIR = os.path.join(BASE_DIR, "static")
+# if os.path.normpath(STATIC_DIR) != os.path.normpath(STATIC_ROOT):
+#     STATICFILES_DIRS = [
+#         STATIC_DIR
+#     ]
+
 # DATA_UPLOAD_MAX_MEMORY_SIZE = 2000485760
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000000
 

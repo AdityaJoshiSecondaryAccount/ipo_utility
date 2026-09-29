@@ -1,5 +1,4 @@
 from django.db import models
-from home.models import GroupDetail
 
 
 class Contact(models.Model):
@@ -18,7 +17,7 @@ class Contact(models.Model):
 
 class Conversation(models.Model):
     contact = models.OneToOneField(Contact, on_delete=models.CASCADE, related_name="conversation")
-    group = models.ForeignKey(GroupDetail, on_delete=models.SET_NULL, null=True, blank=True, related_name="conversations")
+    group = models.ForeignKey('home.GroupDetail', on_delete=models.SET_NULL, null=True, blank=True, related_name="conversations")
     unread_count = models.IntegerField(default=0)
     last_message_text = models.TextField(blank=True, null=True)
     last_message_time = models.DateTimeField(auto_now_add=True, db_index=True)

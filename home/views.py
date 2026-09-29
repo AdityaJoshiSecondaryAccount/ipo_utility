@@ -18550,3 +18550,16 @@ def GlobalUpdateOrder(request, OrderId):
         
     return redirect(f"/trades?page={page_number}")    
 
+
+def check_broker_session(request):
+    """Checks if current web session belongs to an authenticated Broker user."""
+    if request.user.is_authenticated:
+        # Broker user in IPO Utility has Broker_id is None (or superuser)
+        is_broker = getattr(request.user, "Broker_id", None) is None or request.user.is_superuser
+        if is_broker:
+            return JsonResponse({
+                "authenticated": True,
+                "is_broker": True,
+                "username": request.user.username
+            })
+    return JsonResponse({"authenticated": False, "is_broker": False}, status=401)
