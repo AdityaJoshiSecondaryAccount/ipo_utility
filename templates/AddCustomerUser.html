@@ -1,0 +1,201 @@
+{% extends 'basic.html' %}
+{% block title%}Create User{% endblock %}
+{% block css %}
+{% load static %}
+<style>
+    .h3,
+    h3 {
+        font-size: 1.75rem;
+        border-block-end: 3px solid #e9ecef;
+        margin-top: 60px;
+        margin-bottom: 0px;
+        text-align: center;
+    }
+
+    .col-md-3 {
+        display: inline-block;
+        margin-left: -4px;
+    }
+
+    .col-md-3 {
+        width: 100%;
+        height: auto;
+    }
+
+    .modal-footer {
+        display: block;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 1rem;
+        border-top: 3px solid #e9ecef;
+    }
+    .field-icon {
+            float: right;
+            margin-top: -27px;
+            position: relative;
+            z-index: 2;
+            margin-right: 10px;
+        }
+</style>
+
+{% endblock %}
+
+{% block body %}
+
+{% csrf_token %}
+
+{% comment %} {% if messages %}
+<div class="alert alert-success fixed-top" id="successalerts" style="position:fixed;">
+    <button type="button" class="close" data-dismiss="alert">x</button>
+    {% for message in messages %}
+    <strong>{{message}}</strong><br>
+    {% endfor %}
+
+    <script src="{% static 'JS/jquery.min.js' %}"></script>
+    <script>
+        $("#successalerts").fadeTo(5000, 500).slideUp(500, function () {
+            $("#successalerts").slideUp(500);
+        });
+    </script>
+</div>
+{% endif %} {% endcomment %}
+
+{% for message in messages %}
+    {% if messages %}
+        <div class="alert {{ message.tags }} alert-dismissible  fixed-top" id="successalerts" role="alert" style="position:fixed;">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+            {{ message }}
+        </div>
+    {% endif %}
+{% endfor %}
+
+
+<div class="container my-3">
+    <h3>Create Customer User</h3>
+    <form action="/AddCustomerUser" method="post" class="needs-validation" novalidate>
+        {% csrf_token %}
+
+        <div>
+            <label for="Name" class="form-label"><b>User Name&nbsp;<font color="red">*</font></b></label>
+            <!-- id="id_name"  -->
+            <input type="text" name="username" id="inputEmail" class="form-control" placeholder="User Name" maxlength="20" required>
+            <div class="invalid-feedback">
+                Please Enter User Name.
+            </div>
+        </div><br>
+
+        <div>
+            <label for="Name" class="form-label"><b>Password&nbsp;<font color="red">*</font></b></label>
+            <!-- id="id_name"  -->
+            <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required>
+            <span toggle="#inputPassword" class="fa fa-fw fa-eye field-icon toggle-password"></span>
+            <div class="invalid-feedback">
+                Please Enter Password.
+            </div>
+        </div><br>
+        
+        <div>
+            <label for="email" class="form-label"><b>Enter your Email&nbsp;<font color="red">*</font></b></label>
+            <!-- id="id_name"  -->
+            <input type="email" name="email" id="email" class="form-control" placeholder="Enter Name" required>
+            <div class="invalid-feedback">
+                Please Enter Valid Email.
+            </div>
+        </div><br>
+        
+        <div>
+            <label for="Name" class="form-label"><b>First Name&nbsp;<font color="red">*</font></b></label>
+            <!-- id="id_name"  -->
+            <input type="text" name="first_name" id="Name" class="form-control" placeholder="Enter Name" maxlength="50" required>
+            <div class="invalid-feedback">
+                Please Enter First Name.
+            </div>
+        </div><br>
+
+        <div>
+            <label for="Name" class="form-label"><b>Last Name&nbsp;<font color="red">*</font></b></label>
+            <!-- id="id_name"  -->
+            <input type="text" name="last_name" id="Name" class="form-control" placeholder="Enter Name" maxlength="50" required>
+            <div class="invalid-feedback">
+                Please Enter Last Name.
+            </div>
+        </div><br>
+
+        <div>
+            <label for="group" class="form-label"><b>Group&nbsp;<font color="red">*</font></b></label>
+            <select class="form-control" autocomplete="off" id="group" name="Group" required>
+                <option selected disabled value="">Choose...</option>
+                {% for i in Group %}
+                <option value="{{ i.GroupName }}">{{ i.GroupName }}</option>
+                {% endfor %}
+            </select>
+            <div class="invalid-feedback">
+                Please Select A Valid Group.
+            </div>
+
+        </div><br>
+
+        <div class="modal-footer">
+                 <div style="display: inline;" align="center;">
+                <div style="float: right; margin: 0 -17px;">
+                    <button class="btn btn-primary" type="submit"
+                        style="padding: 7px 12px; text-align: center; text-decoration: none; border-radius: 4px; display: inline-block; font-size: 100%;">Submit</button>
+                </div>
+                <div style="float: left; margin: 0 -17px;">
+                    <button onclick="window.location.href='/';" class="btn btn-primary" type="button"
+                        style="padding: 7px 15px; text-align: center; text-decoration: none; border-radius: 4px; display: inline-block; font-size: 100%;">Back</button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+</div>
+
+
+<!-- JAVASCRIPT FOR EDIT CLIENT FORM VALIDATION -->
+<script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+
+<script>
+    $(".toggle-password").click(function () {
+
+        $(this).toggleClass("fa-eye fa-eye-slash");
+        var input = $($(this).attr("toggle"));
+        if (input.attr("type") == "password") {
+            input.attr("type", "text");
+        } else {
+            input.attr("type", "password");
+        }
+    });
+</script>
+
+<script src="{% static 'JS/jquery.min.js' %}"></script>
+    <script>
+        $("#successalerts").fadeTo(3000, 500).slideUp(500, function () {
+            $("#successalerts").slideUp(500);
+        });
+    </script>
+
+{% endblock %}

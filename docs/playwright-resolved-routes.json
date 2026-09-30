@@ -1,0 +1,1190 @@
+[
+  {
+    "route": "/admin/",
+    "name": "index",
+    "namespace": "admin",
+    "view": "django.contrib.admin.sites.AdminSite.index"
+  },
+  {
+    "route": "/admin/login/",
+    "name": "login",
+    "namespace": "admin",
+    "view": "django.contrib.admin.sites.AdminSite.login"
+  },
+  {
+    "route": "/admin/logout/",
+    "name": "logout",
+    "namespace": "admin",
+    "view": "django.contrib.admin.sites.AdminSite.logout"
+  },
+  {
+    "route": "/admin/password_change/",
+    "name": "password_change",
+    "namespace": "admin",
+    "view": "django.contrib.admin.sites.AdminSite.password_change"
+  },
+  {
+    "route": "/admin/password_change/done/",
+    "name": "password_change_done",
+    "namespace": "admin",
+    "view": "django.contrib.admin.sites.AdminSite.password_change_done"
+  },
+  {
+    "route": "/admin/autocomplete/",
+    "name": "autocomplete",
+    "namespace": "admin",
+    "view": "django.contrib.admin.sites.AdminSite.autocomplete_view"
+  },
+  {
+    "route": "/admin/jsi18n/",
+    "name": "jsi18n",
+    "namespace": "admin",
+    "view": "django.contrib.admin.sites.AdminSite.i18n_javascript"
+  },
+  {
+    "route": "/admin/r/<int:content_type_id>/<path:object_id>/",
+    "name": "view_on_site",
+    "namespace": "admin",
+    "view": "django.contrib.contenttypes.views.shortcut"
+  },
+  {
+    "route": "/admin/auth/group/",
+    "name": "auth_group_changelist",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "/admin/auth/group/add/",
+    "name": "auth_group_add",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "/admin/auth/group/<path:object_id>/history/",
+    "name": "auth_group_history",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "/admin/auth/group/<path:object_id>/delete/",
+    "name": "auth_group_delete",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "/admin/auth/group/<path:object_id>/change/",
+    "name": "auth_group_change",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "/admin/auth/group/<path:object_id>/",
+    "name": null,
+    "namespace": "admin",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "/admin/home/customuser/<id>/password/",
+    "name": "auth_user_password_change",
+    "namespace": "admin",
+    "view": "django.contrib.auth.admin.UserAdmin.user_change_password"
+  },
+  {
+    "route": "/admin/home/customuser/",
+    "name": "home_customuser_changelist",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "/admin/home/customuser/add/",
+    "name": "home_customuser_add",
+    "namespace": "admin",
+    "view": "django.contrib.auth.admin.UserAdmin.add_view"
+  },
+  {
+    "route": "/admin/home/customuser/<path:object_id>/history/",
+    "name": "home_customuser_history",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "/admin/home/customuser/<path:object_id>/delete/",
+    "name": "home_customuser_delete",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "/admin/home/customuser/<path:object_id>/change/",
+    "name": "home_customuser_change",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "/admin/home/customuser/<path:object_id>/",
+    "name": null,
+    "namespace": "admin",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "/admin/home/currentiponame/",
+    "name": "home_currentiponame_changelist",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "/admin/home/currentiponame/add/",
+    "name": "home_currentiponame_add",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "/admin/home/currentiponame/<path:object_id>/history/",
+    "name": "home_currentiponame_history",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "/admin/home/currentiponame/<path:object_id>/delete/",
+    "name": "home_currentiponame_delete",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "/admin/home/currentiponame/<path:object_id>/change/",
+    "name": "home_currentiponame_change",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "/admin/home/currentiponame/<path:object_id>/",
+    "name": null,
+    "namespace": "admin",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "/admin/home/groupdetail/",
+    "name": "home_groupdetail_changelist",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "/admin/home/groupdetail/add/",
+    "name": "home_groupdetail_add",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "/admin/home/groupdetail/<path:object_id>/history/",
+    "name": "home_groupdetail_history",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "/admin/home/groupdetail/<path:object_id>/delete/",
+    "name": "home_groupdetail_delete",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "/admin/home/groupdetail/<path:object_id>/change/",
+    "name": "home_groupdetail_change",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "/admin/home/groupdetail/<path:object_id>/",
+    "name": null,
+    "namespace": "admin",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "/admin/home/orderdetail/",
+    "name": "home_orderdetail_changelist",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "/admin/home/orderdetail/add/",
+    "name": "home_orderdetail_add",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "/admin/home/orderdetail/<path:object_id>/history/",
+    "name": "home_orderdetail_history",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "/admin/home/orderdetail/<path:object_id>/delete/",
+    "name": "home_orderdetail_delete",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "/admin/home/orderdetail/<path:object_id>/change/",
+    "name": "home_orderdetail_change",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "/admin/home/orderdetail/<path:object_id>/",
+    "name": null,
+    "namespace": "admin",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "/admin/home/clientdetail/",
+    "name": "home_clientdetail_changelist",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "/admin/home/clientdetail/add/",
+    "name": "home_clientdetail_add",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "/admin/home/clientdetail/<path:object_id>/history/",
+    "name": "home_clientdetail_history",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "/admin/home/clientdetail/<path:object_id>/delete/",
+    "name": "home_clientdetail_delete",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "/admin/home/clientdetail/<path:object_id>/change/",
+    "name": "home_clientdetail_change",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "/admin/home/clientdetail/<path:object_id>/",
+    "name": null,
+    "namespace": "admin",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "/admin/home/ratelist/",
+    "name": "home_ratelist_changelist",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "/admin/home/ratelist/add/",
+    "name": "home_ratelist_add",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "/admin/home/ratelist/<path:object_id>/history/",
+    "name": "home_ratelist_history",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "/admin/home/ratelist/<path:object_id>/delete/",
+    "name": "home_ratelist_delete",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "/admin/home/ratelist/<path:object_id>/change/",
+    "name": "home_ratelist_change",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "/admin/home/ratelist/<path:object_id>/",
+    "name": null,
+    "namespace": "admin",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "/admin/home/order/",
+    "name": "home_order_changelist",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "/admin/home/order/add/",
+    "name": "home_order_add",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "/admin/home/order/<path:object_id>/history/",
+    "name": "home_order_history",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "/admin/home/order/<path:object_id>/delete/",
+    "name": "home_order_delete",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "/admin/home/order/<path:object_id>/change/",
+    "name": "home_order_change",
+    "namespace": "admin",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "/admin/home/order/<path:object_id>/",
+    "name": null,
+    "namespace": "admin",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "/admin/^(?P<app_label>auth|home)/$",
+    "name": "app_list",
+    "namespace": "admin",
+    "view": "django.contrib.admin.sites.AdminSite.app_index"
+  },
+  {
+    "route": "/admin/(?P<url>.*)$",
+    "name": null,
+    "namespace": "admin",
+    "view": "django.contrib.admin.sites.AdminSite.catch_all_view"
+  },
+  {
+    "route": "/whatsapp/buy/<int:ipo_id>/send/",
+    "name": "send_buy_order",
+    "namespace": "whatsapp",
+    "view": "whatsapp.views.send_buy_order"
+  },
+  {
+    "route": "/whatsapp/sell/<int:ipo_id>/send/",
+    "name": "send_sell_order",
+    "namespace": "whatsapp",
+    "view": "whatsapp.views.send_sell_order"
+  },
+  {
+    "route": "/",
+    "name": "home",
+    "namespace": "",
+    "view": "home.decorators.Broker_only.<locals>.wrapper_function"
+  },
+  {
+    "route": "/indexforCustomer",
+    "name": "homeforcustomer",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/<str:IPOid>/<str:OrderType>/update_pann/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>",
+    "name": "OrderDetail_update",
+    "namespace": "",
+    "view": "home.views.Update_pann"
+  },
+  {
+    "route": "/clear-selected-records/",
+    "name": "clear_selected_records",
+    "namespace": "",
+    "view": "home.views.ClearSelectedRecords"
+  },
+  {
+    "route": "/ChangePassword",
+    "name": "ChangePassword",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/get-options/",
+    "name": "get_options",
+    "namespace": "",
+    "view": "home.views.get_options"
+  },
+  {
+    "route": "/<str:IPOid>/get-rates/<str:Ordtyp>",
+    "name": "get_rates_json",
+    "namespace": "",
+    "view": "home.views.get_rates_json"
+  },
+  {
+    "route": "/<str:IPOid>/<str:OrderType>/IPO_Allotment/<str:group>/<str:IPOType>/<str:InvestType>",
+    "name": null,
+    "namespace": "",
+    "view": "home.views.IPO_Allotment"
+  },
+  {
+    "route": "/<str:IPOid>/<str:OrderType>/IPO_Allotment/<str:group>/<str:IPOType>/<str:InvestType>/<str:Rate>",
+    "name": "get_options",
+    "namespace": "",
+    "view": "home.views.IPO_Allotment"
+  },
+  {
+    "route": "/get_pancards/<str:IPOid>/<str:OrderType>/<str:group>/<str:IPOType>/<str:InvestType>",
+    "name": null,
+    "namespace": "",
+    "view": "home.views.get_pancards"
+  },
+  {
+    "route": "/get_pancards/<str:IPOid>/<str:OrderType>/<str:group>/<str:IPOType>/<str:InvestType>/<str:Rate>",
+    "name": "get_pancards",
+    "namespace": "",
+    "view": "home.views.get_pancards"
+  },
+  {
+    "route": "/ChangeUserpassword",
+    "name": "ChangeUserpassword",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/IPOSETUP",
+    "name": "IPOSETUP",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/ClientSetup",
+    "name": "ClientSetup",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/ClientSetup/<str:PanNoId>",
+    "name": "ClientSetup",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/GroupSetup",
+    "name": "GroupSetup",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/AddCustomerUser",
+    "name": "AddCustomerUser",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/AddIPO",
+    "name": "AddIPO",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/AddClient",
+    "name": "AddClient",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/AddGroup",
+    "name": "AddGroup",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/ErrorCSV",
+    "name": "ErrorCSV",
+    "namespace": "",
+    "view": "home.views.Error_csv"
+  },
+  {
+    "route": "/AddGroup/<str:IPOid>/<str:Action>",
+    "name": "AddGroupFromPlaceOrder",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/BulkUploadGroup",
+    "name": "BulkUploadGroup",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/DownloadGroupSample",
+    "name": "DownloadGroupSample",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/edit/<str:IPOid>",
+    "name": null,
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/EditClient/<str:PanNoId>",
+    "name": null,
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/EditGroup/<str:GroupNameId>",
+    "name": null,
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/update/<str:IPOid>",
+    "name": null,
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/<str:IPOid>/updatepreopenprice/<str:group>/<str:IPOType>/<str:InvestType>",
+    "name": null,
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/<str:IPOid>/<str:OrderDetailId>/EditOrderPreOpenPrice/<str:OrderCategory>/<str:InvestorType>/<str:group>/<str:IPOType>/<str:InvestType>",
+    "name": null,
+    "namespace": "",
+    "view": "home.views.EditOrderPreOpenPrice"
+  },
+  {
+    "route": "/UpdateClient/<str:PANNoId>",
+    "name": null,
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/UpdateGroup/<str:GroupNameId>",
+    "name": null,
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/delete/<int:IPOid>",
+    "name": "destroy",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/DeleteClient/<str:PANNoId>",
+    "name": null,
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/DeleteAllClient",
+    "name": null,
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/DeleteGroup/<str:GroupNameId>",
+    "name": null,
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/DeleteOrder/<str:IPOid>/<str:OrderId>/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>",
+    "name": null,
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/<str:IPOid>/SetRate",
+    "name": null,
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/<str:IPOid>/BUY",
+    "name": null,
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/BUY/<str:IPOid>/<str:selectgroup>",
+    "name": null,
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/<str:IPOid>/SELL",
+    "name": null,
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/SELL/<str:IPOid>/<str:selectgroup>",
+    "name": null,
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/<str:IPOid>/Order",
+    "name": null,
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/<str:IPOid>/EditOrder/<str:OrderId>/<str:Grpf>/<str:OrCtf>/<str:InTyf>",
+    "name": null,
+    "namespace": "",
+    "view": "home.views.EditOrder"
+  },
+  {
+    "route": "/<str:IPOid>/<str:OrderId>/UpdateOrder/<str:Grpf>/<str:OrCtf>/<str:InTyf>",
+    "name": null,
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/<str:IPOid>/<str:OrderId>/EditOrderRate/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>",
+    "name": null,
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/<str:IPOid>/OrderDetail/<str:Ordtyp>",
+    "name": null,
+    "namespace": "",
+    "view": "home.views.OrderDetailFunction"
+  },
+  {
+    "route": "/<str:IPOid>/OrderDetail/<str:Ordtyp>/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>",
+    "name": null,
+    "namespace": "",
+    "view": "home.views.OrderDetailFunction"
+  },
+  {
+    "route": "/<str:IPOid>/OrderDetail/<str:Ordtyp>/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>",
+    "name": null,
+    "namespace": "",
+    "view": "home.views.OrderDetailFunction"
+  },
+  {
+    "route": "/<str:IPOid>/OrderDetail/<str:Ordtyp>/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>/<str:Rate>",
+    "name": null,
+    "namespace": "",
+    "view": "home.views.OrderDetailFunction"
+  },
+  {
+    "route": "/<str:IPOid>/Order/<str:Groupfilter>/<str:OrderCategoryFilter>/<str:InvestorTypeFilter>",
+    "name": null,
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/<str:IPOid>/<str:OrderType>/AddPan-<str:OrderDetailId>/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>",
+    "name": "AddPan",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/<str:IPOid>/<str:OrderType>/FirmAllotment/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>",
+    "name": null,
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/<str:IPOid>/<str:OrderType>/FirmAllotment/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>/<str:Rate>",
+    "name": "FirmAllotment",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/autocomplete",
+    "name": "autocomplete",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/autocomplete1",
+    "name": "autocomplete1",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/<str:IPOid>/Billing",
+    "name": "Billing",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/<str:IPOid>/Billing/<str:group>/<str:IPOType>/<str:InvestType>",
+    "name": null,
+    "namespace": "",
+    "view": "home.views.FileterBilling"
+  },
+  {
+    "route": "/<str:IPOid>/Billing/<str:group>/<str:IPOType>/<str:InvestType>/<str:Rate>",
+    "name": "Billing",
+    "namespace": "",
+    "view": "home.views.FileterBilling"
+  },
+  {
+    "route": "/<str:IPOid>/download-Billing/<str:group>/<str:IPOType>/<str:InvestorType>",
+    "name": "exportBillingFilter",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/download-Groupwise",
+    "name": "exportBillingFilter",
+    "namespace": "",
+    "view": "home.views.exportGroupwise"
+  },
+  {
+    "route": "/<str:IPOid>/Sempale-Order",
+    "name": "Sempale-Order",
+    "namespace": "",
+    "view": "home.views.Sempale_Order"
+  },
+  {
+    "route": "/<str:IPOid>/download-Billing-Pdf/<str:group>/<str:IPOType>/<str:InvestorType>",
+    "name": "exportBillingFilterpdf",
+    "namespace": "",
+    "view": "home.views.exportBillingFilterpdf"
+  },
+  {
+    "route": "/<str:IPOid>/Backup/",
+    "name": "Backup",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/AllIpoBackup",
+    "name": "AllIpoBackup",
+    "namespace": "",
+    "view": "home.views.AllIpoBackup"
+  },
+  {
+    "route": "/<str:IPOid>/download-csv/<str:OrderType>/<str:group>/<str:IPOType>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>",
+    "name": null,
+    "namespace": "",
+    "view": "home.views.export"
+  },
+  {
+    "route": "/<str:IPOid>/download-csv/<str:OrderType>/<str:group>/<str:IPOType>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>/<str:Rate>",
+    "name": "OrderDetail_download",
+    "namespace": "",
+    "view": "home.views.export"
+  },
+  {
+    "route": "/<str:IPOid>/Group_wise-download-csv/<str:OrderType>/<str:IPOType>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>",
+    "name": null,
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/<str:IPOid>/Group_wise-download-csv/<str:OrderType>/<str:IPOType>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>/<str:Rate>",
+    "name": "OrderDetail_download",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/<str:IPOid>/Dashboard/<str:value>",
+    "name": "Dashboard",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/<str:IPOid>/DashboardForm/<str:value>",
+    "name": "DashboardForm",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/<str:IPOid>/download-AllRecords-csv/<str:OrderType>/<str:group>/<str:IPOType>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>",
+    "name": null,
+    "namespace": "",
+    "view": "home.views.exportall"
+  },
+  {
+    "route": "/<str:IPOid>/download-AllRecords-csv/<str:OrderType>/<str:group>/<str:IPOType>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>/<str:Rate>",
+    "name": "OrderDetail_download_AllRecords",
+    "namespace": "",
+    "view": "home.views.exportall"
+  },
+  {
+    "route": "/<str:IPOid>/Group_wise-download-AllRecords-csv/<str:OrderType>/<str:IPOType>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>",
+    "name": null,
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/<str:IPOid>/Group_wise-download-AllRecords-csv/<str:OrderType>/<str:IPOType>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>/<str:Rate>",
+    "name": "OrderDetail_download_AllRecords",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/<str:IPOid>/Status",
+    "name": "Status",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/update-telly-status/",
+    "name": "update_telly_status",
+    "namespace": "",
+    "view": "home.views.update_telly_status"
+  },
+  {
+    "route": "/GroupWiseDashboard",
+    "name": "GroupWiseDashboard",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/group-billing-details/",
+    "name": "group_billing_details",
+    "namespace": "",
+    "view": "home.views.group_billing_details"
+  },
+  {
+    "route": "/group-billing-details/<int:group_id>/",
+    "name": "group_billing_details_by_id",
+    "namespace": "",
+    "view": "home.views.group_billing_details"
+  },
+  {
+    "route": "/BackUp",
+    "name": "BackUp",
+    "namespace": "",
+    "view": "home.views.BackUp"
+  },
+  {
+    "route": "/panalloted",
+    "name": "panalloted",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/<str:IPOid>/<str:OrderType>/upload-csv/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>",
+    "name": "OrderDetail_upload",
+    "namespace": "",
+    "view": "home.views.OrderDetail_upload"
+  },
+  {
+    "route": "/<str:IPOid>/<str:OrderType>/upload-csv/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>/<str:OrderDate>/<str:OrderTime>/<str:Rate>",
+    "name": "OrderDetail_upload",
+    "namespace": "",
+    "view": "home.views.OrderDetail_upload"
+  },
+  {
+    "route": "/<str:IPOid>/upload-csv/<str:Groupfilter>/<str:Ordercatagoryfilter>/<str:InvestorTypefilter>",
+    "name": "Order_upload",
+    "namespace": "",
+    "view": "home.views.Order_upload"
+  },
+  {
+    "route": "/AddPayment",
+    "name": "AddPayment",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/login",
+    "name": "login",
+    "namespace": "",
+    "view": "home.views.loginUser"
+  },
+  {
+    "route": "/logout",
+    "name": "logout",
+    "namespace": "",
+    "view": "home.views.logoutUser"
+  },
+  {
+    "route": "/<str:IPOid>/ShareBill",
+    "name": "GroupWiseBillShare",
+    "namespace": "",
+    "view": "home.views.GroupBillShare"
+  },
+  {
+    "route": "/accounting/",
+    "name": "accounting",
+    "namespace": "",
+    "view": "home.views.accounting_view"
+  },
+  {
+    "route": "/get-accounting-entries/",
+    "name": "get_accounting_entries",
+    "namespace": "",
+    "view": "home.views.get_accounting_entries"
+  },
+  {
+    "route": "/save_transaction/",
+    "name": "save_transaction",
+    "namespace": "",
+    "view": "home.views.save_transaction"
+  },
+  {
+    "route": "/save_transaction_group/",
+    "name": "save_transaction_group",
+    "namespace": "",
+    "view": "home.views.save_transaction_group"
+  },
+  {
+    "route": "/update-accounting/",
+    "name": "update_accounting",
+    "namespace": "",
+    "view": "home.views.update_accounting"
+  },
+  {
+    "route": "/bulk-delete-accounting/",
+    "name": "bulk_delete_accounting",
+    "namespace": "",
+    "view": "home.views.bulk_delete_accounting"
+  },
+  {
+    "route": "/soft-delete-accounting/<int:entry_id>/",
+    "name": "soft_delete_accounting",
+    "namespace": "",
+    "view": "home.views.soft_delete_accounting"
+  },
+  {
+    "route": "/restore-accounting/<int:entry_id>/",
+    "name": "restore_accounting",
+    "namespace": "",
+    "view": "home.views.restore_accounting"
+  },
+  {
+    "route": "/add-transaction/",
+    "name": "add_transaction",
+    "namespace": "",
+    "view": "home.views.add_transaction"
+  },
+  {
+    "route": "/add_transaction_group/",
+    "name": "add_transaction_group",
+    "namespace": "",
+    "view": "home.views.add_transaction_group"
+  },
+  {
+    "route": "/accounting-logs/",
+    "name": "accounting_logs",
+    "namespace": "",
+    "view": "home.views.accounting_logs_view"
+  },
+  {
+    "route": "/ipo_transaction/",
+    "name": "ipo_transaction",
+    "namespace": "",
+    "view": "home.views.ipo_transaction"
+  },
+  {
+    "route": "/ipo_transaction1 /",
+    "name": "ipo_transaction1",
+    "namespace": "",
+    "view": "home.views.ipo_transaction1"
+  },
+  {
+    "route": "/AccountingBackup/",
+    "name": "AccountingBackup",
+    "namespace": "",
+    "view": "home.views.AccountingBackup"
+  },
+  {
+    "route": "/share-records/",
+    "name": "Share_AppDetails",
+    "namespace": "",
+    "view": "home.views.Share_AppDetails"
+  },
+  {
+    "route": "/user-profile/",
+    "name": "user_profile",
+    "namespace": "",
+    "view": "home.views.user_profile"
+  },
+  {
+    "route": "/update-user-profile/",
+    "name": "update_user_profile",
+    "namespace": "",
+    "view": "home.views.update_user_profile"
+  },
+  {
+    "route": "/send-telegram-otp/",
+    "name": "send_telegram_otp",
+    "namespace": "",
+    "view": "home.views.send_telegram_otp"
+  },
+  {
+    "route": "/verify-telegram-otp/",
+    "name": "verify_telegram_otp",
+    "namespace": "",
+    "view": "home.views.verify_telegram_otp"
+  },
+  {
+    "route": "/place-order/<int:IPOid>/<str:order_type>/",
+    "name": "place_order",
+    "namespace": "",
+    "view": "home.views.place_order_view"
+  },
+  {
+    "route": "/share-status-telegram/",
+    "name": "share_status_telegram",
+    "namespace": "",
+    "view": "home.views.share_status_telegram"
+  },
+  {
+    "route": "/<str:IPOid>/send-status-telegram/",
+    "name": "send_status_to_telegram",
+    "namespace": "",
+    "view": "home.views.send_status_to_telegram"
+  },
+  {
+    "route": "/<int:IPOid>/DeleteAllOrders/",
+    "name": "delete_all_orders",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/bulk_ipo_transactions/",
+    "name": "bulk_ipo_transactions",
+    "namespace": "",
+    "view": "home.views.bulk_ipo_transactions"
+  },
+  {
+    "route": "/bulk-transfer-transactions/",
+    "name": "bulk_transfer_transactions",
+    "namespace": "",
+    "view": "home.views.bulk_transfer_transactions"
+  },
+  {
+    "route": "/api/transfer-batch/<uuid:batch_id>/",
+    "name": "get_transfer_batch",
+    "namespace": "",
+    "view": "home.views.get_transfer_batch"
+  },
+  {
+    "route": "/api/transfer-group-ipos/<int:group_id>/",
+    "name": "get_transfer_group_ipos",
+    "namespace": "",
+    "view": "home.views.get_transfer_group_ipos"
+  },
+  {
+    "route": "/api/get-group-dues/<int:group_id>/",
+    "name": "get_group_dues",
+    "namespace": "",
+    "view": "home.views.get_group_dues"
+  },
+  {
+    "route": "/<int:IPOid>/get-all-groups/",
+    "name": "get_all_groups",
+    "namespace": "",
+    "view": "home.views.get_all_groups"
+  },
+  {
+    "route": "/<str:IPOid>/send-status-telegram/",
+    "name": "send_status_to_telegram",
+    "namespace": "",
+    "view": "home.views.send_status_to_telegram"
+  },
+  {
+    "route": "/<str:IPOid>/send-status-telegram-image/",
+    "name": "send_status_to_telegram_image",
+    "namespace": "",
+    "view": "home.views.send_status_to_telegram_image"
+  },
+  {
+    "route": "/generate-shared-link/",
+    "name": "generate_shared_link",
+    "namespace": "",
+    "view": "home.views.generate_shared_link"
+  },
+  {
+    "route": "/access-link/<uuid:link_id>/",
+    "name": "resolve_shared_link",
+    "namespace": "",
+    "view": "home.views.resolve_shared_link"
+  },
+  {
+    "route": "/access-link/<uuid:link_id>/<str:order_type>",
+    "name": "resolve_shared_link",
+    "namespace": "",
+    "view": "home.views.resolve_shared_link"
+  },
+  {
+    "route": "/get-user-links/<int:IPOid>/<str:order_type>",
+    "name": "get_user_links",
+    "namespace": "",
+    "view": "home.views.get_user_links"
+  },
+  {
+    "route": "/delete-link/",
+    "name": "delete_link",
+    "namespace": "",
+    "view": "home.views.delete_link"
+  },
+  {
+    "route": "/update-link/<uuid:link_id>/",
+    "name": "update_shared_link",
+    "namespace": "",
+    "view": "home.views.update_shared_link"
+  },
+  {
+    "route": "/send-link-mail/<uuid:linkId>/",
+    "name": "send_link_mail",
+    "namespace": "",
+    "view": "home.views.send_link_mail"
+  },
+  {
+    "route": "/update-all-expiries/<int:IPOid>/",
+    "name": "update_all_expiries",
+    "namespace": "",
+    "view": "home.views.update_all_expiries"
+  },
+  {
+    "route": "/send-all-link-mails/<int:IPOid>/",
+    "name": "send_all_link_mails",
+    "namespace": "",
+    "view": "home.views.send_all_link_mails"
+  },
+  {
+    "route": "/bulk-generate-links/<str:IPOid>/",
+    "name": "bulk_generate_links",
+    "namespace": "",
+    "view": "home.views.bulk_generate_links"
+  },
+  {
+    "route": "/update-link-status/",
+    "name": "update_link_status",
+    "namespace": "",
+    "view": "home.views.update_link_status"
+  },
+  {
+    "route": "/<str:IPOid>/BulkDeleteOrders/",
+    "name": "BulkDeleteOrders",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/BulkDeleteGroup",
+    "name": "BulkDeleteGroup",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/BulkDeleteClients",
+    "name": "BulkDeleteClients",
+    "namespace": "",
+    "view": "home.decorators.allowed_users.<locals>.decorator.<locals>.wrapper_func"
+  },
+  {
+    "route": "/^serviceworker\\.js$",
+    "name": "serviceworker",
+    "namespace": "",
+    "view": "pwa.views.service_worker"
+  },
+  {
+    "route": "/^manifest\\.json$",
+    "name": "manifest",
+    "namespace": "",
+    "view": "pwa.views.manifest"
+  },
+  {
+    "route": "/offline/",
+    "name": "offline",
+    "namespace": "",
+    "view": "pwa.views.offline"
+  }
+]

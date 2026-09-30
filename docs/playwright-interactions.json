@@ -1,0 +1,6036 @@
+[
+  {
+    "template": "templates\\accounting.html",
+    "forms": [
+      {
+        "action": "",
+        "method": "get",
+        "fields": [
+          {
+            "tag": "select",
+            "name": "ipo_name",
+            "id": null,
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "ipo_name",
+            "id": null,
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "group_name",
+            "id": null,
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "group_name",
+            "id": null,
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "date_from",
+            "id": "date_from",
+            "type": "date",
+            "required": null,
+            "min": null,
+            "max": "{% now 'Y-m-d' %}",
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "date_to",
+            "id": "date_to",
+            "type": "date",
+            "required": null,
+            "min": null,
+            "max": "{% if date_from %}{{ date_from }}{% else %}{% now 'Y-m-d' %}{% endif %}",
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": "{% url 'save_transaction' %}",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "select",
+            "name": "group_id",
+            "id": "group_id",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "ipo_id",
+            "id": "ipo_id",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "amount",
+            "id": "amount",
+            "type": "number",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "amount_type",
+            "id": "amount_type",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "remark",
+            "id": "remark",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "date_time",
+            "id": "date_time",
+            "type": "datetime-local",
+            "required": "",
+            "min": "2020-01-01T00:00:00",
+            "max": "2035-12-31T23:59:59",
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "jv_group_id",
+            "id": "jv_group",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "jv_checkbox",
+            "id": "jv_checkbox",
+            "type": "checkbox",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "jv_amount",
+            "id": "jv_amount_display",
+            "type": "number",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "jv_amount",
+            "id": "jv_amount",
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "jv_amount_type",
+            "id": "jv_amount_type_display",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "jv_amount_type",
+            "id": "jv_amount_type",
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "jv_remark",
+            "id": "jv_remark_display",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "jv_remark",
+            "id": "jv_remark",
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "date_time",
+            "id": "jv_date_time",
+            "type": "datetime-local",
+            "required": null,
+            "min": "2020-01-01T00:00:00",
+            "max": "2035-12-31T23:59:59",
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "jv_entry",
+            "id": null,
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": "{% url 'update_accounting' %}",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "entry_id",
+            "id": "edit_entry_id",
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "group_id",
+            "id": "edit_group",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "ipo_id",
+            "id": "edit_ipo",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "amount_type",
+            "id": "edit_amount_type",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "amount",
+            "id": "edit_amount",
+            "type": "number",
+            "required": "",
+            "min": "0.01",
+            "max": "9999999999.99",
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "remark",
+            "id": "edit_remark",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "250",
+            "pattern": null
+          },
+          {
+            "tag": "textarea",
+            "name": "edit_reason",
+            "id": "edit_reason",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "250",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "date_time",
+            "id": "edit_date_time",
+            "type": "datetime-local",
+            "required": "",
+            "min": "2020-01-01T00:00",
+            "max": "2035-12-31T23:59:59",
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "Apply",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Payment",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "JV Payment",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Delete selected ( 0 )",
+        "id": "deleteSelectedAccounting",
+        "onclick": null
+      },
+      {
+        "text": "",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Close",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Save",
+        "id": "saveBtn",
+        "onclick": null
+      },
+      {
+        "text": "",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Close",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Update Entry",
+        "id": null,
+        "onclick": null
+      }
+    ],
+    "links": [
+      "{% url 'accounting' %}",
+      "{% url 'accounting_logs' %}",
+      "{% url 'accounting' %}{% if show_deleted %}{% endif %}"
+    ],
+    "ajax": [
+      "fetch(`/soft-delete-accounting/${id}/`, {",
+      "fetch(`/restore-accounting/${id}/`, {",
+      "fetch(\"{% url 'bulk_delete_accounting' %}\", {"
+    ]
+  },
+  {
+    "template": "templates\\accounting_logs.html",
+    "forms": [],
+    "buttons": [],
+    "links": [
+      "{% url 'accounting' %}"
+    ],
+    "ajax": []
+  },
+  {
+    "template": "templates\\AddCustomerUser.html",
+    "forms": [
+      {
+        "action": "/AddCustomerUser",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "username",
+            "id": "inputEmail",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "20",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "password",
+            "id": "inputPassword",
+            "type": "password",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "email",
+            "id": "email",
+            "type": "email",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "first_name",
+            "id": "Name",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "50",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "last_name",
+            "id": "Name",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "50",
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "Group",
+            "id": "group",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Submit",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Back",
+        "id": null,
+        "onclick": "window.location.href='/';"
+      }
+    ],
+    "links": [],
+    "ajax": []
+  },
+  {
+    "template": "templates\\Backup.html",
+    "forms": [],
+    "buttons": [],
+    "links": [
+      "/BackUp?page=1",
+      "/BackUp?page={{ num }}",
+      "/BackUp?page={{ num }}",
+      "/BackUp?page={{ page_obj.paginator.num_pages }}"
+    ],
+    "ajax": []
+  },
+  {
+    "template": "templates\\BackupReadOnly.html",
+    "forms": [],
+    "buttons": [],
+    "links": [],
+    "ajax": []
+  },
+  {
+    "template": "templates\\basic.html",
+    "forms": [
+      {
+        "action": "/update-user-profile",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "username",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "email",
+            "id": null,
+            "type": "email",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "app_password",
+            "id": "appPassword1",
+            "type": "apppassword",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": null,
+            "id": null,
+            "type": "submit",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": "/ChangeUserpassword",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "NewPassword",
+            "id": "inputPassword1",
+            "type": "password",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "ConfirmPassword",
+            "id": "inputPassword2",
+            "type": "password",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": null,
+            "id": null,
+            "type": "submit",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "X",
+        "id": "close-btn",
+        "onclick": null
+      },
+      {
+        "text": "X",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "X",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Close",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "X",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Close",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "X",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "\u2b07 Install",
+        "id": "pwa-install-btn",
+        "onclick": null
+      },
+      {
+        "text": "\u2715 Close",
+        "id": "pwa-dismiss-btn",
+        "onclick": null
+      }
+    ],
+    "links": [
+      "/",
+      "/IPOSETUP",
+      "/ClientSetup",
+      "/GroupSetup",
+      "/GroupWiseDashboard",
+      "/group-billing-details/",
+      "/accounting",
+      "/BackUp",
+      "{% url 'user_profile' %}",
+      "/logout",
+      "/logout"
+    ],
+    "ajax": []
+  },
+  {
+    "template": "templates\\Bdashboard.html",
+    "forms": [
+      {
+        "action": "/{{IPOid}}/Dashboard/A",
+        "method": "post",
+        "fields": []
+      },
+      {
+        "action": "/{{IPOid}}/Dashboard/B",
+        "method": "post",
+        "fields": []
+      },
+      {
+        "action": "/{{IPOid}}/Dashboard/C",
+        "method": "post",
+        "fields": []
+      },
+      {
+        "action": "/{{IPOid}}/DashboardForm/B",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "input",
+            "name": null,
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": null,
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": null,
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": null,
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": null,
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": null,
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": null,
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": null,
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "ProfitMargin",
+            "id": null,
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "Premium",
+            "id": "inputEmail3",
+            "type": "tel",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "Submit",
+        "id": null,
+        "onclick": null
+      }
+    ],
+    "links": [
+      "/{{IPOid}}/BUY",
+      "/{{IPOid}}/SELL",
+      "/{{IPOid}}/Order",
+      "/{{IPOid}}/OrderDetail/BUY",
+      "/{{IPOid}}/OrderDetail/SELL",
+      "/{{IPOid}}/Billing",
+      "/{{IPOid}}/Status",
+      "/{{IPOid}}/Dashboard/A"
+    ],
+    "ajax": []
+  },
+  {
+    "template": "templates\\Bdashboard_sme.html",
+    "forms": [
+      {
+        "action": "/{{IPOid}}/Dashboard/A",
+        "method": "post",
+        "fields": []
+      },
+      {
+        "action": "/{{IPOid}}/Dashboard/B",
+        "method": "post",
+        "fields": []
+      },
+      {
+        "action": "/{{IPOid}}/Dashboard/C",
+        "method": "post",
+        "fields": []
+      },
+      {
+        "action": "/{{IPOid}}/DashboardForm/B",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "input",
+            "name": null,
+            "id": "inputPassword3",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "ProfitMargin",
+            "id": "inputPassword3",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "Premium",
+            "id": "inputEmail3",
+            "type": "tel",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "Submit",
+        "id": null,
+        "onclick": null
+      }
+    ],
+    "links": [
+      "/{{IPOid}}/BUY",
+      "/{{IPOid}}/SELL",
+      "/{{IPOid}}/Order",
+      "/{{IPOid}}/OrderDetail/BUY",
+      "/{{IPOid}}/OrderDetail/SELL",
+      "/{{IPOid}}/Billing",
+      "/{{IPOid}}/Status",
+      "/{{IPOid}}/Dashboard/A"
+    ],
+    "ajax": []
+  },
+  {
+    "template": "templates\\Billing.html",
+    "forms": [
+      {
+        "action": "/{{IPOid}}/Billing",
+        "method": "POST",
+        "fields": [
+          {
+            "tag": "select",
+            "name": "Groupfilter",
+            "id": null,
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "IPOTypefilter",
+            "id": null,
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "InvestorTypeFilter",
+            "id": null,
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": "BillingFilter",
+        "method": "POST",
+        "fields": []
+      },
+      {
+        "action": "/{{IPOid}}/updatepreopenprice/{{Groupfilter}}/{{IPOTypefilter}}/All",
+        "method": "POST",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "selected_ids",
+            "id": "top-selected-ids-input",
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "PreOpenPrice",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": null,
+        "method": "POST",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "csrfmiddlewaretoken",
+            "id": null,
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "selected_ids",
+            "id": "selected-ids-input",
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "PreOpenPrice",
+            "id": "preopen-price",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "Search",
+        "id": "searchButton",
+        "onclick": null
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Submit",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Submit",
+        "id": null,
+        "onclick": null
+      }
+    ],
+    "links": [
+      "/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/All?page=1",
+      "/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/All?page={{ num }}",
+      "/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/All?page={{ num }}",
+      "/{{IPOid}}/Billing/{{Groupfilter}}/{{IPOTypefilter}}/All?page={{ page_obj.paginator.num_pages }}",
+      "/{{IPOid}}/BUY",
+      "/{{IPOid}}/SELL",
+      "/{{IPOid}}/Order",
+      "/{{IPOid}}/OrderDetail/BUY",
+      "/{{IPOid}}/OrderDetail/SELL",
+      "/{{IPOid}}/Billing",
+      "/{{IPOid}}/Status",
+      "/{{IPOid}}/Dashboard/A"
+    ],
+    "ajax": []
+  },
+  {
+    "template": "templates\\buy.html",
+    "forms": [
+      {
+        "action": "/AddGroup/{{IPOid}}/BUY",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "GroupName",
+            "id": null,
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": null,
+        "method": "post",
+        "fields": [
+          {
+            "tag": "select",
+            "name": "item_id",
+            "id": "validationCustom04",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "datetime",
+            "id": "datetime",
+            "type": "datetime-local",
+            "required": "",
+            "min": "2020-01-01T00:00:00",
+            "max": "2035-12-31T23:59:59",
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "KostakQTY",
+            "id": null,
+            "type": "number",
+            "required": null,
+            "min": "1",
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "KostakRate",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "KostakQTYSHNI",
+            "id": null,
+            "type": "number",
+            "required": null,
+            "min": "1",
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "KostakRateSHNI",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "KostakQTYBHNI",
+            "id": null,
+            "type": "number",
+            "required": null,
+            "min": "1",
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "KostakRateBHNI",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "SubjectToQTY",
+            "id": null,
+            "type": "number",
+            "required": null,
+            "min": "1",
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "SubjectToRate",
+            "id": "subjectToRateInputRetail",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "subjectToIsPremiumRetail",
+            "id": "subjectToIsPremiumRetail",
+            "type": "checkbox",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "SubjectToQTYSHNI",
+            "id": null,
+            "type": "number",
+            "required": null,
+            "min": "1",
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "SubjectToRateSHNI",
+            "id": "subjectToRateInputSHNI",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "subjectToIsPremiumSHNI",
+            "id": "subjectToIsPremiumSHNI",
+            "type": "checkbox",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "SubjectToQTYBHNI",
+            "id": null,
+            "type": "number",
+            "required": null,
+            "min": "1",
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "SubjectToRateBHNI",
+            "id": "subjectToRateInputBHNI",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "subjectToIsPremiumBHNI",
+            "id": "subjectToIsPremiumBHNI",
+            "type": "checkbox",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "PremiumQTY",
+            "id": null,
+            "type": "number",
+            "required": null,
+            "min": "1",
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "PremiumRate",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "CallQTY",
+            "id": null,
+            "type": "number",
+            "required": null,
+            "min": "1",
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "CallStrikePrice",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "CallRate",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "PutQTY",
+            "id": null,
+            "type": "number",
+            "required": null,
+            "min": "1",
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "PutStrikePrice",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "PutRate",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": null,
+            "id": "remarkInput",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "remark_tags",
+            "id": "remarkTags",
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "remark_text",
+            "id": "remarkText",
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": "/AddGroup/{{IPOid}}/BUY",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "GroupName",
+            "id": "GroupName",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Add Group",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "\u25bc",
+        "id": "remarkDropdownBtn",
+        "onclick": null
+      },
+      {
+        "text": "Place BUY Order",
+        "id": "btnPlaceOnly",
+        "onclick": null
+      },
+      {
+        "text": "Place +",
+        "id": "btnPlaceWithTelegram",
+        "onclick": null
+      },
+      {
+        "text": "Send to WhatsApp",
+        "id": "btnSendWhatsApp",
+        "onclick": null
+      },
+      {
+        "text": "Add Group",
+        "id": null,
+        "onclick": null
+      }
+    ],
+    "links": [
+      "/{{IPOid}}/OrderDetail/{{i.OrderType}}/{{i.OrderGroup.GroupName}}/{{ i.OrderCategory }}/{{i.InvestorType}}/{{ i.OrderDate|date:",
+      "/{{IPOid}}/BUY",
+      "/{{IPOid}}/SELL",
+      "/{{IPOid}}/Order",
+      "/{{IPOid}}/OrderDetail/BUY",
+      "/{{IPOid}}/OrderDetail/SELL",
+      "/{{IPOid}}/Billing",
+      "/{{IPOid}}/Status",
+      "/{{IPOid}}/Dashboard/A"
+    ],
+    "ajax": [
+      "fetch(currentUrl, {",
+      "fetch(form.action, {",
+      "fetch('{% url 'place_order' IPOid order_type %}', {",
+      "fetch(currentUrl, {",
+      "fetch(\"{% url 'whatsapp:send_buy_order' IPOid %}\", {",
+      "fetch(\"{% url 'place_order' IPOid order_type %}\", {"
+    ]
+  },
+  {
+    "template": "templates\\Cdashboard.html",
+    "forms": [
+      {
+        "action": "/{{IPOid}}/Dashboard/A",
+        "method": "post",
+        "fields": []
+      },
+      {
+        "action": "/{{IPOid}}/Dashboard/B",
+        "method": "post",
+        "fields": []
+      },
+      {
+        "action": "/{{IPOid}}/Dashboard/C",
+        "method": "post",
+        "fields": []
+      },
+      {
+        "action": "/{{IPOid}}/DashboardForm/C",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "input",
+            "name": null,
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": null,
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": null,
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": null,
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "Premium",
+            "id": "inputEmail3",
+            "type": "tel",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "Submit",
+        "id": null,
+        "onclick": null
+      }
+    ],
+    "links": [
+      "/{{IPOid}}/BUY",
+      "/{{IPOid}}/SELL",
+      "/{{IPOid}}/Order",
+      "/{{IPOid}}/OrderDetail/BUY",
+      "/{{IPOid}}/OrderDetail/SELL",
+      "/{{IPOid}}/Billing",
+      "/{{IPOid}}/Status",
+      "/{{IPOid}}/Dashboard/A"
+    ],
+    "ajax": []
+  },
+  {
+    "template": "templates\\Cdashboard_sme.html",
+    "forms": [
+      {
+        "action": "/{{IPOid}}/Dashboard/A",
+        "method": "post",
+        "fields": []
+      },
+      {
+        "action": "/{{IPOid}}/Dashboard/B",
+        "method": "post",
+        "fields": []
+      },
+      {
+        "action": "/{{IPOid}}/Dashboard/C",
+        "method": "post",
+        "fields": []
+      },
+      {
+        "action": "/{{IPOid}}/DashboardForm/C",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "input",
+            "name": null,
+            "id": "inputPassword3",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "Premium",
+            "id": "inputEmail3",
+            "type": "tel",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "Submit",
+        "id": null,
+        "onclick": null
+      }
+    ],
+    "links": [
+      "/{{IPOid}}/BUY",
+      "/{{IPOid}}/SELL",
+      "/{{IPOid}}/Order",
+      "/{{IPOid}}/OrderDetail/BUY",
+      "/{{IPOid}}/OrderDetail/SELL",
+      "/{{IPOid}}/Billing",
+      "/{{IPOid}}/Status",
+      "/{{IPOid}}/Dashboard/A"
+    ],
+    "ajax": []
+  },
+  {
+    "template": "templates\\ClientSetup.html",
+    "forms": [
+      {
+        "action": "/ClientSetup",
+        "method": "POST",
+        "fields": [
+          {
+            "tag": "select",
+            "name": "client_page_size",
+            "id": "client_page_size",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "group_filter",
+            "id": "group_filter",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "page",
+            "id": null,
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": "/AddClient",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "PANNo",
+            "id": "PANNo",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": "10",
+            "maxlength": "10",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "Name",
+            "id": "Name",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "50",
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "Group",
+            "id": "group",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "ClientIdDpId",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": "16",
+            "maxlength": "16",
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Delete All Clients",
+        "id": "deleteAllClientsBtn",
+        "onclick": null
+      },
+      {
+        "text": "ADD CLIENT",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "X",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Close",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Submit Form",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Cancel",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Delete",
+        "id": null,
+        "onclick": "downloadAndRedirect('{{ page_number }}')"
+      }
+    ],
+    "links": [
+      "/ClientSetup?page=1",
+      "/ClientSetup?page={{ num }}",
+      "/ClientSetup?page={{ num }}",
+      "/ClientSetup?page={{ page_obj.paginator.num_pages }}"
+    ],
+    "ajax": [
+      "$.ajax({"
+    ]
+  },
+  {
+    "template": "templates\\dashboard.html",
+    "forms": [
+      {
+        "action": "/{{IPOid}}/Dashboard/A",
+        "method": "post",
+        "fields": []
+      },
+      {
+        "action": "/{{IPOid}}/Dashboard/B",
+        "method": "post",
+        "fields": []
+      },
+      {
+        "action": "/{{IPOid}}/Dashboard/C",
+        "method": "post",
+        "fields": []
+      },
+      {
+        "action": "/{{IPOid}}/DashboardForm/A",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "ExpecetdRetailApplication",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "50",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "ExpecetdSHNIApplication",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "50",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "ExpecetdBHNIApplication",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "50",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "ProfitMargin",
+            "id": "inputPassword3",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "Premium",
+            "id": "inputEmail3",
+            "type": "tel",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "Submit",
+        "id": null,
+        "onclick": null
+      }
+    ],
+    "links": [
+      "/{{IPOid}}/BUY",
+      "/{{IPOid}}/SELL",
+      "/{{IPOid}}/Order",
+      "/{{IPOid}}/OrderDetail/BUY",
+      "/{{IPOid}}/OrderDetail/SELL",
+      "/{{IPOid}}/Billing",
+      "/{{IPOid}}/Status",
+      "/{{IPOid}}/Dashboard/A"
+    ],
+    "ajax": []
+  },
+  {
+    "template": "templates\\dashboard_sme.html",
+    "forms": [
+      {
+        "action": "/{{IPOid}}/Dashboard/A",
+        "method": "post",
+        "fields": []
+      },
+      {
+        "action": "/{{IPOid}}/Dashboard/B",
+        "method": "post",
+        "fields": []
+      },
+      {
+        "action": "/{{IPOid}}/Dashboard/C",
+        "method": "post",
+        "fields": []
+      },
+      {
+        "action": "/{{IPOid}}/DashboardForm/A",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "ExpecetdRetailApplication",
+            "id": "inputEmail3",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "50",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "ProfitMargin",
+            "id": "inputPassword3",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "Premium",
+            "id": "inputEmail3",
+            "type": "tel",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "Submit",
+        "id": null,
+        "onclick": null
+      }
+    ],
+    "links": [
+      "/{{IPOid}}/BUY",
+      "/{{IPOid}}/SELL",
+      "/{{IPOid}}/Order",
+      "/{{IPOid}}/OrderDetail/BUY",
+      "/{{IPOid}}/OrderDetail/SELL",
+      "/{{IPOid}}/Billing",
+      "/{{IPOid}}/Status",
+      "/{{IPOid}}/Dashboard/A"
+    ],
+    "ajax": []
+  },
+  {
+    "template": "templates\\edit.html",
+    "forms": [
+      {
+        "action": "/update/{{employee.id}}?page{{page_number}}",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "name",
+            "id": "name",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "50",
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "IPOType",
+            "id": "category",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "IPOPrice",
+            "id": "IPOPrice",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "10",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "TotalIPOSize",
+            "id": null,
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "10",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "LotSizeRetail",
+            "id": "LotSize",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "10",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "LotSizeSHNI",
+            "id": "LotSizeS",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "10",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "LotSizeBHNI",
+            "id": "LotSizeB",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "10",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "RetailPercentage",
+            "id": null,
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "10",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "BHNIPercentage",
+            "id": "b%",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "10",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "SHNIPercentage",
+            "id": "s%",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "10",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "Remark",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "100",
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Submit",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Back",
+        "id": null,
+        "onclick": "window.location.href='/IPOSETUP';"
+      }
+    ],
+    "links": [],
+    "ajax": []
+  },
+  {
+    "template": "templates\\EditClient.html",
+    "forms": [
+      {
+        "action": "/UpdateClient/{{employee.id}}?page={{page_number}}",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "PANNo",
+            "id": "PANNo",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": "10",
+            "maxlength": "10",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "Name",
+            "id": "Name",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "50",
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "Group",
+            "id": "Group",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "ClientIdDpId",
+            "id": "id_name",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": "16",
+            "maxlength": "16",
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Submit",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Back",
+        "id": null,
+        "onclick": "window.location.href='/ClientSetup';"
+      }
+    ],
+    "links": [],
+    "ajax": []
+  },
+  {
+    "template": "templates\\EditGroup.html",
+    "forms": [
+      {
+        "action": "/UpdateGroup/{{employee.id}}?page={{page_number}}",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "GroupName",
+            "id": "GroupName",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "50",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "MobileNo",
+            "id": "MobileNo",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": "10",
+            "maxlength": "10",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "Email",
+            "id": "Email",
+            "type": "email",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "100",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "Address",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "100",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "Remark",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "100",
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Submit",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Back",
+        "id": null,
+        "onclick": "window.location.href='/GroupSetup';"
+      }
+    ],
+    "links": [],
+    "ajax": []
+  },
+  {
+    "template": "templates\\EditOrder.html",
+    "forms": [
+      {
+        "action": "/{{IPOid}}/{{employee.id}}/UpdateOrder/{{Grpf}}/{{OrCtf}}/{{InTyf}}?page={{page_number}}",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "select",
+            "name": "Group",
+            "id": "Group",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "OrderType",
+            "id": null,
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "OrderCategory",
+            "id": "id_order_category",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "InvestorType",
+            "id": null,
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "Qty",
+            "id": null,
+            "type": "number",
+            "required": "",
+            "min": "1",
+            "max": null,
+            "minlength": null,
+            "maxlength": "10",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "optionStrikePrice",
+            "id": "strike_price_input",
+            "type": "number",
+            "required": null,
+            "min": "1",
+            "max": null,
+            "minlength": null,
+            "maxlength": "10",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "Sub_Rate",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "10",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "subjectToIsPremium",
+            "id": "subjectToIsPremium",
+            "type": "checkbox",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "Rate",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "10",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "datetime",
+            "id": "datetime",
+            "type": "datetime-local",
+            "required": "",
+            "min": "1970-01-01T00:00:00",
+            "max": "{% now \"Y-m-d H:i:s\" %}",
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": null,
+            "id": "remarkInput",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "remark_tags",
+            "id": "remarkTags",
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "remark_text",
+            "id": "remarkText",
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "\u25bc",
+        "id": "remarkDropdownBtn",
+        "onclick": null
+      },
+      {
+        "text": "Submit",
+        "id": null,
+        "onclick": "return validateForm()"
+      },
+      {
+        "text": "Delete",
+        "id": null,
+        "onclick": "document.getElementById('{{ employee.id }}').style.display='block'"
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Cancel",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Delete",
+        "id": null,
+        "onclick": "window.location.href='/DeleteOrder/{{ IPOid }}/{{employee.id}}/{{Grpf}}/{{OrCtf}}/{{InTyf}}?page={{page_number}}';"
+      },
+      {
+        "text": "Back",
+        "id": null,
+        "onclick": "window.location.href='{% if IPOName.IPOType == "
+      }
+    ],
+    "links": [],
+    "ajax": []
+  },
+  {
+    "template": "templates\\group_billing_details.html",
+    "forms": [],
+    "buttons": [
+      {
+        "text": "Share",
+        "id": null,
+        "onclick": "openGroupShareModal(this, '{{ table_data.group.GroupName }}', 'SME')"
+      },
+      {
+        "text": "Share",
+        "id": null,
+        "onclick": "openGroupShareModal(this, '{{ table_data.group.GroupName }}', 'Mainboard')"
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Copy Image",
+        "id": "copyGroupImageBtn",
+        "onclick": "copyGroupImage()"
+      },
+      {
+        "text": "Share via System",
+        "id": "shareGroupImageBtn",
+        "onclick": "shareGroupImage()"
+      }
+    ],
+    "links": [
+      "/"
+    ],
+    "ajax": [
+      "$.ajax({"
+    ]
+  },
+  {
+    "template": "templates\\GroupSetup.html",
+    "forms": [
+      {
+        "action": "AddGroup",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "GroupName",
+            "id": "GroupName",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "50",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "MobileNo",
+            "id": "MobileNo",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": "10",
+            "maxlength": "10",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "Email",
+            "id": null,
+            "type": "email",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "100",
+            "pattern": "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$"
+          },
+          {
+            "tag": "input",
+            "name": "Address",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "100",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "Remark",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "100",
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": "BulkUploadGroup",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "file",
+            "id": "bulkFile",
+            "type": "file",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "X",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Close",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Submit Form",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "X",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Close",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Upload",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Cancel",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Delete",
+        "id": "confirm_bulk_delete",
+        "onclick": null
+      }
+    ],
+    "links": [
+      "DownloadGroupSample",
+      "/GroupSetup?page=1",
+      "/GroupSetup?page={{ num }}",
+      "/GroupSetup?page={{ num }}",
+      "/GroupSetup?page={{ page_obj.paginator.num_pages }}"
+    ],
+    "ajax": [
+      "fetch('/BulkDeleteGroup', {"
+    ]
+  },
+  {
+    "template": "templates\\GroupWiseDashboard.html",
+    "forms": [
+      {
+        "action": "/AddPayment",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "select",
+            "name": "Group",
+            "id": "Group",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "Amount",
+            "id": "IPOPrice",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "10",
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": "download-Groupwise",
+        "method": "POST",
+        "fields": []
+      },
+      {
+        "action": "{% url 'save_transaction_group' %}",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "select",
+            "name": "group_id",
+            "id": "group_id",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "ipo_id",
+            "id": "ipo_id",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "amount",
+            "id": "amount",
+            "type": "number",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "amount_type",
+            "id": "amount_type",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "remark",
+            "id": "remark",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "date_time",
+            "id": "date_time_jv",
+            "type": "datetime-local",
+            "required": "",
+            "min": "2020-01-01T00:00:00",
+            "max": "2035-12-31T23:59:59",
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "jv_group_id",
+            "id": "jv_group",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "jv_checkbox",
+            "id": "jv_checkbox",
+            "type": "checkbox",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "jv_amount",
+            "id": "jv_amount_display",
+            "type": "number",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "jv_amount",
+            "id": "jv_amount",
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "jv_amount_type",
+            "id": "jv_amount_type_display",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "jv_amount_type",
+            "id": "jv_amount_type",
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "jv_remark",
+            "id": "jv_remark_display",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "jv_remark",
+            "id": "jv_remark",
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "date_time",
+            "id": "date_time",
+            "type": "datetime-local",
+            "required": null,
+            "min": "2020-01-01T00:00:00",
+            "max": "2035-12-31T23:59:59",
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "jv_entry",
+            "id": null,
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": "{% url 'ipo_transaction1' %}",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "select",
+            "name": "group_id_left",
+            "id": "group_id_left",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "ipo_id_left",
+            "id": "ipo_id_left",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "amount",
+            "id": "amount_left",
+            "type": "number",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "amount_type",
+            "id": "amount_type_left",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "textarea",
+            "name": "remark_left",
+            "id": "remark_left",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "date_time",
+            "id": "date_time_left",
+            "type": "datetime-local",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "group_id_right",
+            "id": "group_id_right",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "ipo_id_right",
+            "id": "ipo_id_right",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": null,
+            "id": "amount_right_display",
+            "type": "number",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "amount_right",
+            "id": "amount_right",
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": null,
+            "id": "amount_type_right_display",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "amount_type_right",
+            "id": "amount_type_right",
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "textarea",
+            "name": "remark_right",
+            "id": "remark_right_display",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "remark_right",
+            "id": "remark_right",
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "date_time_right",
+            "id": "date_time_right",
+            "type": "datetime-local",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "X",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Close",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Submit Form",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Download",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Close",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Save",
+        "id": "saveBtn2",
+        "onclick": null
+      },
+      {
+        "text": "",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Close",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Save",
+        "id": "saveBtn1",
+        "onclick": null
+      },
+      {
+        "text": "",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Cancel",
+        "id": null,
+        "onclick": null
+      }
+    ],
+    "links": [
+      "{% url 'destroy' ipo.id %}?url={{ request.path }}",
+      "/GroupWiseDashboard?page=1",
+      "/GroupWiseDashboard?page={{ num }}",
+      "/GroupWiseDashboard?page={{ num }}",
+      "/GroupWiseDashboard?page={{ page_obj.paginator.num_pages }}"
+    ],
+    "ajax": [
+      "$.ajax({",
+      "$.ajax({",
+      "fetch(`/delete/${ipoId}/?page=${pageNumber}`, {"
+    ]
+  },
+  {
+    "template": "templates\\index.html",
+    "forms": [],
+    "buttons": [
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      }
+    ],
+    "links": [
+      "{{ i.id }}/BUY",
+      "{{ i.id }}/Order",
+      "{{ i.id }}/OrderDetail/BUY",
+      "{{ i.id }}/Billing",
+      "{{ i.id }}/SELL",
+      "{{ i.id }}/Dashboard/A",
+      "{{ i.id }}/OrderDetail/SELL",
+      "{{ i.id }}/Status"
+    ],
+    "ajax": []
+  },
+  {
+    "template": "templates\\indexforCustomer.html",
+    "forms": [],
+    "buttons": [],
+    "links": [
+      "",
+      "{{ i.id }}/OrderDetail",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "ajax": []
+  },
+  {
+    "template": "templates\\IPOSETUP.html",
+    "forms": [
+      {
+        "action": "/AddIPO",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "IPOType",
+            "id": "notype",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "10",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "name",
+            "id": "name",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "50",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "IPOPrice",
+            "id": "IPOPrice",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "10",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "TotalIPOSzie",
+            "id": null,
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "10",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "LotSizeRetail",
+            "id": "LotSize",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "10",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "LotSizeSHNI",
+            "id": "LotSizeSH",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "10",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "LotSizeBHNI",
+            "id": "LotSizeBH",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "10",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "RetailPercentage",
+            "id": "Retail%",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "10",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "BHNIPercentage",
+            "id": "BHNI%",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "10",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "SHNIPercentage",
+            "id": "SHNI%",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "10",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "Remark",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "100",
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "X",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Close",
+        "id": null,
+        "onclick": "reset1()"
+      },
+      {
+        "text": "Submit Form",
+        "id": null,
+        "onclick": null
+      }
+    ],
+    "links": [
+      "/IPOSETUP?page=1",
+      "/IPOSETUP?page={{ num }}",
+      "/IPOSETUP?page={{ num }}",
+      "/IPOSETUP?page={{ page_obj.paginator.num_pages }}"
+    ],
+    "ajax": [
+      "fetch(`/delete-ipo/${ipoId}/`, {"
+    ]
+  },
+  {
+    "template": "templates\\login.html",
+    "forms": [
+      {
+        "action": "/login",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "username",
+            "id": "inputEmail",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "password",
+            "id": "inputPassword",
+            "type": "password",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": null,
+            "id": null,
+            "type": "submit",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "x",
+        "id": null,
+        "onclick": null
+      }
+    ],
+    "links": [],
+    "ajax": []
+  },
+  {
+    "template": "templates\\Order.html",
+    "forms": [
+      {
+        "action": "/{{IPOid}}/upload-csv/{{Groupfilter}}/{{OrderCategoryFilter}}/All",
+        "method": "POST",
+        "fields": [
+          {
+            "tag": "input",
+            "name": null,
+            "id": null,
+            "type": "button",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": " file",
+            "id": "file",
+            "type": "file",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Copy as Image",
+        "id": "copyStatusImageBtn",
+        "onclick": "copyStatusImage()"
+      },
+      {
+        "text": "",
+        "id": "tableFilterDropdown",
+        "onclick": null
+      },
+      {
+        "text": "Close",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Send to Telegram",
+        "id": "sendToTelegramBtn",
+        "onclick": "sendStatusToTelegram()"
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Delete All Orders",
+        "id": "confirmDeleteAll",
+        "onclick": null
+      },
+      {
+        "text": "Upload",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Cancel",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Delete",
+        "id": "confirm-bulk-delete",
+        "onclick": null
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Cancel",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Yes, Delete",
+        "id": null,
+        "onclick": "confirmAndDelete({{ IPOid }})"
+      }
+    ],
+    "links": [
+      "/{{IPOid}}/Sempale-Order",
+      "/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/All?page=1",
+      "/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/All?page={{ num }}",
+      "/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/All?page={{ num }}",
+      "/{{IPOid}}/Order/{{Groupfilter}}/{{OrderCategoryFilter}}/All?page= {{ page_obj.paginator.num_pages }}",
+      "/{{IPOid}}/BUY",
+      "/{{IPOid}}/SELL",
+      "/{{IPOid}}/Order",
+      "/{{IPOid}}/OrderDetail/BUY",
+      "/{{IPOid}}/OrderDetail/SELL",
+      "/{{IPOid}}/Billing",
+      "/{{IPOid}}/Status",
+      "/{{IPOid}}/Dashboard/A"
+    ],
+    "ajax": [
+      "fetch(deleteUrl, { method: 'GET' });",
+      "fetch(`/{{IPOid}}/get-all-groups/`);",
+      "fetch(`/{{IPOid}}/send-status-telegram-image/`, {",
+      "fetch('/{{IPOid}}/BulkDeleteOrders/', {"
+    ]
+  },
+  {
+    "template": "templates\\OrderDetail - Sell.html",
+    "forms": [
+      {
+        "action": "/ErrorCSV",
+        "method": "POST",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "name",
+            "id": "csvErrorMessages",
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": "/access-link/{{request.session.access}}/SELL",
+        "method": "POST",
+        "fields": [
+          {
+            "tag": "select",
+            "name": "Groupfilter",
+            "id": "category",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "IPOTypefilter",
+            "id": "category1",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "InvestorTypeFilter",
+            "id": "category2",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "RateFilterValue",
+            "id": "frate",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": null,
+            "id": "expiry_time",
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": "/{{IPOid}}/SELL/upload-csv/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}",
+        "method": "POST",
+        "fields": [
+          {
+            "tag": "input",
+            "name": " file",
+            "id": "file",
+            "type": "file",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": null,
+        "method": "POST",
+        "fields": []
+      },
+      {
+        "action": null,
+        "method": null,
+        "fields": [
+          {
+            "tag": "select",
+            "name": null,
+            "id": "bulk_selected_groups",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "expiry_date",
+            "id": "bulk_expiry_date",
+            "type": "datetime-local",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": null,
+        "method": "POST",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "record_type",
+            "id": "recordTypeInput",
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": null,
+        "method": "POST",
+        "fields": [
+          {
+            "tag": "select",
+            "name": "ipo_register",
+            "id": "ipo_register",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "secondary_dropdown",
+            "id": "secondary_dropdown",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "Pannocheck",
+            "id": "Pannocheck",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": "/{{IPOid}}/SELL/FirmAllotment/{{Groupfilter}}/{{IPOTypefilter}}/All/{{RateFilterValue}}",
+        "method": "POST",
+        "fields": [
+          {
+            "tag": "select",
+            "name": "Group",
+            "id": "category3",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "InvestorType",
+            "id": "category4",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "AllotedQty",
+            "id": "AllotedQty",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": "/{{IPOid}}/OrderDetail/SELL/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}",
+        "method": "POST",
+        "fields": [
+          {
+            "tag": "select",
+            "name": "page_size",
+            "id": "page_size",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "page",
+            "id": null,
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "Groupfilter",
+            "id": null,
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "IPOTypefilter",
+            "id": null,
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "InvestorTypeFilter",
+            "id": null,
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "RateFilterValue",
+            "id": null,
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": "/{{ IPOid }}/SELL/update_pann/{{Groupfilter}}/{{IPOTypefilter}}/{{InvestorTypeFilter}}?page={{ page_obj.number }}",
+        "method": "POST",
+        "fields": []
+      }
+    ],
+    "buttons": [
+      {
+        "text": "x",
+        "id": null,
+        "onclick": "$('#all-messages-popup').hide();"
+      },
+      {
+        "text": "Download CSV File",
+        "id": "downloadErrorCsvButton",
+        "onclick": null
+      },
+      {
+        "text": "Search",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Download",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Bulk\n                                Upload",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Bulk Upload",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Check\n                                    Allotment",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Firm Allotment",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Manage Links",
+        "id": null,
+        "onclick": "loadUserLinks()"
+      },
+      {
+        "text": "Search",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Download",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Bulk\n                            Uploads",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Check\n                                Allotment",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Firm Allotment",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Manage Links",
+        "id": null,
+        "onclick": "loadUserLinks()"
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Upload",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": "$('#linkManagementModal').modal('hide')"
+      },
+      {
+        "text": "Apply",
+        "id": null,
+        "onclick": "updateAllExpiries()"
+      },
+      {
+        "text": "Send Mail",
+        "id": null,
+        "onclick": "sendAllMails()"
+      },
+      {
+        "text": "Delete",
+        "id": null,
+        "onclick": "deleteLink()"
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Generate New Links",
+        "id": null,
+        "onclick": "submitBulkLinks('generate')"
+      },
+      {
+        "text": "Generate & Send Mail",
+        "id": null,
+        "onclick": "submitBulkLinks('generate_send')"
+      },
+      {
+        "text": "Submit",
+        "id": null,
+        "onclick": "submitInitialSetup()"
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": "$('#editLinkModal').modal('hide'); $('#linkManagementModal').modal('show');"
+      },
+      {
+        "text": "Close",
+        "id": null,
+        "onclick": "$('#editLinkModal').modal('hide'); $('#linkManagementModal').modal('show');"
+      },
+      {
+        "text": "Save Changes",
+        "id": null,
+        "onclick": "updateLinkData()"
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Select All",
+        "id": "toggleSelectAll",
+        "onclick": null
+      },
+      {
+        "text": "Share",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": "$('#all-confirmation-popup').modal('hide');"
+      },
+      {
+        "text": "Cancel",
+        "id": null,
+        "onclick": "$('#all-confirmation-popup').modal('hide');"
+      },
+      {
+        "text": "Yes, Proceed",
+        "id": "confirm-proceed-btn",
+        "onclick": null
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Firm Allotment",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Submit",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Submit",
+        "id": "submit-btn",
+        "onclick": null
+      },
+      {
+        "text": "Clear Records",
+        "id": "clear_records_btn",
+        "onclick": "clearSelectedRecords()"
+      },
+      {
+        "text": "Update",
+        "id": "main-update-btn",
+        "onclick": null
+      },
+      {
+        "text": "Update",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Fix Row(s)",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Skip Duplicates & Update Rest",
+        "id": "continue-skip-btn",
+        "onclick": null
+      }
+    ],
+    "links": [
+      "/{{IPOid}}/download-AllRecords-csv/SELL/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}",
+      "/{{IPOid}}/download-AllRecords-csv/SELL/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}",
+      "/{{IPOid}}/download-csv/SELL/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}",
+      "/{{IPOid}}/download-csv/SELL/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}",
+      "/{{IPOid}}/download-csv/SELL/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}",
+      "/{{IPOid}}/OrderDetail/SELL/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}?page=1",
+      "/{{IPOid}}/OrderDetail/SELL/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}?page={{ num }}",
+      "/{{IPOid}}/OrderDetail/SELL/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}?page={{ num }}",
+      "/{{IPOid}}/OrderDetail/SELL/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}?page={{ page_obj.paginator.num_pages }}",
+      "/{{IPOid}}/OrderDetail/SELL/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}?page=1",
+      "/{{IPOid}}/OrderDetail/SELL/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}?page={{ num }}",
+      "/{{IPOid}}/OrderDetail/SELL/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}?page={{ num }}",
+      "/{{IPOid}}/OrderDetail/SELL/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}?page={{ page_obj.paginator.num_pages }}",
+      "/access-link/{{request.session.access}}/BUY",
+      "/access-link/{{request.session.access}}/SELL",
+      "/{{IPOid}}/Order",
+      "/{{IPOid}}/OrderDetail/BUY",
+      "/{{IPOid}}/OrderDetail/SELL",
+      "/{{IPOid}}/Billing",
+      "/{{IPOid}}/Status",
+      "/{{IPOid}}/Dashboard/A",
+      ""
+    ],
+    "ajax": [
+      "fetch(`/get-options/?ipo_register=${selectedValue}`)",
+      "fetch(panurl, {",
+      "fetch(actionUrl, {",
+      "fetch(`/${ipoId}/get-rates/SELL?group=${group}&category=${category}&investor=${investor}&date=${date}&time=${time}`)",
+      "$.ajax({",
+      "$.ajax({",
+      "$.ajax({",
+      "$.ajax({",
+      "$.ajax({",
+      "$.ajax({",
+      "$.ajax({",
+      "fetch(`/send-link-mail/${linkId}/`, {",
+      "$.ajax({",
+      "$.ajax({",
+      "$.ajax({",
+      "$.ajax({",
+      "$.ajax({"
+    ]
+  },
+  {
+    "template": "templates\\OrderDetail.html",
+    "forms": [
+      {
+        "action": "/ErrorCSV",
+        "method": "POST",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "name",
+            "id": "csvErrorMessages",
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": "/access-link/{{request.session.access}}/BUY",
+        "method": "POST",
+        "fields": [
+          {
+            "tag": "select",
+            "name": "Groupfilter",
+            "id": "category",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "IPOTypefilter",
+            "id": "category1",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "InvestorTypeFilter",
+            "id": "category2",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "RateFilterValue",
+            "id": "frate",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": null,
+            "id": "expiry_time",
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": "/{{IPOid}}/BUY/upload-csv/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}",
+        "method": "POST",
+        "fields": [
+          {
+            "tag": "input",
+            "name": " file",
+            "id": "file",
+            "type": "file",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": null,
+        "method": "POST",
+        "fields": []
+      },
+      {
+        "action": null,
+        "method": null,
+        "fields": [
+          {
+            "tag": "select",
+            "name": null,
+            "id": "bulk_selected_groups",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "expiry_date",
+            "id": "bulk_expiry_date",
+            "type": "datetime-local",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": null,
+        "method": "POST",
+        "fields": [
+          {
+            "tag": "select",
+            "name": "ipo_register",
+            "id": "ipo_register",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "secondary_dropdown",
+            "id": "secondary_dropdown",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "Pannocheck",
+            "id": "Pannocheck",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": "/{{IPOid}}/BUY/FirmAllotment/{{Groupfilter}}/{{IPOTypefilter}}/All/{{RateFilterValue}}",
+        "method": "POST",
+        "fields": [
+          {
+            "tag": "select",
+            "name": "Group",
+            "id": "category3",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "InvestorType",
+            "id": "category4",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "AllotedQty",
+            "id": "AllotedQty",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": "/{{IPOid}}/OrderDetail/BUY/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}",
+        "method": "POST",
+        "fields": [
+          {
+            "tag": "select",
+            "name": "page_size",
+            "id": "page_size",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "page",
+            "id": null,
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "Groupfilter",
+            "id": null,
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "IPOTypefilter",
+            "id": null,
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "InvestorTypeFilter",
+            "id": null,
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "RateFilterValue",
+            "id": null,
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": "/{{ IPOid }}/BUY/update_pann/{{Groupfilter}}/{{IPOTypefilter}}/{{InvestorTypeFilter}}?page={{ page_obj.number }}",
+        "method": "POST",
+        "fields": []
+      }
+    ],
+    "buttons": [
+      {
+        "text": "x",
+        "id": null,
+        "onclick": "$('#all-messages-popup').hide();"
+      },
+      {
+        "text": "Download CSV File",
+        "id": "downloadErrorCsvButton",
+        "onclick": null
+      },
+      {
+        "text": "Search",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Download",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Bulk\n                                Upload",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Check\n                                        Allotment",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Firm Allotment",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Manage Links",
+        "id": null,
+        "onclick": "loadUserLinks()"
+      },
+      {
+        "text": "Search",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Download",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Bulk\n                                Order",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Check\n                                    Allotment",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Firm Allotment",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Manage Links",
+        "id": null,
+        "onclick": "loadUserLinks()"
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Upload",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": "$('#linkManagementModal').modal('hide')"
+      },
+      {
+        "text": "Apply",
+        "id": null,
+        "onclick": "updateAllExpiries()"
+      },
+      {
+        "text": "Send Mail",
+        "id": null,
+        "onclick": "sendAllMails()"
+      },
+      {
+        "text": "Delete",
+        "id": null,
+        "onclick": "deleteLink()"
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Generate New Links",
+        "id": null,
+        "onclick": "submitBulkLinks('generate')"
+      },
+      {
+        "text": "Generate & Send Mail",
+        "id": null,
+        "onclick": "submitBulkLinks('generate_send')"
+      },
+      {
+        "text": "Submit",
+        "id": null,
+        "onclick": "submitInitialSetup()"
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": "$('#editLinkModal').modal('hide'); $('#linkManagementModal').modal('show');"
+      },
+      {
+        "text": "Close",
+        "id": null,
+        "onclick": "$('#editLinkModal').modal('hide'); $('#linkManagementModal').modal('show');"
+      },
+      {
+        "text": "Save Changes",
+        "id": null,
+        "onclick": "updateLinkData()"
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": "$('#all-confirmation-popup').modal('hide');"
+      },
+      {
+        "text": "Cancel",
+        "id": null,
+        "onclick": "$('#all-confirmation-popup').modal('hide');"
+      },
+      {
+        "text": "Yes, Proceed",
+        "id": "confirm-proceed-btn",
+        "onclick": null
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Firm Allotment",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Submit",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Submit",
+        "id": "submit-btn",
+        "onclick": null
+      },
+      {
+        "text": "Clear Records",
+        "id": "clear_records_btn",
+        "onclick": "clearSelectedRecords()"
+      },
+      {
+        "text": "Update",
+        "id": "main-update-btn",
+        "onclick": null
+      },
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Fix Row(s)",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Skip Duplicates & Update Rest",
+        "id": "continue-skip-btn",
+        "onclick": null
+      }
+    ],
+    "links": [
+      "/{{IPOid}}/download-AllRecords-csv/BUY/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}",
+      "/{{IPOid}}/download-AllRecords-csv/BUY/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}",
+      "/{{IPOid}}/download-csv/BUY/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}",
+      "/{{IPOid}}/download-csv/BUY/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}",
+      "/{{IPOid}}/download-csv/BUY/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}",
+      "/{{IPOid}}/OrderDetail/BUY/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}?page=1",
+      "/{{IPOid}}/OrderDetail/BUY/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}?page={{ num }}",
+      "/{{IPOid}}/OrderDetail/BUY/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}?page={{ num }}",
+      "/{{IPOid}}/OrderDetail/BUY/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}?page={{ page_obj.paginator.num_pages }}",
+      "/{{IPOid}}/OrderDetail/BUY/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}?page=1",
+      "/{{IPOid}}/OrderDetail/BUY/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}?page={{ num }}",
+      "/{{IPOid}}/OrderDetail/BUY/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}?page={{ num }}",
+      "/{{IPOid}}/OrderDetail/BUY/{{Groupfilter}}/{{IPOTypefilter}}/All/{{OrderDate}}/{{OrderTime}}/{{RateFilterValue}}?page={{ page_obj.paginator.num_pages }}",
+      "/access-link/{{request.session.access}}/BUY",
+      "/access-link/{{request.session.access}}/SELL",
+      "/{{IPOid}}/BUY",
+      "/{{IPOid}}/SELL",
+      "/{{IPOid}}/Order",
+      "/{{IPOid}}/OrderDetail/BUY",
+      "/{{IPOid}}/OrderDetail/SELL",
+      "/{{IPOid}}/Billing",
+      "/{{IPOid}}/Status",
+      "/{{IPOid}}/Dashboard/A",
+      ""
+    ],
+    "ajax": [
+      "fetch(`/get-options/?ipo_register=${selectedValue}`)",
+      "fetch(panurl, {",
+      "fetch(actionUrl, {",
+      "$.ajax({",
+      "$.ajax({",
+      "$.ajax({",
+      "$.ajax({",
+      "$.ajax({",
+      "$.ajax({",
+      "$.ajax({",
+      "$.ajax({",
+      "$.ajax({",
+      "fetch(`/send-link-mail/${linkId}/`, {",
+      "$.ajax({",
+      "$.ajax({",
+      "fetch(`/${ipoId}/get-rates/BUY?group=${group}&category=${category}&investor=${investor}&date=${date}&time=${time}`)",
+      "$.ajax({"
+    ]
+  },
+  {
+    "template": "templates\\panalloted.html",
+    "forms": [
+      {
+        "action": null,
+        "method": null,
+        "fields": []
+      }
+    ],
+    "buttons": [],
+    "links": [],
+    "ajax": []
+  },
+  {
+    "template": "templates\\partials\\add_payment_modal.html",
+    "forms": [
+      {
+        "action": "{% if request.resolver_match.url_name == 'GroupWiseDashboard' %}{% url 'add_transaction_group' %}{% else %}{% url 'add_transaction' %}{% endif %}",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "select",
+            "name": "group_id",
+            "id": "trans_group",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "ipo_id",
+            "id": "trans_ipo",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "jv",
+            "id": "trans_jv",
+            "type": "checkbox",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": "amount_type",
+            "id": "trans_amount_type",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "amount",
+            "id": "trans_amount",
+            "type": "number",
+            "required": "",
+            "min": "1",
+            "max": "9999999999.99",
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "remark",
+            "id": "trans_remark",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "250",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "date_time",
+            "id": "add_date_time",
+            "type": "datetime-local",
+            "required": "",
+            "min": "2020-01-01T00:00",
+            "max": "2035-12-31T23:59:59",
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Close",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Save",
+        "id": "trans_save_btn",
+        "onclick": null
+      }
+    ],
+    "links": [],
+    "ajax": [
+      "$.ajax({",
+      "$.ajax({",
+      "$.ajax({"
+    ]
+  },
+  {
+    "template": "templates\\partials\\transfer_payment_modal.html",
+    "forms": [
+      {
+        "action": null,
+        "method": null,
+        "fields": [
+          {
+            "tag": "input",
+            "name": null,
+            "id": "ct_mode",
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": null,
+            "id": "ct_source_group",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": null,
+            "id": "ct_source_ipos",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": null,
+            "id": "ct_destination_group",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": null,
+            "id": "ct_destination_ipos",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "select",
+            "name": null,
+            "id": "ct_source_type",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": null,
+            "id": "ct_amount",
+            "type": "number",
+            "required": "",
+            "min": "1",
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": null,
+            "id": "ct_destination_type",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": null,
+            "id": "ct_remark",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "250",
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": null,
+            "id": "ct_date_time",
+            "type": "datetime-local",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "textarea",
+            "name": null,
+            "id": "ct_edit_reason",
+            "type": null,
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": "250",
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Close",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Save Transfer",
+        "id": "ct_save",
+        "onclick": null
+      }
+    ],
+    "links": [],
+    "ajax": [
+      "$.ajax({",
+      "$.ajax({",
+      "$.ajax({"
+    ]
+  },
+  {
+    "template": "templates\\sell.html",
+    "forms": [
+      {
+        "action": "/AddGroup/{{IPOid}}/SELL",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "GroupName",
+            "id": null,
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": null,
+        "method": "post",
+        "fields": [
+          {
+            "tag": "select",
+            "name": "item_id",
+            "id": "validationCustom04",
+            "type": null,
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "datetime",
+            "id": "datetime",
+            "type": "datetime-local",
+            "required": "",
+            "min": "2020-01-01T00:00:00",
+            "max": "2035-12-31T23:59:59",
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "KostakQTY",
+            "id": null,
+            "type": "number",
+            "required": null,
+            "min": "1",
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "KostakRate",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "KostakQTYSHNI",
+            "id": null,
+            "type": "number",
+            "required": null,
+            "min": "1",
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "KostakRateSHNI",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "KostakQTYBHNI",
+            "id": null,
+            "type": "number",
+            "required": null,
+            "min": "1",
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "KostakRateBHNI",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "SubjectToQTY",
+            "id": null,
+            "type": "number",
+            "required": null,
+            "min": "1",
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "SubjectToRate",
+            "id": "subjectToRateInputRetail",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "subjectToIsPremiumRetail",
+            "id": "subjectToIsPremiumRetail",
+            "type": "checkbox",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "SubjectToQTYSHNI",
+            "id": null,
+            "type": "number",
+            "required": null,
+            "min": "1",
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "SubjectToRateSHNI",
+            "id": "subjectToRateInputSHNI",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "subjectToIsPremiumSHNI",
+            "id": "subjectToIsPremiumSHNI",
+            "type": "checkbox",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "SubjectToQTYBHNI",
+            "id": null,
+            "type": "number",
+            "required": null,
+            "min": "1",
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "SubjectToRateBHNI",
+            "id": "subjectToRateInputBHNI",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "subjectToIsPremiumBHNI",
+            "id": "subjectToIsPremiumBHNI",
+            "type": "checkbox",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "PremiumQTY",
+            "id": null,
+            "type": "number",
+            "required": null,
+            "min": "1",
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "PremiumRate",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "CallQTY",
+            "id": null,
+            "type": "number",
+            "required": null,
+            "min": "1",
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "CallStrikePrice",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "CallRate",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "PutQTY",
+            "id": null,
+            "type": "number",
+            "required": null,
+            "min": "1",
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "PutStrikePrice",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "PutRate",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": null,
+            "id": "remarkInput",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "remark_tags",
+            "id": "remarkTags",
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "remark_text",
+            "id": "remarkText",
+            "type": "hidden",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": "/AddGroup/{{IPOid}}/SELL",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "GroupName",
+            "id": "GroupName",
+            "type": "text",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Add Group",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "\u25bc",
+        "id": "remarkDropdownBtn",
+        "onclick": null
+      },
+      {
+        "text": "Place SELL Order",
+        "id": "btnPlaceOnly",
+        "onclick": null
+      },
+      {
+        "text": "Place +",
+        "id": "btnPlaceWithTelegram",
+        "onclick": null
+      },
+      {
+        "text": "Send to WhatsApp",
+        "id": "btnSendWhatsApp",
+        "onclick": null
+      },
+      {
+        "text": "Add Group",
+        "id": null,
+        "onclick": null
+      }
+    ],
+    "links": [
+      "/{{IPOid}}/OrderDetail/{{i.OrderType}}/{{i.OrderGroup.GroupName}}/{{ i.OrderCategory }}/{{i.InvestorType}}/{{ i.OrderDate|date:",
+      "/{{IPOid}}/BUY",
+      "/{{IPOid}}/SELL",
+      "/{{IPOid}}/Order",
+      "/{{IPOid}}/OrderDetail/BUY",
+      "/{{IPOid}}/OrderDetail/SELL",
+      "/{{IPOid}}/Billing",
+      "/{{IPOid}}/Status",
+      "/{{IPOid}}/Dashboard/A"
+    ],
+    "ajax": [
+      "fetch(currentUrl, {",
+      "fetch(form.action, {",
+      "fetch('{% url 'place_order' IPOid order_type %}', {",
+      "fetch(currentUrl, {",
+      "fetch(\"{% url 'whatsapp:send_sell_order' IPOid %}\", {"
+    ]
+  },
+  {
+    "template": "templates\\SetRate.html",
+    "forms": [
+      {
+        "action": null,
+        "method": "post",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "KostakQTY",
+            "id": "numberBox",
+            "type": "text",
+            "required": null,
+            "min": "0",
+            "max": "10",
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "KostakRate",
+            "id": "inputPassword4",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "SubjectToQTY",
+            "id": "numberBox",
+            "type": "text",
+            "required": null,
+            "min": "0",
+            "max": "10",
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "SubjectToSellRate",
+            "id": "inputPassword4",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "PremiumQTY",
+            "id": "numberBox",
+            "type": "text",
+            "required": null,
+            "min": "0",
+            "max": "10",
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "PremiumRate",
+            "id": "inputPassword4",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "KostakSellQTY",
+            "id": "numberBox",
+            "type": "text",
+            "required": null,
+            "min": "0",
+            "max": "10",
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "KostakSellRate",
+            "id": "inputPassword4",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "SubjectToSellQTY",
+            "id": "numberBox",
+            "type": "text",
+            "required": null,
+            "min": "0",
+            "max": "10",
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "SubjectToRate",
+            "id": "inputPassword4",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "PremiumSellQTY",
+            "id": "numberBox",
+            "type": "text",
+            "required": null,
+            "min": "0",
+            "max": "10",
+            "minlength": "2",
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "PremiumSellRate",
+            "id": "inputPassword4",
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "Save",
+        "id": null,
+        "onclick": null
+      }
+    ],
+    "links": [
+      "/{{IPOid}}/SetRate",
+      "/{{IPOid}}/BUY",
+      "/{{IPOid}}/SELL",
+      "/{{IPOid}}/Order",
+      "/{{IPOid}}/OrderDetail/BUY",
+      "/{{IPOid}}/OrderDetail/SELL",
+      "/{{IPOid}}/Billing",
+      "/{{IPOid}}/Status",
+      "/{{IPOid}}/Dashboard/A"
+    ],
+    "ajax": []
+  },
+  {
+    "template": "templates\\Status.html",
+    "forms": [],
+    "buttons": [
+      {
+        "text": "\u00d7",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Export to Excel",
+        "id": null,
+        "onclick": "exportTableToExcel('example', 'my_excel_file')"
+      }
+    ],
+    "links": [
+      "/{{IPOid}}/Status?page=1",
+      "/{{IPOid}}/Status?page={{ num }}",
+      "/{{IPOid}}/Status?page={{ num }}",
+      "/{{IPOid}}/Status?page={{ page_obj.paginator.num_pages }}",
+      "/{{IPOid}}/BUY",
+      "/{{IPOid}}/SELL",
+      "/{{IPOid}}/Order",
+      "/{{IPOid}}/OrderDetail/BUY",
+      "/{{IPOid}}/OrderDetail/SELL",
+      "/{{IPOid}}/Billing",
+      "/{{IPOid}}/Status",
+      "/{{IPOid}}/Dashboard/A"
+    ],
+    "ajax": [
+      "fetch('/update-telly-status/', {",
+      "fetch('/update-telly-status/', { // You'll need to create this URL and view"
+    ]
+  },
+  {
+    "template": "templates\\status_table_template.html",
+    "forms": [],
+    "buttons": [],
+    "links": [],
+    "ajax": []
+  },
+  {
+    "template": "templates\\user_profile.html",
+    "forms": [
+      {
+        "action": "/ChangeUserpassword",
+        "method": "post",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "NewPassword",
+            "id": "inputPassword_up",
+            "type": "password",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "ConfirmPassword",
+            "id": "inputPassword_up1",
+            "type": "password",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": null,
+        "method": null,
+        "fields": [
+          {
+            "tag": "input",
+            "name": "telegram_api",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "telegram_api_key",
+            "id": "telegram_api_key",
+            "type": "password",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "mobile_number",
+            "id": null,
+            "type": "text",
+            "required": null,
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      },
+      {
+        "action": "/update-user-profile/",
+        "method": "POST",
+        "fields": [
+          {
+            "tag": "input",
+            "name": "email",
+            "id": null,
+            "type": "email",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          },
+          {
+            "tag": "input",
+            "name": "app_password",
+            "id": "app_password",
+            "type": "password",
+            "required": "",
+            "min": null,
+            "max": null,
+            "minlength": null,
+            "maxlength": null,
+            "pattern": null
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "text": "",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "",
+        "id": "toggleOldPassword",
+        "onclick": null
+      },
+      {
+        "text": "",
+        "id": "toggleNewPassword",
+        "onclick": null
+      },
+      {
+        "text": "Change Password",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "",
+        "id": "toggleTelegramKey",
+        "onclick": null
+      },
+      {
+        "text": "Create Session",
+        "id": null,
+        "onclick": "createSessionAndSendOTP()"
+      },
+      {
+        "text": "",
+        "id": "toggleAppPassword",
+        "onclick": null
+      },
+      {
+        "text": "Update Email",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Cancel",
+        "id": null,
+        "onclick": null
+      },
+      {
+        "text": "Submit",
+        "id": null,
+        "onclick": "submitTelegramForm()"
+      }
+    ],
+    "links": [
+      "{% url 'home' %}",
+      "{% url 'home' %}"
+    ],
+    "ajax": [
+      "fetch(\"/update-user-profile/\", {",
+      "fetch(\"/send-telegram-otp/\", {",
+      "fetch(\"/verify-telegram-otp/\", {"
+    ]
+  },
+  {
+    "template": "templates\\whatsapp_qr_modal.html",
+    "forms": [],
+    "buttons": [],
+    "links": [],
+    "ajax": []
+  }
+]

@@ -1,0 +1,78 @@
+Flows Encryption
+Updated: Jul 2, 2026
+This guide specifies how to set and get the business public key for the WhatsApp Flows user experience. Generate a 2048-bit RSA key pair and share the business public key to establish an encrypted GraphQL-powered data exchange channel between your business and the WhatsApp consumer client.
+Prerequisites
+The phone number must be successfully registered, and the business must have generated a 2048-bit RSA Key as described below.
+Generating a 2048-bit RSA key pair
+Generate a public and private RSA key pair by typing in the following command:
+openssl genrsa -des3 -out private.pem 2048
+This command generates a 2048-bit RSA key pair encrypted with a password you provided and is written to a file.
+Next, you need to export the RSA Public Key to a file:
+openssl rsa -in private.pem -outform PEM -pubout -out public.pem
+You can then use it, for example, on your web server to encrypt content such that it can only be read with the private key.
+Reusing an existing 2048-bit RSA key pair
+You could also re-use an existing private/public key pair by extracting a public key from existing certificate:
+openssl x509 -pubkey -noout -in private.pem  > public.pem
+Set the business public key
+To set a business public key using Graph API, make a POST request to /PHONE_NUMBER_ID/whatsapp_business_encryption. In your call, include the 2048-bit RSA key you generated. If you have multiple phone numbers linked to a WABA, this API must be called to sign the business public key for each phone number.
+In Postman⁠, when inputting the business public key as a parameter in the Body, select x-www-form-urlencoded.
+Endpoint	Authentication
+/PHONE_NUMBER_ID/whatsapp_business_encryption
+Authenticate yourself with a system user access token and you must have the whatsapp_business_messaging permission.
+If you are requesting the code on behalf of another business, the access token needs to have Advanced Access to the whatsapp_business_messaging permission.
+Parameters
+Name	Description
+business_public_keystring
+Required.
+2048-bit RSA business public key generated.
+Example
+Sample request:
+curl -X POST \
+  'https://graph.facebook.com/v26.0/PHONE_NUMBER_ID/whatsapp_business_encryption' \
+  -H 'Authorization: Bearer ACCESS_TOKEN' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode 'business_public_key=BUSINESS_PUBLIC_KEY'
+For example:
+curl -X POST \
+  'https://graph.facebook.com/v26.0/PHONE_NUMBER_ID/whatsapp_business_encryption' \
+  -H 'Authorization: Bearer ACCESS_TOKEN' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode 'business_public_key=-----BEGIN PUBLIC KEY-----
+AAA
+BBB
+CCC
+DDD
+EEE
+FFF
+GGG
+-----END PUBLIC KEY-----'
+A successful request returns HTTP status code 200 and the payload:
+{
+  "success": true
+}
+Please see Error and Status Messages if you encounter any errors.
+Get the business public key
+The phone number must be successfully registered, and the business must have generated a 2048-bit RSA key.
+To get a business public key using Graph API, make a GET request to /PHONE_NUMBER_ID/whatsapp_business_encryption.
+Endpoint	Authentication
+/PHONE_NUMBER_ID/whatsapp_business_encryption
+Authenticate yourself with a system user access token and you must have the whatsapp_business_messaging permission.
+If you are requesting the code on behalf of another business, the access token needs to have Advanced Access to the whatsapp_business_messaging permission.
+Parameters
+Name	Description
+business_public_keystring
+Stored 2048-bit RSA business public key.
+business_public_key_signature_statusstring
+Status of stored 2048-bit RSA business public key.
+Example
+Sample request:
+curl -X GET \
+  'https://graph.facebook.com/v26.0/PHONE_NUMBER_ID/whatsapp_business_encryption' \
+  -H 'Authorization: Bearer ACCESS_TOKEN'
+A successful response looks like this:
+{
+  "business_public_key": "<2048_bit_RSA_key>"
+  "business_public_key_signature_status": VALID | MISMATCH
+}
+Please see Error and Status Messages if you encounter any errors.
+
