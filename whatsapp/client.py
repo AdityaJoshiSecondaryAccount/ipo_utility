@@ -37,6 +37,12 @@ def _get_api_headers(content_type="application/json"):
     return headers
 
 def send_template_message(phone_number, template_name, body_texts=None, language_code="en"):
+    import re
+    # Normalize phone number
+    clean_phone = re.sub(r"\D", "", str(phone_number))
+    if len(clean_phone) == 10:
+        clean_phone = "91" + clean_phone
+        
     url = (
         "https://graph.facebook.com/"
         f"{settings.WHATSAPP_API_VERSION}/"
@@ -54,7 +60,7 @@ def send_template_message(phone_number, template_name, body_texts=None, language
         
     payload = {
         "messaging_product": "whatsapp",
-        "to": phone_number,
+        "to": clean_phone,
         "type": "template",
         "template": {
             "name": template_name,
@@ -78,12 +84,18 @@ def send_template_message(phone_number, template_name, body_texts=None, language
     if body_texts:
         log_text += "\nVariables: " + ", ".join([str(t) for t in body_texts])
         
+    if not res.ok:
+        error_msg = res.json().get("error", {}).get("message", "Unknown error")
+        log_text = f"⚠️ [FAILED TO SEND]\n{log_text}\n\nError: {error_msg}"
+        
     _log_outbound_to_fastapi(
-        phone_number=phone_number,
+        phone_number=clean_phone,
         text=log_text,
         msg_type="text",
         wamid=wamid
     )
+    
+    res.raise_for_status()
     return res
 
 
