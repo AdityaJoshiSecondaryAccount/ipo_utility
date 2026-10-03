@@ -2287,7 +2287,7 @@ $(function () {
                         let jvAmountData = response.jv_amount || 0;
                         let jvAmount = Math.abs(jvAmountData);
                         let jvAmountType = jvAmountData < 0 ? 'debit' : 'credit';
-                        
+
                         // Generate IPO payment form
                         let ipoFormHtml = '';
                         if (ipoData.length === 0 && jvAmount === 0) {
@@ -2333,7 +2333,7 @@ $(function () {
                                     <hr>
                                 `;
                             }
-                            
+
                             // Add single container for all IPO payment rows
                             if (ipoData.length > 0) {
                                 ipoFormHtml += `
@@ -2341,12 +2341,12 @@ $(function () {
                                         <div class="card-body" style="padding: 15px;">
                                 `;
                             }
-                            
+
                             ipoData.forEach(function(ipo, index) {
                                 // Handle negative amounts (credit balances)
                                 const absoluteAmount = Math.abs(ipo.due_amount);
                                 const defaultAmountType = ipo.due_amount < 0 ? 'debit' : 'credit';
-                                
+
                                 ipoFormHtml += `
                                     <div class="row mb-3 ipo-payment-row" data-ipo-id="${ipo.ipo_id}" data-original-amount="${ipo.due_amount}">
                                         <div class="col-md-4">
@@ -2385,12 +2385,12 @@ $(function () {
                                     ${index < ipoData.length - 1 ? '<hr>' : ''}
                                 `;
                             });
-                            
+
                             // Close the single container for all IPO entries
                             if (ipoData.length > 0) {
                                 ipoFormHtml += `</div></div>`;
                             }
-                            
+
                             // Add totals row at the bottom
                             ipoFormHtml += `
                                 <div class="row mb-3 totals-row" style="width: 99.5%; margin-left: 0px; background-color: #e9ecef; padding: 10px; border: 1px solid #dee2e6; font-weight: bold;">
@@ -2398,7 +2398,7 @@ $(function () {
                                         <label>Total Amount</label>
                                         <input type="text" class="form-control total-amount" value="0" readonly>
                                         <small class="text-muted">
-                                            <span class="total-credit">Credit: 0</span> | 
+                                            <span class="total-credit">Credit: 0</span> |
                                             <span class="total-debit">Debit: 0</span> |
                                             <span class="Net-amount">Net Amount: 0</span>
                                         </small>
@@ -2410,9 +2410,9 @@ $(function () {
                                 </div>
                             `;
                         }
-                        
+
                         $('#ipoPaymentsList').html(ipoFormHtml);
-                        
+
                         // Unbind previous listeners to prevent memory leaks on multiple opens
                         $(document).off('input change', '.ipo-amount, .jv-amount, .ipo-amount-type, .jv-amount-type, .ipo-include, .jv-include');
                         $(document).off('input', '#multi_remark');
@@ -2421,17 +2421,17 @@ $(function () {
                         // Add event listeners for real-time totals calculation
                         updateTotals();
                         updateIPORemarkPreviews();
-                        
+
                         // Update totals when amounts or checkboxes change
                         $(document).on('input change', '.ipo-amount, .jv-amount, .ipo-amount-type, .jv-amount-type, .ipo-include, .jv-include', function() {
                             updateTotals();
                         });
-                        
+
                         // Update IPO remark previews when additional remarks change
                         $(document).on('input', '#multi_remark', function() {
                             updateIPORemarkPreviews();
                         });
-                        
+
                         // Show/hide totals row
                         $(document).on('change', '.show-totals', function() {
                             if ($(this).is(':checked')) {
@@ -2440,7 +2440,7 @@ $(function () {
                                 $('.totals-row').hide();
                             }
                         });
-                        
+
                     } else {
                         $('#ipoPaymentsList').html('<div class="alert alert-danger">Failed to load data.</div>');
                     }
@@ -3366,9 +3366,9 @@ function deleteIPO(ipoId, pageNumber, btn) {
         function adjustFixedGroupColWidth() {
             let cells = document.querySelectorAll('.fixed-group-col');
             if (cells.length === 0) return;
-            
+
             let maxWidth = 0;
-            
+
             // Create an off-screen span to precisely measure text width
             let span = document.createElement('span');
             span.style.visibility = 'hidden';
@@ -3388,16 +3388,16 @@ function deleteIPO(ipoId, pageNumber, btn) {
                     maxWidth = w;
                 }
             });
-            
+
             document.body.removeChild(span);
-            
+
             // Add buffer for cell padding (~15px left/right) and sort icons
             if (maxWidth > 0) {
-                maxWidth += 10; 
-                
+                maxWidth += 10;
+
                 // Cap the width at 160px to prevent the column from becoming too wide
                 maxWidth = Math.min(maxWidth, 160);
-                
+
                 let styleId = 'dynamic-fixed-group-col-style';
                 let styleEl = document.getElementById(styleId);
                 if (!styleEl) {
@@ -3405,7 +3405,7 @@ function deleteIPO(ipoId, pageNumber, btn) {
                     styleEl.id = styleId;
                     document.head.appendChild(styleEl);
                 }
-                
+
                 styleEl.innerHTML = `
                     .fixed-group-col {
                         width: ${maxWidth}px !important;
@@ -3416,7 +3416,7 @@ function deleteIPO(ipoId, pageNumber, btn) {
                         text-overflow: ellipsis !important;
                     }
                 `;
-                
+
                 // Let DataTables know to adjust cloned header/footer alignment
                 if (typeof $ !== 'undefined' && $.fn.dataTable) {
                     let tables = $.fn.dataTable.tables({ visible: true, api: true });
@@ -3426,10 +3426,10 @@ function deleteIPO(ipoId, pageNumber, btn) {
                 }
             }
         }
-        
+
         // Execute initially
         setTimeout(adjustFixedGroupColWidth, 300);
-        
+
         // Also execute if window resizes
         $(window).on('resize', adjustFixedGroupColWidth);
         if (typeof $ !== 'undefined') {

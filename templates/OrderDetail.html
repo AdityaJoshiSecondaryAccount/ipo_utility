@@ -111,6 +111,25 @@
     table.table-sortable th[data-sort]:hover {
         background-color: #e2e8f0;
     }
+    table.table-sortable th[data-sort]::after {
+        content: " \21C5";
+        opacity: 0.35;
+        font-size: 11px;
+        margin-left: 5px;
+        display: inline-block;
+        vertical-align: middle;
+    }
+    table.table-sortable th[data-sort].currently-sorted::after {
+        opacity: 1;
+        color: #0d6efd;
+        font-weight: bold;
+    }
+    table.table-sortable th[data-sort].currently-sorted[data-sort-dir="asc"]::after {
+        content: " \25B2";
+    }
+    table.table-sortable th[data-sort].currently-sorted[data-sort-dir="desc"]::after {
+        content: " \25BC";
+    }
 
     .container {
         width: 100%;
@@ -2251,6 +2270,9 @@
                                 <button type="button" class="btn btn-warning" onclick="sendAllMails()" style="min-width: 150px; font-weight: bold;">
                                     <i class="fas fa-share-square"></i> Send Mail
                                 </button>
+                                <button type="button" class="btn btn-success ml-3" onclick="sendAllWhatsApp()" style="min-width: 150px; font-weight: bold; background-color: #25D366; border-color: #25D366;">
+                                    <i class="fab fa-whatsapp"></i> Send WhatsApp
+                                </button>
                                 <button type="button" class="btn btn-danger ml-3" onclick="deleteLink()" style="min-width: 150px; font-weight: bold;">
                                     <i class="fas fa-trash"></i> Delete
                                 </button>
@@ -2294,6 +2316,9 @@
                                 </button>
                                 <button type="button" class="btn btn-success" onclick="submitBulkLinks('generate_send')">
                                     Generate & Send Mail
+                                </button>
+                                <button type="button" class="btn btn-success" style="background-color: #25D366; border-color: #25D366;" onclick="submitBulkLinks('generate_whatsapp')">
+                                    <i class="fab fa-whatsapp"></i> Generate & Send WhatsApp
                                 </button>
                             </div>
                         </form>
@@ -3471,6 +3496,77 @@
                 if (response.status === 'success') {
                     // 1. Update ONLY the successful links to "Sent" (Green)
                     if (response.successful_links && response.successful_links.length > 0) {
+                        response.successful_links.forEach(id => {
+                            $(`#status-badge-${id}`)
+                                .removeClass('badge-warning')
+                                .addClass('badge-success')
+                                .html('<i class="fas fa-check-circle"></i> Sent');
+                        });
+                    }
+
+                    // 2. Show detailed summary popup
+                    let summaryHtml = `
+                        <div style="text-align: left;">
+                            <p><strong>Success:</strong> ${response.successful_links ? response.successful_links.length : 0} groups.</p>
+                    `;
+
+                    if (response.failed_groups && response.failed_groups.length > 0) {
+                        summaryHtml += `<p class="text-danger mt-2 mb-1"><strong>Failed (${response.failed_groups.length}):</strong></p>
+                                        <ul style="font-size: 0.9em; max-height: 150px; overflow-y: auto;">`;
+                        response.failed_groups.forEach(group => {
+                            summaryHtml += `<li>${group}</li>`;
+                        });
+                        summaryHtml += `</ul>`;
+                    }
+                    summaryHtml += `</div>`;
+
+                    showMessagePopup(summaryHtml, 'success', 'Mail Sending Summary');
+                } else {
+                    showMessagePopup(response.message, 'error');
+                }
+            },
+            error: function(xhr) {
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+                showMessagePopup("Failed to send mails. Server error.", 'error');
+            }
+        });
+    }
+
+    function sendAllWhatsApp() {
+        // Gather selected link IDs
+        let selectedIds = [];
+        $('.link-checkbox:checked').each(function() {
+            if ($(this).val() !== 'on') { // Prevent 'Select All' dummy value
+                selectedIds.push($(this).val());
+            }
+        });
+
+        if (selectedIds.length === 0) {
+            showMessagePopup("Please select at least one group to send the link to.", 'error');
+            return;
+        }
+
+        const btn = event.target.closest('button');
+        const originalContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+        $.ajax({
+            url: `/send-all-link-mails/{{IPOid}}/`,
+            type: 'POST',
+            data: {
+                'action_type': 'whatsapp',
+                'selected_links': JSON.stringify(selectedIds),
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+
+                if (response.status === 'success') {
+                    // 1. Update ONLY the successful links to "Sent" (Green)
+                    if (response.successful_links && response.successful_links.length > 0) {
                         response.successful_links.forEach(function(linkId) {
                             let $toggleBtn = $('#toggle_btn_' + linkId);
                             if ($toggleBtn.length) {
@@ -4064,7 +4160,7 @@
         const form = document.getElementById('update-form');
         const updateBtn = document.getElementById('main-update-btn');
         const loader = document.getElementById('full-screen-loader');
-        
+
         if (loader) {
             loader.style.display = 'flex';
         }
@@ -4113,6 +4209,8 @@
             return;
         }
 
+        // Submit the form containing only the "Clean" and "Modified" rows
+        form.submit();
         // Batch submission logic for avoiding Cloudflare timeout
         // Find all rows that have at least one enabled input to submit
         const validRows = [];
@@ -4123,37 +4221,37 @@
         });
 
         const batchSize = 200;
-        
+
         async function sendBatches() {
             const url = form.action;
             const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
-            
+
             for (let i = 0; i < validRows.length; i += batchSize) {
                 const chunk = validRows.slice(i, i + batchSize);
-                
+
                 // Update UI progress
                 const progress = Math.round((i / validRows.length) * 100);
                 if (updateBtn) {
                     updateBtn.innerHTML = `Updating... ${progress}% <i class="fa fa-spinner fa-spin"></i>`;
                 }
-                
+
                 const formData = new FormData();
                 formData.append('csrfmiddlewaretoken', csrfToken);
-                
+
                 // Append all hidden inputs from the form (page, Groupfilter, etc)
                 form.querySelectorAll('input[type="hidden"]').forEach(hidden => {
                     if (hidden.name !== 'csrfmiddlewaretoken') {
                         formData.append(hidden.name, hidden.value);
                     }
                 });
-                
+
                 // Append row inputs for this chunk
                 chunk.forEach(tr => {
                     tr.querySelectorAll('input:not([disabled])').forEach(input => {
                         formData.append(input.name, input.value);
                     });
                 });
-                
+
                 try {
                     const response = await fetch(url, {
                         method: 'POST',
@@ -4163,7 +4261,7 @@
                             'Accept': 'application/json'
                         }
                     });
-                    
+
                     if (!response.ok) {
                         console.error('Batch error status:', response.status);
                     }
@@ -4171,15 +4269,15 @@
                     console.error('Network error sending batch', err);
                 }
             }
-            
+
             if (updateBtn) {
                 updateBtn.innerHTML = `Updating... 100% <i class="fa fa-spinner fa-spin"></i>`;
             }
-            
+
             // Revert original form action behavior by reloading
             window.location.reload();
         }
-        
+
         sendBatches();
     }
 
@@ -4246,14 +4344,14 @@
     }
 
     function handleGroupFilterChange(selectElement) {
-        const category1 = document.getElementById('category1'); 
-        const category2 = document.getElementById('category2'); 
-        const frate = document.getElementById('frate'); 
-        
+        const category1 = document.getElementById('category1');
+        const category2 = document.getElementById('category2');
+        const frate = document.getElementById('frate');
+
         if (category1) category1.value = "All";
         if (category2) category2.value = "All";
         if (frate) frate.value = "All";
-        
+
         selectElement.form.submit();
     }
 </script>

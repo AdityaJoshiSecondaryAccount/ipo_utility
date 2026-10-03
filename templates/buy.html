@@ -837,7 +837,7 @@
 
         <div class="col-xl-10 col-lg-10 col-md-10 col-sm-9 col-12 brdc">
             {% comment %} <br> {% endcomment %}
-            <hr/ class="ad">
+            <hr class="ad"/>
             <form method="post" id="placeOrderForm" class="needs-validation form" class="form" novalidate>
                 {% csrf_token %}
 
@@ -1236,19 +1236,25 @@
                         <input type="hidden" name="remark_tags" id="remarkTags">
                         <input type="hidden" name="remark_text" id="remarkText">
                     </div>
-                    <div class="col-xl-7 col-lg-7 col-md-5 col-sm-12 col-12 mt-2 mt-md-0" style="padding-left: 10px; padding-right: 10px;">
-                        <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-                            <button class="btn btn-primary" type="button" id="btnPlaceOnly" style="flex: 1 1 auto; min-height: 38px; padding: 6px 18px; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center;">Place BUY Order</button>
-                            <button class="btn btn-primary" type="button" id="btnPlaceWithTelegram" style="flex: 1 1 auto; min-height: 38px; padding: 6px 18px; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center;">Place BUY Order + 
-                                <svg width="20" height="18" fill="currentColor" class="bi bi-telegram" viewBox="0 0 16 16" style="vertical-align: middle; margin-left: 6px;">
-                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.287 5.906q-1.168.486-4.666 2.01-.567.225-.595.442c-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294q.39.01.868-.32 3.269-2.206 3.374-2.30c.05-.012.12-.026.166.016s.042.12.037.141c-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8 8 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629q.14.092.27.187c.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.4 1.4 0 0 0-.013-.315.34.34 0 0 0-.114-.217.53.53 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09"/>
-                                </svg>
-                            </button>
-                        </div>
+                    <div class="col-xl-2 col-lg-2 col-md-2 col-sm-6 col-6" style="padding-left: 10px; padding-right: 10px;">
+                        <button class="btn btn-primary w-100" type="button" id="btnPlaceOnly">Place BUY Order</button>
+                    </div>
+                    <div class="col-xl-2 col-lg-2 col-md-3 col-sm-6 col-6" style="padding-left: 10px;">
+                        <button class="btn btn-primary w-100" type="button" id="btnPlaceWithTelegram">Place +
+                            <svg width="20" height="18" fill="currentColor" class="bi bi-telegram" viewBox="0 0 16 16" style="vertical-align: middle; margin-left: 4px;">
+                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.287 5.906q-1.168.486-4.666 2.01-.567.225-.595.442c-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294q.39.01.868-.32 3.269-2.206 3.374-2.30c.05-.012.12-.026.166.016s.042.12.037.141c-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8 8 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629q.14.092.27.187c.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.4 1.4 0 0 0-.013-.315.34.34 0 0 0-.114-.217.53.53 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="col-xl-2 col-lg-2 col-md-3 col-sm-6 col-6" style="padding-left: 10px;">
+                        <button class="btn btn-success w-100" type="button" id="btnSendWhatsApp">
+                            Send to WhatsApp
+                        </button>
                     </div>
                 </div>
                
             </form>
+
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
                     // Get both buttons
@@ -1422,7 +1428,7 @@
                     <th scope="col">Group Name&nbsp;</th>
                     <th scope="col">Order Type&nbsp;</th>
                     <th scope="col">Order Category&nbsp;</th>
-                    {%if IPOName.IPOType == "MAINBOARD" %}<th scope="col">Investor Type&nbsp;</th>{%endif%}
+                    {% if IPOName.IPOType == "MAINBOARD" %}<th scope="col">Investor Type&nbsp;</th>{% endif %}
                     <th scope="col">Premium Strike Price&nbsp;</th>
                     <th scope="col">Qty&nbsp;</th>
                     <th scope="col">Rate&nbsp;</th>
@@ -1438,7 +1444,7 @@
                             <td style="text-transform: uppercase;">{{ i.OrderGroup.GroupName }}</td>
                             <td>{{ i.OrderType }}</td>
                             <td>{{ i.OrderCategory }}</td>
-                            {%if IPOName.IPOType == "MAINBOARD" %}<td>{{ i.InvestorType }}</td>{%endif%}
+                            {% if IPOName.IPOType == "MAINBOARD" %}<td>{{ i.InvestorType }}</td>{% endif %}
                             <td>
                                 {% if i.OrderCategory == "Premium" %}
                                     -
@@ -1450,7 +1456,7 @@
                                     {% endif %}
                                 {% endif %}
                             </td>
-                            <td><a {%if  i.OrderCategory != 'Premium'%} href="/{{IPOid}}/OrderDetail/{{i.OrderType}}/{{i.OrderGroup.GroupName}}/{{ i.OrderCategory }}/{{i.InvestorType}}/{{ i.OrderDate|date:"Ymd" }}/{{i.OrderTime|time:"His"}}{{i.id}}" style="color:blue; text-decoration: underline; "{%endif%}>{{ i.Quantity|floatformat:0 }}</a></td>
+                            <td><a {% if i.OrderCategory != 'Premium' %} href="/{{IPOid}}/OrderDetail/{{i.OrderType}}/{{i.OrderGroup.GroupName}}/{{ i.OrderCategory }}/{{i.InvestorType}}/{{ i.OrderDate|date:"Ymd" }}/{{i.OrderTime|time:"His"}}{{i.id}}" style="color:blue; text-decoration: underline; "{% endif %}>{{ i.Quantity|floatformat:0 }}</a></td>
                             <td>{{ i.Rate|floatformat:2 }}</td>
                             <td>{{ i.OrderDate }} |&nbsp; {{i.OrderTime|time:"h:i:s A"}} </td>
                             <td style="white-space: nowrap; max-width: 300px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; outline: none;" 
@@ -1686,6 +1692,53 @@
         });
         
         
+    });
+    document.getElementById("btnSendWhatsApp").addEventListener("click", function () {
+        const button = this;
+
+        if (!form.checkValidity()) {
+            form.classList.add("was-validated");
+            form.reportValidity();
+            return;
+        }
+
+        button.disabled = true;
+        button.textContent = "Sending...";
+
+        const formData = new FormData(form);
+        formData.append("placeOrderWithWhatsApp", "true");
+
+        fetch(currentUrl, {
+            method: "POST",
+            body: formData,
+            headers: { "X-CSRFToken": csrfToken }
+        })
+        .then(async response => {
+            if (response.redirected) {
+                window.location.replace(cleanOrderUrl);
+                return null;
+            }
+            const data = await response.json();
+            if (!response.ok || data.status !== "success") {
+                window.location.replace(cleanOrderUrl);
+                return null;
+            }
+            return fetch("{% url 'whatsapp:send_buy_order' IPOid %}", {
+                method: "POST",
+                body: formData,
+                headers: { "X-CSRFToken": csrfToken }
+            });
+        })
+        .then(() => {
+            window.location.replace(cleanOrderUrl);
+        })
+        .catch(() => {
+            window.location.replace(cleanOrderUrl);
+        })
+        .finally(() => {
+            button.disabled = false;
+            button.textContent = "Send to WhatsApp";
+        });
     });
 </script>
 

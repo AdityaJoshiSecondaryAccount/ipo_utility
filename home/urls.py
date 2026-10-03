@@ -1,9 +1,20 @@
 from django.contrib import admin
 from django.urls import path,include
 from home import views
+from django.conf import settings
+from django.shortcuts import redirect
+
+def chat_redirect(request):
+    if settings.DEBUG:
+        return redirect("http://localhost:5173/chat/")
+    # In production, Nginx catches /chat/ first, so this shouldn't be hit.
+    # But just in case, redirect to the production Nginx route.
+    return redirect("/chat/")
 
 urlpatterns = [
-    path('', views.index, name="home"),
+    path('chat', chat_redirect),
+    path('chat/', chat_redirect),
+    path('', views.Home, name="home"),
     path('indexforCustomer', views.indexforCustomer, name="homeforcustomer"),
     path('<str:IPOid>/<str:OrderType>/update_pann/<str:GrpName>/<str:OrderCategory>/<str:InvestorType>', views.Update_pann,name = "OrderDetail_update"),
     path('clear-selected-records/', views.ClearSelectedRecords, name='clear_selected_records'),
@@ -152,4 +163,5 @@ urlpatterns = [
     path('BulkDeleteIPO', views.BulkDeleteIPO, name='BulkDeleteIPO'),
     path('BulkDeleteClients', views.BulkDeleteClients, name='BulkDeleteClients'),
     path('generate-group-share-image/', views.generate_group_share_image, name='generate_group_share_image'),
+    path('check-broker-session/', views.check_broker_session, name='check_broker_session'),
 ]

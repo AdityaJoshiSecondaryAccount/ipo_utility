@@ -25,7 +25,7 @@
 
 
 
-    <title>{% block title%} {% endblock %}</title>
+    <title>{% block title %} {% endblock %}</title>
 
     {% block css %} {% endblock %}
 
@@ -593,7 +593,7 @@
                 </span>
                 {% endif %}
 
-                {% if request.user.is_authenticated%}
+                {% if request.user.is_authenticated %}
                 <li class="nav-item active">
                     <a class="nav-link" href="/GroupWiseDashboard"><b>|</b>&nbsp; Group Wise Dashboard</a>
                 </li>
@@ -631,6 +631,12 @@
                 <span class="nav-link ms-2">
                     <b style="color: #fff;">|</b> &nbsp; Backup
                 </span>
+                {% endif %}
+
+                    {% if request.user.is_authenticated %}
+                <li class="nav-item active">
+                    <a class="nav-link" href="/chat" style="color: #ffffff;"><b>|</b>&nbsp; WhatsApp Chat</a>
+                </li>
                 {% endif %}
             </ul>
             <ul class="navbar-nav ml-auto" method="post" style="margin-bottom: 0px;margin-top: 2px;">
@@ -673,7 +679,7 @@
                             title="Profile editing is managed by your broker.">
                             Change Password
                         </span>
-                        {%endif%}
+                        {% endif %}
                         <div style="height: 5px;"></div>
                         <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#logout"
                             style="line-height: 1.2;"><img src='/../static/image/logout.png' width="23px" height="23px"

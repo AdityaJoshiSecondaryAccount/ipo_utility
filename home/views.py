@@ -218,10 +218,11 @@ def fetch_data_API(url):
     return None
 # @allowed_users(allowed_roles=['Broker'])
 @Broker_only
-def index(request):
+def Home(request):
     if request.user.is_anonymous:
         return redirect("/login")
     products = CurrentIpoName.objects.filter(user=request.user).order_by('-id')
+
     # ratelist = []
     # for i in products:
     #     try:
@@ -642,9 +643,10 @@ def MaashitlaDropDown():
 
     url = 'https://api.maashitla.com/api/company-directory'
     json_data = getDropDown(url)
+
     if json_data:
         items = json_data.get("companies", json_data) if isinstance(json_data, dict) else json_data
-        
+
         if isinstance(items, list):
             data = []
             data2 = []
@@ -5465,7 +5467,7 @@ def OrderDetailFunction(request, IPOid, Ordtyp, GrpName=None, OrderCategory=None
     sort_mapping[10 + col_offset] = 'Order__remark'
     
     entry, sort_col, sort_dir = apply_global_sorting(entry, request, sort_mapping, default_sort=(F('OrderDetailPANNo__PANNo').asc(nulls_first=True), '-Order__OrderDate', '-Order__OrderTime'))
-    
+
     if not sort_col:
         sort_col = str(4 + col_offset)
         sort_dir = 'asc'
@@ -5738,7 +5740,7 @@ def filterfromstatus(request, IPOid, Groupfilter, OrderCategoryFilter, InvestorT
 
     unique_rates = list(products.values_list('Rate', flat=True).distinct().order_by('Rate'))
     unique_rates = [rate for rate in unique_rates if rate is not None]
-    
+
     InvestorTypeFilter=InvestorTypeFilter
     Groupfilter = Groupfilter
     OrderCategoryFilter = OrderCategoryFilter
@@ -6148,6 +6150,7 @@ def filterfromstatus(request, IPOid, Groupfilter, OrderCategoryFilter, InvestorT
         html_table += "</tr>\n"
     html_table += "</tbody></table>"
     
+
     # return render(request, 'Order.html', {'Group': Group.order_by('GroupName'), 'html_table': html_table, 'IPOid': IPOid, 'IPOName': IPO, 'Groupfilter': Groupfilter,'PremiumSellAmount':PremiumSellAmount,'PremiumNetAmount':PremiumNetAmount,'PremiumBuyAmount':PremiumBuyAmount,'net_count':net_count,'net_avg':net_avg,'net_amount':net_amount  ,'OrderCategoryFilter': OrderCategoryFilter,'InvestorTypeFilter': InvestorTypeFilter, 'RateFilterValue': RateFilterValue, 'unique_rates': unique_rates, 'dict_count': dict_count, 'dict_avg': dict_avg, 'dict_amount':dict_amount, 'PremiumBuyCount':PremiumBuyCount,'PremiumSellCount':PremiumSellCount,'PremiumNetCount':PremiumNetCount,'PremiumNetAvg':PremiumNetAvg,'PremiumNetAvg':"{:.2f}".format(PremiumNetAvg),'PremiumNetCount':"{:.2f}".format(PremiumNetCount), 'PremiumSellAvg':"{:.2f}".format(PremiumSellAvg),'PremiumBuyAvg':"{:.2f}".format(PremiumBuyAvg),'page_obj': page_obj,'Order_page_size':page_size})
     return render(request, 'Order.html', {'Group': Group.order_by('GroupName'), 'available_categories': available_categories, 'available_investor_types': available_investor_types, 'html_table': html_table, 'IPOid': IPOid, 'IPOName': IPO, 'Groupfilter': Groupfilter, 'OrderCategoryFilter': OrderCategoryFilter,'category_totals': category_totals,'strike_prices': strike_prices,'grand_total': grand_total, 'InvestorTypeFilter': InvestorTypeFilter, 'RateFilterValue': RateFilterValue, 'unique_rates': unique_rates,'PremiumBuyAmount':PremiumBuyAmount,'PremiumNetAmount':PremiumNetAmount,'PremiumSellAmount':PremiumSellAmount ,'dict_count': dict_count, 'net_count':net_count ,'net_avg':net_avg ,'net_amount':net_amount ,'dict_amount':dict_amount,'dict_avg': dict_avg,'PremiumNetCount':PremiumNetCount,'PremiumNetCount':"{:.2f}".format(PremiumNetCount),'PremiumNetAvg':PremiumNetAvg,'PremiumNetAvg':"{:.2f}".format(PremiumNetAvg), 'PremiumBuyCount':PremiumBuyCount,'PremiumSellCount':PremiumSellCount,'PremiumSellAvg':"{:.2f}".format(PremiumSellAvg),'PremiumBuyAvg':"{:.2f}".format(PremiumBuyAvg),'page_obj': page_obj,'Order_page_size':page_size, 'SearchQuery': SearchQuery, 'sort_col': sort_col, 'sort_dir': sort_dir})
 
@@ -8785,7 +8788,7 @@ def Update_pann(request,IPOid,OrderType,GrpName=None, OrderCategory=None, Invest
     if is_ajax:
         return JsonResponse({'status': 'success'})
 
-    if request.user.is_authenticated:    
+    if request.user.is_authenticated:
         return redirect(f"/{IPOid}/OrderDetail/{OrderType}/{Groupfilter}/{IPOTypefilter}/{InvestorTypefilter}?page={page_number}{sort_params}")
     else:
         linkid = request.session.get('access')
@@ -9380,7 +9383,7 @@ def Billing(request, IPOid):
     #             </div> 
     #         """
 
-    return render(request, 'Billing.html', {'Group': Group.order_by('GroupName'),'html_table':html_table,'select': available_categories, 'select2': available_investor_types, 'available_categories': available_categories, 'available_investor_types': available_investor_types, "total": "{:.0f}".format(total),'Groupfilter': Groupfilter, "IPOName": IPO, 'IPOTypefilter': IPOTypefilter, 'InvestorTypeFilter': InvestorTypeFilter,  "IPO": IPO, "IPOid": IPOid,'page_obj': page_obj,'Billing_page_size':page_size, 'SearchQuery': SearchQuery, 'sort_col': sort_col, 'sort_dir': sort_dir})
+    return render(request, 'Billing.html', {'Group': Group.order_by('GroupName'),'html_table':html_table,'select': available_categories, 'select2': available_investor_types, 'available_categories': available_categories, 'available_investor_types': available_investor_types, "total": "{:.0f}".format(total),'Groupfilter': Groupfilter, "IPOName": IPO, 'IPOTypefilter': IPOTypefilter, 'InvestorTypeFilter': InvestorTypeFilter, "IPO": IPO, "IPOid": IPOid,'page_obj': page_obj,'Billing_page_size':page_size, 'SearchQuery': SearchQuery, 'sort_col': sort_col, 'sort_dir': sort_dir})
 
 @allowed_users(allowed_roles=['Broker'])
 def FileterBilling(request, IPOid ,group,IPOType,InvestType, Rate='All'):
@@ -17875,7 +17878,7 @@ def get_group_dues(request, group_id):
             )
         )
         jv_amount = float(jv_totals["total"] or 0)
-        
+
         # 4. Calculate Dues
         due_data = []
         for ipo in ipos:
@@ -17892,7 +17895,7 @@ def get_group_dues(request, group_id):
                 })
                     
         return JsonResponse({"status": "success", "data": due_data, "jv_amount": round(jv_amount, 2)})
-        
+
     except Exception as e:
         traceback.print_exc()
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
@@ -18830,8 +18833,9 @@ def update_all_expiries(request, IPOid):
 @require_POST
 def send_all_link_mails(request, IPOid):
     if request.method == 'POST':
+        action_type = request.POST.get('action_type', 'mail')
         # Check sender's configuration
-        if not request.user.email or not request.user.AppPassword:
+        if action_type == 'mail' and (not request.user.email or not request.user.AppPassword):
             return JsonResponse({'status': 'error', 'message': 'Please configure your Email and App Password in your profile first.'})
 
         selected_links_json = request.POST.get('selected_links', '[]')
@@ -18857,14 +18861,22 @@ def send_all_link_mails(request, IPOid):
 
         for link in links:
             group_obj = link.group
-            if not group_obj.Email:
-                failed_groups.append(f"{group_obj.GroupName} (No Email Entered)")
-                continue
+
+            if action_type == 'whatsapp':
+                if not group_obj.MobileNo:
+                    failed_groups.append(f"{group_obj.GroupName} (No Mobile Entered)")
+                    continue
+            else:
+                if not group_obj.Email:
+                    failed_groups.append(f"{group_obj.GroupName} (No Email Entered)")
+                    continue
 
             try:
                 # Prepare async tasks
                 expiry_date = link.expiry_at
-                coro = create_ipo_link(request, request.user, IPOid, group_obj, expiry_date, send_email=True, link_genrate=False)
+                is_mail = (action_type == 'mail')
+                is_whatsapp = (action_type == 'whatsapp')
+                coro = create_ipo_link(request, request.user, IPOid, group_obj, expiry_date, send_email=is_mail, send_whatsapp=is_whatsapp, link_genrate=False)
                 tasks.append(coro)
                 # Count as queued for success since SMTP is offloaded asynchronously
                 successful_links.append(str(link.id))
@@ -18892,7 +18904,7 @@ def send_all_link_mails(request, IPOid):
         })
 
 # Helper Function: Reusable Link Logic
-async def create_ipo_link(request,user, ipo_id, group_obj, expiry_str, send_email=False,link_genrate=False):
+async def create_ipo_link(request,user, ipo_id, group_obj, expiry_str, send_email=False, send_whatsapp=False, link_genrate=False):
     # Create the link
     if link_genrate:
         expiry_date = parse_datetime(expiry_str) if expiry_str else (timezone.now() + timezone.timedelta(days=1))
@@ -18949,6 +18961,17 @@ async def create_ipo_link(request,user, ipo_id, group_obj, expiry_str, send_emai
         except Exception as e:
             print(f"Mail Error: {e}")
             
+    if send_whatsapp and group_obj.MobileNo:
+        try:
+            from whatsapp.client import send_template_message
+            await sync_to_async(send_template_message)(
+                phone_number=group_obj.MobileNo,
+                template_name="ipo_missing_details",
+                body_texts=[group_obj.GroupName, full_url]
+            )
+        except Exception as e:
+            print(f"WhatsApp Error: {e}")
+
     return link
 
 # The View for the Popup
@@ -18983,6 +19006,7 @@ def bulk_generate_links(request, IPOid):
             
             for group in groups:
                 should_mail = (action_type == 'generate_send')
+                should_whatsapp = (action_type == 'generate_whatsapp')
                 # Run creation synchronously for each group to avoid complex async issues in setup
                 async_to_sync(create_ipo_link)(
                     request, 
@@ -18991,6 +19015,7 @@ def bulk_generate_links(request, IPOid):
                     group, 
                     expiry_date, 
                     send_email=should_mail,
+                    send_whatsapp=should_whatsapp,
                     link_genrate=True
                 )
             
@@ -19207,4 +19232,19 @@ def GlobalUpdateOrder(request, OrderId):
             request, 'Order Modified successfully')
         
     return redirect(f"/trades?page={page_number}")    
+
+
+def check_broker_session(request):
+    """Checks if current web session belongs to an authenticated Broker user."""
+    if request.user.is_authenticated:
+        # Broker user in IPO Utility has Broker_id as None/empty, or group 'Broker', or is superuser
+        is_broker_group = request.user.groups.filter(name='Broker').exists()
+        has_no_broker_id = getattr(request.user, "Broker_id", None) in [None, "", "None"]
+        if is_broker_group or has_no_broker_id or request.user.is_superuser:
+            return JsonResponse({
+                "authenticated": True,
+                "is_broker": True,
+                "username": request.user.username
+            })
+    return JsonResponse({"authenticated": False, "is_broker": False}, status=401)
 
