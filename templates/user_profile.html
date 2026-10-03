@@ -1,0 +1,584 @@
+{% extends "basic.html" %}
+{% load static %}
+{% block css %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'DataTables/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'DataTables/css/dataTables.bootstrap5.min.css' %}">
+<link rel="stylesheet" href="{% static 'DataTables/css/buttons.bootstrap5.min.css' %}">
+<style>
+    .card.shadow {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+        background: #fff;
+    }
+    .card-header {
+        background: linear-gradient(135deg, #1ab7b7, #0d9a9a);
+        color: #fff;
+        padding: 1rem 1.5rem;
+        border-radius: 20px 20px 0 0;
+        font-weight: bold;
+        font-size: 1.5rem;
+        box-shadow: 0 0 5px rgba(26, 183, 183, 0.5);
+    }
+    .card-body {
+        background-color: #f9f9f9;
+        border-radius: 0 0 20px 20px;
+        padding: 2rem;
+        box-shadow: 0 0 5px rgba(26, 183, 183, 0.5);
+    }
+    .form-label {
+        font-weight: 300;
+        color: #333;
+    }
+    .form-control {
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        transition: all 0.3s ease-in-out;
+    }
+    .form-control:focus {
+        border-color: #1ab7b7;
+        box-shadow: 0 0 5px rgba(26, 183, 183, 0.5);
+    }
+    .input-group .btn-outline-secondary {
+        border-radius: 0 10px 10px 0;
+        border-color: #ccc;
+        background-color: #f1f1f1;
+    }
+    .input-group .btn-outline-secondary:hover {
+        background-color: #1ab7b7;
+        color: white;
+    }
+    .btn-primary1{
+        background-color: #6c757d;
+        {% comment %} color: white;
+        border-radius: 10px;
+        border: none;
+        font-weight: 600; {% endcomment %}
+    }
+    
+    .btn-warning, .btn-success, .btn-secondary, .btn-primary {
+        font-weight: 600;
+        border-radius: 8px;
+        width: 100%;
+    }
+    .email-config-section {
+        padding: 0.5rem;
+    }
+    .user-config-header {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .user-config-header h5 {
+        margin: 0;
+        color: #464949ff;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+    }
+    .user-config-content {
+        display: none;
+    }
+    .user-config-content.show {
+        display: block;
+    }
+    .toggle-icon {
+        transition: transform 0.3s ease;
+    }
+    .toggle-icon.rotated {
+        transform: rotate(180deg);
+    }
+</style>
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert {{ message.tags }} alert-dismissible fade show fixed-top"
+             role="alert"
+             style="position:fixed; z-index:1050;">
+            {{ message }}
+            <button type="button" class="btn-close alert-close-btn" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="container-fluid mt-5">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="card shadow w-100" style="border-radius: 20px;">
+                <div class="card-header text-center" style="background: whitesmoke; color: black; border-radius: 20px 20px 0 0;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div></div>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-user"></i>
+                            <h3 class="mb-0">User Profile</h3>
+                        </div>
+                        <div>
+                            <a href="{% url 'home' %}" class="btn btn-outline-light btn-sm">
+                                <i class="fa fa-times"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body" style="background: whitesmoke; border-radius: 0 0 20px 20px;">
+                    
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <i class="fas fa-user"></i>
+                                <label class="form-label"><b>Username</b></label>
+                                <input type="text" class="form-control w-100" value="{{ user.username }}" readonly>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <i class="fas fa-calendar-alt field-icon"></i>
+                                <label class="form-label"><b>Expiry Date</b></label>
+                                <input type="text" class="form-control w-100" value="{{expiry_date|date:'j F, Y'}}" readonly>
+                            </div>
+                        </div>
+
+                        <!-- Change Password Section -->
+                        <div class="email-config-section">
+                            <div class="user-config-header" onclick="togglePasswordConfig()">
+                                <h5>
+                                    <i class="fas fa-lock"></i>&nbsp
+                                    Change Password
+                                </h5>
+                                <i class="fas fa-chevron-down toggle-icon" id="passwordConfigToggle"></i>
+                            </div>
+                            <div class="user-config-content" id="passwordConfigContent">
+                                <form method="post" action="/ChangeUserpassword">
+                                    {% csrf_token %}
+                                    <div class="mb-3"><br>
+                                        <i class="fas fa-lock field-icon"></i>
+                                        <label class="form-label"><b>New Password</b></label>
+                                        <div class="input-group">
+                                            {% comment %} <input type="password" class="form-control w-90" name="OldPassword" id="oldPassword" placeholder="Enter Old Password" required> {% endcomment %}
+                                            {% comment %} <input type="password" class="form-control w-90" id="oldPassword" name="NewPassword"
+                                                placeholder="New Password" required> {% endcomment %}
+                                            <input type="password" class="form-control w-90" id="inputPassword_up" name="NewPassword"
+                                                placeholder="New Password" required>    
+                                            <button class="btn btn-outline-secondary" type="button" id="toggleOldPassword">
+                                                <i class="fa fa-eye" id="oldPasswordIcon"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <i class="fas fa-lock field-icon"></i>
+                                        <label class="form-label"><b>Confirm Password</b></label>
+                                        <div class="input-group">
+                                            {% comment %} <input type="password" class="form-control w-90" name="NewPassword" id="newPassword" placeholder="Enter New Password" required> {% endcomment %}
+                                            {% comment %} <input type="password" class="form-control w-90" name="NewPassword" id="newPassword" placeholder="Enter New Password"  required> {% endcomment %}
+                                            <input type="password" class="form-control w-90" id="inputPassword_up1" name="ConfirmPassword"
+                                                    placeholder="Confirm Password" required>
+                                            <button class="btn btn-outline-secondary" type="button" id="toggleNewPassword">
+                                                <i class="fa fa-eye" id="newPasswordIcon"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 text-center">
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="fas fa-key"></i> Change Password
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Telegram Configuration Section -->
+                        <div class="email-config-section">
+                            <div class="user-config-header" onclick="toggleTelegramConfig()">
+                                <h5>
+                                    <i class="fab fa-telegram-plane"></i>&nbsp
+                                    Telegram Configuration
+                                </h5>
+                                
+                                <i class="fas fa-chevron-down toggle-icon" id="telegramConfigToggle"></i>
+                            </div>
+                            <div class="user-config-content" id="telegramConfigContent">
+                                <form id="telegramForm">
+                                    {% csrf_token %}
+                                    <div class="mb-3"><br>
+                                        <i class="fab fa-telegram-plane field-icon"></i>
+                                        <label class="form-label"><b>Telegram API Id</b></label>
+                                        <input type="text" class="form-control w-90" name="telegram_api" value="{{ user_detail.TelegramApi_id|default:'' }}" placeholder="Enter Telegram API">
+                                    </div>
+                                    <div class="mb-3">
+                                        <i class="fas fa-key"></i>
+                                        <label class="form-label"><b>Telegram API Key</b></label>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control w-90" name="telegram_api_key" id="telegram_api_key" value="{{ user_detail.TelegramApi_key|default:'' }}" placeholder="Enter Telegram API Key">
+                                            <button class="btn btn-outline-secondary" type="button" id="toggleTelegramKey">
+                                                <i class="fa fa-eye" id="telegramKeyIcon"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <i class="fas fa-mobile-alt"></i>
+                                        <label class="form-label"><b>Mobile Number</b></label>
+                                        <input type="text" class="form-control w-90" name="mobile_number" value="{{ user_detail.Mobileno|default:'+91' }}" placeholder="Enter Mobile Number">
+                                    </div>
+                                    <div class="mb-3 text-center">
+                                        <div class="mb-3 d-flex justify-content-between gap-2">
+                                            <!-- Update Button -->
+                                            {% comment %} <button type="submit" class="btn btn-primary w-50">
+                                                <i class="fas fa-save"></i> Update Telegram
+                                            </button> {% endcomment %}
+
+                                            <!-- Create Session Button -->
+                                            <button type="button" class="btn btn-primary w-100" onclick="createSessionAndSendOTP()">
+                                                <i class="fas fa-key"></i> Create Session
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        
+
+                        <!-- Email Configuration Section (at the end) -->
+                        <div class="email-config-section">
+                            <div class="user-config-header" onclick="toggleEmailConfig()">
+                                <h5>
+                                    <i class="fas fa-envelope"></i>&nbsp
+                                    Email Configuration
+                                </h5>
+                                <i class="fas fa-chevron-down toggle-icon" id="emailConfigToggle"></i>
+                            </div>
+                            <div class="user-config-content" id="emailConfigContent">
+                                <form method="POST" action="/update-user-profile/">
+                                    {% csrf_token %}
+                                    <div class="mb-3"><br>
+                                        <i class="fas fa-envelope field-icon"></i>
+                                        <label class="form-label"><b>Email</b></label>
+                                        <input type="email" class="form-control w-90" name="email" value="{{ user_detail.email }}" placeholder="Enter Email Id" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <i class="fas fa-lock field-icon"></i>
+                                        <label class="form-label"><b>App Password</b></label>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control w-90" name="app_password" id="app_password" value="{{ user_detail.AppPassword|default:'' }}" placeholder="Enter App Password" required>
+                                            <button class="btn btn-outline-secondary" type="button" id="toggleAppPassword">
+                                                <i class="fa fa-eye" id="appPasswordIcon"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 text-center">
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="fas fa-save"></i> Update Email
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- OTP Modal -->
+                        <div class="modal fade" id="otpModal" tabindex="-1" role="dialog" aria-labelledby="otpModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content" style="border-radius: 15px;">
+                                    <div class="modal-header bg-info text-white">
+                                        <h5 class="modal-title" id="otpModalLabel">
+                                            <i class="fas fa-key"></i> Enter OTP
+                                        </h5>
+                                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <input type="text" id="otpInput" class="form-control" placeholder="Enter OTP here" required>
+                                        <div class="mt-2 text-danger" id="otpError" style="display:none;">Please enter a valid OTP.</div>
+
+                                        <input type="hidden" id="telegramPhone">
+                                        <input type="hidden" id="telegramApiId">
+                                        <input type="hidden" id="telegramApiHash">
+                                        <input type="hidden" id="telegramSession">
+                                        <input type="hidden" id="telegramPhoneCodeHash">
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-primary"  onclick="submitTelegramForm()">Submit</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="mb-3 d-flex justify-content-between">
+                            <a href="{% url 'home' %}" class="btn btn-secondary w-100 me-2">
+                                <i class="fa fa-arrow-left"></i> Back
+                            </a>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{% static 'JS/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'DataTables\js\jquery-3.7.0.js' %}"></script>
+
+<script>
+    // Hide only the close button after 5 seconds
+    setTimeout(function() {
+        document.querySelectorAll('.alert').forEach(function(btn) {
+            btn.style.display = 'none';
+        });
+    }, 5000); // 5 seconds
+</script>
+<script>
+    function createSessionAndSendOTP() {
+        const form = document.getElementById("telegramForm");
+        const formData = new FormData(form);
+
+        // STEP 1: Save Telegram details to DB
+        fetch("/update-user-profile/", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                 "X-Requested-With": "XMLHttpRequest"
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                // STEP 2: After saving, send OTP
+                sendTelegramOTP();
+            } else {
+                window.location.reload();
+                //alert("Error saving Telegram details: " + data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            window.location.reload();
+            //alert("Something went wrong while saving details.");
+        });
+    }
+    function sendTelegramOTP() {
+        const form = document.getElementById("telegramForm");
+        const formData = new FormData(form);
+        fetch("/send-telegram-otp/", {
+            method: "POST",
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: formData 
+        }).then(response => response.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                document.getElementById('telegramPhone').value = data.phone;
+                document.getElementById('telegramApiId').value = data.api_id;
+                document.getElementById('telegramApiHash').value = data.api_hash;
+                document.getElementById('telegramSession').value = data.session_string;
+                document.getElementById('telegramPhoneCodeHash').value = data.phone_code_hash;
+                const otpModal = new bootstrap.Modal(document.getElementById('otpModal'));
+                otpModal.show();
+            } else if (data.status === 'already') {
+                window.location.reload();
+                //alert("Telegram already authorized.");
+            } else {
+                window.location.reload();
+                //alert("Error: " + data.message);
+            }
+        });
+    }
+
+    
+</script>
+<script>
+    function submitTelegramForm() {
+        const otp = document.getElementById("otpInput").value;
+        const otpError = document.getElementById("otpError");
+
+        if (!otp) {
+            otpError.style.display = 'block';
+            return;
+        } else {
+            otpError.style.display = 'none';
+        }
+
+        const phone = document.getElementById("telegramPhone").value;
+        const api_id = document.getElementById("telegramApiId").value;
+        const api_hash = document.getElementById("telegramApiHash").value;
+        const session_string = document.getElementById("telegramSession").value;
+        const phone_code_hash = document.getElementById("telegramPhoneCodeHash").value;
+
+        const formData = new FormData();
+        formData.append("otp", otp);
+        formData.append("phone", phone);
+        formData.append("api_id", api_id);
+        formData.append("api_hash", api_hash);
+        formData.append("session_string", session_string);
+        formData.append("phone_code_hash", phone_code_hash);
+
+        fetch("/verify-telegram-otp/", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+            },
+            body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Response from backend:", data);
+            // const modalEl = document.getElementById("otpModal");
+            // const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            $('#otpModal').modal('hide');// Always close the modal on submit
+            if (data.status === "success") {
+                setTimeout(() => window.location.reload(), 300);
+                document.body.focus();
+            } else {
+                // Optionally, show a toast or alert here for error
+                // alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Error occurred:", error);
+            const modalEl = document.getElementById("otpModal");
+            const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            $('#otpModal').modal('hide'); // Always close the modal on error
+            // Optionally, show a toast or alert for network errors
+        });
+    }
+    function clearOtpModalFields() {
+        // Reset modal input
+        document.getElementById('otpInput').value = "";
+        document.getElementById('otpError').style.display = "none";
+        // Show Bootstrap modal
+        //var otpModal = new bootstrap.Modal(document.getElementById('otpModal'));
+        //otpModal.show();
+    }
+</script>
+<script>
+    document.getElementById('otpModal').addEventListener('hidden.bs.modal', function () {
+        clearOtpModalFields();
+    });
+</script>
+
+
+<script>
+        $(".toggle-password1").click(function () {
+    
+            $(this).toggleClass("fa-eye fa-eye-slash");
+            var input = $($(this).attr("toggle"));
+            if (input.attr("type") == "password") {
+                input.attr("type", "text");
+            } else {
+                input.attr("type", "password");
+            }
+        });
+    </script>
+    <script>
+        $(".toggle-password2").click(function () {
+    
+            $(this).toggleClass("fa-eye fa-eye-slash");
+            var input = $($(this).attr("toggle"));
+            if (input.attr("type") == "password") {
+                input.attr("type", "text");
+            } else {
+                input.attr("type", "password");
+            }
+        });
+    </script>
+<script>
+    
+    // Toggle App Password visibility
+    document.getElementById('toggleAppPassword').onclick = function() {
+        var input = document.getElementById('app_password');
+        var icon = document.getElementById('appPasswordIcon');
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = "password";
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    };
+    // Toggle Telegram API Key visibility
+    document.getElementById('toggleTelegramKey').onclick = function() {
+        var input = document.getElementById('telegram_api_key');
+        var icon = document.getElementById('telegramKeyIcon');
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = "password";
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    };
+    // Toggle Old Password visibility
+    document.getElementById('toggleOldPassword').onclick = function() {
+        var input = document.getElementById('inputPassword_up');
+        var icon = document.getElementById('oldPasswordIcon');
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = "password";
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    };
+    // Toggle New Password visibility
+    document.getElementById('toggleNewPassword').onclick = function() {
+        var input = document.getElementById('inputPassword_up1');
+        var icon = document.getElementById('newPasswordIcon');
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = "password";
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    };
+    // Toggle Email Config Section
+    function toggleEmailConfig() {
+        var emailContent = document.getElementById('emailConfigContent');
+        var emailIcon = document.getElementById('emailConfigToggle');
+        var telegramContent = document.getElementById('telegramConfigContent');
+        var telegramIcon = document.getElementById('telegramConfigToggle');
+        var passwordContent = document.getElementById('passwordConfigContent');
+        var passwordIcon = document.getElementById('passwordConfigToggle');
+        telegramContent.classList.remove('show');
+        telegramIcon.classList.remove('rotated');
+        passwordContent.classList.remove('show');
+        passwordIcon.classList.remove('rotated');
+        emailContent.classList.toggle('show');
+        emailIcon.classList.toggle('rotated');
+    }
+    // Toggle Telegram Config Section
+    function toggleTelegramConfig() {
+        var emailContent = document.getElementById('emailConfigContent');
+        var emailIcon = document.getElementById('emailConfigToggle');
+        var telegramContent = document.getElementById('telegramConfigContent');
+        var telegramIcon = document.getElementById('telegramConfigToggle');
+        var passwordContent = document.getElementById('passwordConfigContent');
+        var passwordIcon = document.getElementById('passwordConfigToggle');
+        emailContent.classList.remove('show');
+        emailIcon.classList.remove('rotated');
+        passwordContent.classList.remove('show');
+        passwordIcon.classList.remove('rotated');
+        telegramContent.classList.toggle('show');
+        telegramIcon.classList.toggle('rotated');
+    }
+    // Toggle Password Config Section
+    function togglePasswordConfig() {
+        var emailContent = document.getElementById('emailConfigContent');
+        var emailIcon = document.getElementById('emailConfigToggle');
+        var telegramContent = document.getElementById('telegramConfigContent');
+        var telegramIcon = document.getElementById('telegramConfigToggle');
+        var passwordContent = document.getElementById('passwordConfigContent');
+        var passwordIcon = document.getElementById('passwordConfigToggle');
+        emailContent.classList.remove('show');
+        emailIcon.classList.remove('rotated');
+        telegramContent.classList.remove('show');
+        telegramIcon.classList.remove('rotated');
+        passwordContent.classList.toggle('show');
+        passwordIcon.classList.toggle('rotated');
+    }
+</script>
+{% endblock %}

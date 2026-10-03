@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background-color: white; 
+            margin: 20px;
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 10px;
+        }
+        th, td {
+            border: 1px solid black;
+            text-align: center;
+            padding: 6px 10px;
+        }
+        th {
+            background-color: #e8e8e8;
+            font-weight: bold;
+        }
+        .section-title {
+            font-weight: bold;
+            margin-top: 15px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h3 style="text-align:center;">Status</h3>
+
+    <div class="table-responsive text-nowrap">
+        <table style="height: 20px; ">
+            <thead>
+                <tr style="border: 1px solid black; border-collapse: collapse;">
+                    {% comment %} <th scope="col" style="border: 1px solid black; border-collapse: collapse;" ></th> {% endcomment %}
+                    <th colspan="10" style="border: 1px solid black; border-collapse: collapse;">Kostak</td>                               
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border: 1px solid black; border-collapse: collapse; font-weight: bold;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;"></th>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">Retail</td>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">SHNI</td>
+                    <td colspan="3"style="border: 1px solid black; border-collapse: collapse;" >BHNI</td>
+                </tr>
+                <tr style="border: 1px solid; border-collapse: collapse; font-weight: bold;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;"></th>
+                    <td style="border: 1px solid black; border-collapse: collapse;">COUNT</td>
+                    <td style="border: 1px solid black; border-collapse: collapse; padding-right: 16px; padding-left: 16px;">AVG</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">Amount</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">COUNT</td>
+                    <td style="border: 1px solid black; border-collapse: collapse; padding-right: 16px; padding-left: 16px;">AVG</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">Amount</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">COUNT</td>
+                    <td style="border: 1px solid black; border-collapse: collapse; padding-right: 16px; padding-left: 16px;">AVG</td>     
+                    <td style="border: 1px solid black; border-collapse: collapse;">Amount</td>
+                </tr>
+                <tr style="border: 1px solid; border-collapse: collapse;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;">BUY</th>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_count.KostakRETAILBUYCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_avg.KostakRETAILBUYAvg|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.KostakRETAILBUYAmount|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_count.KostakSHNIBUYCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_avg.KostakSHNIBUYAvg|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.KostakSHNIBUYAmount|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_count.KostakBHNIBUYCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_avg.KostakBHNIBUYAvg|floatformat:2}}</td>     
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.KostakBHNIBUYAmount|floatformat:2}}</td>               
+                </tr>
+                <tr style="border: 1px solid; border-collapse: collapse;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;">SELL</th>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_count.KostakRETAILSELLCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_avg.KostakRETAILSELLAvg|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.KostakRETAILSELLAmount|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_count.KostakSHNISELLCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_avg.KostakSHNISELLAvg|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.KostakSHNISELLAmount|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_count.KostakBHNISELLCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_avg.KostakBHNISELLAvg|floatformat:2}}</td>      
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.KostakBHNISELLAmount|floatformat:2}}</td>                
+                </tr>
+                <tr style="border: 1px solid; border-collapse: collapse;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;">NET</th>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{net_count.KostakRETAILNetCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{net_avg.KostakRETAILNetAvg|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{net_amount.KostakRETAILNetAmount|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{net_count.KostakSHNINetCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{net_avg.KostakSHNINetAvg|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{net_amount.KostakSHNINetAmount|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{net_count.KostakBHNINetCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{net_avg.KostakBHNINetAvg|floatformat:2}}</td>  
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{net_amount.KostakBHNINetAmount|floatformat:2}}</td>
+
+                </tr>
+            </tbody>
+        </table>
+    </div>
+        <br>
+
+    <div class="table-responsive text-nowrap">
+        <table style="height: 20px;">
+            <thead>
+                <tr style="border: 1px solid black; border-collapse: collapse;">
+                    {% comment %} <th scope="col" style="border: 1px solid black; border-collapse: collapse;"></th> {% endcomment %}
+                    <th colspan="10">Subject To</td>                               
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border: 1px solid black; border-collapse: collapse; font-weight: bold;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;"></th>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">Retail</td>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">SHNI</td>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">BHNI</td>                       
+                </tr>
+                <tr style="font-weight: bold;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;"></th>
+                    <td style="border: 1px solid black; border-collapse: collapse;">COUNT</td>
+                    <td style="border: 1px solid black; border-collapse: collapse; padding-right: 16px; padding-left: 16px;">AVG</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">Amount</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">COUNT</td>
+                    <td style="border: 1px solid black; border-collapse: collapse; padding-right: 16px; padding-left: 16px;">AVG</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">Amount</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">COUNT</td>
+                    <td style="border: 1px solid black; border-collapse: collapse; padding-right: 16px; padding-left: 16px;">AVG</td> 
+                    <td style="border: 1px solid black; border-collapse: collapse;">Amount</td>                       
+                </tr>
+                <tr style="border: 1px solid; border-collapse: collapse;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;">BUY</th>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_count.SubjectToRETAILBUYCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_avg.SubjectToRETAILBUYAvg|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.SubjectToRETAILBUYAmount|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_count.SubjectToSHNIBUYCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_avg.SubjectToSHNIBUYAvg|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.SubjectToSHNIBUYAmount|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_count.SubjectToBHNIBUYCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_avg.SubjectToBHNIBUYAvg|floatformat:2}}</td>  
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.SubjectToBHNIBUYAmount|floatformat:2}}</td>                  
+                </tr>
+                <tr style="border: 1px solid; border-collapse: collapse;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;">SELL</th>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_count.SubjectToRETAILSELLCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_avg.SubjectToRETAILSELLAvg|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.SubjectToRETAILSELLAmount|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_count.SubjectToSHNISELLCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_avg.SubjectToSHNISELLAvg|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.SubjectToSHNISELLAmount|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_count.SubjectToBHNISELLCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_avg.SubjectToBHNISELLAvg|floatformat:2}}</td>  
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{dict_amount.SubjectToBHNISELLAmount|floatformat:2}}</td>                    
+                </tr>
+                <tr style="border: 1px solid; border-collapse: collapse;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;">NET</th>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{net_count.SubjectToRETAILNetCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{net_avg.SubjectToRETAILNetAvg|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{net_amount.SubjectToRETAILNetAmount|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{net_count.SubjectToSHNINetCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{net_avg.SubjectToSHNINetAvg|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{net_amount.SubjectToSHNINetAmount|floatformat:2}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{net_count.SubjectToBHNINetCount|floatformat:0}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{net_avg.SubjectToBHNINetAvg|floatformat:2}}</td>  
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{net_amount.SubjectToBHNINetAmount|floatformat:2}}</td>
+            </tbody>
+        </table>
+    </div>
+    <br>
+    <div class="table-responsive text-nowrap">
+        <table style="height: 20px;">
+            <thead>
+                <tr style="border: 1px solid black; border-collapse: collapse;">
+                    {% comment %} <th scope="col" style="border: 1px solid black; border-collapse: collapse;"></th> {% endcomment %}
+                    <th colspan="10" style="border: 1px solid black; border-collapse: collapse;">Premium</td>                               
+                </tr>
+            </thead>
+            
+            <tbody>
+                <tr style="border: 1px solid black; border-collapse: collapse; font-weight: bold;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;"></th>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">COUNT</td>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse; padding-right: 16px; padding-left: 16px;">AVG</td>                                                       
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">Amount</td>
+                </tr>
+
+                <tr style="border: 1px solid black; border-collapse: collapse;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;">BUY</th>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{PremiumBuyCount}} </td>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">{{PremiumBuyAvg|floatformat:2}} </td>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">{{PremiumBuyAmount|floatformat:2}} </td>
+                </tr>
+
+                <tr style="border: 1px solid black; border-collapse: collapse;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;">SELL</th>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{PremiumSellCount}} </td>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{PremiumSellAvg|floatformat:2}} </td>  
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">{{PremiumSellAmount|floatformat:2}} </td>                                 
+                </tr>
+
+                <tr style="border: 1px solid black; border-collapse: collapse;">
+                    <th scope="row" style="border: 1px solid black; border-collapse: collapse;">NET</th>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{PremiumNetCount}} </td>
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;"> {{PremiumNetAvg|floatformat:2}} </td>   
+                    <td colspan="3" style="border: 1px solid black; border-collapse: collapse;">{{PremiumNetAmount|floatformat:2}} </td>                                
+                </tr>
+
+            </tbody>
+        </table>
+    </div>    
+    <br>
+    <div class="table-responsive text-nowrap">
+        <table style="border: 1px solid black; border-collapse: collapse; width:100%;">
+            <thead>
+                <tr>
+                    <th rowspan="1" style="border: 1px solid black; text-align:center;">Strike Price</th>
+                    <th colspan="3" style="border: 1px solid black; text-align:center;">CALL</th>
+                    <th colspan="3" style="border: 1px solid black; text-align:center;">PUT</th>
+                </tr>
+                <tr>
+                    <th style="border: 1px solid black; text-align:center;"></th>
+                    <th style="border: 1px solid black; text-align:center;">Total Share</th>
+                    <th style="border: 1px solid black; text-align:center;">Average</th>
+                    <th style="border: 1px solid black; text-align:center;">Amount</th>
+                    <th style="border: 1px solid black; text-align:center;">Total Share</th>
+                    <th style="border: 1px solid black; text-align:center;">Average</th>
+                    <th style="border: 1px solid black; text-align:center;">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for strike in strike_prices %}
+                <tr>
+                    <td style="border: 1px solid black; text-align:center;">{{ strike.value }}</td>
+                    <td style="border: 1px solid black; text-align:right;">{{ strike.call_total_count }}</td>
+                    <td style="border: 1px solid black; text-align:right;">{{ strike.call_avg|floatformat:2 }}</td>
+                    <td style="border: 1px solid black; text-align:right;">{{ strike.call_net_amount }}</td>
+                    <td style="border: 1px solid black; text-align:right;">{{ strike.put_total_count }}</td>
+                    <td style="border: 1px solid black; text-align:right;">{{ strike.put_avg|floatformat:2 }}</td>
+                    <td style="border: 1px solid black; text-align:right;">{{ strike.put_net_amount }}</td>
+                </tr>
+                {% endfor %}
+                {% comment %} <tr style="font-weight:bold; background:#e8e8e8;">
+                    <td>NET</td>
+                    <td style="border: 1px solid black; text-align:right;">{{ grand_total.call_total_count }}</td>
+                    <td style="border: 1px solid black; text-align:right;">{{ grand_total.call_avg|floatformat:2 }}</td>
+                    <td style="border: 1px solid black; text-align:right;">{{ grand_total.call_net_amount }}</td>
+                    <td style="border: 1px solid black; text-align:right;">{{ grand_total.put_total_count }}</td>
+                    <td style="border: 1px solid black; text-align:right;">{{ grand_total.put_avg|floatformat:2 }}</td>
+                    <td style="border: 1px solid black; text-align:right;">{{ grand_total.put_net_amount }}</td>
+                </tr> {% endcomment %}
+            </tbody>
+        </table>
+
+    </div>    
+
+</body>
+</html>
