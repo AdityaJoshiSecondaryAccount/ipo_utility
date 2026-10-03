@@ -1,0 +1,1175 @@
+{% extends 'basic.html' %}
+{% load static %}
+
+{% block title %}Positions{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'DataTables/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'DataTables/css/dataTables.bootstrap5.min.css' %}">
+<link rel="stylesheet" href="{% static 'DataTables/css/buttons.bootstrap5.min.css' %}">
+<style>
+    .dataTables_wrapper .d-flex {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .dataTables_filter input {
+        margin-left: 0.5em;
+        display: inline-block;
+        width: auto;
+    }
+
+    .dataTables_length select {
+        width: auto;
+        display: inline-block;
+        margin: 0 0.5em;
+    }
+
+    .Input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 2px;
+        font-size: 0.75rem;
+    }
+
+    .container-fluid {
+        margin-top: -31px;
+        width: 100%;
+        padding-right: 30px;
+        padding-left: 30px;
+        margin-right: auto;
+        margin-left: auto;
+    }
+
+    .fm {
+        margin-top: 15px;
+        margin-bottom: 15px;
+    }
+
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+        width: 100%;
+        border: 1px solid #ddd;
+        margin-bottom: 1%;
+        font-size: 0.75rem;
+    }
+
+    th,
+    td {
+        text-align: center;
+        padding: 2px 4px;
+        white-space: nowrap;
+    }
+
+    thead th {
+        background-color: #f1f1f1;
+        position: sticky !important;
+        top: 0;
+        z-index: 11;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2
+    }
+
+    .table-wrapper-scroll-x {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -ms-overflow-style: -ms-autohiding-scrollbar;
+    }
+
+    .btn-secondary {
+        margin-bottom: 4px;
+    }
+
+    .archived-ipo,
+    .archived-ipo>td,
+    .archived-ipo>th {
+        background-color: #cbd5e1 !important;
+    }
+
+    .positions-toolbar {
+        position: sticky !important;
+        top: var(--positions-navbar-height, 40px);
+        z-index: 111;
+        margin-bottom: 16px;
+        padding-top: 15px;
+        background-color: #fff;
+    }
+
+    .positions-page {
+        margin-top: var(--positions-navbar-height, 40px);
+    }
+
+    .positions-title {
+        display: inline-block;
+        margin-right: 20px;
+    }
+
+    .positions-toggle {
+        position: relative;
+        top: -4px;
+    }
+
+    .positions-actions {
+        text-align: right;
+    }
+
+    .group-table-scroll,
+    .table-responsive,
+    .dataTables_wrapper {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    table[id^="mainboardBillingTable_"] {
+        min-width: 1500px;
+    }
+
+    table[id^="mainboardBillingTable_"]>thead>tr:first-child>th {
+        border-top: 1px solid #555 !important;
+    }
+
+    table[id^="mainboardBillingTable_"]>tbody>tr:last-child>th,
+    table[id^="mainboardBillingTable_"]>tbody>tr:last-child>td {
+        border-bottom: 1px solid #555 !important;
+    }
+
+    table[id^="smeBillingTable_"] {
+        min-width: 800px;
+    }
+
+    table[id^="mainboardBillingTable_"],
+    table[id^="smeBillingTable_"] {
+        --frozen-tally-width: 72px;
+    }
+
+    table[id^="mainboardBillingTable_"]>thead>tr:first-child>th:first-child,
+    table[id^="mainboardBillingTable_"]>tbody>tr> :first-child:not(.dataTables_empty),
+    table[id^="smeBillingTable_"]>thead>tr:first-child>th:first-child,
+    table[id^="smeBillingTable_"]>tbody>tr> :first-child:not(.dataTables_empty) {
+        position: sticky !important;
+        left: 0;
+    }
+
+    table[id^="mainboardBillingTable_"]>thead>tr:first-child>th:nth-child(2),
+    table[id^="mainboardBillingTable_"]>tbody>tr> :nth-child(2):not(.dataTables_empty),
+    table[id^="smeBillingTable_"]>thead>tr:first-child>th:nth-child(2),
+    table[id^="smeBillingTable_"]>tbody>tr> :nth-child(2):not(.dataTables_empty) {
+        position: sticky !important;
+        left: var(--frozen-tally-width);
+    }
+
+    table[id^="mainboardBillingTable_"]>thead>tr:first-child>th:first-child,
+    table[id^="mainboardBillingTable_"]>thead>tr:first-child>th:nth-child(2),
+    table[id^="smeBillingTable_"]>thead>tr:first-child>th:first-child,
+    table[id^="smeBillingTable_"]>thead>tr:first-child>th:nth-child(2) {
+        z-index: 14;
+        background-color: #f1f1f1;
+        background-clip: padding-box;
+    }
+
+    table[id^="mainboardBillingTable_"]>tbody>tr> :first-child,
+    table[id^="mainboardBillingTable_"]>tbody>tr> :nth-child(2),
+    table[id^="smeBillingTable_"]>tbody>tr> :first-child,
+    table[id^="smeBillingTable_"]>tbody>tr> :nth-child(2) {
+        z-index: 4;
+        background-color: #fff;
+        background-clip: padding-box;
+    }
+
+    table[id^="mainboardBillingTable_"]>tbody>tr:nth-child(odd)> :first-child,
+    table[id^="mainboardBillingTable_"]>tbody>tr:nth-child(odd)> :nth-child(2),
+    table[id^="smeBillingTable_"]>tbody>tr:nth-child(odd)> :first-child,
+    table[id^="smeBillingTable_"]>tbody>tr:nth-child(odd)> :nth-child(2) {
+        background-color: #f2f2f2;
+    }
+
+    @media (max-width: 767.98px) {
+        .container-fluid {
+            padding-right: 10px;
+            padding-left: 10px;
+        }
+
+        .positions-toolbar {
+            margin-right: 0;
+            margin-left: 0;
+            margin-bottom: 12px;
+            padding: 8px 0 10px;
+        }
+
+        .positions-toolbar-left,
+        .positions-actions {
+            width: 100%;
+            max-width: 100%;
+            flex: 0 0 100%;
+            padding-right: 0;
+            padding-left: 0;
+        }
+
+        .positions-title {
+            display: block;
+            margin: 0 0 6px;
+            font-size: 1.6rem;
+        }
+
+        .positions-toggle {
+            display: flex !important;
+            align-items: center;
+            top: 0 !important;
+            margin-bottom: 10px;
+        }
+
+        .positions-toggle label {
+            line-height: 1.2;
+        }
+
+        .positions-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            text-align: left !important;
+        }
+
+        .positions-group-filter {
+            display: flex !important;
+            flex-direction: column;
+            width: 100%;
+            margin: 0 0 8px !important;
+        }
+
+        .positions-group-filter label {
+            margin: 0 0 4px !important;
+        }
+
+        .positions-group-filter select,
+        .positions-dashboard-button {
+            width: 100% !important;
+        }
+
+        .positions-dashboard-button {
+            margin: 0 !important;
+        }
+
+        .group-section {
+            margin-bottom: 12px !important;
+        }
+
+        .group-section>div {
+            margin-top: 0 !important;
+        }
+
+        .group-section h4 {
+            margin: 8px 0;
+            font-size: 1.35rem;
+        }
+
+        .group-section table {
+            margin-bottom: 0;
+        }
+
+        .table-responsive {
+            scrollbar-width: thin;
+        }
+
+        thead th {
+            position: static !important;
+        }
+
+        table[id^="mainboardBillingTable_"]>thead>tr:first-child>th:first-child,
+        table[id^="mainboardBillingTable_"]>thead>tr:first-child>th:nth-child(2),
+        table[id^="smeBillingTable_"]>thead>tr:first-child>th:first-child,
+        table[id^="smeBillingTable_"]>thead>tr:first-child>th:nth-child(2) {
+            top: auto;
+        }
+    }
+
+    .tally-ts-span {
+        display: inline-block;
+        min-width: 95px;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid fc positions-page">
+    <div id="positionsToolbar" class="row align-items-center border-bottom positions-toolbar">
+        <div class="col-md-6 positions-toolbar-left">
+            <h3 class="positions-title">Positions</h3>
+            <div class="d-inline-block positions-toggle" title="Filter IPOs by tallied status">
+                <select id="tallyFilterSelect" class="form-control-sm custom-select"
+                    style="width: 150px; margin-left: 5px;">
+                    <option value="all">All</option>
+                    <option value="tallied">Show Tallied</option>
+                    <option value="untallied" selected>Show Untallied</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-6 positions-actions">
+            <div class="fm d-inline-block positions-group-filter">
+                <label for="groupSelect" style="font-weight: bold; margin-right: 10px;">Active Group:</label>
+                <select id="groupSelect" class="form-control-sm custom-select" style="width: 250px;">
+                    <option value="all" {% if not selected_group %}selected{% endif %}>All Groups</option>
+                    {% for grp in groups %}
+                    <option value="{{ grp.id }}" {% if selected_group and selected_group.id == grp.id %}selected{% endif %}>{{ grp.GroupName }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <!-- <a href="/" class="btn btn-secondary btn-sm positions-dashboard-button" style="margin-left: 15px;">Back to Dashboard</a> -->
+        </div>
+    </div>
+
+    {% if group_tables or empty_groups %}
+    <div id="groupsContainer" data-has-next="{% if has_next %}true{% else %}false{% endif %}"
+        data-offset="{{ next_offset }}">
+        {% include 'partials/group_billing_partial.html' %}
+    </div>
+
+    <div id="emptyGroupsContainer" class="alert alert-info text-center mt-2"
+        style="display: {% if empty_groups %}block{% else %}none{% endif %};">
+        <strong>No records found for:</strong> <span id="emptyGroupsList">{{ empty_groups|join:", " }}</span>
+    </div>
+
+    <div class="text-center mt-3 mb-4" id="loadMoreContainer" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <div class="mt-2 text-muted">Loading more groups...</div>
+    </div>
+    {% else %}
+    <div class="alert alert-warning text-center mt-4" style="margin-top: 30px;">
+        No records found.
+    </div>
+    {% endif %}
+</div>
+
+<!-- Share Modal -->
+<div class="modal fade" id="shareGroupModal" tabindex="-1" aria-labelledby="shareGroupModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header" style="border-bottom: none; padding-bottom: 0;">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin-top: -10px;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="shareGroupModalBody">
+            </div>
+            <div class="modal-footer">
+                <div class="mr-3 d-flex align-items-center">
+                    <label for="modalTallyFilterSelect" class="text-muted mr-2" style="margin-bottom:0;">Filter
+                        Rows:</label>
+                    <select id="modalTallyFilterSelect" class="form-control-sm custom-select" style="width: 140px;">
+                        <option value="all">All</option>
+                        <option value="tallied">Show Tallied</option>
+                        <option value="untallied">Show Untallied</option>
+                    </select>
+                </div>
+                <div class="custom-control custom-switch mr-4">
+                    <input type="checkbox" class="custom-control-input" id="hideEmptyRowsToggle" checked>
+                    <label class="custom-control-label text-muted" style="cursor:pointer; margin-bottom:0;"
+                        for="hideEmptyRowsToggle">Hide Empty Rows/Tables</label>
+                </div>
+                <div class="custom-control custom-switch mr-4">
+                    <input type="checkbox" class="custom-control-input" id="showNetTableToggle" checked>
+                    <label class="custom-control-label text-muted" style="cursor:pointer; margin-bottom:0;"
+                        for="showNetTableToggle">Show Net Table</label>
+                </div>
+                <button type="button" class="btn btn-info" id="copyGroupImageBtn" onclick="copyGroupImage()">
+                    <i class="fa fa-copy"></i> Copy Image
+                </button>
+                <button type="button" class="btn btn-primary" id="shareGroupImageBtn" onclick="shareGroupImage()">
+                    <i class="fa fa-share-alt"></i> Share via System
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'JS/jquery.min.js' %}"></script>
+<script src="{% static 'DataTables/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.bootstrap5.min.js' %}"></script>
+<script>
+    let liveTimeInterval;
+    function openGroupShareModal(buttonElement, groupName, type) {
+        if (liveTimeInterval) clearInterval(liveTimeInterval);
+
+        const containerDiv = buttonElement.closest('div');
+        const tableToClone = containerDiv.querySelector('table');
+
+        if (!tableToClone) return;
+
+        const modalBody = document.getElementById('shareGroupModalBody');
+        modalBody.innerHTML = '';
+
+        const titleContainer = document.createElement('div');
+        titleContainer.style.display = 'flex';
+        titleContainer.style.justifyContent = 'space-between';
+        titleContainer.style.alignItems = 'center';
+        titleContainer.style.marginBottom = '1rem';
+
+        const title = document.createElement('h3');
+        title.className = 'font-weight-bold m-0';
+        title.innerText = groupName + (type === 'SME' ? ' (SME IPOs)' : '');
+
+        const timeDisplay = document.createElement('span');
+        timeDisplay.className = 'text-muted';
+        timeDisplay.style.fontWeight = 'bold';
+
+        const updateTime = () => {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+            timeDisplay.innerText = now.toLocaleString('en-IN', options);
+        };
+        updateTime();
+        liveTimeInterval = setInterval(updateTime, 1000);
+
+        titleContainer.appendChild(title);
+        titleContainer.appendChild(timeDisplay);
+        modalBody.appendChild(titleContainer);
+
+        const styleBlock = document.createElement('style');
+        styleBlock.innerHTML = `
+            #shareGroupModalBody th { position: static !important; }
+            #shareGroupModalBody thead tr.header-row th { background-color: #f8f9fa; }
+        `;
+        modalBody.appendChild(styleBlock);
+
+        const tablesContainer = document.createElement('div');
+        tablesContainer.id = 'shareGroupModalTablesContainer';
+        modalBody.appendChild(tablesContainer);
+
+        let rows = [];
+        if ($.fn.DataTable.isDataTable(tableToClone)) {
+            rows = Array.from($(tableToClone).DataTable().rows().nodes());
+        } else {
+            const tbody = tableToClone.querySelector('tbody');
+            rows = Array.from(tbody.querySelectorAll('tr'));
+        }
+
+        const extractText = (td) => {
+            if (!td) return '';
+            const a = td.querySelector('a');
+            return a ? a.innerText.trim() : td.textContent.trim();
+        };
+
+        const createTable = (title, headerHtml) => {
+            const table = document.createElement('table');
+            table.className = 'table table-bordered table-sm mt-3';
+            table.style.border = '1px solid #000';
+            table.style.width = '100%';
+            table.innerHTML = `
+                <thead>
+                    <tr><th colspan="100%" class="text-center font-weight-bold" style="border:1px solid #000; font-size:1.1rem; background-color: #fff;">${title}</th></tr>
+                    ${headerHtml}
+                </thead>
+                <tbody style="text-align: center;"></tbody>
+            `;
+            return table;
+        };
+
+        const renderTables = (hideEmpty, tallyFilter, showNetTable) => {
+            tablesContainer.innerHTML = '';
+
+            const kostakTable = createTable('Kostak', `
+                <tr class="header-row">
+                    <th rowspan="2" style="text-align:center; vertical-align:middle; border:1px solid #000; width: 180px;">IPO Name</th>
+                    <th colspan="3" style="text-align:center; border:1px solid #000;">Retail</th>
+                    <th colspan="3" style="text-align:center; border:1px solid #000;">SHNI</th>
+                    <th colspan="3" style="text-align:center; border:1px solid #000;">BHNI</th>
+                </tr>
+                <tr class="header-row">
+                    <th style="border:1px solid #000;">Count</th><th style="border:1px solid #000;">Alloted</th><th style="border:1px solid #000;">Billing</th>
+                    <th style="border:1px solid #000;">Count</th><th style="border:1px solid #000;">Alloted</th><th style="border:1px solid #000;">Billing</th>
+                    <th style="border:1px solid #000;">Count</th><th style="border:1px solid #000;">Alloted</th><th style="border:1px solid #000;">Billing</th>
+                </tr>
+            `);
+
+            const stTable = createTable('Subject To', `
+                <tr class="header-row">
+                    <th rowspan="2" style="text-align:center; vertical-align:middle; border:1px solid #000; width: 180px;">IPO Name</th>
+                    <th colspan="3" style="text-align:center; border:1px solid #000;">Retail</th>
+                    <th colspan="3" style="text-align:center; border:1px solid #000;">SHNI</th>
+                    <th colspan="3" style="text-align:center; border:1px solid #000;">BHNI</th>
+                </tr>
+                <tr class="header-row">
+                    <th style="border:1px solid #000;">Count</th><th style="border:1px solid #000;">Alloted</th><th style="border:1px solid #000;">Billing</th>
+                    <th style="border:1px solid #000;">Count</th><th style="border:1px solid #000;">Alloted</th><th style="border:1px solid #000;">Billing</th>
+                    <th style="border:1px solid #000;">Count</th><th style="border:1px solid #000;">Alloted</th><th style="border:1px solid #000;">Billing</th>
+                </tr>
+            `);
+
+            const premiumTable = createTable('Premium', `
+                <tr class="header-row">
+                    <th rowspan="2" style="text-align:center; vertical-align:middle; border:1px solid #000; width: 180px;">IPO Name</th>
+                    <th colspan="2" style="text-align:center; border:1px solid #000;">Premium</th>
+                </tr>
+                <tr class="header-row">
+                    <th style="border:1px solid #000;">Shares</th><th style="border:1px solid #000;">Billing</th>
+                </tr>
+            `);
+
+            const optsTable = createTable('Options', `
+                <tr class="header-row">
+                    <th rowspan="2" style="text-align:center; vertical-align:middle; border:1px solid #000; width: 180px;">IPO Name</th>
+                    <th rowspan="2" style="text-align:center; vertical-align:middle; border:1px solid #000;">Strike</th>
+                    <th colspan="2" style="text-align:center; border:1px solid #000;">OPTIONS</th>
+                    <th colspan="2" style="text-align:center; border:1px solid #000;">Total</th>
+                </tr>
+                <tr class="header-row">
+                    <th style="border:1px solid #000;">Call Amount</th>
+                    <th style="border:1px solid #000;">Put Amount</th>
+                    <th style="border:1px solid #000;">Shares</th>
+                    <th style="border:1px solid #000;">Amount</th>
+                </tr>
+            `);
+
+            const netTable = createTable('Net', `
+                <tr class="header-row">
+                    <th rowspan="2" style="text-align:center; vertical-align:middle; border:1px solid #000; width: 180px;">IPO Name</th>
+                    <th colspan="2" style="text-align:center; vertical-align:middle; border:1px solid #000;">Total</th>
+                </tr>
+                <tr class="header-row">
+                    <th style="border:1px solid #000;">Shares</th><th style="border:1px solid #000;">Amount</th>
+                </tr>
+            `);
+
+            let totalNetAmount = 0;
+
+            rows.forEach(tr => {
+                const cells = Array.from(tr.querySelectorAll('th, td'));
+                if (cells.length < 25) return;
+
+                // Check tally / archived status
+                const isTallied = tr.classList.contains('archived-ipo') ||
+                    (tr.querySelector('input.ipo-archive-checkbox') && tr.querySelector('input.ipo-archive-checkbox').checked);
+
+                // Handle tally filter logic
+                if (tallyFilter === 'untallied' && isTallied) {
+                    return;
+                }
+                if (tallyFilter === 'tallied' && !isTallied) {
+                    return;
+                }
+
+                const ipoNameText = extractText(cells[1]);
+                let ipoName = ipoNameText;
+                if (isTallied) {
+                    const tallySpan = cells[0].querySelector('.tally-ts-span');
+                    const tallyDateText = tallySpan ? tallySpan.innerText.trim().replace(/\n/g, ' ') : '';
+                    let tallyHtml = `<span style="color: #28a745;" title="Tallied">✔</span>`;
+                    if (tallyDateText) {
+                        tallyHtml += `<br><span style="font-size:0.75em; color:#666; font-weight:normal;">${tallyDateText}</span>`;
+                    }
+                    ipoName = `${ipoNameText} ${tallyHtml}`;
+                }
+                const rowBgColor = isTallied ? '#f4fff4' : '#fff';
+
+                const makeRowAndCheckEmpty = (tableObj, data) => {
+                    const isAllZeros = data.every(val => {
+                        const v = val.replace(/,/g, '');
+                        return v === '0' || v === '0.0' || v === '-0.0' || v === '' || v === '-';
+                    });
+
+                    if (hideEmpty && isAllZeros) return;
+
+                    const trHTML = document.createElement('tr');
+                    trHTML.innerHTML = `<th style="text-align:center; border:1px solid #000; background-color:${rowBgColor};">${ipoName}</th>`;
+                    data.forEach(val => {
+                        trHTML.innerHTML += `<td style="text-align:center; border:1px solid #000; background-color:${rowBgColor};">${val}</td>`;
+                    });
+                    tableObj.querySelector('tbody').appendChild(trHTML);
+                };
+
+                // Parse Options breakdown
+                let optBreakdown = [];
+                const rawBreakdown = tr.getAttribute('data-options-breakdown');
+                if (rawBreakdown) {
+                    try {
+                        optBreakdown = JSON.parse(rawBreakdown);
+                    } catch (e) {
+                        optBreakdown = [];
+                    }
+                }
+
+                const callAmt = extractText(cells[22]);
+                const putAmt = extractText(cells[23]);
+
+                // Determine if Option data exists
+                const hasOptionsData = optBreakdown.length > 0 ||
+                    (callAmt !== '0.0' && callAmt !== '0' && callAmt !== '') ||
+                    (putAmt !== '0.0' && putAmt !== '0' && putAmt !== '');
+
+                if (!hideEmpty || hasOptionsData) {
+                    const tbody = optsTable.querySelector('tbody');
+                    const items = (optBreakdown && optBreakdown.length > 0)
+                        ? optBreakdown
+                        : [{
+                            strike_price: '-',
+                            call_amount: callAmt,
+                            put_amount: putAmt,
+                            shares: 0,
+                            amount: (parseFloat(callAmt || 0) + parseFloat(putAmt || 0)).toFixed(0)
+                        }];
+                    const rowSpan = items.length;
+
+                    items.forEach((item, idx) => {
+                        const trEl = document.createElement('tr');
+                        if (idx === 0) {
+                            trEl.innerHTML += `<th rowspan="${rowSpan}" style="text-align:center; vertical-align:middle; border:1px solid #000; background-color:${rowBgColor};">${ipoName}</th>`;
+                        }
+                        trEl.innerHTML += `
+                            <td style="text-align:center; border:1px solid #000; background-color:${rowBgColor};">${item.strike_price}</td>
+                            <td style="text-align:center; border:1px solid #000; background-color:${rowBgColor};">${item.call_amount}</td>
+                            <td style="text-align:center; border:1px solid #000; background-color:${rowBgColor};">${item.put_amount}</td>
+                            <td style="text-align:center; border:1px solid #000; background-color:${rowBgColor};">${item.shares !== undefined ? item.shares : 0}</td>
+                            <td style="text-align:center; border:1px solid #000; background-color:${rowBgColor};">${item.amount !== undefined ? item.amount : '0'}</td>
+                        `;
+                        tbody.appendChild(trEl);
+                    });
+                }
+
+                makeRowAndCheckEmpty(kostakTable, [
+                    extractText(cells[2]), extractText(cells[3]), extractText(cells[4]),
+                    extractText(cells[5]), extractText(cells[6]), extractText(cells[7]),
+                    extractText(cells[8]), extractText(cells[9]), extractText(cells[10])
+                ]);
+
+                makeRowAndCheckEmpty(stTable, [
+                    extractText(cells[11]), extractText(cells[12]), extractText(cells[13]),
+                    extractText(cells[14]), extractText(cells[15]), extractText(cells[16]),
+                    extractText(cells[17]), extractText(cells[18]), extractText(cells[19])
+                ]);
+
+                makeRowAndCheckEmpty(premiumTable, [
+                    extractText(cells[20]), extractText(cells[21])
+                ]);
+
+                let netShares = extractText(cells[cells.length - 2]) || '0';
+                let netAmount = extractText(cells[cells.length - 1]) || '0';
+
+                let numShares = parseFloat(netShares.replace(/,/g, '')) || 0;
+                let numAmount = parseFloat(netAmount.replace(/,/g, '')) || 0;
+
+                const isNetZero = numShares === 0 && numAmount === 0;
+                if (!hideEmpty || !isNetZero) {
+                    const tbody = netTable.querySelector('tbody');
+                    const trHTML = document.createElement('tr');
+                    trHTML.innerHTML = `<th style="text-align:center; border:1px solid #000; background-color:${rowBgColor};">${ipoName}</th>
+                                        <td style="text-align:center; border:1px solid #000; background-color:${rowBgColor};">${netShares}</td>
+                                        <td style="text-align:center; border:1px solid #000; background-color:${rowBgColor};">${netAmount}</td>`;
+                    tbody.appendChild(trHTML);
+                    
+                    totalNetAmount += numAmount;
+                }
+            });
+
+            // Append Final amount row to netTable
+            if (netTable.querySelector('tbody').children.length > 0) {
+                const tbody = netTable.querySelector('tbody');
+                const totalTr = document.createElement('tr');
+                totalTr.innerHTML = `<th style="text-align:center; border:1px solid #000; font-weight:bold;">Final Amount</th>
+                                     <td style="text-align:center; border:1px solid #000; font-weight:bold;">—</td>
+                                     <td style="text-align:center; border:1px solid #000; font-weight:bold;">${totalNetAmount}</td>`;
+                tbody.appendChild(totalTr);
+            }
+
+            [kostakTable, stTable].forEach(tbl => {
+                if (tbl.querySelector('tbody').children.length > 0) {
+                    tablesContainer.appendChild(tbl);
+                }
+            });
+
+            const bottomContainer = document.createElement('table');
+            bottomContainer.style.width = '100%';
+            bottomContainer.style.border = 'none';
+            bottomContainer.style.marginTop = '15px';
+            const tbodyBottom = document.createElement('tbody');
+            const trBottom = document.createElement('tr');
+
+            const hasPremium = premiumTable.querySelector('tbody').children.length > 0;
+            const hasOpts = optsTable.querySelector('tbody').children.length > 0;
+            const hasNet = netTable.querySelector('tbody').children.length > 0;
+
+            if (hasPremium) {
+                const td = document.createElement('td');
+                td.style.verticalAlign = 'top';
+                td.style.paddingRight = '15px';
+                td.style.border = 'none';
+                td.style.width = '1%';
+                td.style.whiteSpace = 'nowrap';
+                premiumTable.style.width = 'max-content';
+                premiumTable.style.marginTop = '0';
+                td.appendChild(premiumTable);
+                trBottom.appendChild(td);
+            }
+
+            if (hasOpts) {
+                const td = document.createElement('td');
+                td.style.verticalAlign = 'top';
+                td.style.paddingRight = '15px';
+                td.style.border = 'none';
+                td.style.width = '1%';
+                td.style.whiteSpace = 'nowrap';
+                optsTable.style.width = 'max-content';
+                optsTable.style.marginTop = '0';
+                td.appendChild(optsTable);
+                trBottom.appendChild(td);
+            }
+
+            if (hasNet && showNetTable) {
+                const td = document.createElement('td');
+                td.style.verticalAlign = 'top';
+                td.style.border = 'none';
+                td.style.width = '1%';
+                td.style.whiteSpace = 'nowrap';
+                netTable.style.width = 'max-content';
+                netTable.style.marginTop = '0';
+                td.appendChild(netTable);
+                trBottom.appendChild(td);
+            }
+
+            if (hasPremium || hasOpts || (hasNet && showNetTable)) {
+                // Add empty td to take up remaining space if needed
+                const tdEmpty = document.createElement('td');
+                tdEmpty.style.border = 'none';
+                trBottom.appendChild(tdEmpty);
+
+                tbodyBottom.appendChild(trBottom);
+                bottomContainer.appendChild(tbodyBottom);
+                tablesContainer.appendChild(bottomContainer);
+            }
+        };
+
+        // Sync initial state from the main page's #tallyFilterSelect
+        const mainPageTallyState = $('#tallyFilterSelect').val();
+        const modalTallySelect = document.getElementById('modalTallyFilterSelect');
+        const emptyToggle = document.getElementById('hideEmptyRowsToggle');
+        const netToggle = document.getElementById('showNetTableToggle');
+
+        modalTallySelect.value = mainPageTallyState;
+
+        // Initial render
+        renderTables(emptyToggle.checked, modalTallySelect.value, netToggle.checked);
+
+        // Listen for toggles inside the modal
+        const updateView = () => {
+            renderTables(emptyToggle.checked, modalTallySelect.value, netToggle.checked);
+        };
+        emptyToggle.onchange = updateView;
+        netToggle.onchange = updateView;
+        modalTallySelect.onchange = updateView;
+
+        // document.getElementById('shareGroupModalLabel').innerText = `Share Group Details - ${groupName}`;
+
+        var myModal = new bootstrap.Modal(document.getElementById('shareGroupModal'));
+        myModal.show();
+    }
+
+    async function renderGroupImageBlob() {
+        const modalBody = document.getElementById('shareGroupModalBody');
+        if (!modalBody) {
+            throw new Error('Group Share content was not found.');
+        }
+
+        function getCsrfToken() {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, 10) === 'csrftoken=') {
+                        cookieValue = decodeURIComponent(cookie.substring(10));
+                        break;
+                    }
+                }
+            }
+            return cookieValue || '{{ csrf_token }}';
+        }
+
+        const response = await fetch('/generate-group-share-image/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify({
+                html_content: modalBody.innerHTML
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Failed to generate share image on server.');
+        }
+
+        const blob = await response.blob();
+        if (!blob || blob.size === 0) {
+            throw new Error('Generated image is empty.');
+        }
+
+        return blob;
+    }
+
+    async function copyGroupImage() {
+        const button = document.getElementById('copyGroupImageBtn');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Generating...';
+        button.disabled = true;
+
+        try {
+            const blob = await renderGroupImageBlob();
+            try {
+                const item = new ClipboardItem({ "image/png": blob });
+                await navigator.clipboard.write([item]);
+                alert("Image copied to clipboard successfully!");
+            } catch (clipErr) {
+                console.warn("Direct clipboard write failed, downloading image instead:", clipErr);
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'group_details.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                alert("Image saved to downloads (clipboard access was restricted by browser).");
+            }
+        } catch (err) {
+            console.error("Failed to generate image: ", err);
+            alert("Error: " + (err.message || "Failed to generate image."));
+        } finally {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    }
+
+    async function shareGroupImage() {
+        const button = document.getElementById('shareGroupImageBtn');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Generating...';
+        button.disabled = true;
+
+        try {
+            const blob = await renderGroupImageBlob();
+            const file = new File([blob], 'group_details.png', { type: 'image/png' });
+            const titleText = document.getElementById('shareGroupModalLabel').innerText;
+
+            const shareData = {
+                title: titleText,
+                text: 'Here are the billing details for ' + titleText,
+                files: [file]
+            };
+
+            if (navigator.canShare && navigator.canShare(shareData)) {
+                await navigator.share(shareData);
+            } else {
+                alert("Sharing files is not supported on this browser. Use 'Copy Image' instead.");
+            }
+        } catch (err) {
+            if (err.name !== 'AbortError') {
+                console.error("Failed to share image: ", err);
+                alert("Failed to share image.");
+            }
+        } finally {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    }
+
+    function updatePositionsNavbarOffset() {
+        var navbar = document.querySelector('.navbar.fixed-top');
+        var navbarHeight = navbar ? navbar.getBoundingClientRect().height : 0;
+        document.documentElement.style.setProperty('--positions-navbar-height', navbarHeight + 'px');
+    }
+
+    updatePositionsNavbarOffset();
+    window.addEventListener('load', updatePositionsNavbarOffset);
+    window.addEventListener('resize', updatePositionsNavbarOffset);
+
+    var responsiveNavbar = document.getElementById('navbarNavAltMarkup');
+    if (responsiveNavbar) {
+        new MutationObserver(updatePositionsNavbarOffset).observe(responsiveNavbar, {
+            attributes: true,
+            attributeFilter: ['class']
+        });
+    }
+
+    document.getElementById('groupSelect').addEventListener('change', function () {
+        var groupId = this.value;
+        if (groupId && groupId !== 'all') {
+            window.location.href = '/group-billing-details/' + groupId + '/';
+        } else {
+            window.location.href = '/group-billing-details/';
+        }
+    });
+
+    $(document).ready(function () {
+        var savedTallyFilter = localStorage.getItem('tallyFilterIpos');
+        if (savedTallyFilter) {
+            $('#tallyFilterSelect').val(savedTallyFilter);
+        }
+
+        $('#tallyFilterSelect').on('change', function () {
+            localStorage.setItem('tallyFilterIpos', $(this).val());
+        });
+
+        $(document).on('change', '.ipo-archive-checkbox', function () {
+            var checkbox = $(this);
+            var ipoId = checkbox.data('id');
+            var groupName = checkbox.data('group');
+            var tr = checkbox.closest('tr');
+            var isChecked = checkbox.is(':checked');
+
+            if (isChecked) {
+                tr.addClass('archived-ipo');
+            } else {
+                tr.removeClass('archived-ipo');
+            }
+
+            var dtTable = tr.closest('table').DataTable();
+            if (dtTable) {
+                dtTable.draw();
+            }
+
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            var tsSpan = checkbox.closest('th').find('.tally-ts-span');
+            if (tsSpan.length === 0) {
+                checkbox.after("<br><span class='tally-ts-span' style='font-size: 0.65rem; font-weight: normal;'></span>");
+                tsSpan = checkbox.closest('th').find('.tally-ts-span');
+            }
+            var originalTsStr = tsSpan.html();
+            tsSpan.html('<i class="fa fa-spinner fa-spin"></i>');
+            checkbox.prop('disabled', true);
+
+            $.ajax({
+                url: '/update-telly-status/',
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                data: JSON.stringify({
+                    updateType: 'One',
+                    groupname: groupName,
+                    status: isChecked,
+                    IPO_id: ipoId
+                }),
+                contentType: 'application/json',
+                success: function (response) {
+                    checkbox.prop('disabled', false);
+                    if (!response.success) {
+                        alert('Error updating status.');
+                        checkbox.prop('checked', !isChecked).trigger('change');
+                        tsSpan.html(originalTsStr);
+                    } else {
+                        if (response.ts_str !== undefined) {
+                            tsSpan.html(response.ts_str);
+                        } else {
+                            tsSpan.html('');
+                        }
+                    }
+                },
+                error: function () {
+                    checkbox.prop('disabled', false);
+                    alert('Network error while updating status.');
+                    checkbox.prop('checked', !isChecked).trigger('change');
+                    tsSpan.html(originalTsStr);
+                }
+            });
+        });
+
+        jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+            "num-html-pre": function (a) {
+                var x = String(a).replace(/<[\s\S]*?>/g, "").trim();
+                var numStr = x.replace(/[^\d\.-]/g, '');
+                if (numStr === '' || numStr === '-' || numStr === '.') {
+                    return x.toLowerCase();
+                }
+                return parseFloat(numStr) || 0;
+            },
+            "num-html-asc": function (a, b) {
+                return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+            },
+            "num-html-desc": function (a, b) {
+                return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+            }
+        });
+
+        $.fn.dataTable.ext.order['dom-checkbox'] = function (settings, col) {
+            return this.api().column(col, { order: 'index' }).nodes().map(function (td, i) {
+                return $('input', td).prop('checked') ? '1' : '0';
+            });
+        }
+
+        function initDataTable(tableId) {
+            var table = $('#' + tableId);
+            if (table.length == 0) return;
+
+            function syncFrozenColumnOffset() {
+                var tallyHeader = table.find('thead > tr:first-child > th:first-child');
+                var tallyWidth = tallyHeader.outerWidth();
+                if (tallyWidth) {
+                    table[0].style.setProperty('--frozen-tally-width', Math.ceil(tallyWidth) + 'px');
+                }
+            }
+
+            var dt = table.DataTable({
+                "dom": "<'table-responsive'tr>",
+                "paging": false,
+                "lengthChange": false,
+                "searching": true,
+                "ordering": true,
+                "order": [],
+                "info": false,
+                "autoWidth": false,
+                "responsive": false,
+                "scrollX": false,
+                "orderCellsTop": false,
+                "fixedHeader": true,
+                "columnDefs": [
+                    { "orderDataType": "dom-checkbox", "targets": 0 },
+                    { "type": 'num-html', "targets": '_all' }
+                ],
+                initComplete: function () {
+                    var api = this.api();
+
+                    $.fn.dataTable.ext.search.push(
+                        function (settings, data, dataIndex, rowData, counter) {
+                            if (settings.nTable.id !== tableId) return true;
+                            var tr = $(settings.aoData[dataIndex].nTr);
+                            var tallyFilter = $('#tallyFilterSelect').val();
+                            var isArchived = tr.hasClass('archived-ipo');
+                            if (tallyFilter === 'tallied' && !isArchived) {
+                                return false;
+                            }
+                            if (tallyFilter === 'untallied' && isArchived) {
+                                return false;
+                            }
+                            return true;
+                        }
+                    );
+
+                    api.draw();
+
+                    $('#tallyFilterSelect').on('change', function () {
+                        api.draw();
+                    });
+                }
+            });
+
+            syncFrozenColumnOffset();
+            dt.on('draw.dt column-sizing.dt', syncFrozenColumnOffset);
+            $(window).on('resize.frozenColumns-' + tableId, syncFrozenColumnOffset);
+        }
+
+        $('table[id^="mainboardBillingTable_"], table[id^="smeBillingTable_"]').each(function () {
+            var id = $(this).attr('id');
+            if (id) {
+                initDataTable(id);
+            }
+        });
+
+        // Infinite Scroll Pagination logic (AJAX)
+        var isLoading = false;
+
+        $(window).scroll(function () {
+            var hasNext = $('#groupsContainer').attr('data-has-next') === 'true';
+
+            if (!hasNext || isLoading) {
+                return;
+            }
+
+            // Check if we are near the bottom of the page
+            if ($(window).scrollTop() + $(window).height() >= $(document).height() - 300) {
+                loadMoreGroups();
+            }
+        });
+
+        function loadMoreGroups() {
+            var offset = $('#groupsContainer').attr('data-offset');
+            isLoading = true;
+            $('#loadMoreContainer').show();
+
+            $.ajax({
+                url: window.location.pathname,
+                type: 'GET',
+                data: {
+                    'offset': offset
+                },
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                success: function (response) {
+                    if (response.html) {
+                        var newHtml = $(response.html);
+                        $('#groupsContainer').append(newHtml);
+
+                        // Initialize datatables for newly added tables
+                        newHtml.find('table[id^="mainboardBillingTable_"], table[id^="smeBillingTable_"]').each(function () {
+                            var id = $(this).attr('id');
+                            if (id) {
+                                initDataTable(id);
+                            }
+                        });
+
+                        // DataTables filtering will automatically hide archived rows based on the dropdown state
+                        // because initDataTable calls api.draw() immediately.
+
+                        // Update empty groups alert
+                        if (response.empty_groups && response.empty_groups.length > 0) {
+                            var emptyGroupsStr = response.empty_groups.join(", ");
+                            var alertBox = $('#emptyGroupsContainer');
+                            var listSpan = $('#emptyGroupsList');
+                            var currentText = listSpan.text();
+
+                            if (currentText.length > 0) {
+                                listSpan.text(currentText + ", " + emptyGroupsStr);
+                            } else {
+                                listSpan.text(emptyGroupsStr);
+                            }
+                            alertBox.show();
+                        }
+                    }
+
+                    if (response.has_next) {
+                        $('#groupsContainer').attr('data-offset', response.next_offset);
+                        $('#groupsContainer').attr('data-has-next', 'true');
+                    } else {
+                        $('#groupsContainer').attr('data-has-next', 'false');
+                    }
+                },
+                error: function () {
+                    console.error('Error loading more groups.');
+                },
+                complete: function () {
+                    isLoading = false;
+                    $('#loadMoreContainer').hide();
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
