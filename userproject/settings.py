@@ -12,13 +12,24 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 import pymysql
+from dotenv import load_dotenv
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Load the .env file from WAB_Interaface folder
+ENV_PATH = os.path.join(BASE_DIR, "WAB_Interaface", ".env")
+load_dotenv(ENV_PATH)
 
 pymysql.version_info = (1, 4, 6, 'final', 0)
 pymysql.install_as_MySQLdb()
 
-
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# WhatsApp Settings loaded from .env
+WHATSAPP_ACCESS_TOKEN = os.getenv("WHATSAPP_ACCESS_TOKEN")
+WHATSAPP_PHONE_NUMBER_ID = os.getenv("WHATSAPP_PHONE_NUMBER_ID")
+WHATSAPP_BUSINESS_ACCOUNT_ID = os.getenv("WHATSAPP_BUSINESS_ACCOUNT_ID")
+WHATSAPP_WEBHOOK_VERIFY_TOKEN = os.getenv("WHATSAPP_WEBHOOK_VERIFY_TOKEN", "ADwealth_WA_Webhook_2026")
+WHATSAPP_APP_SECRET = os.getenv("WHATSAPP_APP_SECRET", "")
+WHATSAPP_API_VERSION = os.getenv("WHATSAPP_API_VERSION", "v25.0")
 
 os.environ["OMP_NUM_THREADS"] = "1"
 
