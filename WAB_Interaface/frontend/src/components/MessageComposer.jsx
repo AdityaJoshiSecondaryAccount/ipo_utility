@@ -66,7 +66,7 @@ export const MessageComposer = () => {
       const isImage = file.type.startsWith('image/');
       const msgType = isImage ? 'image' : 'document';
 
-      const fullMediaUrl = window.location.origin + uploadData.media_url;
+      const fullMediaUrl = uploadData.media_url;
 
       await sendMessage({
         text: file.name,

@@ -4,9 +4,22 @@ import { X, Download } from 'lucide-react';
 export const MediaViewerModal = ({ mediaUrl, onClose }) => {
   if (!mediaUrl) return null;
 
-  const proxiedUrl = mediaUrl.startsWith('http') 
-    ? `/chat-api/proxy?url=${encodeURIComponent(mediaUrl)}` 
-    : mediaUrl;
+  const getSafeUrl = (url) => {
+    if (!url) return null;
+    let cleaned = url.replace('/api/media/file/', '/chat-api/file/');
+    if (cleaned.includes('/chat-api/file/')) {
+      return '/chat-api/file/' + cleaned.split('/chat-api/file/')[1];
+    }
+    if (cleaned.includes('/chat-api/media/local/')) {
+      return '/chat-api/media/local/' + cleaned.split('/chat-api/media/local/')[1];
+    }
+    if (cleaned.startsWith('http://') || cleaned.startsWith('https://')) {
+      return `/chat-api/proxy?url=${encodeURIComponent(cleaned)}`;
+    }
+    return cleaned;
+  };
+
+  const proxiedUrl = getSafeUrl(mediaUrl);
 
   return (
     <div className="modal-overlay" onClick={onClose}>

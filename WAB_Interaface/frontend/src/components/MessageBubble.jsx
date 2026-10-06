@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   Check, CheckCheck, AlertCircle, FileText, Download, Play, Music,
-  ChevronDown, Trash2, Copy, Info, CornerUpLeft, Smile, Forward, Star, Pin 
+  ChevronDown, Trash2 
 } from 'lucide-react';
 import { formatMessageTime } from '../utils/dateUtils';
 import { useChat } from '../context/ChatContext';
@@ -13,8 +13,29 @@ export const MessageBubble = ({ message, onPreviewMedia }) => {
 
   const isInbound = message.direction === 'inbound';
   
-  // Patch old URLs from DB if they still use the old /api/ prefix
-  const safeMediaUrl = message.media_url ? message.media_url.replace('/api/media/file/', '/chat-api/file/') : null;
+  // Normalize and sanitize media URLs
+  const getSafeMediaUrl = (url) => {
+    if (!url) return null;
+    let cleaned = url.replace('/api/media/file/', '/chat-api/file/');
+    if (cleaned.includes('/chat-api/file/')) {
+      return '/chat-api/file/' + cleaned.split('/chat-api/file/')[1];
+    }
+    if (cleaned.includes('/chat-api/media/local/')) {
+      return '/chat-api/media/local/' + cleaned.split('/chat-api/media/local/')[1];
+    }
+    return cleaned;
+  };
+
+  const safeMediaUrl = getSafeMediaUrl(message.media_url);
+
+  const getMediaSrc = (url) => {
+    if (!url) return null;
+    // Only external remote URLs (e.g. Meta WhatsApp CDN) need to be proxied
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return `/chat-api/proxy?url=${encodeURIComponent(url)}`;
+    }
+    return url;
+  };
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -30,12 +51,6 @@ export const MessageBubble = ({ message, onPreviewMedia }) => {
     };
   }, [showMenu]);
 
-  const handleCopy = () => {
-    if (message.text) {
-      navigator.clipboard.writeText(message.text);
-    }
-    setShowMenu(false);
-  };
 
   const handleDelete = () => {
     setShowMenu(false);
@@ -60,7 +75,7 @@ export const MessageBubble = ({ message, onPreviewMedia }) => {
           <div>
             {message.media_url && (
               <img 
-                src={safeMediaUrl.startsWith('http') ? `/chat-api/proxy?url=${encodeURIComponent(safeMediaUrl)}` : safeMediaUrl} 
+                src={getMediaSrc(safeMediaUrl)} 
                 alt="Attachment" 
                 className="message-media-img"
                 onClick={() => onPreviewMedia && onPreviewMedia(safeMediaUrl)}
@@ -74,7 +89,7 @@ export const MessageBubble = ({ message, onPreviewMedia }) => {
         return (
           <div>
             <a 
-              href={safeMediaUrl?.startsWith('http') ? `/chat-api/proxy?url=${encodeURIComponent(safeMediaUrl)}` : safeMediaUrl}
+              href={getMediaSrc(safeMediaUrl)}
               target="_blank" 
               rel="noopener noreferrer"
               className="document-card"
@@ -95,7 +110,7 @@ export const MessageBubble = ({ message, onPreviewMedia }) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0' }}>
             <Music size={22} color="var(--accent-wa)" />
             <audio controls style={{ height: '32px', maxWidth: '220px' }}>
-              <source src={safeMediaUrl?.startsWith('http') ? `/chat-api/proxy?url=${encodeURIComponent(safeMediaUrl)}` : safeMediaUrl} />
+              <source src={getMediaSrc(safeMediaUrl)} />
               Audio not supported
             </audio>
           </div>
@@ -141,37 +156,9 @@ export const MessageBubble = ({ message, onPreviewMedia }) => {
           <ChevronDown size={15} />
         </button>
 
-        {/* WhatsApp-Style Options Menu */}
+        {/* Message Options Menu */}
         {showMenu && (
           <div className="message-dropdown-menu">
-            <div className="message-dropdown-item" onClick={() => setShowMenu(false)}>
-              <Info size={15} />
-              <span>Message info</span>
-            </div>
-            <div className="message-dropdown-item" onClick={() => setShowMenu(false)}>
-              <CornerUpLeft size={15} />
-              <span>Reply</span>
-            </div>
-            <div className="message-dropdown-item" onClick={handleCopy}>
-              <Copy size={15} />
-              <span>Copy</span>
-            </div>
-            <div className="message-dropdown-item" onClick={() => setShowMenu(false)}>
-              <Smile size={15} />
-              <span>React</span>
-            </div>
-            <div className="message-dropdown-item" onClick={() => setShowMenu(false)}>
-              <Forward size={15} />
-              <span>Forward</span>
-            </div>
-            <div className="message-dropdown-item" onClick={() => setShowMenu(false)}>
-              <Pin size={15} />
-              <span>Pin</span>
-            </div>
-            <div className="message-dropdown-item" onClick={() => setShowMenu(false)}>
-              <Star size={15} />
-              <span>Star</span>
-            </div>
             <div className="message-dropdown-item danger" onClick={handleDelete}>
               <Trash2 size={15} color="#ff5252" />
               <span style={{ color: '#ff5252' }}>Delete</span>

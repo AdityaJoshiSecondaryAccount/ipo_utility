@@ -89,7 +89,7 @@ async def delete_message(
     message_id: int,
     db: AsyncSession = Depends(get_db)
 ):
-    """Deletes a message by its ID."""
+    """Deletes a message by its ID and synchronizes conversation state."""
     stmt = select(Message).where(Message.id == message_id)
     result = await db.execute(stmt)
     msg = result.scalar_one_or_none()
@@ -98,18 +98,61 @@ async def delete_message(
         
     conv_id = msg.conversation_id
     await db.delete(msg)
+    await db.flush()
+
+    # Query newest remaining message for this conversation
+    last_msg_stmt = (
+        select(Message)
+        .where(Message.conversation_id == conv_id)
+        .order_by(desc(Message.timestamp), desc(Message.id))
+        .limit(1)
+    )
+    last_msg_res = await db.execute(last_msg_stmt)
+    last_msg = last_msg_res.scalar_one_or_none()
+
+    conv_stmt = select(Conversation).where(Conversation.id == conv_id)
+    conv_res = await db.execute(conv_stmt)
+    conv = conv_res.scalar_one_or_none()
+
+    if conv:
+        if last_msg:
+            conv.last_message_text = last_msg.text or f"[{last_msg.message_type.capitalize()}]"
+            conv.last_message_time = last_msg.timestamp
+            conv.last_message_status = last_msg.status
+        else:
+            conv.last_message_text = None
+            conv.last_message_status = "sent"
+
+        # Re-tally unread inbound messages
+        unread_stmt = select(func.count(Message.id)).where(
+            Message.conversation_id == conv_id,
+            Message.direction == "inbound",
+            Message.status != "read"
+        )
+        unread_res = await db.execute(unread_stmt)
+        conv.unread_count = unread_res.scalar() or 0
+
     await db.commit()
     
     # Broadcast deletion via WebSocket
-    await manager.broadcast({
-        "type": "MESSAGE_DELETED",
-        "data": {
-            "message_id": message_id,
-            "conversation_id": conv_id
-        }
+    await manager.broadcast("MESSAGE_DELETED", {
+        "message_id": message_id,
+        "conversation_id": conv_id,
+        "last_message_text": conv.last_message_text if conv else None,
+        "last_message_time": conv.last_message_time.isoformat() if (conv and conv.last_message_time) else None,
+        "last_message_status": conv.last_message_status if conv else None,
+        "unread_count": conv.unread_count if conv else 0
     })
     
-    return {"status": "success", "message_id": message_id}
+    return {
+        "status": "success",
+        "message_id": message_id,
+        "conversation_id": conv_id,
+        "last_message_text": conv.last_message_text if conv else None,
+        "last_message_time": conv.last_message_time.isoformat() if (conv and conv.last_message_time) else None,
+        "last_message_status": conv.last_message_status if conv else None,
+        "unread_count": conv.unread_count if conv else 0
+    }
 
 
 @router.post("/conversations/{conv_id}/read")

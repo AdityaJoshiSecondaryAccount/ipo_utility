@@ -141,10 +141,32 @@ export const ChatProvider = ({ children }) => {
         method: 'DELETE'
       });
       if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.detail || "Failed to delete message");
+        let errorMsg = "Failed to delete message";
+        try {
+          const errData = await res.json();
+          errorMsg = errData.detail || errorMsg;
+        } catch {
+          const text = await res.text();
+          if (text) errorMsg = text;
+        }
+        throw new Error(errorMsg);
       }
+      const data = await res.json().catch(() => ({}));
       setMessages(prev => prev.filter(m => m.id !== messageId));
+      if (data && data.conversation_id) {
+        setConversations(prev => prev.map(c => {
+          if (c.id === data.conversation_id) {
+            return {
+              ...c,
+              last_message_text: data.last_message_text !== undefined ? data.last_message_text : c.last_message_text,
+              last_message_time: data.last_message_time || c.last_message_time,
+              last_message_status: data.last_message_status || c.last_message_status,
+              unread_count: data.unread_count !== undefined ? data.unread_count : c.unread_count
+            };
+          }
+          return c;
+        }));
+      }
       fetchConversations();
       return true;
     } catch (err) {
@@ -213,8 +235,22 @@ export const ChatProvider = ({ children }) => {
             const { conversation_id } = data;
             setConversations(prev => prev.map(c => c.id === conversation_id ? { ...c, unread_count: 0 } : c));
           } else if (type === 'MESSAGE_DELETED') {
-            const { message_id } = data;
+            const { message_id, conversation_id, last_message_text, last_message_time, last_message_status, unread_count } = data;
             setMessages(prev => prev.filter(m => m.id !== message_id));
+            if (conversation_id) {
+              setConversations(prev => prev.map(c => {
+                if (c.id === conversation_id) {
+                  return {
+                    ...c,
+                    last_message_text: last_message_text !== undefined ? last_message_text : c.last_message_text,
+                    last_message_time: last_message_time || c.last_message_time,
+                    last_message_status: last_message_status || c.last_message_status,
+                    unread_count: unread_count !== undefined ? unread_count : c.unread_count
+                  };
+                }
+                return c;
+              }));
+            }
             fetchConversations();
           }
         } catch (err) {

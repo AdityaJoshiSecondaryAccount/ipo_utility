@@ -23,6 +23,34 @@ logger = logging.getLogger("WAB_Inbox")
 async def lifespan(app: FastAPI):
     logger.info("Initializing IPO Utility WhatsApp Inbox Database...")
     await init_db()
+    try:
+        from .database import AsyncSessionLocal
+        from .models import Conversation, Message
+        from sqlalchemy import select, desc
+        async with AsyncSessionLocal() as session:
+            convs_res = await session.execute(select(Conversation))
+            for conv in convs_res.scalars().all():
+                last_msg_res = await session.execute(
+                    select(Message)
+                    .where(Message.conversation_id == conv.id)
+                    .order_by(desc(Message.timestamp), desc(Message.id))
+                    .limit(1)
+                )
+                last_msg = last_msg_res.scalar_one_or_none()
+                if last_msg:
+                    new_text = last_msg.text or f"[{last_msg.message_type.capitalize()}]"
+                    if conv.last_message_text != new_text:
+                        conv.last_message_text = new_text
+                        conv.last_message_time = last_msg.timestamp
+                        conv.last_message_status = last_msg.status
+                elif conv.last_message_text is not None:
+                    conv.last_message_text = None
+                    conv.last_message_status = "sent"
+            await session.commit()
+            logger.info("Conversation latest messages synchronized.")
+    except Exception as e:
+        logger.warning(f"Could not auto-sync conversation last messages: {e}")
+
     logger.info("IPO Utility WhatsApp Inbox running on http://localhost:%s", settings.PORT)
     yield
     logger.info("Shutting down IPO Utility WhatsApp Inbox...")

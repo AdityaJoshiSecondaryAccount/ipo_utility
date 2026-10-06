@@ -85,6 +85,18 @@ async def get_uploaded_file(filename: str):
 @router.get("/proxy")
 async def proxy_whatsapp_media(url: str):
     """Securely proxies media download from Meta WhatsApp CDN using Bearer token."""
+    # Safety fallback: if an internal uploaded file URL was passed, serve it directly
+    if "/chat-api/file/" in url:
+        filename = url.split("/chat-api/file/")[-1].split("?")[0]
+        file_path = MEDIA_DIR / filename
+        if file_path.exists():
+            import mimetypes
+            content_type, _ = mimetypes.guess_type(str(file_path))
+            with file_path.open("rb") as f:
+                content = f.read()
+            return Response(content=content, media_type=content_type or "application/octet-stream")
+        raise HTTPException(status_code=404, detail="File not found")
+
     headers = {"Authorization": f"Bearer {settings.WHATSAPP_ACCESS_TOKEN}"}
     try:
         async with httpx.AsyncClient(timeout=20.0) as client:
