@@ -1,3 +1,0 @@
-IpoUtilityAdmin
-IpoUtilityAdmin@1234
-usb db admin panel cred

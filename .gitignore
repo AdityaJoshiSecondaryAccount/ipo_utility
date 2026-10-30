@@ -1,9 +1,16 @@
-# Python
+# Byte-compiled / optimized / binary files
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
-.Python
+*.dll
+*.dylib
+*.a
+wkhtmltox.dll
+libwkhtmltox.a
+wkhtmltox/
+
+# Distribution / packaging
 build/
 develop-eggs/
 dist/
@@ -22,22 +29,72 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# Django
+# Executables & Binaries
+*.exe
+wkhtmltoimage.exe
+wkhtmltopdf.exe
+WAB_Interaface/ngrok.exe
+
+# Django & Database
 local_settings.py
 db.sqlite3
+db(_Bundled_).sqlite3
 *.sqlite3
 *.db
-db.sqlite3-journal
+*.sqlite3-journal
 staticfiles/
 
-# Environments
+# Environments & Virtual Envs
 .env
-.venv
-env/
+*.env
+.env*
+**/.env*
+WAB_Interaface/.env
+WAB_Interaface/backend/.env
+.venv/
+**/.venv/
 venv/
+**/venv/
+env/
+**/env/
 ENV/
 env.bak/
 venv.bak/
+
+# WhatsApp Flow Keys, Certificates & Credentials
+whatsapp/flow_keys/
+**/flow_keys/
+pemfile/
+*.pem
+*.key
+Cred.txt
+
+# Node & Frontend
+node_modules/
+**/node_modules/
+WAB_Interaface/frontend/node_modules/
+WAB_Interaface/frontend/dist/
+.npm/
+
+# Uploads & Media
+uploads/
+**/uploads/
+/uploads/*
+WAB_Interaface/backend/uploads/
+WAB_Interaface/backend/inbox.db
+WAB_Interaface/backend/wab_inbox.db
+WAB_Interaface/public_sign_readme.txt
+
+# Temp & Scratch Files
+temp_docx/
+*views2.py
+home/views2.py
+home/views-real.py
+*.bak
+*.tmp
+scratch/
+launcher_log.txt
+*.log
 
 # IDEs / Editors
 .vscode/
@@ -50,27 +107,6 @@ venv.bak/
 .project
 .pydevproject
 .settings/
-docs/
-!docs/
-docs/*
-!docs/playwright*.md
-!docs/playwright*.json
-
-**/migrations/
-wkhtmltox/
-
-# Isolated browser automation artifacts
-playwright_testing/results/
-playwright_testing/tmp/
-tmp/playwright-e2e-*/
-test-results/
-playwright-report/
-playwright/.auth/
-*.webm
-
-**/migrations/
-!home/migrations/
-!home/migrations/*.py
 
 # OS-specific
 .DS_Store
@@ -78,63 +114,11 @@ Thumbs.db
 ehthumbs.db
 desktop.ini
 
-# Logs
-*.log
-launcher_log.txt
-
-# Node & Frontend
-node_modules/
-**/node_modules/
-dist/
-**/dist/
-.npm/
-
-# Executables & Binaries
-*.exe
-wkhtmltoimage.exe
-wkhtmltopdf.exe
-
-# WhatsApp Flow Keys & Secrets
-whatsapp/flow_keys/
-**/flow_keys/
-*.pem
-*.key
-*.env*
-.env*
-
-# --------------------------
-# Backup & Scratch Files
-*views2.py
-home/views2.py
-*.bak
-*.tmp
-scratch/
-
-
-# WAB_Interaface / WhatsApp Inbox Microservice
-WAB_Interaface/public_sign_readme.txt
-WAB_Interaface/backend/.env
-WAB_Interaface/backend/wab_inbox.db
-WAB_Interaface/backend/.venv/
-WAB_Interaface/frontend/node_modules/
-WAB_Interaface/frontend/dist/
-WAB_Interaface/ngrok.exe
-
-# Playwright Testing
-playwright_testing/**
-!playwright_testing/remote.py
-!playwright_testing/remote_e2e.py
-!playwright_testing/REMOTE_TESTING.md
-!playwright_testing/calculation/
-!playwright_testing/calculation/remote_seed.py
-
-.python-version
-home/views-real.py
-settings.py
-
-*.jpg
-*.png
-*.webp
-*.jfif
-
-/uploads/*
+# Isolated browser automation artifacts / Playwright
+playwright_testing/results/
+playwright_testing/tmp/
+tmp/playwright-e2e-*/
+test-results/
+playwright-report/
+playwright/.auth/
+*.webm
