@@ -1,0 +1,309 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2FA Verification</title>
+    <link rel="stylesheet" href="{% static 'CSS/all.min.css' %}" />
+    <link href="{% static 'CSS/bootstrap.min.css' %}" rel="stylesheet" id="bootstrap-css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: arabic typesetting;
+        }
+
+        body {
+            background: bisque;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 440px;
+            padding: 0 20px;
+            margin: 70px auto;
+        }
+
+        .wrapper {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.48);
+            border-radius: 5px;
+            box-shadow: 0px 4px 10px 1px rgba(0, 0, 0, 0.1);
+        }
+
+        .wrapper .title {
+            height: 90px;
+            border-radius: 5px 5px 0 0;
+            color: #fff;
+            font-size: 35px;
+            font-weight: 609;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            text-decoration: underline;
+        }
+
+        .wrapper form {
+            padding: 30px 25px 25px 25px;
+        }
+
+        .wrapper form .row {
+            height: 45px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .wrapper form .row input {
+            height: 100%;
+            width: 100%;
+            outline: none;
+            padding-left: 47px;
+            padding-right: 47px;
+            border-radius: 5px;
+            border: 1px solid lightgrey;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        form .row input:focus {
+            border-color: #16a085;
+            box-shadow: inset 0px 0px 2px 2px rgba(26, 188, 156, 0.25);
+        }
+
+        .wrapper form .row i {
+            position: absolute;
+            width: 47px;
+            height: 100%;
+            color: #fff;
+            font-size: 18px;
+            background: #5cb85c;
+            border: 1px solid #4cae4c;
+            border-radius: 5px 0 0 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .wrapper form .button input {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 500;
+            background: #5cb85c;
+            border: 1px solid green;
+            cursor: pointer;
+            border-radius: 50px;
+            margin: -10px 0;
+            padding-left: 0;
+            padding-right: 0;
+            text-align: center;
+            width: 100%;
+        }
+
+        .code-boxes-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .code-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .code-box {
+            width: 42px;
+            height: 45px;
+            outline: none;
+            border-radius: 5px;
+            border: 1px solid lightgrey;
+            font-size: 22px;
+            font-weight: bold;
+            text-align: center;
+            background: #fff;
+            transition: all 0.2s ease;
+            padding: 0;
+        }
+
+        .code-box:focus {
+            border-color: #16a085;
+            box-shadow: inset 0px 0px 2px 2px rgba(26, 188, 156, 0.25);
+        }
+
+        .code-dash {
+            color: #fff;
+            font-size: 28px;
+            font-weight: bold;
+            user-select: none;
+            margin: 0 4px;
+            line-height: 1;
+        }
+
+        @media (max-width: 400px) {
+            .code-box {
+                width: 34px;
+                height: 42px;
+                font-size: 18px;
+            }
+            .code-boxes-wrapper, .code-group {
+                gap: 5px;
+            }
+        }
+
+        form .button input:hover {
+            background: green;
+        }
+
+        .fallback-link {
+            text-align: center;
+            margin-top: 20px;
+            display: block;
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        .fallback-link:hover {
+            text-decoration: underline;
+        }
+
+        p.desc {
+            color: white;
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    {% if messages %}
+    <div class="alert alert-danger fixed-top" id="success-alert" style="position:fixed;">
+        <button type="button" class="close" data-dismiss="alert">x</button>
+        {% for message in messages %}
+        <strong>{{message}}</strong><br>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <div class="container">
+        <div class="wrapper">
+            <div class="title"><span>Two-Factor Auth</span></div>
+            <form method="post" action="{% url 'verify_2fa' %}" id="twoFactorForm">
+                {% csrf_token %}
+                <p class="desc">Enter the 6-digit code from Google Authenticator.</p>
+                <div class="code-boxes-wrapper">
+                    <div class="code-group">
+                        <input type="text" class="code-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-index="0" autofocus autocomplete="off" required>
+                        <input type="text" class="code-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-index="1" autocomplete="off" required>
+                        <input type="text" class="code-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-index="2" autocomplete="off" required>
+                    </div>
+                    <span class="code-dash">-</span>
+                    <div class="code-group">
+                        <input type="text" class="code-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-index="3" autocomplete="off" required>
+                        <input type="text" class="code-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-index="4" autocomplete="off" required>
+                        <input type="text" class="code-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-index="5" autocomplete="off" required>
+                    </div>
+                </div>
+                <input type="hidden" name="totp_token" id="totpTokenCombined" required>
+                <div class="row button mt-4">
+                    <input class="btn-outline-success loginbtn" type="submit" value="Verify Code">
+                </div>
+                <a class="fallback-link" href="{% url 'verify_backup_code' %}">Lost device? Use a backup code</a>
+            </form>
+        </div>
+    </div>
+    <script src="{% static 'JS/jquery.min.js' %}"></script>
+    <script src="{% static 'JS/bootstrap.min.js' %}"></script>
+    <script>
+        $("#success-alert").fadeTo(3000, 500).slideUp(500, function () {
+            $("#success-alert").slideUp(500);
+        });
+
+        const boxes = Array.from(document.querySelectorAll('.code-box'));
+        const form = document.getElementById('twoFactorForm');
+        const combinedInput = document.getElementById('totpTokenCombined');
+
+        boxes.forEach((box, index) => {
+            box.addEventListener('focus', () => {
+                box.select();
+            });
+
+            box.addEventListener('keydown', (e) => {
+                // If user presses hyphen or space, advance to next box
+                if (e.key === '-' || e.key === '–' || e.key === ' ') {
+                    e.preventDefault();
+                    if (index < boxes.length - 1) {
+                        boxes[index + 1].focus();
+                    }
+                    return;
+                }
+
+                // Handle backspace
+                if (e.key === 'Backspace') {
+                    if (box.value === '' && index > 0) {
+                        e.preventDefault();
+                        boxes[index - 1].value = '';
+                        boxes[index - 1].focus();
+                    }
+                    return;
+                }
+
+                // Handle arrow keys
+                if (e.key === 'ArrowLeft' && index > 0) {
+                    e.preventDefault();
+                    boxes[index - 1].focus();
+                } else if (e.key === 'ArrowRight' && index < boxes.length - 1) {
+                    e.preventDefault();
+                    boxes[index + 1].focus();
+                }
+            });
+
+            box.addEventListener('input', (e) => {
+                const val = box.value.replace(/[^0-9]/g, '');
+                box.value = val;
+
+                if (val && index < boxes.length - 1) {
+                    boxes[index + 1].focus();
+                }
+            });
+
+            box.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pasteData = (e.clipboardData || window.clipboardData).getData('text');
+                const cleaned = pasteData.replace(/[^0-9]/g, '');
+                if (!cleaned) return;
+
+                // Fill from index 0 if cleaned length is 6, or from current box
+                const startIdx = (cleaned.length === 6) ? 0 : index;
+                for (let i = 0; i < cleaned.length && (startIdx + i) < boxes.length; i++) {
+                    boxes[startIdx + i].value = cleaned[i];
+                }
+                const focusTarget = Math.min(startIdx + cleaned.length, boxes.length - 1);
+                boxes[focusTarget].focus();
+            });
+        });
+
+        form.addEventListener('submit', (e) => {
+            const token = boxes.map(b => b.value.trim()).join('');
+
+            if (token.length !== 6) {
+                e.preventDefault();
+                const firstEmpty = boxes.find(b => !b.value.trim());
+                if (firstEmpty) firstEmpty.focus();
+                return false;
+            }
+
+            combinedInput.value = token;
+        });
+    </script>
+</body>
+
+</html>

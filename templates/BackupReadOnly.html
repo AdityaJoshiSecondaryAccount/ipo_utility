@@ -1,0 +1,504 @@
+{% extends 'basic.html' %}
+{% block title%}BACK UP{% endblock %}
+{% block css %}
+{% load static %}
+<link rel="stylesheet" href="{% static  'DataTables/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static  'DataTables/css/buttons.bootstrap5.min.css' %}">
+<link rel="stylesheet" href="{% static  'DataTables/css/dataTables.bootstrap5.min.css' %}">
+<style>
+    html, body {
+        pointer-events: none; 
+    }
+    #example th{
+        text-align: center;
+    }
+    
+    textarea {
+        width: 100%;
+        height: 300px;
+        resize: none;
+        border: none;
+        background-color: #f8f8f8;
+        font-family: Arial, sans-serif;
+    }
+    .custom-width {
+        width: 81% !important;
+        left: 0% !important;;
+    }
+    .form-control-sm{
+        border: 0.3px solid black;
+        height:30px !important;
+    }
+    .cw{
+        width: 13%;
+        left: 5%;
+    }
+    #example_wrapper{
+        margin-top: 1.5%;
+    }
+
+    table{
+        border-collapse: collapse;
+        border-spacing: 0;
+        width: 100%;
+        border: 1px solid #ddd;
+        margin-bottom: 2%;
+    }
+
+    .container-fluid {
+        width: 100%;
+        margin-right: 0%;
+        margin-left: 0%;
+    }
+
+    
+
+    th,
+    td {
+        text-align: center;
+        padding: 15px;
+    }
+    
+
+    table td:nth-child(1){
+        background :rgb(182, 182, 158);
+    }
+
+    .h3,
+    h3 {
+        margin: 0px 0px;
+        margin-top: 85px;
+        font-size: 1.75rem;
+        border-block-end: 3px solid #e9ecef;
+    }
+
+    .iponame {
+        background-color: white;
+        height: 45px;
+        margin-top: 35px;
+        width: 100%;
+        text-align: center;
+        text-align: center;
+    }
+
+
+    table.table-sortable th.currently-sorted[data-sort-dir="asc"]::after {
+        content: "\25b2";
+
+    }
+
+    table.table-sortable th.currently-sorted[data-sort-dir="desc"]::after {
+        content: "\25bc";
+
+    }
+
+    .col-md-3 {
+        display: inline-block;
+        margin-left: -4px;
+    }
+
+    @media (min-width: 1200px){
+        .fc{
+            margin-top: 4%;
+        }
+    }
+
+    @media (min-width: 1541px) and (max-width: 1950px) {
+        .bi{
+            margin-top: -2.8% !important;
+        }
+        #example_filter {
+            margin-left: -6rem;
+        }
+    }
+
+    @media (min-width: 1200px) and (max-width: 1540px) {
+        .bi{
+            margin-top: -4% !important;
+            margin-right: 7% !important;
+        }
+        #example_wrapper {
+            margin-top: 4.5%;
+        }
+        #example_filter {
+            margin-left: -6rem;
+        }
+    }
+
+    @media (min-width: 992px) and (max-width: 1199px) {
+        .bi{
+            margin-top: -5% !important;
+            margin-right: 31% !important;
+            width: 14% !important;
+        }
+        #example_filter {
+            margin-left: -8em;
+          
+          }
+
+        .fc{
+            margin-top: 9%;
+        }
+    }
+
+    @media (min-width: 768px) and (max-width: 991px) {
+        .fc{
+            margin-top: 11%;
+        }
+
+        .bi{
+            margin-top: -6.5% !important;
+            width: 18% !important;
+            margin-right: 37% !important;
+        }
+
+        .addipomodal {
+            margin: 0% -22%!important;
+            position: fixed;
+        }
+        #example_filter {
+            margin-left: -10rem;
+          
+          }
+    }
+    @media (min-width: 637px) and (max-width: 767px) {
+        .fc{
+            margin-top: 18%;
+        }
+
+        .bi{
+            margin-top: -21% !important;
+            width: 73% !important;
+            margin-right: -8rem !important;
+        }
+
+        .addipomodal {
+            margin: 0% -39%!important;
+            position: fixed;
+        }
+
+        .iponame{
+            margin-top: 54px;     
+        }
+
+        #example_length {
+            margin-right: 67%;
+        }
+        #example_filter {
+            margin-left: -12rem !important;
+          
+          }
+    }
+
+
+
+    @media (min-width: 576px) and (max-width: 636px) {
+        .fc{
+            margin-top: 18%;
+        }
+
+        .bi{
+            margin-top: -28% !important;
+            width: 73% !important;
+            margin-right: -8rem !important;
+        }
+
+        .addipomodal {
+            margin: 0% -39%!important;
+            position: fixed;
+        }
+
+        .iponame{
+            margin-top: 54px;     
+        }
+
+        #example_length {
+            margin-right: 67%;
+        }
+        #example_filter {
+            margin-left: -12rem !important;
+          
+          }
+    }
+
+    @media (min-width: 427px) and (max-width: 575px) {
+        .fc{
+            margin-top: 23%;
+        }
+
+        .bi{
+            margin-top: -33% !important;
+            width: 101% !important;
+            margin-right: -18.5rem !important;
+        }
+
+        .addipomodal {
+            margin: 0% -64%!important;
+            position: fixed;
+        }
+
+        .iponame{
+            margin-top: 54px;     
+        }
+        #example_length {
+            margin-right: 67%;
+        }
+        #example_filter {
+            margin-left: -13rem !important;
+            margin-top: 120%;
+        }
+    }
+
+    @media (min-width: 316px) and (max-width: 426px) {
+        .fc{
+            margin-top: 33%;
+        }
+
+        .bi{
+            margin-top: -2.5rem !important;
+            width: 138% !important;
+            margin-right: -13.5rem !important;
+        }
+
+        .addipomodal {
+            margin: 0% -82%!important;
+            position: fixed;
+        }
+        #example_wrapper {
+            margin-top: 2.5%;
+        }
+
+        .iponame{
+            margin-top: 54px;     
+        }
+        #example_length {
+            margin-right: 67%;
+        }
+        #example_filter {
+            margin-left: -14rem !important;
+            margin-top: 2.5rem;
+        }
+    }
+
+    @media (min-width: 280px) and (max-width: 315px){ 
+        .bi{
+            margin-top: -2.3rem !important;
+            width: 158% !important;
+            margin-right: -11.8rem !important;
+        }
+
+        .addipomodal {
+            margin: 0% -96%!important;
+            position: fixed;
+        }
+
+        .iponame{
+            margin-top: 54px;     
+        }
+
+        .fc{
+            margin-top: 38%;
+        }
+        #example_length {
+            margin-right: 67%;
+        }
+        #example_filter {
+            margin-left: -14rem !important;
+            margin-top: 2.5rem;
+        }
+    }
+
+    @media (min-width: 280px) and (max-width: 294px){ 
+        .bi{
+            margin-top: -2.3rem !important;
+            width: 158% !important;
+            margin-right: -11.8rem !important;
+        }
+
+        .addipomodal {
+            margin: 0% -96%!important;
+            position: fixed;
+        }
+
+        .iponame{
+            margin-top: 54px;
+            height: 74px;    
+        }
+
+        .fc{
+            margin-top: 48%;
+        }
+        
+    }
+</style>
+
+{% endblock %}
+{% block body %}
+
+{% csrf_token %}
+
+<script src="{% static 'DataTables/js/jquery-3.7.0.js' %}"></script>
+<script src="{% static 'DataTables/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.fixedHeader.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.bootstrap5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.bootstrap5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/jszip.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'DataTables/js/buttons.colVis.min.js' %}"></script>
+<script src="{% static 'DataTables/js/pdfmake.min.js' %}"></script>
+<script src="{% static 'DataTables/js/vfs_fonts.js' %}"></script>
+
+<h3 class="fixed-top iponame" style="z-index: 9; position:absolute;  ">BACK UP</h3>
+
+<div class="container-fluid fc" >
+    <div class="table-responsive text-nowrap table-wrapper-scroll-x my-custom-scrollbar"> 
+        <table  id="example" class="table table-hover table-bordered table-responsive" style='width:100%' >
+           
+            {{ html_table |safe }}
+            
+        </table>
+    </div>
+
+</div> 
+{% comment %} <script>
+    $(document).ready(function () {
+        var editButton = $('button');
+        editButton.prop('disabled', true);
+        editButton.addClass('disabled'); 
+    });
+</script> {% endcomment %}
+<script>
+    $(document).ready(function () {
+        $('#bootstrapdatatable').DataTable({
+            "aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
+            "iDisplayLength": 25
+        }
+        );
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $('#example thead tr')
+            .clone(true)
+            .addClass('filters')
+            .appendTo('#example thead');
+    
+        var table = $('#example').DataTable({
+            orderCellsTop: true,
+            fixedHeader: true,
+            lengthMenu: [50, 100, 150, 200,-1],
+            lengthChange: true,
+            
+            initComplete: function () {
+                var api = this.api();
+                
+                api
+                    .columns(':not(:last-child)')
+                    .eq(0)
+                    .each(function (colIdx) {
+                        
+                        var cell = $('.filters th').eq(
+                            $(api.column(colIdx).header()).index()
+                        );
+                        var title = $(cell).text();
+                        $(cell).html('<input class="Input" type="text" placeholder="' + title + '" style="text-align: center ;" />');
+                        
+                        $(
+                            'input',
+                            $('.filters th').eq($(api.column(colIdx).header()).index())
+                        )
+                            .off('keyup change')
+                            .on('change', function (e) {
+                                
+                                $(this).attr('title', $(this).val());
+                                var regexr = '({search})'; //$(this).parents('th').find('select').val();
+    
+                                var cursorPosition = this.selectionStart;
+                                
+                                api
+                                    .column(colIdx)
+                                    .search(
+                                        this.value != ''
+                                            ? regexr.replace('{search}', '(((' + this.value + ')))')
+                                            : '',
+                                        this.value != '',
+                                        this.value == ''
+                                    )
+                                    .draw();
+                            })
+                            .on('keyup', function (e) {
+                                e.stopPropagation();
+    
+                                $(this).trigger('change');
+                                $(this)
+                                    .focus()[0]
+                                    .setSelectionRange(cursorPosition, cursorPosition);
+                            });
+                    });
+                    var lastCell = $('.filters th').eq(
+                    $(api.column(':last-child').header()).index()
+                    );
+                    $(lastCell).html('');
+            },
+            language: {
+                info: 'Showing _START_ to _END_ of _TOTAL_ Rows',
+                infoFiltered: '(filtered from _MAX_ total Rows)',
+                lengthMenu: 'Show <select>' +
+                            '<option value="50">50</option>' +
+                            '<option value="100">100</option>' +
+                            '<option value="150">150</option>' +
+                            '<option value="200">200</option>' +
+                            '<option value="-1">All</option>' +
+                            '</select> Rows',
+                search: 'Search:',
+                paginate: {
+                    first: 'First',
+                    last: 'Last',
+                    next: 'Next',
+                    previous: 'Previous'
+                }
+            },
+            
+        });
+        var customButton = $('<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#exampleModal">Status</button>');
+        $('.dt-buttons.btn-group').append(customButton);
+
+        $('select[name="example_length"] option[value="-1"]').text('All');
+        
+        table.buttons().container()
+            .appendTo( '#example_wrapper .col-md-6:eq(0)' );
+
+        var table = $('#example').DataTable();
+
+    } );
+</script>
+<script>
+
+    $(document).ready(function () {
+        var newDiv = $('<div></div>');
+        var formHtml =    `
+            <form method="POST" action="/AllIpoBackup">
+                {% csrf_token %}
+                <!-- BUTTON OF EDIT MODAL -->
+                <button type="submit" class="btn btn-outline-primary bi" style="float:right; margin: -2.5% 0%; width: 11%;">
+                    IPO Backup &nbsp;
+                </button>
+            </form>
+            {% for profile in entry %}
+                {{ profile.name }}
+            {% endfor %} 
+        `;
+        
+        newDiv.append(formHtml);
+        $('.dataTables_length').append(newDiv);
+    });
+        $(document).ready(function() {
+        $(".col-sm-12.col-md-6:first").addClass("custom-width");
+        $(".col-sm-12.col-md-6").addClass("cw");
+        $(".buttons-collection").addClass("d-flex justify-content-center align-items-center");
+    });
+</script>
+
+{% endblock %}

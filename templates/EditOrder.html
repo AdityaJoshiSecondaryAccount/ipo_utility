@@ -1,0 +1,654 @@
+{% extends 'basic.html' %}
+{% block title%} Update Order{% endblock %}
+{% block css %}
+{% load static %}
+<style>
+    .h3,
+    h3 {
+        font-size: 1.5rem;
+        border-block-end: 3px solid #e9ecef;
+        margin-top: 40px;
+        margin-bottom: 0px;
+        text-align: center;
+    }
+    .form-check-input {
+        position: absolute;
+        margin-top: -1.7rem !important;
+        margin-left: 83rem !important;
+        transform: scale(2.8);
+    }
+    .input-small-font {
+        height: 38px;
+        line-height: normal;
+    }
+    .input-small-font:hover {
+        background-color: #f0f0f0;
+    }
+    .tag {
+        background-color: #007bff;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        font-size: 12px;
+        margin-right: 4px;
+        margin-bottom: 2px;
+    }
+    .tag-remove {
+        margin-left: 6px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+    .navbar{
+        padding: 0.5rem 0rem !important;
+    }
+    .card-title {
+        border-bottom: 3px solid #020202;
+        margin: 15px;
+        margin-top: 3px;
+        margin-bottom: 10px;
+        padding: 5px 0px;
+        color: black;
+        /* background-color: teal; */
+        border-color: black;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        font-weight: bold;
+        /* border-bottom-left-radius: 40px;
+    border-bottom-right-radius: 40px; */
+    }
+    .container {
+        display: block;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        max-width: 100%;
+        margin-top: 82px;
+    }
+
+    .col-md-3 {
+        display: inline-block;
+        margin-left: -4px;
+    }
+
+    .col-md-3 {
+        width: 100%;
+        height: auto;
+    }
+
+    body{
+        background:white;
+    }
+
+    body .no-padding {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .carousel-control-prev-icon {
+        background: black no-repeat center center;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23fff' viewBox='0 0 8 8'%3e%3cpath d='M5.25 0l-4 4 4 4 1.5-1.5-2.5-2.5 2.5-2.5-1.5-1.5z'/%3e%3c/svg%3e");
+    }
+
+    .carousel-control-next-icon {
+        background: black no-repeat center center;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23fff' viewBox='0 0 8 8'%3e%3cpath d='M2.75 0l-1.5 1.5 2.5 2.5-2.5 2.5 1.5 1.5 4-4-4-4z'/%3e%3c/svg%3e");
+    }
+
+    .card{
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        transition:all 0.5s ease os;
+        border-radius: 20px;
+    }
+
+    .card-body .indexbtn span {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: inline-block;
+        background: white;
+        z-index: 10;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 19px;
+        /* text-transform: uppercase; */
+        /* letter-spacing: 2px; */
+        color: black;
+        border: 1px solid #040a29;
+        z-index: 1;
+    }
+
+    body .carousel-indicators {
+        bottom: 0;
+    }
+
+    .carousel-indicators .active {
+        background-color: blue;
+    }
+    
+    .modal-footer {
+        display: block;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 1rem;
+        border-top: 3px solid #e9ecef;
+        margin-bottom : 1.5rem;
+    }
+
+    .container-fluid {
+        width: 100%;
+        padding-right: 15px;
+        padding-left: 15px;
+        margin-right: auto;
+        margin-left: auto;
+    }
+
+    .container {
+        margin-top: 4rem !important;
+    }
+
+    .main {
+        float: right;
+        margin-right:12%;
+        width: 75%;
+        border-radius: 20%;
+    }
+
+    .card-deck {
+        display: flex;
+        margin: 0% 0%;
+        width: 100%;
+    }
+
+    .card-body {
+        line-height: 2;
+        padding: 0px 0;
+    }
+    
+    @media (min-width: 576px) and (max-width: 767px) {
+        .fc{
+            margin-top: 9%!important;
+        }
+    }
+
+    @media (min-width: 280px) and (max-width: 575px) {
+        .fc{
+            margin-top: 18%!important;
+        }
+    }
+</style>
+
+{% endblock %}
+
+{% block body %}
+<div class="container my-3 fc">
+    <div class="container ">
+    <div class="main">
+        <div class="card">
+            <div class="box">
+                <div class="card-body">
+                    <div class="modal-body">
+                        <h3 class="card-title">Edit Order</h3>
+                        <form action="/{{IPOid}}/{{employee.id}}/UpdateOrder/{{Grpf}}/{{OrCtf}}/{{InTyf}}?page={{page_number}}" method="post" class="needs-validation" novalidate>{% csrf_token %}
+                            <div class="form-group">
+                                {% for message in messages %}
+                                    {% if messages %}
+                                        <div class="alert {{ message.tags }} alert-dismissible  fixed-top" id="successalerts" role="alert" style="position:fixed;">
+                                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                            </button>
+                                            {{ message }}
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                                <div>
+                                    <label for="Group" class="form-label"><b>Group&nbsp;<font color="red">*</font></b></label>
+                                    <select class="form-control" name="Group" autocomplete="off" id="Group" required>
+                                        <option disabled value="">Select Group</option>
+                                        {% for i in Group %}
+                                        <option value="{{ i.GroupName }}" {% if employee.OrderGroup.GroupName == i.GroupName %} selected {% endif %}>
+                                            {{i.GroupName }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="invalid-feedback">
+                                        Please Select A Valid Group.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="Group" class="form-label"><b>Order Type&nbsp;<font color="red">*</font></b></label>
+                                <select class="form-control" name='OrderType' autocomplete="off"  required>
+                                <!-- <option disabled value="">Choose...</option> -->
+                                <option value="BUY" {% if employee.OrderType == 'BUY' %} selected {% endif %}>BUY</option>
+                                <option value="SELL"{% if employee.OrderType == 'SELL' %} selected {% endif %}>SELL</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Please Select A Valid Order Type.
+                                </div>
+                            </div>  
+
+                            <div class="form-group">
+                                <label for="Group" class="form-label"><b>Order Category&nbsp;<font color="red">*</font></b></label>
+                                <select class="form-control" name='OrderCategory' autocomplete="off" id="id_order_category" required>
+                                {% if employee.OrderCategory == 'Premium' %}
+                                    <option value="Premium" selected>Premium</option>
+                                {% elif employee.OrderCategory == 'Kostak' or employee.OrderCategory == 'Subject To' %}
+                                    <option value="Kostak" {% if employee.OrderCategory == 'Kostak' %}selected{% endif %}>Kostak</option>
+                                    <option value="Subject To" {% if employee.OrderCategory == 'Subject To' %}selected{% endif %}>Subject To</option>
+                                {% elif employee.OrderCategory == 'CALL' or employee.OrderCategory == 'PUT' %}
+                                    <option value="CALL" {% if employee.OrderCategory == 'CALL' %}selected{% endif %}>CALL</option>
+                                    <option value="PUT" {% if employee.OrderCategory == 'PUT' %}selected{% endif %}>PUT</option>
+                                {% endif %}
+                                </select>
+                                <div class="invalid-feedback">
+                                    Please Select A Valid Order Category.
+                                </div>
+                            </div>
+
+                            <div class="form-group" {%if IPOName.IPOType == "SME" %} style="display: none;" {%endif%}>
+                                <label for="Group" class="form-label"><b>Investor Type&nbsp;<font color="red">*</font></b></label>
+                                <select class="form-control" name='InvestorType' autocomplete="off" required>
+                                {% if employee.InvestorType == 'PREMIUM' %}
+                                    <option value="PREMIUM" selected>PREMIUM</option>
+                                {% elif employee.OrderCategory == 'CALL' or employee.OrderCategory == 'PUT' %}
+                                    <option value="OPTIONS" selected>OPTIONS</option>
+                                {%else%}
+                                    <option value="RETAIL" {% if employee.InvestorType == 'RETAIL' %} selected {% endif %}>RETAIL</option>
+                                    <option value="SHNI" {% if employee.InvestorType == 'SHNI' %} selected {% endif %}>SHNI</option>
+                                    <option value="BHNI" {% if employee.InvestorType == 'BHNI' %} selected {% endif %}>BHNI</option>
+                                {%endif%}
+                                </select> 
+                                <div class="invalid-feedback">
+                                    Please Select A Valid Investor Type.
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="IPOPrice" class="form-label"><b>QTY&nbsp;<font color="red">*</font></b></label>
+                                <input type="number" min="1" class="form-control" placeholder="Enter QTY" 
+                                onkeypress="return event.charCode >= 48 && event.charCode <= 57" name='Qty'
+                                value="{{ employee.Quantity }}" maxlength="10" required>
+                                <div class="invalid-feedback">
+                                    Please Enter Valid QTY.
+                                </div>
+                            </div>
+
+                            {% comment %} <div class="form-group">
+                                <label for="IPOPrice" class="form-label"><b>Strike Price&nbsp;<font color="red">*</font></b></label>
+                                <input type="number" min="1" class="form-control" placeholder="Enter Strike Price" 
+                                onkeypress="return event.charCode >= 48 && event.charCode <= 57" name='PutStrikePrice'
+                                value="{{ employee.Method }}" maxlength="10" required>
+                                <div class="invalid-feedback">
+                                    Please Enter Valid Strike Price.
+                                </div>
+                            </div> {% endcomment %}
+
+                            <div class="form-group" id="strike_price_section">
+                                <label for="IPOPrice" class="form-label"><b>Strike Price&nbsp;<font color="red">*</font></b></label>
+                                <input type="number" min="1" class="form-control" placeholder="Enter Strike Price" 
+                                    onkeypress="return event.charCode >= 48 && event.charCode <= 57" name='optionStrikePrice'
+                                    value="{{ employee.Method }}" maxlength="10" id="strike_price_input">
+                                <div class="invalid-feedback">
+                                    Please Enter Valid Strike Price.
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="IPOPrice" class="form-label"><b>Rate&nbsp;<font color="red">*</font></b></label>
+                                <div id="rate_subject_to_section" style="display: none;">
+                                    <div class="row align-items-center">
+                                        <div class="col-11">
+                                            <input type="text" class="form-control" placeholder="Enter Rate"
+                                            oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\--*)\-/g, '$1').replace(/(\..*)\./g, '$1');" name='Sub_Rate'
+                                            value="{{ employee.Rate }}" maxlength="10">
+                                        </div>
+                                        <div class="col-1 d-flex justify-content-center">
+                                            <input class="form-check-input" type="checkbox" name='subjectToIsPremium' id="subjectToIsPremium"{% if employee.Method == "Premium" %}checked{% endif %} style="transform: scale(2.8); position: static !important; margin: 0 !important;">
+                                        </div>
+                                    </div>        
+                                </div>
+                                <div id="rate_normal_section" style="display: none;">
+                                    <input type="text" class="form-control" placeholder="Enter Rate" 
+                                    oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\--*)\-/g, '$1').replace(/(\..*)\./g, '$1');" name='Rate'
+                                    value="{{ employee.Rate }}" maxlength="10">
+                                </div>
+                                <div class="invalid-feedback">
+                                    Please Enter Rate.
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="Date" class="form-label"><b>Date and Time&nbsp;<font color="red">*</font></b></label><br>            
+                                <input type="datetime-local" style="width: 100%;" step="1" name="datetime" id="datetime" value='{{employee.OrderDate|date:"Y-m-d"}} {{employee.OrderTime|time:"H:i:s"}}'
+                                min="1970-01-01T00:00:00" max='{% now "Y-m-d H:i:s" %}' required>
+                                <div class="invalid-feedback" >
+                                    Please Enter Valid Date and Time.
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="remarkTemplate" class="form-label"><b>Remark</b></label>
+                                <div style="position: relative;">
+                                    <div class="tags-input-container" style="position: relative;">
+                                        <div class="tags-display" id="tagsDisplay" style="min-height: 38px; border: 1px solid #ced4da; border-radius: 0.25rem; padding: 4px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; cursor: text; background: white;">
+                                            <input type="text" id="remarkInput" class="form-control input-small-font" placeholder="Add remark or select from dropdown" style="border: none; flex: 1; min-width: 150px; outline: none; box-shadow: none; padding: 2px 4px; height: 30px;" autocomplete="off">
+                                        </div>
+                                        <button type="button" id="remarkDropdownBtn" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 4px; z-index: 10;">▼</button>
+                                        <div id="remarkDropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ced4da; border-radius: 0.25rem; margin-top: 2px; max-height: 200px; overflow-y: auto; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                            <div class="dropdown-item" data-value="First Day Bidding" style="padding: 8px 12px; cursor: pointer; color: #000;">First Day Bidding</div>
+                                            <div class="dropdown-item" data-value="Subject to + Fix Charges Amount:" style="padding: 8px 12px; cursor: pointer; color: #000;">Subject to + Fix Charges Amount:</div>
+                                            <div class="dropdown-item" data-value="Profit Sharing" title="Profit Sharing (i.e. 50:50) : 50(own) : 50(client)" style="padding: 8px 12px; cursor: pointer; color: #000;">Profit Sharing</div>
+                                            <div class="dropdown-item" data-value="Shareholder Application" style="padding: 8px 12px; cursor: pointer; color: #000;">Shareholder Application</div>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="remark_tags" id="remarkTags">
+                                    <input type="hidden" name="remark_text" id="remarkText">
+                                </div>
+                            </div>
+                        
+                            <div class="modal-footer">
+                                
+                                <div style="display: inline;" align="center;">
+                                    <div style="float: right; margin: 0 -17px;">
+                                        <button class="btn btn-primary" type="submit" onclick="return validateForm()"
+                                            style="padding: 7px 12px; text-align: center; text-decoration: none; border-radius: 4px; display: inline-block; font-size: 100%;">Submit</button>
+                                        
+                                    </div>
+                                    <div style="float: right; margin: 2px 40px;">
+                                        <button type="button" class="btn btn-outline-danger"
+                                        onclick="document.getElementById('{{ employee.id }}').style.display='block'" style="width: auto;"
+                                        data-toggle="modal" data-target="#{{ employee.id }}">Delete</button>
+                                        <!--NEW  Modal FOR DELETE MODAL-->
+                                        <div class="modal fade" id="{{ employee.id }}" tabindex="-1" role="dialog"
+                                            aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header" style="border-bottom: 1px solid black;">
+                                                        <b>
+                                                            <h5 class="modal-title" id="exampleModalLabel">Delete Order</h5>
+                                                        </b>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body" style="white-space: normal;">
+                                                        {{prompt}}
+                                                        <center>
+                                                            <p>Are you sure you want to delete this order?</p>
+                                                            <div class="form-row">
+                                                                <div class="form-group col-md-6">
+                                                                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal"
+                                                                    style="width:50%;">Cancel</button>
+                                                                </div>
+                                                                <div class="form-group col-md-6">
+                                                                    <button type="button" class="btn btn-outline-danger"
+                                                                    style="width:50%;"
+                                                                    {% if IPOName.IPOType == "SME" %} 
+                                                                        onclick="window.location.href='/DeleteOrder/{{ IPOid }}/{{employee.id}}/{{Grpf}}/{{OrCtf}}/All?page={{page_number}}';"
+                                                                    {% else %}
+                                                                        onclick="window.location.href='/DeleteOrder/{{ IPOid }}/{{employee.id}}/{{Grpf}}/{{OrCtf}}/{{InTyf}}?page={{page_number}}';"
+                                                                    {% endif %}
+                                                                    >Delete</button>
+                                                                </div>
+                                                            </div>
+                                                        </center>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div style="float: left; margin: 0 -17px;">
+                                        <button onclick="window.location.href='{% if IPOName.IPOType == "MAINBOARD" %}/{{IPOid}}/Order/{{Grpf}}/{{OrCtf}}/{{InTyf}}?page={{page_number}}{% else %}/{{IPOid}}/Order/{{Grpf}}/{{OrCtf}}/All?page={{page_number}}{% endif %}';" class="btn btn-primary" type="button"
+                                            style="padding: 7px 15px; text-align: center; text-decoration: none; border-radius: 4px; display: inline-block; font-size: 100%;">Back</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+<script>
+    function validateForm() {
+        const datetimeField = document.getElementById("datetime");
+        if (!datetimeField.value) {
+            alert("Please enter a valid date and time.");
+            datetimeField.focus();
+            return false; // Prevents form submission
+        }
+    }
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const orderCategorySelect = document.getElementById('id_order_category');
+        const rateSubjectToSection = document.getElementById('rate_subject_to_section');
+        const rateNormalSection = document.getElementById('rate_normal_section');
+
+        function toggleRateSection() {
+            const subjectToRateInput = rateSubjectToSection.querySelector('input[name="Sub_Rate"]');
+            const normalRateInput = rateNormalSection.querySelector('input[name="Rate"]');
+
+            if (orderCategorySelect.value === 'Subject To') {
+                rateSubjectToSection.style.display = 'block';
+                rateNormalSection.style.display = 'none';
+                subjectToRateInput.setAttribute('required', 'required');
+                normalRateInput.removeAttribute('required');
+            } else {
+                rateSubjectToSection.style.display = 'none';
+                rateNormalSection.style.display = 'block';
+                normalRateInput.setAttribute('required', 'required');
+                subjectToRateInput.removeAttribute('required');
+            }
+        }
+
+        // Initial call to set the correct section visibility on page load
+        toggleRateSection();
+
+        // Add event listener for when the dropdown changes
+        orderCategorySelect.addEventListener('change', toggleRateSection);
+    });
+</script>
+<script>    
+    document.addEventListener('DOMContentLoaded', function() {
+        const investorTypeSelect = document.querySelector('select[name="OrderCategory"]');
+        const strikePriceSection = document.getElementById('strike_price_section');
+        const strikePriceInput = document.getElementById('strike_price_input');
+
+        function toggleStrikePrice() {
+            const value = investorTypeSelect.value.toUpperCase();
+            if (value === 'CALL' || value === 'PUT') {
+                strikePriceSection.style.display = 'block';
+                strikePriceInput.setAttribute('required', 'required');
+            } else {
+                strikePriceSection.style.display = 'none';
+                strikePriceInput.removeAttribute('required');
+                strikePriceInput.value = '';
+            }
+        }
+
+        // Initial call
+        toggleStrikePrice();
+
+        // On change
+        investorTypeSelect.addEventListener('change', toggleStrikePrice);
+    });
+</script>
+{% comment %} <script>
+    // JavaScript to validate date format
+    document.getElementById('datetime').addEventListener('change', function() {
+        var dateString = this.value;
+        var parts = dateString.split(' ');
+        var datePart = parts[0].split('/');
+        var timePart = parts[1].split(':');
+
+        // Reformat date to yyyy-mm-dd
+        var formattedDate = datePart[2] + '-' + datePart[1] + '-' + datePart[0];
+        // Reformat time to hh:mm:ss
+        var formattedTime = timePart[0].padStart(2, '0') + ':' + timePart[1].padStart(2, '0') + ':' + timePart[2].padStart(2, '0');
+
+        // Set the value back to the input field
+        this.value = formattedDate + ' ' + formattedTime;
+    });
+</script> {% endcomment %}
+
+{% comment %} <script>
+    $(document).ready(function () {
+        $('#PANNo, #Name, #group').focusout(function () {
+            var thisValue = $(this).val();
+            if (thisValue.trim() == '') {
+                $(this).next().show();
+                $(this).focus();
+            } else {
+                $(this).next().hide();
+            }
+        });
+
+    });
+</script> {% endcomment %}
+
+<script src="{% static 'JS/jquery.min.js' %}"></script>
+    <script>
+        $("#successalerts").fadeTo(3000, 500).slideUp(500, function () {
+            $("#successalerts").slideUp(500);
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const remarkInput = document.getElementById('remarkInput');
+            const tagsDisplay = document.getElementById('tagsDisplay');
+            const remarkTagsInput = document.getElementById('remarkTags');
+            const remarkTextInput = document.getElementById('remarkText');
+            const remarkDropdownBtn = document.getElementById('remarkDropdownBtn');
+            const remarkDropdown = document.getElementById('remarkDropdown');
+            const dropdownItems = remarkDropdown.querySelectorAll('.dropdown-item');
+            
+            let tags = [];
+            let text = "";
+
+            // Pre-populate data
+            {% if employee.remark %}
+                const savedRemark = {{ employee.remark|safe }};
+                if (savedRemark) {
+                    if (savedRemark.tags && Array.isArray(savedRemark.tags)) {
+                        tags = savedRemark.tags;
+                    }
+                    if (savedRemark.text) {
+                        text = savedRemark.text;
+                        remarkInput.value = text;
+                    }
+                }
+            {% endif %}
+            
+            renderTags();
+            updateHiddenFields();
+
+            function renderTags() {
+                // Remove all tags from display (keep input)
+                const existingTags = tagsDisplay.querySelectorAll('.tag');
+                existingTags.forEach(t => t.remove());
+                
+                // Add tags before the input
+                tags.forEach((tag, index) => {
+                    const tagElem = document.createElement('span');
+                    tagElem.className = 'tag';
+                    tagElem.innerHTML = `${tag} <span class="tag-remove" data-index="${index}">×</span>`;
+                    tagsDisplay.insertBefore(tagElem, remarkInput);
+                });
+            }
+
+            function updateHiddenFields() {
+                remarkTagsInput.value = JSON.stringify(tags);
+                remarkTextInput.value = remarkInput.value;
+            }
+
+            // Dropdown Toggle
+            remarkDropdownBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                remarkDropdown.style.display = remarkDropdown.style.display === 'none' ? 'block' : 'none';
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!tagsDisplay.contains(e.target) && !remarkDropdown.contains(e.target)) {
+                    remarkDropdown.style.display = 'none';
+                }
+            });
+
+            // Dropdown Item Click
+            dropdownItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    if (value && !tags.includes(value)) {
+                        tags.push(value);
+                        renderTags();
+                        updateHiddenFields();
+                    }
+                    remarkDropdown.style.display = 'none';
+                    remarkInput.focus();
+                });
+            });
+
+            // Remove Tag
+            tagsDisplay.addEventListener('click', function(e) {
+                if (e.target.classList.contains('tag-remove')) {
+                    const index = parseInt(e.target.getAttribute('data-index'));
+                    tags.splice(index, 1);
+                    renderTags();
+                    updateHiddenFields();
+                } else if (e.target === tagsDisplay) {
+                    remarkInput.focus();
+                }
+            });
+
+            // Input handling
+            remarkInput.addEventListener('input', function() {
+                updateHiddenFields();
+            });
+
+            remarkInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && remarkInput.value === '' && tags.length > 0) {
+                    tags.pop();
+                    renderTags();
+                    updateHiddenFields();
+                }
+            });
+        });
+    </script>
+
+{% endblock %}

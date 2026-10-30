@@ -1,0 +1,138 @@
+{% extends 'basic.html' %}
+{% block title%}IPO Allotment Analysis{% endblock %}
+{% block css %}
+{% load static %}
+<style>
+    .h3,
+    h3 {
+        margin: 23px 558px;
+        margin-top: 45px;
+        text-align: center;
+        font-size: 1.75rem;
+        border-block-end: 3px solid #e9ecef;
+    }
+
+
+    .col-md-3 {
+        display: inline-block;
+        margin-left: -4px;
+    }
+
+    .col-md-3 {
+        width: 100%;
+        height: auto;
+    }
+
+
+
+    body .no-padding {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .carousel-control-prev-icon {
+        background: black no-repeat center center;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23fff' viewBox='0 0 8 8'%3e%3cpath d='M5.25 0l-4 4 4 4 1.5-1.5-2.5-2.5 2.5-2.5-1.5-1.5z'/%3e%3c/svg%3e");
+    }
+
+    .carousel-control-next-icon {
+        background: black no-repeat center center;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23fff' viewBox='0 0 8 8'%3e%3cpath d='M2.75 0l-1.5 1.5 2.5 2.5-2.5 2.5 1.5 1.5 4-4-4-4z'/%3e%3c/svg%3e");
+
+    }
+
+    body .carousel-indicators {
+        bottom: 0;
+    }
+
+    .carousel-indicators .active {
+        background-color: blue;
+
+    }
+
+
+    .tscroll table td:first-child {
+        position: sticky;
+        left: 0;
+        background-color: rgb(210, 207, 207);
+    }
+
+    .tscroll table th:first-child {
+        position: sticky;
+        left: 0;
+        background-color: rgb(210, 207, 207);
+    }
+
+    /* .tscroll td, .tscroll th {
+  border-bottom: dashed #888 1px;
+} */
+</style>
+<!-- <link rel="stylesheet" href="{% static 'JS//jquery-ui.css' %}"> -->
+
+{% endblock %}
+
+{% block body %}
+
+
+{% csrf_token %}
+
+{% comment %} <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script> {% endcomment %}
+
+<script src="{% static 'JS/jquery.dataTables.min.js' %}"></script>
+<script src="h{% static 'JS/dataTables.bootstrap4.min.js' %}"></script>
+<!-- <h1>Total is {{ total }}</h1> -->
+<h3 class="fixed-top"
+    style="background-color:white; height: 64px; margin: 42px 0px; padding: 10px 0; width: 100%; z-index: 9;">
+    IPO Allotment Analysis</h3>
+<form class="form-inline my-2 my-lg-0">
+    <!-- {{MyFilter.form}}
+    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button> -->
+</form>
+<div class="card" style="padding: 14px 11px; margin: 100px 26px; border: none;">
+    <div class="card-body tscroll">
+        <table id="bootstrapdatatable" class="table table-hover table-bordered"
+            style="overflow-x: scroll; display: block;">
+            <thead>
+
+                <tr>
+                    <th scope="col" class="tscroll">Client PAN</th>
+                    {% for col in df.columns %}
+
+                    <th scope="col">{{col}}</th>
+                    {% endfor %}
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+                {% for index, row in df.iterrows %}
+                <tr>
+                    <td>
+                        {{index}}
+                    </td>
+                    {% for cell in row %}
+                    <td>
+                        {{cell}}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#bootstrapdatatable').DataTable({
+            "aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
+            "iDisplayLength": 25
+        }
+        );
+    });
+</script>
+{% endblock %}

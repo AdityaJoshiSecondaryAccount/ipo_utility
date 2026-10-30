@@ -1,0 +1,2441 @@
+{% extends 'basic.html' %}
+{% load static %}
+{% block title %}Group Wise Dashboard{% endblock %}
+
+{% block css %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+<style>
+    /* Lock whole page horizontal overflow to prevent viewport sliding */
+    html, body {
+        max-width: 100vw;
+        overflow-x: hidden;
+    }
+
+    .container-fluid {
+        max-width: 100%;
+        overflow-x: hidden;
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .row {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    /* Top Bar Controls */
+    .top-controls {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px 16px;
+        padding-bottom: 15px;
+        font-size: 14px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .top-controls-left {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px 12px;
+    }
+
+    .top-controls-middle {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px 14px;
+    }
+
+    .top-controls-right {
+        display: flex;
+        align-items: center;
+    }
+    
+    .top-controls .btn {
+        padding: 4px 10px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+    
+    .btn-secondary-custom {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+    }
+    
+    .btn-outline-custom {
+        border: 1px solid #007bff;
+        color: #007bff;
+        background-color: white;
+    }
+    
+    .btn-outline-custom:hover {
+        background-color: #007bff;
+        color: white;
+    }
+    
+    .search-box {
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+        max-width: 100%;
+    }
+    
+    .search-box input {
+        margin-left: 6px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        padding: 4px 8px;
+        outline: none;
+        box-sizing: border-box;
+        width: 170px;
+        max-width: 100%;
+        font-size: 13px;
+    }
+
+    .search-box input:focus {
+        outline: 2px solid #007bff;
+        box-shadow: none !important;
+        border: 1px solid #b9bba4 !important;
+    }
+
+    /* Mobile & Tablets (<= 767px) */
+    @media (max-width: 767px) {
+        .top-controls {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+        }
+        .top-controls-left {
+            width: 100%;
+            justify-content: space-between;
+        }
+        .top-controls-middle {
+            width: 100%;
+            justify-content: space-between;
+        }
+        .top-controls-right {
+            width: 100%;
+        }
+        .search-box {
+            width: 100%;
+        }
+        .search-box input {
+            flex: 1;
+            width: 100%;
+            min-width: 0;
+        }
+        #paginationRow {
+            display: flex !important;
+            flex-direction: row !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            gap: 8px 12px;
+            margin-top: 10px;
+            width: 100%;
+        }
+        #paginationRow > div {
+            width: auto !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+        #paginationRow .pagination {
+            justify-content: flex-end !important;
+            margin: 0 !important;
+            flex-wrap: nowrap;
+        }
+        #paginationRow p {
+            text-align: left !important;
+            margin: 0 !important;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        #paginationRow .pagination .page-link {
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+    }
+
+    /* Extra Small Devices (<= 480px) */
+    @media (max-width: 480px) {
+        .top-controls-left {
+            gap: 8px;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .top-controls-middle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .top-controls-middle .btn-group-payments {
+            display: inline-flex !important;
+            gap: 6px;
+        }
+        #paginationRow p {
+            font-size: 13px !important;
+        }
+        #paginationRow .pagination .page-link {
+            padding: 4px 8px !important;
+            font-size: 13px !important;
+        }
+    }
+
+    /* Table Container - Strict horizontal boundary */
+    .table-container {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        overflow-x: auto;
+        max-height: 80vh;
+        overflow-y: auto;
+        position: relative;
+        background-color: #fff;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Basic Table Styling */
+    #example {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin: 0;
+        font-size: 16px;
+    }
+
+    #example th, #example td {
+        padding: 10px 8px;
+        border-right: 1px solid #e0e0e0;
+        border-bottom: 1px solid #e0e0e0;
+        vertical-align: middle;
+        text-align: center;
+    }
+    
+    #example th:first-child, #example td:first-child {
+        border-left: 1px solid #e0e0e0;
+    }
+
+    @media (max-width: 991px) {
+        #example {
+            font-size: 15px;
+        }
+        #example th, #example td {
+            padding: 8px 6px;
+        }
+    }
+
+    @media (max-width: 767px) {
+        #example {
+            font-size: 14px;
+        }
+        #example th, #example td {
+            padding: 8px 6px;
+        }
+    }
+
+    /* Khaki Theme for Headers and Sticky Column */
+    #example thead th {
+        background-color: #b9bba4; /* Khaki color matching screenshot */
+        color: #333;
+        font-weight: 700;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    /* Sticky First Column (Group Name) */
+    .fixed-group-col {
+        position: sticky !important;
+        left: 0 !important;
+        background-color: #b9bba4 !important; /* Match header */
+        color: #222;
+        font-weight: 700;
+        z-index: 50;
+    }
+    
+    /* Zebra Striping for Sticky Column to match row striping if desired */
+    #example tbody tr:nth-child(even) .fixed-group-col {
+        background-color: #c4c6b1 !important; 
+    }
+
+    /* Top-Left Corner (Needs highest z-index) */
+    #example thead .fixed-group-col {
+        z-index: 150 !important;
+    }
+    
+    /* Footer Styling */
+    #example tfoot th, #example tfoot td {
+        background-color: #b9bba4;
+        font-weight: bold;
+        position: sticky;
+        bottom: 0;
+        z-index: 100;
+        border-top: 2px solid #9a9c87;
+    }
+    
+    #example tfoot .fixed-group-col {
+        z-index: 150 !important;
+    }
+
+    /* IPO Data Cell Styling & Interactive Spans */
+    .amount-cell {
+        min-width: 130px;
+    }
+
+    .cell-total, .cell-collection, .cell-due {
+        display: inline-block;
+        padding: 1px 5px;
+        margin: 1px 0;
+        border-radius: 3px;
+        cursor: pointer;
+        transition: all 0.15s ease-in-out;
+    }
+
+    /* Total Hover - Primary Blue with Underline */
+    .cell-total {
+        color: #333;
+    }
+    .cell-total:hover {
+        color: #0d6efd !important;
+        background-color: #b6d4ff !important;
+        text-decoration: underline !important;
+        text-decoration-color: #0d6efd !important;
+    }
+
+    /* Collection Hover - Indigo / Purple with Underline */
+    .cell-collection {
+        color: #333;
+    }
+    .cell-collection:hover {
+        color: #c17342 !important;
+        background-color: #ffedcb !important;
+        text-decoration: underline !important;
+        text-decoration-color: #c17342 !important;
+    }
+
+    /* Due Default */
+    .cell-due {
+        color: #333;
+    }
+
+    /* Due is positive (+ve): Green hover */
+    .cell-due.due-positive:hover,
+    .cell-due[data-due]:not([data-due^="-"]):not([data-due="0"]):not([data-due="0.0"]):not([data-due="0.00"]):hover {
+        color: #198754 !important;
+        background-color: #d1e7dd !important;
+        text-decoration: underline !important;
+        text-decoration-color: #198754 !important;
+    }
+
+    /* Due is negative (-ve): Red hover (matching screenshot) */
+    .cell-due.due-negative:hover,
+    .cell-due[data-due^="-"]:hover {
+        color: #dc3545 !important;
+        background-color: #f8d7da !important;
+        text-decoration: underline !important;
+        text-decoration-color: #dc3545 !important;
+    }
+
+    /* Due is zero: Neutral subtle hover */
+    .cell-due.due-zero:hover {
+        color: #495057 !important;
+        background-color: #e9ecef !important;
+        text-decoration: underline !important;
+        text-decoration-color: #adb5bd !important;
+    }
+
+    /* JV & Due Amount Column Hover */
+    .jv-cell {
+        cursor: pointer;
+        transition: all 0.15s ease-in-out;
+    }
+    .jv-cell:hover {
+        background-color: #fff3cd !important;
+        color: #856404 !important;
+        text-decoration: underline !important;
+    }
+
+    .due-amount-cell {
+        cursor: pointer;
+        transition: all 0.15s ease-in-out;
+    }
+    .due-amount-cell.due-positive:hover {
+        color: #198754 !important;
+        background-color: #d1e7dd !important;
+        text-decoration: underline !important;
+    }
+    .due-amount-cell.due-negative:hover {
+        color: #dc3545 !important;
+        background-color: #f8d7da !important;
+        text-decoration: underline !important;
+    }
+    .due-amount-cell.due-zero:hover {
+        color: #495057 !important;
+        background-color: #e9ecef !important;
+    }
+    .due-amount-cell:hover {
+        text-decoration: underline !important;
+    }
+
+    /* Table Row Hover (Even rows before hover to ensure hover works on all rows) */
+    #example tbody tr:nth-child(even) td {
+        background-color: #f9f9f9;
+    }
+
+    #example tbody tr:hover td {
+        background-color: #f0f4f8;
+    }
+
+    #example tbody tr:hover .fixed-group-col {
+        background-color: #adb099 !important;
+    }
+    
+    .sort-icon {
+        color: #888;
+        font-size: 10px;
+        margin-left: 5px;
+    }
+
+    /* Fix Delete Button Rendering */
+    .delete-btn {
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+        margin-left: 5px;
+    }
+    .delete-btn .icon-solid { display: none; }
+    .delete-btn:hover .icon-outline { display: none; }
+    .delete-btn:hover .icon-solid { display: inline-block; color: #dc3545; }
+    
+    /* Fix Collection Column Width */
+    #example th, #example td {
+        white-space: nowrap;
+    }
+
+
+    /* Custom Dark Dropdown for Columns/Download */
+    .custom-dark-dropdown {
+        background-color: #6c757d;
+        color: white;
+        font-size: 13px;
+        border: none;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    }
+    .custom-dark-dropdown .dropdown-item {
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 15px;
+    }
+    .custom-dark-dropdown .dropdown-item:hover,
+    .custom-dark-dropdown .dropdown-item:focus,
+    .custom-dark-dropdown .dropdown-item:active {
+        background-color: #5a6268 !important;
+        color: white !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+    .custom-dark-dropdown .check-icon {
+        visibility: hidden;
+    }
+    .custom-dark-dropdown .active-col .check-icon {
+        visibility: visible;
+    }
+    
+    /* Custom Toggle Switch (self-contained, works with any Bootstrap version) */
+    .custom-switch {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+        margin-bottom: 0;
+    }
+    .custom-switch input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+        margin: 0;
+        pointer-events: none;
+    }
+    .custom-switch-track {
+        display: inline-block;
+        position: relative;
+        width: 36px;
+        height: 18px;
+        background-color: #adb5bd;
+        border-radius: 18px;
+        transition: background-color 0.25s ease;
+        vertical-align: middle;
+        cursor: pointer;
+        margin-right: 8px;
+        flex-shrink: 0;
+    }
+    .custom-switch-track::after {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 14px;
+        height: 14px;
+        background-color: #ffffff;
+        border-radius: 50%;
+        transition: transform 0.25s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    }
+    .custom-switch input[type="checkbox"]:checked + .custom-switch-track {
+        background-color: #007bff;
+    }
+    .custom-switch input[type="checkbox"]:checked + .custom-switch-track::after {
+        transform: translateX(18px);
+    }
+
+    /* Modal Close Button (Cross icon) matching Accounting */
+    .btn-close {
+        box-sizing: content-box;
+        width: 1em;
+        height: 1em;
+        padding: .25em .25em;
+        color: #000;
+        background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
+        border: 0;
+        border-radius: .375rem;
+        opacity: .5;
+        cursor: pointer;
+    }
+    .btn-close:hover {
+        color: #000;
+        text-decoration: none;
+        opacity: .75;
+    }
+    .btn-close:focus {
+        outline: 0;
+        box-shadow: 0 0 0 .25rem rgba(13,110,253,.25);
+        opacity: 1;
+    }
+
+</style>
+{% endblock %}
+
+{% block body %}
+{% for message in messages %}
+    <div class="alert {{ message.tags }} alert-dismissible fixed-top" id="successalerts" role="alert" style="position:fixed;">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        {{ message }}
+    </div>
+{% endfor %}
+<div class="container-fluid mt-4" style="padding: 0px 10px;">
+    
+    <div class="text-center mb-3 pt-3">
+        <h3>Group Wise Dashboard</h3>
+    </div>
+
+    <!-- Top Controls Bar -->
+    <div class="top-controls">
+        <!-- Left: Rows per page & Dropdowns -->
+        <div class="top-controls-left">
+            <div class="d-inline-flex align-items-center" style="white-space: nowrap;">
+                <form method="GET" action="/GroupWiseDashboard" id="filterForm" style="display:inline-flex; align-items:center; gap: 4px; margin: 0;">
+                    <input type="hidden" name="sort_col" id="sort_col" value="{{ sort_col|default:'' }}">
+                    <input type="hidden" name="sort_dir" id="sort_dir" value="{{ sort_dir|default:'' }}">
+                    <input type="hidden" name="show_zero_due" value="{{ show_zero_due|yesno:'true,false' }}">
+                    <span>Show</span> 
+                    <select name="GWD_page_size" id="GWD_page_size" style="padding:2px 4px; border:1px solid #ccc; border-radius: 3px;">
+                        <option value="50" {% if GWD_page_size|stringformat:"s" == "50" %}selected{% endif %}>50</option>
+                        <option value="100" {% if GWD_page_size|stringformat:"s" == "100" %}selected{% endif %}>100</option>
+                        <option value="200" {% if GWD_page_size|stringformat:"s" == "200" %}selected{% endif %}>200</option>
+                        <option value="All" {% if GWD_page_size|stringformat:"s" == "All" %}selected{% endif %}>All</option>
+                    </select>
+                    <span>Rows</span>
+                    <input type="hidden" name="page" value="{{ page_obj.number }}">
+                    {% if SearchQuery %}<input type="hidden" name="SearchQuery" value="{{ SearchQuery }}">{% endif %}
+                </form>
+            </div>
+            
+            <div class="d-inline-flex align-items-center" style="gap: 4px;">
+                <div class="dropdown">
+                    <button class="btn btn-secondary-custom rounded dropdown-toggle" type="button" id="columnsDropdown" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
+                        Columns
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark custom-dark-dropdown" aria-labelledby="columnsDropdown" id="columnToggleMenu" style="max-height: 400px; overflow-y: auto; width: 220px;">
+                        <li>
+                            <div class="dropdown-item d-flex justify-content-between align-items-center w-100" style="cursor: default; padding: 6px 15px;">
+                                <span>Toggle All IPOs</span>
+                                <label class="custom-switch mb-0 ms-2" style="cursor: pointer;">
+                                    <input type="checkbox" id="toggleAllIposSwitch" checked>
+                                    <span class="custom-switch-track" style="margin-right: 0;"></span>
+                                </label>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="dropdown">
+                    <button class="btn btn-secondary-custom rounded dropdown-toggle" type="button" id="downloadDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        Download
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark custom-dark-dropdown" aria-labelledby="downloadDropdown" style="min-width: 100px;">
+                        <li>
+                            <!-- <form method="POST" action="download-Groupwise" style="margin: 0;">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item text-center">Excel</button>
+                            </form> -->
+                            
+                            <button type="button" class="dropdown-item text-center" id="exportGwdExcelBtn">Excel</button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Middle: Toggles & Payments -->
+        <div class="top-controls-middle">
+            <label title="show data with 0 due amount when checked" class="custom-switch mb-0" style="cursor: pointer;">
+                <input type="checkbox" id="toggleZeroDue" {% if show_zero_due %}checked{% endif %}>
+                <span class="custom-switch-track"></span>
+                <span class="font-weight-bold" style="font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer; color: #212529;">
+                    Show Zero Due Account
+                </span>
+            </label>
+            <div class="btn-group-payments d-inline-flex align-items-center" style="gap: 6px;">
+                <button class="btn btn-outline-custom rounded btn-sm" style="font-weight: 600; padding: 4px 12px;" data-bs-toggle="modal" data-bs-target="#transactionModal">Payment</button>
+                <button class="btn btn-outline-custom rounded btn-sm" style="font-weight: 600; padding: 4px 12px;" data-bs-toggle="modal" data-bs-target="#combinedTransferModal">JV Payment</button>
+            </div>
+        </div>
+        
+        <!-- Right: Search -->
+        <div class="top-controls-right">
+            <div class="search-box">
+                <span>Search:</span> 
+                <input type="text" id="searchInput" value="{{ SearchQuery|default:'' }}" autocomplete="off" autofocus>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="row">
+        <div class="col-12" style="min-width: 0; padding: 0;">
+            <div class="table-container">
+                <table id="example">
+                    {{ html_table|safe }}
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Pagination -->
+    <div class="row align-items-center justify-content-between" id="paginationRow" style="padding: 0 4px;">
+        <div class="col-auto">
+            <!-- Total rows and current range display (left aligned) -->
+            <p class="text-left mb-0">
+                Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} Rows
+            </p>
+        </div>
+
+        <div class="col-auto">
+            <ul class="pagination justify-content-end mb-0" style="margin: 0;">
+                <!-- Always show the first page -->
+                {% if page_obj.number != 1 %}
+                    <li class="page-item">
+                        <a class="page-link" href="/GroupWiseDashboard?show_zero_due={{ show_zero_due|yesno:'true,false' }}&page=1{% if sort_col %}&sort_col={{ sort_col }}{% endif %}{% if sort_dir %}&sort_dir={{ sort_dir }}{% endif %}{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}">1</a>
+                    </li>
+                {% endif %}
+                
+                <!-- Show ellipsis if current page is greater than 4 -->
+                {% if page_obj.number > 4 %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+                
+                <!-- Display pages before the current page -->
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num > 1 and num < page_obj.number and num >= page_obj.number|add:'-2' %}
+                        <li class="page-item">
+                            <a class="page-link" href="/GroupWiseDashboard?show_zero_due={{ show_zero_due|yesno:'true,false' }}&page={{ num }}{% if sort_col %}&sort_col={{ sort_col }}{% endif %}{% if sort_dir %}&sort_dir={{ sort_dir }}{% endif %}{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                <!-- Display current page -->
+                <li class="page-item active">
+                    <span class="page-link">{{ page_obj.number }}</span>
+                </li>
+                
+                <!-- Display pages after the current page -->
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num > page_obj.number and num < page_obj.number|add:'3' and num < page_obj.paginator.num_pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="/GroupWiseDashboard?show_zero_due={{ show_zero_due|yesno:'true,false' }}&page={{ num }}{% if sort_col %}&sort_col={{ sort_col }}{% endif %}{% if sort_dir %}&sort_dir={{ sort_dir }}{% endif %}{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                <!-- Show ellipsis if current page is less than num_pages - 3 -->
+                {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+                
+                <!-- Always show the last page -->
+                {% if page_obj.number != page_obj.paginator.num_pages %}
+                    <li class="page-item">
+                        <a class="page-link" href="/GroupWiseDashboard?show_zero_due={{ show_zero_due|yesno:'true,false' }}&page={{ page_obj.paginator.num_pages }}{% if sort_col %}&sort_col={{ sort_col }}{% endif %}{% if sort_dir %}&sort_dir={{ sort_dir }}{% endif %}{% if SearchQuery %}&SearchQuery={{ SearchQuery|urlencode }}{% endif %}">{{ page_obj.paginator.num_pages }}</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
+
+{% include "partials/add_payment_modal.html" %}
+{% include "partials/transfer_payment_modal.html" %}
+
+<div class="modal pymodel fade addipomodal" id="edit" tabindex="-1" role="dialog"
+                    aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog1" role="document" style="padding: 0 60px; margin: 5px auto;">
+                        <div class="modal-content"
+                            style="text-align: justify; background-color: whitesmoke; border-radius: 40px; border: 1px solid black;">
+                            <div class="modal-body">
+                                <div class="modal-header"
+                                    style="background: rgb(49, 183, 183); color: white; border-radius: 40px; border: 3px solid black; text-align: center; display: block;">
+                                    <b>
+                                        <h5 class="modal-title" id="exampleModalLabel">Payment</h5>
+                                    </b>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <form action="/AddPayment" method="post" class="needs-validation"
+                                    style="margin: 10px 20px;" novalidate>{% csrf_token %}
+                                    <div class="form-group">
+                                        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> -->
+    
+                                        {% comment %} <script>
+    
+                                            $("#success-alert").fadeTo(5000, 500).slideUp(500, function () {
+                                                $("#success-alert").slideUp(500);
+                                            });
+                                        </script> {% endcomment %}
+    
+                                        <label for="Group" class="form-label"><b>Group&nbsp;<font color="red">*</font></b></label>
+                                        <select class="form-control" name="Group" autocomplete="off" id="Group" required>
+                                            <option disabled selected value="">Select Group</option>
+                                            {% for j in entry_sorted %}
+                                            <option value="{{ j.GroupName }}">{{ j.GroupName }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="invalid-feedback">
+                                            Please Select A Valid Group.
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="IPOPrice" class="form-label"><b>Amount&nbsp;<font color="red">*</font>
+                                                </b></label>
+                                        <input type="text" class="form-control" placeholder="Enter Amount" id="IPOPrice"
+                                            oninput="this.value=this.value.replace(/[^0-9.]/g,'');if((this.value.match(/\./g)||[]).length>1)this.value=this.value.slice(0,-1);if(this.value.includes('.')){let p=this.value.split('.');if(p[1].length>2)this.value=p[0]+'.'+p[1].slice(0,2);}"
+                                            name='Amount' maxlength="10" required>
+                                        <div class="invalid-feedback">
+                                            Please Enter Amount.
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-footer" style="border-top: 1px solid black;">
+                                        <button type="button" class="btn btn-outline-secondary"
+                                            data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-outline-primary pysubbtn">Submit Form</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <!-- JAVASCRIPT FOR ADDGROUP FORM VALIDATION -->
+                            <script>
+                                // Example starter JavaScript for disabling form submissions if there are invalid fields
+                                (function () {
+                                    'use strict'
+
+                                    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                                    var forms = document.querySelectorAll('.needs-validation')
+
+                                    // Loop over them and prevent submission
+                                    Array.prototype.slice.call(forms)
+                                        .forEach(function (form) {
+                                            form.addEventListener('submit', function (event) {
+                                                if (!form.checkValidity()) {
+                                                    event.preventDefault()
+                                                    event.stopPropagation()
+                                                }
+
+                                                form.classList.add('was-validated')
+                                            }, false)
+                                        })
+                                })()
+                            </script>
+                            <!-- JAVASCRIPT FOR ADDGROUP FORM WITHOUT ENTERING ANY NUMBER USER CANNOT TO BE NEXT INPUT -->
+                            <script>
+                                $(document).ready(function () {
+                                    $('#GroupName').focusout(function () {
+                                        var thisValue = $(this).val();
+                                        if (thisValue.trim() == '') {
+                                            $(this).next().show();
+                                            $(this).focus();
+                                        } else {
+                                            $(this).next().hide();
+                                        }
+                                    });
+
+                                });
+                            </script>
+                           
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div style ="margin-top:5px;">
+                <!-- BUTTON OF EDIT MODAL -->
+                {% comment %} <button type="button" class="btn btn-secondary dwo" data-toggle="modal" style="float:right; margin: 24px 15px; width: 10%;"
+                                data-target="#exampleModals">Download &nbsp; <i class="fa fa-download" aria-hidden="true"
+                                    style='font-size:18px;'></i>
+                </button> {% endcomment %}
+                <!--NEW  Modal FOR EDIT MODAL-->
+                <div class="modal fade" id="exampleModals" tabindex="-1" role="dialog"
+                    aria-labelledby="exampleModalLabels" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header" style="border-bottom: 1px solid black;">
+                                <h5 class="modal-title" id="exampleModalLabels">Download File &nbsp; <i
+                                        class="fa fa-download" aria-hidden="true" style='font-size:18px;'></i></h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                {{prompt}}
+                                <form method="POST"     {% if IPOName.IPOType == "MAINBOARD" %} action="download-Groupwise" 
+                                {%else%}  action="download-Groupwise" {%endif%} >
+                                    {% csrf_token %}
+                                    <label><b style="margin: 0 12px;"> Download File :</b></label>
+                                    <button type="submit" class="btn btn-primary"> Download &nbsp;<i
+                                            class="fa fa-file-excel-o" aria-hidden="true"
+                                            style='font-size:18px;'></i></button>
+                                </form>
+                                {% for profile in entry%}
+                                {{profile.name}}
+                                {% endfor %}
+                            </div>
+                            {% comment %} <div class="modal-body">
+                                {{prompt}}
+                                <form method="POST" {% if IPOName.IPOType == "MAINBOARD" %} action="download-Billing-Pdf" 
+                                {%else%}  action="download-Billing-Pdf" {%endif%} >
+                                    {% csrf_token %}
+                                    <label><b style="margin: 0 12px;"> Download PDF :</b></label>
+                                    <button type="submit" class="btn btn-primary"> Download &nbsp;<i
+                                            class="fa fa-file-pdf-o" aria-hidden="true"
+                                            style='font-size:18px;'></i></button>
+                                </form>
+                                {% for profile in entry%}
+                                {{profile.name}}
+                                {% endfor %}
+                            </div> {% endcomment %}
+                        </div>
+                    </div>
+                </div>                            
+            </div>
+
+            <!-- {% comment %} <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const select = document.getElementById('trans_ipo');
+                    const options = Array.from(select.options)
+                        .slice(1) // exclude "All"
+                        .sort((a, b) => a.text.localeCompare(b.text)); // A-Z sort
+
+                    select.options.length = 1; // keep only the first "All" option
+                    options.forEach(opt => select.add(opt));
+                });
+            </script> {% endcomment %} -->
+
+            <script>
+                function toggleIpoField() {
+                    // {% comment %} const ipoField = document.getElementById('trans_ipo').closest('.form-group');
+                    // ipoField.style.display = document.getElementById('trans_jv').checked ? 'none' : 'block'; {% endcomment %}
+                    const ipoElement = document.getElementById('trans_ipo');
+                    const jvElement = document.getElementById('trans_jv');
+                    
+                    if (ipoElement && jvElement) {
+                        const ipoField = ipoElement.closest('.form-group');
+                        if (ipoField) {
+                            ipoField.style.display = jvElement.checked ? 'none' : 'block';
+                        }
+                    }
+                }
+
+                // Initialize on page load
+                document.addEventListener('DOMContentLoaded', function() {
+                    toggleIpoField();
+                });
+            </script>
+            <div class="modal fade" id="transactionModal1" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <form id="nonJVForm" method="post" action="{% url 'save_transaction_group' %}">
+                            {% csrf_token %}
+                            <div class="modal-header">
+                                <h5 class="modal-title">Add Payment (Non-JV)</h5>
+                                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                            </div> 
+
+                            <div class="modal-body">
+                                <div class="row">
+                                    <!-- Left Side (User fills) -->
+                                    <div class="col-md-6">
+                                        <label>Group Name</label>
+                                        <select name="group_id" id="group_id" class="form-select" required>
+                                            <option value="" disabled selected>All</option>
+                                            {% for group in groups %}
+                                                <option value="{{ group.id }}">{{ group.GroupName }}</option>
+                                                {% comment %} <option value="{{ group.id }}" {% if forloop.first %}selected{% endif %}>{{ group.GroupName }}</option> {% endcomment %}
+                                            {% endfor %}
+                                        </select>
+
+                                        <label>IPO Name</label>
+                                        <select name="ipo_id" id="ipo_id" class="form-select" required>
+                                            <option value="" disabled selected>All</option>
+                                            {% for ipo in ipos %}
+                                                <option value="{{ ipo.id }}">{{ ipo.IPOName }}</option>
+                                                {% comment %} <option value="{{ ipo.id }}" {% if forloop.first %}selected{% endif %}>{{ ipo.IPOName }}</option> {% endcomment %}
+                                            {% endfor %}
+                                        </select>
+
+                                        
+                                        <label>Amount</label>
+                                        <input
+                                            type="number"
+                                            name="amount"
+                                            id="amount"
+                                            step="0.01"
+                                            class="form-control"
+                                            oninput="this.value = this.value.replace(/[^0-9.]/g,'');
+                                                    if ((this.value.match(/\./g) || []).length > 1) {
+                                                        this.value = this.value.slice(0, -1);
+                                                    }
+                                                    this.value = Math.abs(this.value);"
+                                            onkeydown="if (event.key === '-' || event.key === 'e' || event.key === 'E'|| event.key === '+') event.preventDefault();"
+                                            required
+                                        />;
+                                        <!-- {% comment %} <input type="text" name="amount" id="amount" step="0.01" class="form-control" oninput="this.value=this.value.replace(/[^0-9.]/g,'');if((this.value.match(/\./g)||[]).length>1)this.value=this.value.slice(0,-1);if(this.value.includes('.')){let p=this.value.split('.');if(p[1].length>2)this.value=p[0]+'.'+p[1].slice(0,2);}" required> {% endcomment %} -->
+                                        
+                                        <label>Amount Type</label>
+                                        <select name="amount_type" id="amount_type" class="form-select" required>
+                                            <option value="credit">Credit</option>
+                                            <option value="debit">Debit</option>
+                                        </select>
+
+                                        {% comment %} <label>Remark</label>
+                                        <input type="text" name="remark" id="remark" class="form-control"> {% endcomment %}
+                                        <label for="remark">Remark</label>
+                                        <input type="text" name="remark" id="remark" class="form-control">
+                                        <div id="remark_error" class="text-danger small" style="display:none; margin-top:2px;">
+                                            Maximum 250 characters allowed!
+                                        </div>
+
+                                        <label>Date & Time</label>
+                                        {% comment %} <input type="datetime-local" id="date_time" name="date_time"
+                                            class="form-control"
+                                            value="{{ now|date:'Y-m-d\\TH:i' }}"> {% endcomment %}
+                                        <input tabindex="-1" type="datetime-local" style="width: 100%;" class="form-control width" step="1" name="date_time" id="date_time_jv" value='{% now "Y-m-d H:i:s" %}' min="2020-01-01T00:00:00" max="2035-12-31T23:59:59" required>
+                                    </div>
+
+                                    <!-- Right Side (Auto JV) -->
+                                    <div class="col-md-6">
+                                        <label>Group Name</label>
+                                        <select id="jv_group" name="jv_group_id" class="form-select" required>
+                                            <option value="" disabled selected>All</option>
+                                            {% for group in groups %}
+                                                <option value="{{ group.id }}">{{ group.GroupName }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <h6> </h6></br>
+
+                                        
+                                        <input class="form-check-input" type="checkbox" id="jv_checkbox" name="jv_checkbox" checked disabled>
+                                        <label class="form" for="jv_checkbox">
+                                            JV Entry 
+                                        </label></br>
+                                        
+
+                                        
+                                        {% comment %} <input type="hidden" id="jv_group" name="jv_group_id"> {% endcomment %}
+
+                                        <label>Amount</label>
+                                        <input type="number" id="jv_amount_display" name="jv_amount" step="0.01" class="form-control" readonly>
+                                        <input type="hidden" id="jv_amount" name="jv_amount">
+
+                                        <label>Amount Type</label>
+                                        <input type="text" id="jv_amount_type_display" name="jv_amount_type" class="form-control" readonly>
+                                        <input type="hidden" id="jv_amount_type" name="jv_amount_type">
+
+                                        {% comment %} <label>Remark</label>
+                                        <input type="text" id="jv_remark_display" name="jv_remark" class="form-control" >
+                                        <input type="hidden" id="jv_remark" name="jv_remark"> {% endcomment %}
+                                        <label>Remark</label>
+                                        <input type="text" id="jv_remark_display" name="jv_remark" class="form-control">
+                                        <input type="hidden" id="jv_remark" name="jv_remark">
+                                        <div id="jv_remark_error" class="text-danger small" style="display:none; margin-top:2px;">
+                                            Maximum 250 characters allowed!
+                                        </div>
+
+                                        <label>Date & Time</label>
+                                        
+                                        <input tabindex="-1" type="datetime-local" style="width: 100%;" class="form-control width" step="1" name="date_time" id="date_time" value='{% now "Y-m-d H:i:s" %}' min="2020-01-01T00:00:00" max="2035-12-31T23:59:59" readonly>
+
+
+                                        <!-- Flag to tell Django this is JV mode -->
+                                        <input type="hidden" name="jv_entry" value="true">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary" id="saveBtn2">Save</button>
+                            </div>
+                        </form>
+                        <script>
+                            // Default JV remark template
+                            function getDefaultJVRemark() {
+                                const amount = document.getElementById('amount').value;
+                                const amountType = document.getElementById('amount_type').value;
+                                const groupName = document.getElementById('group_id').selectedOptions[0].text;
+                                const ipoName = document.getElementById('ipo_id').selectedOptions[0].text;
+
+                                // Build your default remark string
+                                return `JV from ${groupName} for ${ipoName}`;
+                            }
+                            function getDefaultRemark() {
+                                const groupName = document.getElementById('jv_group').selectedOptions[0].text;
+                                const ipoName = document.getElementById('ipo_id').selectedOptions[0].text;
+                                return `JV To ${groupName} for ${ipoName}`;
+                            }
+
+                            function updateJVDisplay() {
+                                // Update amount
+                                const amount = document.getElementById('amount').value;
+                                document.getElementById('jv_amount_display').value = amount;
+                                document.getElementById('jv_amount').value = amount;
+
+                                // Update amount type (opposite of selected)
+                                const amountType = document.getElementById('amount_type').value;
+                                const jvAmountType = amountType === 'credit' ? 'debit' : 'credit';
+                                document.getElementById('jv_amount_type_display').value = jvAmountType.charAt(0).toUpperCase() + jvAmountType.slice(1);
+                                document.getElementById('jv_amount_type').value = jvAmountType;
+                                
+
+                                // Update remark
+                                const jvRemarkInput = document.getElementById('jv_remark_display');
+                                const jvHiddenRemark = document.getElementById('jv_remark');
+
+                                const defaultRemark = getDefaultJVRemark();
+
+                                if (!jvRemarkInput.dataset.edited) {
+                                    // Set default remark if user hasn't edited manually
+                                    jvRemarkInput.value = defaultRemark;
+                                    jvHiddenRemark.value = defaultRemark;
+                                } else {
+                                    // If user edited, append default remark at the end
+                                    jvHiddenRemark.value = jvRemarkInput.value ;
+                                }
+                                const mainRemarkInput = document.getElementById('remark');
+                                if (!mainRemarkInput.dataset.edited) {
+                                    mainRemarkInput.value = getDefaultRemark();
+                                }
+                            }
+
+                            document.addEventListener('DOMContentLoaded', function() {
+                                updateJVDisplay();
+
+                                document.getElementById('amount').addEventListener('input', updateJVDisplay);
+                                document.getElementById('amount_type').addEventListener('change', updateJVDisplay);
+                                document.getElementById('group_id').addEventListener('change', updateJVDisplay);
+                                document.getElementById('jv_group').addEventListener('change', updateJVDisplay);
+                                document.getElementById('ipo_id').addEventListener('change', updateJVDisplay);
+
+                                const jvRemarkInput = document.getElementById('jv_remark_display');
+                                jvRemarkInput.addEventListener('input', function() {
+                                    jvRemarkInput.dataset.edited = true;
+                                    document.getElementById('jv_remark').value = jvRemarkInput.value;
+                                });
+
+                                const modal = document.getElementById('transactionModal1');
+                                if (modal) {
+                                    modal.addEventListener('shown.bs.modal', function() {
+                                        updateJVDisplay();
+                                    });
+                                }
+                                document.getElementById('remark').addEventListener('input', function() {
+                                    this.dataset.edited = true;
+                                });
+                            });
+                        </script>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="transactionModal2" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <form id="IPOForm" method="post" action="{% url 'ipo_transaction1' %}">
+                            {% csrf_token %}
+                            <div class="modal-header">
+                                <h5 class="modal-title">Add Payment</h5>
+                                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                            </div> 
+
+                            <div class="modal-body">
+                            <div class="row">
+
+                                <!-- Left Side -->
+                                <div class="col-md-6">
+                                
+
+                                <label>Group Name</label>
+                                <select name="group_id_left" id="group_id_left" class="form-select" required>
+                                    <option value="" selected disabled>All</option>
+                                    {% for group in groups %}
+                                    <option value="{{ group.id }}">{{ group.GroupName }}</option>
+                                    {% endfor %}
+                                </select>
+
+                                <label>IPO Name</label>
+                                <select name="ipo_id_left" id="ipo_id_left" class="form-select" required>
+                                    <option value="" selected disabled>All</option>
+                                    {% for ipo in ipos %}
+                                    <option value="{{ ipo.id }}">{{ ipo.IPOName }}</option>
+                                    {% endfor %}
+                                </select>
+
+                                <label>Amount</label>
+                                <input type="number" name="amount" id="amount_left" step="0.01" class="form-control" oninput="this.value = this.value.replace(/[^0-9.]/g,'');if ((this.value.match(/\./g) || []).length > 1) {this.value = this.value.slice(0, -1);}this.value = Math.abs(this.value);" onkeydown="if (event.key === '-' || event.key === 'e' || event.key === 'E'|| event.key === '+') event.preventDefault();" required>
+                                {% comment %} <input type="text" name="amount" id="amount_left" step="0.01" class="form-control" oninput="this.value=this.value.replace(/[^0-9.]/g,'');if((this.value.match(/\./g)||[]).length>1)this.value=this.value.slice(0,-1);if(this.value.includes('.')){let p=this.value.split('.');if(p[1].length>2)this.value=p[0]+'.'+p[1].slice(0,2);}" required> {% endcomment %}
+
+                                <label>Amount Type</label>
+                                <select name="amount_type" id="amount_type_left" class="form-select" required>
+                                    <option value="credit">Credit</option>
+                                    <option value="debit">Debit</option>
+                                </select>
+
+                                {% comment %} <label>Remark</label>
+                                <textarea name="remark_left" id="remark_left" class="form-control" rows="3" maxlength="250"></textarea> {% endcomment %}
+
+                                <label>Remark</label>
+                                <textarea name="remark_left" id="remark_left" class="form-control" rows="3"></textarea>
+                                <div id="remark_left_error" class="text-danger small" style="display:none; margin-top:2px;">
+                                    Maximum 250 characters allowed!
+                                </div>   
+
+                                <label>Date & Time</label>
+                                <input type="datetime-local" class="form-control" step="1" name="date_time" id="date_time_left" value='{% now "Y-m-d H:i:s" %}' required>
+                                </div>
+
+                                <!-- Right Side -->
+                                <div class="col-md-6">
+                                <label>Group Name</label>
+                                <select id="group_id_right" name="group_id_right" class="form-select" required>
+                                    <option value="" selected disabled>All</option>
+                                    {% for group in groups %}
+                                    <option value="{{ group.id }}">{{ group.GroupName }}</option>
+                                    {% endfor %}
+                                </select>
+
+                                <label>IPO Name</label>
+                                <select name="ipo_id_right" id="ipo_id_right" class="form-select" required>
+                                    <option value="" selected disabled>All</option>
+                                    {% for ipo in ipos %}
+                                    <option value="{{ ipo.id }}">{{ ipo.IPOName }}</option>
+                                    {% endfor %}
+                                </select>
+
+                                
+                                <label>Amount</label>
+                                <input type="number" id="amount_right_display" class="form-control" readonly>
+                                <input type="hidden" id="amount_right" name="amount_right">
+
+                                <label>Amount Type</label>
+                                <input type="text" id="amount_type_right_display" class="form-control" readonly>
+                                <input type="hidden" id="amount_type_right" name="amount_type_right">
+
+                                {% comment %} <label>Remark</label>
+                                <textarea id="remark_right_display" name="remark_right" class="form-control" rows="3" maxlength="250"></textarea>
+                                <input type="hidden" id="remark_right" name="remark_right"> {% endcomment %}
+                                <label>Remark</label>
+                                <textarea id="remark_right_display" name="remark_right" class="form-control" rows="3"></textarea>
+                                <input type="hidden" id="remark_right" name="remark_right">
+                                <div id="remark_right_error" class="text-danger small" style="display:none; margin-top:2px;">
+                                    Maximum 250 characters allowed!
+                                </div>
+
+                                <label>Date & Time</label>
+                                <input type="datetime-local" class="form-control" step="1" name="date_time_right" id="date_time_right" value='{% now "Y-m-d H:i:s" %}' readonly>
+                                </div>
+                            </div>
+                            </div>
+
+                            <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary" id="saveBtn1">Save</button> 
+                            </div>
+                        </form>
+                        
+                        <script>
+                            function getDefaultLeftRemark() {
+                                const amountType = document.getElementById('amount_type_left').value;
+                                const rightGroup = document.getElementById('group_id_right').selectedOptions[0]?.text || "";
+                                const leftIPO = document.getElementById('ipo_id_left').selectedOptions[0]?.text || "";
+                                const rightIPO = document.getElementById('ipo_id_right').selectedOptions[0]?.text || "";
+
+                                if(amountType === 'credit') return `Given to ${rightGroup} for ${rightIPO}`;
+                                if(amountType === 'debit') return `Received from ${rightGroup} for ${rightIPO}`;
+                                return '';
+                            }
+
+
+                            function getDefaultRightRemark() {
+                                const amountType = document.getElementById('amount_type_left').value; // opposite of left
+                                const leftGroup = document.getElementById('group_id_left').selectedOptions[0]?.text || "";
+                                const leftIPO = document.getElementById('ipo_id_left').selectedOptions[0]?.text || "";
+
+                                if(amountType === 'credit') return `Received from ${leftGroup} for ${leftIPO}`;
+                                if(amountType === 'debit') return `Given to ${leftGroup} for ${leftIPO}`;
+                                return '';
+                            }
+
+                            function updateRemarksAndAmount() {
+                                // Mirror Amount to right side
+                                const amount = document.getElementById('amount_left').value;
+                                document.getElementById('amount_right_display').value = amount;
+                                document.getElementById('amount_right').value = amount;
+
+                                // Mirror Amount Type to right side (opposite)
+                                const leftType = document.getElementById('amount_type_left').value;
+                                const rightType = leftType === 'credit' ? 'debit' : 'credit';
+                                document.getElementById('amount_type_right_display').value = rightType.charAt(0).toUpperCase() + rightType.slice(1);
+                                document.getElementById('amount_type_right').value = rightType;
+
+                                // Left Remark
+                                const leftRemarkInput = document.getElementById('remark_left');
+                                const defaultLeft = getDefaultLeftRemark();
+                                if(!leftRemarkInput.dataset.edited){
+                                    leftRemarkInput.value = defaultLeft.substring(0,250);
+                                } 
+
+                                // Right Remark
+                                const rightRemarkInput = document.getElementById('remark_right_display');
+                                const rightRemarkHidden = document.getElementById('remark_right');
+                                const defaultRight = getDefaultRightRemark();
+                                if(!rightRemarkInput.dataset.edited){
+                                    rightRemarkInput.value = defaultRight.substring(0,250);
+                                    rightRemarkHidden.value = defaultRight.substring(0,250);
+                                } 
+                            }
+
+                            document.addEventListener('DOMContentLoaded', function() {
+                                updateRemarksAndAmount();
+
+                                // Update whenever relevant fields change
+                                ['amount_left','amount_type_left','group_id_left','ipo_id_left','group_id_right','ipo_id_right'].forEach(id=>{
+                                    const el = document.getElementById(id);
+                                    if(el){
+                                        el.addEventListener('input', updateRemarksAndAmount);
+                                        el.addEventListener('change', updateRemarksAndAmount);
+                                    }
+                                });
+
+                                // Track edits for left remark
+                                const leftRemarkInput = document.getElementById('remark_left');
+                                leftRemarkInput.addEventListener('input', function(){
+                                    this.dataset.edited = true;
+                                    // {% comment %} this.value = this.value.substring(0,250); {% endcomment %}
+                                });
+
+                                // Track edits for right remark
+                                const rightRemarkInput = document.getElementById('remark_right_display');
+                                rightRemarkInput.addEventListener('input', function(){
+                                    this.dataset.edited = true;
+                                    document.getElementById('remark_right').value = this.value;
+                                });
+                            });
+                        </script>
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function(){
+                                const saveBtn = document.getElementById("saveBtn1");
+
+                                // Elements
+                                const leftInput = document.getElementById("remark_left");
+                                const leftError = document.getElementById("remark_left_error");
+
+                                const rightInput = document.getElementById("remark_right_display");
+                                const rightHidden = document.getElementById("remark_right");
+                                const rightError = document.getElementById("remark_right_error");
+
+                                function validateInputs() {
+                                    let leftValid = true, rightValid = true;
+
+                                    // Validate left
+                                    if(leftInput.value.length > 250){
+                                        leftInput.value = leftInput.value.substring(0, 250);
+                                        leftError.style.display = "block";
+                                        leftValid = false;
+                                    } else {
+                                        leftError.style.display = "none";
+                                    }
+
+                                    // Validate right
+                                    let rightValue = rightInput.value;
+                                    if(rightValue.length > 250){
+                                        rightValue = rightValue.substring(0, 250);
+                                        rightError.style.display = "block";
+                                        rightValid = false;
+                                    } else {
+                                        rightError.style.display = "none";
+                                    }
+
+                                    // Update right hidden input
+                                    rightInput.value = rightValue;
+                                    rightHidden.value = rightValue;
+
+                                    // Disable submit if either invalid
+                                    saveBtn.disabled = !(leftValid && rightValid);
+                                }
+
+                                // Bind events
+                                leftInput.addEventListener("input", validateInputs);
+                                rightInput.addEventListener("input", validateInputs);
+
+                                // Initial validation
+                                validateInputs();
+                            });
+                        </script>
+
+
+
+                    </div>
+                </div>
+            </div>
+            
+        
+                <!-- Delete Modal -->
+    {% for ipo in IPOName %}
+        <div class="modal fade" id="deleteModal-{{ ipo.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel-{{ ipo.id }}" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel-{{ ipo.id }}">Delete IPO</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete IPO <strong>{{ ipo.IPOName }}</strong>?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary " class="close-btn" data-dismiss="modal">Cancel</button>
+                    <a href="{% url 'destroy' ipo.id %}?url={{ request.path }}" class="btn btn-danger">Delete</a>
+                </div>
+            </div>
+        </div>
+        </div>
+    {% endfor %}
+        {% comment %} html_table += f"""
+                <!-- Delete Modal -->
+                <div class="modal fade" id="deleteModal-{ipo.id}" tabindex="-1" role="dialog"
+                    aria-labelledby="deleteModalLabel-{ipo.id}" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="deleteModalLabel-{ipo.id}">Delete IPO</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Are you sure you want to delete IPO <b>{ipo.IPOName}</b>?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-outline-danger"
+                                    onclick="erwindow.location.href='/delete/{ipo.id}?page={page_numb';">
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            """ {% endcomment %}
+
+    
+</div> 
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'JS/xlsx.full.min.js' %}"></script>
+<script>
+$(document).ready(function() {
+    $("#successalerts").fadeTo(3000, 500).slideUp(500, function () {
+        $("#successalerts").slideUp(500);
+    });
+
+    // --- 1. Transaction Modal Group Summary Preview ---
+    function updateGroupSummary() {
+        const groupName = $("#trans_group option:selected").text() || "All";
+        const amountType = $("#trans_amount_type option:selected").text() || "Credit";
+        const amount = $("#trans_amount").val() || "0.00";
+        let text = `${amountType} to ${groupName}`;
+        if (amount) text += `  ₹${amount}`;
+        $("#groupSummaryPreview").text(text);
+    }
+    updateGroupSummary();
+    $("#trans_group, #trans_amount_type").on("change", updateGroupSummary);
+    $("#trans_amount").on("input", updateGroupSummary);
+    $("#transactionModal").on("shown.bs.modal", updateGroupSummary);
+
+    // --- 2. Central AJAX Dashboard Loader (Preserves Scroll & Focus Without Storage) ---
+    var activeAjaxReq = null;
+    function loadDashboard(targetUrl, isPopState) {
+        var url;
+        if (targetUrl) {
+            url = targetUrl;
+        } else {
+            var params = $("#filterForm").serializeArray();
+            var searchVal = $("#searchInput").val();
+            params = params.filter(function(p) { return p.name !== "SearchQuery"; });
+            if (searchVal) {
+                params.push({ name: "SearchQuery", value: searchVal });
+            }
+            url = "/GroupWiseDashboard?" + $.param(params);
+        }
+
+        if (activeAjaxReq && activeAjaxReq.readyState !== 4) {
+            activeAjaxReq.abort();
+        }
+
+        $("#example").css("opacity", "0.5");
+
+        activeAjaxReq = $.ajax({
+            url: url,
+            method: "GET",
+            success: function(htmlData) {
+                var $newDoc = $("<div>").html(htmlData);
+
+                // 1. Update Table
+                var $newTable = $newDoc.find("#example");
+                if ($newTable.length) {
+                    $("#example").html($newTable.html());
+                }
+
+                // 2. Update Pagination
+                var $newPagination = $newDoc.find("#paginationRow");
+                if ($newPagination.length) {
+                    $("#paginationRow").html($newPagination.html());
+                }
+
+                // 3. Update hidden form parameters
+                var $newForm = $newDoc.find("#filterForm");
+                if ($newForm.length) {
+                    $("#sort_col").val($newForm.find("#sort_col").val() || "");
+                    $("#sort_dir").val($newForm.find("#sort_dir").val() || "");
+                    $("input[name='show_zero_due']").val($newForm.find("input[name='show_zero_due']").val() || "false");
+                    $("input[name='page']").val($newForm.find("input[name='page']").val() || "1");
+                }
+
+                // 4. Update browser URL history without full reload
+                if (!isPopState && window.history && window.history.pushState) {
+                    window.history.pushState(null, "", url);
+                }
+
+                // 5. Re-apply sorting icons and hidden columns
+                renderSortIcons();
+                if (typeof applyHiddenColumns === "function") {
+                    applyHiddenColumns();
+                }
+            },
+            error: function(xhr, status) {
+                if (status !== "abort") {
+                    console.error("Failed to load dashboard data", xhr);
+                }
+            },
+            complete: function() {
+                $("#example").css("opacity", "1");
+            }
+        });
+    }
+
+    window.addEventListener("popstate", function() {
+        loadDashboard(window.location.href, true);
+    });
+
+    $("#filterForm").on("submit", function(e) {
+        e.preventDefault();
+        loadDashboard();
+    });
+
+    // --- 3. Zero Due Toggle ---
+    $("#toggleZeroDue").on("change", function() {
+        var isChecked = $(this).is(":checked");
+        $("input[name=\"show_zero_due\"]").val(isChecked ? "true" : "false");
+        $("input[name=\"page\"]").val("1");
+        loadDashboard();
+    });
+
+    // --- 4. Debounced Server-side Search (Focus & Caret Naturally Preserved) ---
+    var $searchInput = $("#searchInput");
+    if ($searchInput.length) {
+        var moveCursorToEnd = function() {
+            var elem = $searchInput[0];
+            var len = elem.value.length;
+            elem.focus();
+            if (elem.setSelectionRange) {
+                elem.setSelectionRange(len, len);
+            }
+        };
+        moveCursorToEnd();
+        setTimeout(moveCursorToEnd, 10);
+    }
+
+    var searchTimer;
+    $("#searchInput").on("input", function() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(function() {
+            $("input[name=\"page\"]").val("1");
+            loadDashboard();
+        }, 800);
+    });
+
+    $("#searchInput").on("keydown", function(e) {
+        if (e.key === "Enter" || e.keyCode === 13) {
+            e.preventDefault();
+            clearTimeout(searchTimer);
+            $("input[name=\"page\"]").val("1");
+            loadDashboard();
+        }
+    });
+
+    // --- 5. Rows per Page & Pagination Click Handlers ---
+    $("#GWD_page_size").on("change", function() {
+        $("input[name=\"page\"]").val("1");
+        loadDashboard();
+    });
+
+    $(document).on("click", "#paginationRow a.page-link", function(e) {
+        e.preventDefault();
+        var href = $(this).attr("href");
+        if (href && href !== "#") {
+            loadDashboard(href);
+        }
+    });
+
+    // --- 6. Server-side Column Sorting Clicks & Icons ---
+    function renderSortIcons() {
+        var currentCol = $("#sort_col").val();
+        var currentDir = $("#sort_dir").val();
+
+        $("#example thead th").each(function(index) {
+            $(this).css("cursor", "pointer");
+            $(this).find(".sort-icon").remove();
+            var iconClass = "fa-sort";
+            var iconColor = "#888";
+            if (currentCol !== "" && parseInt(currentCol, 10) === index) {
+                iconClass = currentDir === "asc" ? "fa-sort-up" : "fa-sort-down";
+                iconColor = "#333";
+            }
+            $(this).append(" <i class=\"fas " + iconClass + " sort-icon\" style=\"color: " + iconColor + "\"></i>");
+        });
+    }
+    renderSortIcons();
+
+    $(document).on("click", "#example thead th", function(e) {
+        if ($(e.target).closest("button, a, input").length > 0) return;
+        var colIndex = $(this).index();
+        var currentDir = $("#sort_dir").val();
+        var currentCol = $("#sort_col").val();
+        var newDir = "asc";
+        if (currentCol == colIndex && currentDir == "asc") {
+            newDir = "desc";
+        }
+        $("#sort_col").val(colIndex);
+        $("#sort_dir").val(newDir);
+        $("input[name=\"page\"]").val("1");
+        loadDashboard();
+    });
+
+    // --- 5. Columns Dropdown Toggle & Persistence ---
+    const STORAGE_KEY_COLUMNS = "gwd_hidden_columns";
+    const STORAGE_KEY_ALL_IPOS = "gwd_toggle_all_ipos";
+
+    var headers = $("#example thead th");
+    $("#columnToggleMenu li:not(:first)").remove();
+
+    var hiddenCols = [];
+    try {
+        hiddenCols = JSON.parse(localStorage.getItem(STORAGE_KEY_COLUMNS) || "[]");
+    } catch(err) {
+        hiddenCols = [];
+    }
+
+    var savedAllIpos = localStorage.getItem(STORAGE_KEY_ALL_IPOS);
+    if (savedAllIpos !== null) {
+        $("#toggleAllIposSwitch").prop("checked", savedAllIpos === "true");
+    }
+
+    headers.each(function(index) {
+        var colName = $(this).contents().filter(function() {
+            return this.nodeType === 3;
+        }).text().trim();
+        if (!colName) colName = $(this).text().trim();
+        if (!colName) colName = "Column " + (index + 1);
+
+        var isHidden = hiddenCols.indexOf(colName) !== -1;
+        var activeClass = isHidden ? "" : " active-col";
+
+        var li = $("<li><a class=\"dropdown-item col-toggle-btn" + activeClass + "\" href=\"#\" data-colidx=\"" + index + "\" data-colname=\"" + colName.replace(/"/g, '&quot;') + "\"><span>" + colName + "</span><i class=\"fas fa-check check-icon ms-2\"></i></a></li>");
+        $("#columnToggleMenu").append(li);
+
+        if (isHidden) {
+            $("#example thead th").eq(index).hide();
+            $("#example tfoot th, #example tfoot td").eq(index).hide();
+            $("#example tbody tr").each(function() {
+                $(this).find("td, th").eq(index).hide();
+            });
+        }
+    });
+
+    function saveColumnVisibility() {
+        var hidden = [];
+        $(".col-toggle-btn").each(function() {
+            if (!$(this).hasClass("active-col")) {
+                hidden.push($(this).data("colname"));
+            }
+        });
+        localStorage.setItem(STORAGE_KEY_COLUMNS, JSON.stringify(hidden));
+        localStorage.setItem(STORAGE_KEY_ALL_IPOS, $("#toggleAllIposSwitch").is(":checked") ? "true" : "false");
+    }
+
+    $(document).on("click", ".col-toggle-btn", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $(this).blur();
+        $(this).toggleClass("active-col");
+        var colIdx = $(this).data("colidx");
+        var isChecked = $(this).hasClass("active-col");
+        $("#example thead th").eq(colIdx).toggle(isChecked);
+        $("#example tfoot th, #example tfoot td").eq(colIdx).toggle(isChecked);
+        $("#example tbody tr").each(function() {
+            $(this).find("td, th").eq(colIdx).toggle(isChecked);
+        });
+
+        // Update Toggle All IPOs switch state if all IPO columns are active/inactive
+        var numIPOs = parseInt("{{ IPOName|length }}", 10) || 0;
+        var allIposChecked = true;
+        $(".col-toggle-btn").each(function() {
+            var idx = parseInt($(this).data("colidx"), 10);
+            if (idx >= 1 && idx <= numIPOs) {
+                if (!$(this).hasClass("active-col")) {
+                    allIposChecked = false;
+                }
+            }
+        });
+        if (numIPOs > 0) {
+            $("#toggleAllIposSwitch").prop("checked", allIposChecked);
+        }
+
+        saveColumnVisibility();
+    });
+
+    $("#toggleAllIposSwitch").on("change", function(e) {
+        var isChecked = $(this).is(":checked");
+        var numIPOs = parseInt("{{ IPOName|length }}", 10) || 0;
+        $(".col-toggle-btn").each(function() {
+            var idx = parseInt($(this).data("colidx"), 10);
+            if (idx >= 1 && idx <= numIPOs) {
+                if (isChecked) {
+                    $(this).addClass("active-col");
+                    $("#example thead th").eq(idx).show();
+                    $("#example tfoot th, #example tfoot td").eq(idx).show();
+                    $("#example tbody tr").each(function() {
+                        $(this).find("td, th").eq(idx).show();
+                    });
+                } else {
+                    $(this).removeClass("active-col");
+                    $("#example thead th").eq(idx).hide();
+                    $("#example tfoot th, #example tfoot td").eq(idx).hide();
+                    $("#example tbody tr").each(function() {
+                        $(this).find("td, th").eq(idx).hide();
+                    });
+                }
+            }
+        });
+        saveColumnVisibility();
+    });
+
+    function applyHiddenColumns() {
+        var hiddenCols = [];
+        try {
+            hiddenCols = JSON.parse(localStorage.getItem(STORAGE_KEY_COLUMNS) || "[]");
+        } catch(err) {
+            hiddenCols = [];
+        }
+        if (!hiddenCols || !hiddenCols.length) return;
+
+        $("#example thead th").each(function(index) {
+            var colName = $(this).contents().filter(function() {
+                return this.nodeType === 3;
+            }).text().trim();
+            if (!colName) colName = $(this).text().trim();
+            if (colName && hiddenCols.indexOf(colName) !== -1) {
+                $("#example thead th").eq(index).hide();
+                $("#example tfoot th, #example tfoot td").eq(index).hide();
+                $("#example tbody tr").each(function() {
+                    $(this).find("td, th").eq(index).hide();
+                });
+            } else {
+                $("#example thead th").eq(index).show();
+                $("#example tfoot th, #example tfoot td").eq(index).show();
+                $("#example tbody tr").each(function() {
+                    $(this).find("td, th").eq(index).show();
+                });
+            }
+        });
+    }
+
+    // --- 7. Double-click Table Cell Navigation & Handlers ---
+    $(document).on("dblclick", ".cell-total", function(e) {
+        e.stopPropagation();
+        const cell = $(this).closest(".amount-cell");
+        const ipoId = cell.data("ipo-id");
+        const groupName = cell.data("group-name");
+        if (ipoId) {
+            let url = "/" + encodeURIComponent(ipoId) + "/Billing";
+            if (groupName) url += "?Groupfilter=" + encodeURIComponent(groupName);
+            window.location.href = url;
+        }
+    });
+
+    $(document).on("dblclick", ".cell-collection", function(e) {
+        e.stopPropagation();
+        const cell = $(this).closest(".amount-cell");
+        const groupName = cell.data("group-name");
+        const ipoName = cell.data("ipo-name");
+        let params = [];
+        if (groupName) params.push("group_name=" + encodeURIComponent(groupName));
+        if (ipoName) params.push("ipo_name=" + encodeURIComponent(ipoName));
+        window.location.href = "/accounting/" + (params.length ? "?" + params.join("&") : "");
+    });
+
+    $(document).on("dblclick", ".cell-due", function(e) {
+        e.stopPropagation();
+        const cell = $(this).closest(".amount-cell");
+        const ipoId = cell.data("ipo-id");
+        const groupId = cell.data("group-id");
+        const exactDue = cell.data("exact-due");
+        let dueAmount = 0;
+        if (exactDue !== undefined && exactDue !== "") {
+            dueAmount = parseFloat(exactDue);
+        } else {
+            const dueMatch = cell.text().match(/Due:\s*([-]?\d+(\.\d+)?)/);
+            if (dueMatch) dueAmount = parseFloat(dueMatch[1]);
+        }
+        $("#trans_ipo").val(ipoId).trigger("change");
+        $("#trans_group").val(groupId).trigger("change");
+        $("#trans_amount").val(Math.abs(dueAmount));
+        $("#trans_amount_type").val(dueAmount < 0 ? "debit" : "credit");
+        $("#transactionModal").modal("show");
+        setTimeout(function() { $("#trans_remark").focus(); }, 300);
+    });
+
+    $(document).on("dblclick", ".jv-cell", function(e) {
+        e.stopPropagation();
+        const groupId = $(this).data("group-id");
+        const jvAmount = parseFloat($(this).data("jv-amount")) || 0;
+        $("#trans_group").val(groupId).trigger("change");
+        $("#trans_amount").val(Math.abs(jvAmount));
+        $("#trans_amount_type").val(jvAmount < 0 ? "debit" : "credit");
+        $("#trans_jv").prop("checked", true).trigger("change");
+        $("#trans_ipo").val("");
+        $("#transactionModal").modal("show");
+        setTimeout(function() { $("#trans_remark").focus(); }, 300);
+    });
+
+    // --- Copy Due Amount Breakdown Button Handler (Format like Status.html) ---
+    $(document).on("click", ".copy-group-due-btn", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $btn = $(this);
+        var $cell = $btn.closest("td");
+        var groupId = $btn.data("group-id");
+        var groupName = $btn.data("group-name");
+        var totalDueAmount = parseFloat($btn.data("due-amount")) || 0;
+
+        var $row = $cell.closest("tr");
+
+        // Directly extract the EXACT on-screen Due amounts for every IPO and JV from this row
+        var itemsToFormat = [];
+
+        $row.find(".amount-cell").each(function() {
+            var $amountCell = $(this);
+            var ipoName = $amountCell.data("ipo-name");
+            var exactDue = $amountCell.data("exact-due");
+            var dueVal = exactDue !== undefined && exactDue !== "" ? parseFloat(exactDue) : (parseFloat($amountCell.find(".cell-due").data("due")) || 0);
+            
+            if (dueVal !== 0 && ipoName) {
+                itemsToFormat.push({
+                    label: ipoName,
+                    amount: dueVal
+                });
+            }
+        });
+
+        var $jvCell = $row.find(".jv-cell");
+        if ($jvCell.length) {
+            var jvVal = parseFloat($jvCell.data("jv-amount")) || 0;
+            if (jvVal !== 0) {
+                itemsToFormat.push({
+                    label: "jv",
+                    amount: jvVal
+                });
+            }
+        }
+
+        // Calculate max width for right-aligning amount values
+        var maxValLen = 0;
+                    itemsToFormat.forEach(function(item) {
+                        var formattedStr = Math.round(item.amount).toLocaleString('en-IN');
+                        if (formattedStr.length > maxValLen) {
+                            maxValLen = formattedStr.length;
+                        }
+                    });
+
+                    var totalFormattedVal = Math.round(totalDueAmount).toLocaleString('en-IN');
+                    if (totalFormattedVal.length > maxValLen) {
+                        maxValLen = totalFormattedVal.length;
+                    }
+
+                    // Calculate max label width (min 13 chars)
+                    var LABEL_WIDTH = 13;
+                    itemsToFormat.forEach(function(item) {
+                        if (item.label.length + 2 > LABEL_WIDTH) {
+                            LABEL_WIDTH = item.label.length + 2;
+                        }
+                    });
+
+                    function formatAmountLine(label, valStr) {
+                        var paddedLabel = label.padEnd(LABEL_WIDTH, ' ');
+                        var paddedVal = valStr.padStart(maxValLen, ' ');
+                        return paddedLabel + paddedVal;
+                    }
+
+                    var formattedParts = itemsToFormat.map(function(item) {
+                        var formattedStr = Math.round(item.amount).toLocaleString('en-IN');
+                        return formatAmountLine(item.label, formattedStr);
+                    });
+
+                    var footerLine = formatAmountLine("Net Amount", totalFormattedVal);
+                    var header = groupName;
+                    var monospacedBody = "```\n" + (formattedParts.length > 0 ? formattedParts.join("\n") + "\n" : "") + footerLine + "\n```";
+                    var textToCopy = header + "\n" + monospacedBody;
+
+                    function fallbackCopy(text) {
+                        var $temp = $("<textarea>");
+                        $("body").append($temp);
+                        $temp.val(text).select();
+                        try {
+                            document.execCommand("copy");
+                        } catch (err) {
+                            console.error('Fallback copy failed', err);
+                        }
+                        $temp.remove();
+                        showSuccessFeedback();
+                    }
+
+                    function showSuccessFeedback() {
+                        $btn.html('<i class="fa fa-check" style="color: #198754;"></i>');
+                        setTimeout(function() {
+                            $btn.html('<i class="fa fa-copy" style="color: #007bff;"></i>');
+                        }, 1200);
+                    }
+
+                    if (navigator.clipboard && window.isSecureContext) {
+                        navigator.clipboard.writeText(textToCopy).then(function() {
+                            showSuccessFeedback();
+                        }).catch(function(err) {
+                            fallbackCopy(textToCopy);
+                        });
+                    } else {
+                        fallbackCopy(textToCopy);
+                    }
+    });
+
+    $(document).on("dblclick", ".due-amount-cell", function(e) {
+        if ($(e.target).closest(".copy-group-due-btn").length) {
+            return;
+        }
+        e.stopPropagation();
+        const groupId = $(this).data("group-id");
+        const groupName = $(this).data("group-name");
+        const exactDue = $(this).data("exact-due");
+        const dueAmount = exactDue !== undefined && exactDue !== "" ? parseFloat(exactDue) : (parseFloat($(this).data("due-amount")) || 0);
+        showMultipleIPOPaymentForm(groupId, groupName, dueAmount);
+    });
+
+    function getLocalDateTime() {
+        const now = new Date();
+        const localTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+        return localTime.toISOString().slice(0, 16);
+    }
+
+    // --- 7. Multiple IPO Payment Modal Implementation ---
+    function showMultipleIPOPaymentForm(groupId, groupName, totalDueAmount) {
+        $("#multipleIPOModal").remove();
+        const modalHtml = `
+            <div class="modal fade" id="multipleIPOModal" tabindex="-1" role="dialog" aria-labelledby="multipleIPOModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="multipleIPOModalLabel">Add Multiple IPO Payments - ${groupName}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="multipleIPOForm">
+                                <div class="form-group mb-3">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label class="fw-bold" for="multi_group_name">Group Name :</label>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <input type="text" class="form-control" id="multi_group_name" value="${groupName}" readonly>
+                                            <input type="hidden" id="multi_group_id" value="${groupId}">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group mb-3">
+                                    <label class="fw-bold mb-2">IPO-wise Payments</label>
+                                    <div id="ipoPaymentsList">
+                                        <div class="text-center py-3">
+                                            <i class="fas fa-spinner fa-spin"></i> Loading data securely from server...
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row p-3 rounded" style="background-color: #f8f9fa;">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="fw-bold" for="multi_date_time">Date & Time</label>
+                                            <input type="datetime-local" class="form-control" id="multi_date_time">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="form-group">
+                                            <label class="fw-bold" for="multi_remark">Common Remark</label>
+                                            <textarea class="form-control" id="multi_remark" rows="1" placeholder="Add your additional remarks here..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" id="saveMultipleIPOPayments">Save All Payments</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        $("body").append(modalHtml);
+        $("#multipleIPOModal").modal("show");
+        $("#multi_date_time").val(getLocalDateTime());
+        loadIPODataForGroup(groupId, groupName);
+    }
+
+    function loadIPODataForGroup(groupId, groupName) {
+        $("#ipoPaymentsList").html("<div class=\"text-center py-3\"><i class=\"fas fa-spinner fa-spin\"></i> Loading data securely from server...</div>");
+
+        $.ajax({
+            url: `/api/get-group-dues/${groupId}/`,
+            method: "GET",
+            success: function(response) {
+                if (response.status === "success") {
+                    let ipoData = response.data || [];
+                    let jvAmountData = response.jv_amount || 0;
+                    let jvAmount = Math.abs(jvAmountData);
+                    let jvSettleType = jvAmountData < 0 ? "credit" : "debit";
+                    
+                    let ipoFormHtml = "";
+                    if (ipoData.length === 0 && jvAmount === 0) {
+                        ipoFormHtml = "<div class=\"alert alert-info\">No IPO due amounts or JV amounts found for this group.</div>";
+                    } else {
+                        if (jvAmount > 0) {
+                            ipoFormHtml += `
+                                <div class="card mb-3" style="border: 1px solid #dee2e6; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); background-color: #fff;">
+                                    <div class="card-body p-3">
+                                        <div class="row jv-entry-row">
+                                            <div class="col-md-4">
+                                                <label><strong>JV Entry</strong></label>
+                                                <input type="text" class="form-control" value="Journal Voucher Entry" readonly>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label>Amount</label>
+                                                <input type="number" class="form-control jv-amount" value="${jvAmount}" step="0.01" min="0" placeholder="Enter JV amount" oninput="this.value = Math.abs(this.value)">
+                                                <small class="text-muted">Current JV: ${-jvAmountData}</small>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label>Amount Type</label>
+                                                <select class="form-select jv-amount-type">
+                                                    <option value="credit" ${jvSettleType === "credit" ? "selected" : ""}>Credit</option>
+                                                    <option value="debit" ${jvSettleType === "debit" ? "selected" : ""}>Debit</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2 d-flex align-items-center mt-3">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input jv-include" id="jvIncludeCheck" checked>
+                                                    <label class="form-check-label" for="jvIncludeCheck">Include</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 mt-2">
+                                                <small class="text-muted"><strong>Remark:</strong></small>
+                                                <div class="jv-remark-preview" contenteditable="true" style="font-size: 0.85em; background-color: #f8f9fa; padding: 5px; border-radius: 3px; min-height: 28px; border: 1px solid #ddd;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                        
+                        if (ipoData.length > 0) {
+                            ipoFormHtml += `<div class="card mb-3" style="border: 1px solid #dee2e6; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); background-color: #fff;"><div class="card-body p-3">`;
+                            ipoData.forEach(function(ipo, index) {
+                                const absoluteAmount = Math.abs(ipo.due_amount);
+                                const defaultAmountType = ipo.due_amount < 0 ? "debit" : "credit";
+                                
+                                ipoFormHtml += `
+                                    <div class="row mb-3 ipo-payment-row" data-ipo-id="${ipo.ipo_id}" data-original-amount="${ipo.due_amount}">
+                                        <div class="col-md-4">
+                                            <label>IPO Name</label>
+                                            <input type="text" class="form-control" value="${ipo.ipo_name}" readonly>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>Due Amount</label>
+                                            <input type="number" class="form-control ipo-amount" value="${absoluteAmount}" step="0.01" min="0" oninput="this.value = Math.abs(this.value)">
+                                            <small class="text-muted">Original: ₹${ipo.due_amount}</small>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>Amount Type</label>
+                                            <select class="form-select ipo-amount-type">
+                                                <option value="credit" ${defaultAmountType === "credit" ? "selected" : ""}>Credit</option>
+                                                <option value="debit" ${defaultAmountType === "debit" ? "selected" : ""}>Debit</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2 d-flex align-items-center mt-3">
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input ipo-include" id="ipoInc_${index}" checked>
+                                                <label class="form-check-label" for="ipoInc_${index}">Include</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 mt-2">
+                                            <small class="text-muted"><strong>Remark:</strong></small>
+                                            <div class="ipo-remark-preview" contenteditable="true" style="font-size: 0.85em; background-color: #f8f9fa; padding: 5px; border-radius: 3px; min-height: 28px; border: 1px solid #ddd;"></div>
+                                        </div>
+                                    </div>
+                                    ${index < ipoData.length - 1 ? "<hr class=\"my-2\">" : ""}
+                                `;
+                            });
+                            ipoFormHtml += `</div></div>`;
+                        }
+                        
+                        ipoFormHtml += `
+                            <div class="row p-3 totals-row rounded" style="background-color: #e9ecef; font-weight: bold;">
+                                <div class="col-md-6">
+                                    <label>Total Amount</label>
+                                    <input type="text" class="form-control total-amount" value="0" readonly>
+                                    <small class="text-muted">
+                                        <span class="total-credit">Credit: 0</span> | 
+                                        <span class="total-debit">Debit: 0</span> |
+                                        <span class="Net-amount">Net Amount: 0</span>
+                                    </small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label>Balance</label>
+                                    <input type="text" class="form-control balance-display" value="Balanced" readonly>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    $("#ipoPaymentsList").html(ipoFormHtml);
+                    updateTotals();
+                    updateIPORemarkPreviews();
+                } else {
+                    $("#ipoPaymentsList").html("<div class=\"alert alert-danger\">Failed to load data.</div>");
+                }
+            },
+            error: function() {
+                $("#ipoPaymentsList").html("<div class=\"alert alert-danger\">Server error while loading data.</div>");
+            }
+        });
+    }
+
+    $(document).on("input change", "#multipleIPOModal .ipo-amount, #multipleIPOModal .jv-amount, #multipleIPOModal .ipo-amount-type, #multipleIPOModal .jv-amount-type, #multipleIPOModal .ipo-include, #multipleIPOModal .jv-include", function() {
+        updateTotals();
+    });
+
+    $(document).on("input", "#multi_remark", function() {
+        updateIPORemarkPreviews();
+    });
+
+    function updateIPORemarkPreviews() {
+        const userRemark = $("#multi_remark").val().trim();
+        $("#multipleIPOModal .ipo-remark-preview, #multipleIPOModal .jv-remark-preview").each(function() {
+            $(this).text(userRemark);
+        });
+    }
+
+    function updateTotals() {
+        let totalCredit = 0;
+        let totalDebit = 0;
+
+        $("#multipleIPOModal .ipo-payment-row").each(function() {
+            if ($(this).find(".ipo-include").is(":checked")) {
+                const amount = parseFloat($(this).find(".ipo-amount").val()) || 0;
+                const type = $(this).find(".ipo-amount-type").val();
+                if (amount > 0) {
+                    if (type === "credit") totalCredit += amount;
+                    else totalDebit += amount;
+                }
+            }
+        });
+
+        if ($("#multipleIPOModal .jv-include").is(":checked")) {
+            const amount = parseFloat($("#multipleIPOModal .jv-amount").val()) || 0;
+            const type = $("#multipleIPOModal .jv-amount-type").val();
+            if (amount > 0) {
+                if (type === "credit") totalCredit += amount;
+                else totalDebit += amount;
+            }
+        }
+
+        $("#multipleIPOModal .total-credit").text(`Credit: ${totalCredit.toFixed(2)}`);
+        $("#multipleIPOModal .total-debit").text(`Debit: ${totalDebit.toFixed(2)}`);
+        $("#multipleIPOModal .Net-amount").text(`Net Amount: ${(totalCredit - totalDebit).toFixed(2)}`);
+
+        const netAmount = totalCredit - totalDebit;
+        $("#multipleIPOModal .total-amount").val(Math.abs(netAmount).toFixed(2));
+
+        if (Math.abs(netAmount) < 0.01) {
+            $("#multipleIPOModal .balance-display").val("Balanced").css("background-color", "#d4edda");
+        } else if (netAmount > 0) {
+            $("#multipleIPOModal .balance-display").val(`Credit Balance: ${netAmount.toFixed(2)}`).css("background-color", "#fff3cd");
+        } else {
+            $("#multipleIPOModal .balance-display").val(`Debit Balance: ${Math.abs(netAmount).toFixed(2)}`).css("background-color", "#f8d7da");
+        }
+    }
+
+    // --- 8. Save Multiple IPO Payments with Duplicate Prevention ---
+    $(document).on("click", "#saveMultipleIPOPayments", function() {
+        const $btn = $(this);
+        if ($btn.prop("disabled")) return;
+
+        const groupId = $("#multi_group_id").val();
+        const dateTime = $("#multi_date_time").val();
+        const transactions = [];
+
+        if ($("#multipleIPOModal .jv-include").is(":checked")) {
+            const jvAmount = parseFloat($("#multipleIPOModal .jv-amount").val()) || 0;
+            const jvType = $("#multipleIPOModal .jv-amount-type").val();
+            if (jvAmount > 0) {
+                transactions.push({
+                    group_id: groupId,
+                    ipo_id: null,
+                    amount: jvAmount,
+                    amount_type: jvType,
+                    remark: $("#multipleIPOModal .jv-remark-preview").text().trim(),
+                    date_time: dateTime,
+                    jv: 1
+                });
+            }
+        }
+
+        $("#multipleIPOModal .ipo-payment-row").each(function() {
+            if ($(this).find(".ipo-include").is(":checked")) {
+                const ipoId = $(this).data("ipo-id");
+                const amount = parseFloat($(this).find(".ipo-amount").val()) || 0;
+                const type = $(this).find(".ipo-amount-type").val();
+                if (amount > 0) {
+                    transactions.push({
+                        group_id: groupId,
+                        ipo_id: ipoId,
+                        amount: amount,
+                        amount_type: type,
+                        remark: $(this).find(".ipo-remark-preview").text().trim(),
+                        date_time: dateTime,
+                        jv: 0
+                    });
+                }
+            }
+        });
+
+        if (transactions.length === 0) {
+            alert("Please select at least one entry (IPO or JV) with amount > 0");
+            return;
+        }
+
+        // Disable button immediately to prevent double-click double submissions!
+        $btn.prop("disabled", true).html("<i class=\"fas fa-spinner fa-spin\"></i> Saving...");
+
+        $.ajax({
+            url: "/bulk_ipo_transactions/",
+            method: "POST",
+            data: {
+                "transactions": JSON.stringify(transactions),
+                "csrfmiddlewaretoken": $("[name=csrfmiddlewaretoken]").val()
+            },
+            success: function(response) {
+                if (response.status === "success") {
+                    $("#multipleIPOModal").modal("hide");
+                    location.reload();
+                } else {
+                    alert("Error: " + response.message);
+                    $btn.prop("disabled", false).text("Save All Payments");
+                }
+            },
+            error: function(xhr, status, error) {
+                const message = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : error;
+                alert("Error creating transactions: " + message);
+                $btn.prop("disabled", false).text("Save All Payments");
+            }
+        });
+    });
+
+    $(document).on("hidden.bs.modal", "#multipleIPOModal", function() {
+        $(this).remove();
+        $("body").removeClass("modal-open");
+        $(".modal-backdrop").remove();
+    });
+
+    $("#transactionModal").on("hidden.bs.modal", function() {
+        $("body").removeClass("modal-open");
+        $(".modal-backdrop").remove();
+    });
+
+    // --- 9. Remark Validation & Alert Fadeout ---
+    const submitBtn = document.getElementById("saveBtn2");
+    const remarkInput = document.getElementById("remark");
+    const remarkError = document.getElementById("remark_error");
+    if (remarkInput && submitBtn) {
+        remarkInput.addEventListener("input", function() {
+            if (remarkInput.value.length > 250) {
+                if (remarkError) remarkError.style.display = "block";
+                submitBtn.disabled = true;
+            } else {
+                if (remarkError) remarkError.style.display = "none";
+                submitBtn.disabled = false;
+            }
+        });
+    }
+
+    const jvDisplay = document.getElementById("jv_remark_display");
+    const jvHidden = document.getElementById("jv_remark");
+    const jvError = document.getElementById("jv_remark_error");
+    if (jvDisplay && submitBtn) {
+        jvDisplay.addEventListener("input", function() {
+            let value = jvDisplay.value;
+            if (value.length > 250) {
+                if (jvError) jvError.style.display = "block";
+                submitBtn.disabled = true;
+            } else {
+                if (jvError) jvError.style.display = "none";
+                submitBtn.disabled = false;
+            }
+            if (jvHidden) jvHidden.value = value;
+        });
+    }
+
+    $(".alert").each(function() {
+        var alert = $(this);
+        setTimeout(function() {
+            alert.fadeOut(500, function() {
+                alert.remove();
+            });
+        }, 3000);
+    });
+
+    // --- 10. Client-Side Universal Excel Export using SheetJS (All rows by default, no popup) ---
+    $("#exportGwdExcelBtn").on("click", function(e) {
+        e.preventDefault();
+
+        if (typeof XLSX === "undefined") {
+            alert("SheetJS library is not loaded. Please try again.");
+            return;
+        }
+
+        var $btn = $(this);
+        var originalBtnHtml = $btn.html();
+        $btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin"></i> Exporting...');
+
+        function parseAndDownloadTable($tableElement) {
+            // Identify visible column indices from the active table header
+            var visibleColIndices = [];
+            $("#example thead tr th").each(function(colIdx) {
+                if ($(this).is(":visible")) {
+                    visibleColIndices.push(colIdx);
+                }
+            });
+
+            var aoa = [];
+
+            // 1. Header row
+            var headerRow = [];
+            visibleColIndices.forEach(function(colIdx) {
+                var $th = $tableElement.find("thead tr th").eq(colIdx);
+                if (!$th.length) $th = $("#example thead tr th").eq(colIdx);
+                // Extract clean text, ignore nested delete buttons/icons
+                var text = $th.clone().find("button, i, script, style").remove().end().text().trim();
+                text = text.replace(/\s+/g, " ");
+                headerRow.push(text);
+            });
+            aoa.push(headerRow);
+
+            // 2. Body rows
+            $tableElement.find("tbody tr").each(function() {
+                var $row = $(this);
+                // Respect zero-due filter if active
+                if ($("#toggleZeroDue").is(":checked") === false && $row.hasClass("zero-due-row")) {
+                    return;
+                }
+
+                var rowData = [];
+                visibleColIndices.forEach(function(colIdx) {
+                    var $cell = $row.find("td, th").eq(colIdx);
+                    if (!$cell.length) {
+                        rowData.push("");
+                        return;
+                    }
+
+                    if ($cell.hasClass("amount-cell")) {
+                        // Multi-line cell with Total, Collection, Due
+                        var tText = $cell.find(".cell-total").text().trim();
+                        var cText = $cell.find(".cell-collection").text().trim();
+                        var dText = $cell.find(".cell-due").text().trim();
+                        var parts = [];
+                        if (tText) parts.push(tText);
+                        if (cText) parts.push(cText);
+                        if (dText) parts.push(dText);
+                        rowData.push(parts.join("\n"));
+                    } else {
+                        var cellVal = $cell.text().trim();
+                        cellVal = cellVal.replace(/\s+/g, " ");
+                        // Attempt to parse clean numeric value for JV, Total, Collection, Due Amount
+                        var cleanNumeric = cellVal.replace(/,/g, "");
+                        if (cleanNumeric !== "" && !isNaN(cleanNumeric) && isFinite(cleanNumeric) && !/^[0-9]+[A-Za-z]+/.test(cellVal)) {
+                            rowData.push(parseFloat(cleanNumeric));
+                        } else {
+                            rowData.push(cellVal);
+                        }
+                    }
+                });
+                aoa.push(rowData);
+            });
+
+            // 3. Footer row
+            var $tfoot = $tableElement.find("tfoot tr");
+            if (!$tfoot.length) $tfoot = $("#example tfoot tr");
+            if ($tfoot.length) {
+                var footerRow = [];
+                visibleColIndices.forEach(function(colIdx) {
+                    var $cell = $tfoot.find("td, th").eq(colIdx);
+                    if (!$cell.length) {
+                        footerRow.push("");
+                        return;
+                    }
+                    var cellText = $cell.text().trim();
+                    var lines = cellText.split(/\r?\n/).map(function(l) { return l.trim(); }).filter(Boolean);
+                    if (lines.length > 1) {
+                        footerRow.push(lines.join("\n"));
+                    } else {
+                        var cleanNum = cellText.replace(/,/g, "");
+                        if (cleanNum !== "" && !isNaN(cleanNum) && isFinite(cleanNum)) {
+                            footerRow.push(parseFloat(cleanNum));
+                        } else {
+                            footerRow.push(cellText);
+                        }
+                    }
+                });
+                aoa.push(footerRow);
+            }
+
+            // Create worksheet and workbook
+            var ws = XLSX.utils.aoa_to_sheet(aoa);
+
+            // Compute auto column widths
+            var colWidths = visibleColIndices.map(function(idx, colPos) {
+                var maxLen = 12;
+                aoa.forEach(function(row) {
+                    var val = row[colPos];
+                    if (val !== undefined && val !== null) {
+                        var lines = String(val).split("\n");
+                        lines.forEach(function(l) {
+                            if (l.length > maxLen) maxLen = l.length;
+                        });
+                    }
+                });
+                return { wch: Math.min(maxLen + 3, 50) };
+            });
+            ws["!cols"] = colWidths;
+
+            var wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "GroupWiseDashboard");
+
+            var today = new Date().toISOString().split("T")[0];
+            XLSX.writeFile(wb, "GroupWiseDashboard_" + today + ".xlsx");
+            $btn.prop("disabled", false).html(originalBtnHtml);
+        }
+
+        var isAllSelected = $("#GWD_page_size").val() === "All";
+        if (isAllSelected) {
+            // Table already has all rows in the DOM
+            parseAndDownloadTable($("#example"));
+        } else {
+            // Fetch complete dataset in background
+            var params = $("#filterForm").serializeArray();
+            var searchVal = $("#searchInput").val();
+            params = params.filter(function(p) { return p.name !== "SearchQuery" && p.name !== "GWD_page_size" && p.name !== "page"; });
+            params.push({ name: "GWD_page_size", value: "All" });
+            params.push({ name: "page", value: "1" });
+            if (searchVal) {
+                params.push({ name: "SearchQuery", value: searchVal });
+            }
+
+            $.ajax({
+                url: "/GroupWiseDashboard?" + $.param(params),
+                method: "GET",
+                success: function(htmlData) {
+                    var $tempDoc = $("<div>").html(htmlData);
+                    var $allTable = $tempDoc.find("#example");
+                    if ($allTable.length) {
+                        parseAndDownloadTable($allTable);
+                    } else {
+                        parseAndDownloadTable($("#example"));
+                    }
+                },
+                error: function() {
+                    // Fallback to currently rendered table
+                    parseAndDownloadTable($("#example"));
+                }
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

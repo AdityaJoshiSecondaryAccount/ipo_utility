@@ -1,0 +1,219 @@
+{% extends 'basic.html' %}
+{% block title%} Update Kostak Group Details{% endblock %}
+{% block css %}
+{% load static %}
+<style>
+    .h3,
+    h3 {
+        font-size: 1.75rem;
+        border-block-end: 3px solid #e9ecef;
+        margin-top: 60px;
+        margin-bottom: 0px;
+        text-align: center;
+    }
+    .navbar{
+        padding: 0.5rem 0rem !important;
+    }
+
+    .col-md-3 {
+        display: inline-block;
+        margin-left: -4px;
+    }
+
+    .col-md-3 {
+        width: 100%;
+        height: auto;
+    }
+
+
+
+    body .no-padding {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .carousel-control-prev-icon {
+        background: black no-repeat center center;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23fff' viewBox='0 0 8 8'%3e%3cpath d='M5.25 0l-4 4 4 4 1.5-1.5-2.5-2.5 2.5-2.5-1.5-1.5z'/%3e%3c/svg%3e");
+    }
+
+    .carousel-control-next-icon {
+        background: black no-repeat center center;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23fff' viewBox='0 0 8 8'%3e%3cpath d='M2.75 0l-1.5 1.5 2.5 2.5-2.5 2.5 1.5 1.5 4-4-4-4z'/%3e%3c/svg%3e");
+
+    }
+
+    body .carousel-indicators {
+        bottom: 0;
+    }
+
+    .carousel-indicators .active {
+        background-color: blue;
+    }
+
+    .modal-footer {
+        display: block;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 1rem;
+        border-top: 3px solid #e9ecef;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container my-3">
+    <h3>Update Kostak Group Details</h3>
+    <form action="/UpdateGroup/{{employee.id}}?page={{page_number}}" method="post" class="needs-validation" novalidate>
+        {% csrf_token%}
+
+        <div class="form-group">
+
+            {% comment %} {% if messages %}
+
+            <div class="alert alert-danger fixed-top" id="success-alert" style="height: 40px;">
+                {% for message in messages %}
+
+                <button type=" button" class="close" data-dismiss="alert">x</button>
+                <strong>{{message}}</strong>
+                {% endfor %}
+
+            </div>
+            {% endif %}
+            <script src="{% static 'JS/jquery.min.js' %}"></script>
+
+            <script>
+
+                $("#success-alert").fadeTo(5000, 500).slideUp(500, function () {
+                    $("#success-alert").slideUp(500);
+                });
+            </script> {% endcomment %}
+            {% for message in messages %}
+                {% if messages %}
+                    <div class="alert {{ message.tags }} alert-dismissible  fixed-top" id="successalerts" role="alert" style="position:fixed;">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                        {{ message }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+            <label for="GroupName" class="form-label"><b>Name :&nbsp;<font color="red">*</font></b></label>
+            <input type="text" name="GroupName" class="form-control" placeholder="Enter  Name" maxlength="50"
+                value="{{ employee.GroupName }}" autofocus="autofocus" onfocus="this.select()" id="GroupName" required>
+            <div class="invalid-feedback" id="nameError">
+                Enter Name.
+            </div>
+            <script>
+                const input = document.getElementById("GroupName");
+                const errorDiv = document.getElementById("nameError");
+
+                input.addEventListener("input", function () {
+                    if (input.value.includes(",")) {
+                        errorDiv.textContent = "Commas are not allowed in the group name.";
+                        errorDiv.style.display = "block";
+                        input.setCustomValidity("Commas are not allowed.");
+                        input.classList.add("is-invalid");
+                    } else {
+                        errorDiv.textContent = "Please Enter Name.";
+                        input.setCustomValidity("");
+                        errorDiv.style.display = "none";
+                        input.classList.remove("is-invalid");
+                    }
+                });
+            </script>
+
+        </div>
+        <div>
+            <label class="form-label"><b>Group Mobile No:&nbsp;</b></label>
+            <input type="text" name='MobileNo' class="form-control" placeholder="Enter Mobile No" id="MobileNo"
+                maxlength="10" minlength="10" value="{{ employee.MobileNo }}">
+                <div class="invalid-feedback">
+                    Enter Group Mobile No.
+                </div>    
+        </div><br>
+        <div>
+            <label class="form-label"><b>Email:&nbsp;</b></label>
+            <input type="email" name='Email' class="form-control" placeholder="Enter Email" id="Email"
+                maxlength="100" value="{{ employee.Email }}">
+                <div class="invalid-feedback">
+                    Please enter a valid email address.
+                </div>    
+        </div><br>
+        <div>
+            <label class="form-label"><b>Address :</b></label>
+            <input type="text" name='Address' class="form-control" placeholder="Enter Address" maxlength="100"
+                value="{{ employee.Address }}">
+        </div><br>
+        <div>
+            <label class="form-label"><b>Remark :</b></label>
+            <input type="text" name="Remark" class="form-control" placeholder="Enter Remark"
+                value="{{ employee.Remark }}" maxlength="100">
+        </div><br>
+
+
+        <div class="modal-footer">
+            <div style="display: inline;" align="center;">
+                <div style="float: right; margin: 0 -17px;">
+                    <button class="btn btn-primary" type="submit"
+                        style="padding: 7px 12px; text-align: center; text-decoration: none; border-radius: 4px; display: inline-block; font-size: 100%;">Submit</button>
+                </div>
+                <div style="float: left; margin: 0 -17px;">
+                    <button onclick="window.location.href='/GroupSetup';" class="btn btn-primary" type="button"
+                        style="padding: 7px 15px; text-align: center; text-decoration: none; border-radius: 4px; display: inline-block; font-size: 100%;">Back</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- JAVASCRIPT FOR EDITGROUP FORM VALIDATION -->
+<script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+
+<!-- JAVASCRIPT FOR EDITGROUP FORM WITHOUT ENTERING ANY NUMBER USER CANNOT TO BE NEXT INPUT -->
+<script>
+    $(document).ready(function () {
+        $('#GroupName').focusout(function () {
+            var thisValue = $(this).val();
+            if (thisValue.trim() == '') {
+                $(this).next().show();
+                $(this).focus();
+            } else {
+                $(this).next().hide();
+            }
+        });
+
+    });
+</script>
+
+<script src="{% static 'JS/jquery.min.js' %}"></script>
+    <script>
+        $("#successalerts").fadeTo(3000, 500).slideUp(500, function () {
+            $("#successalerts").slideUp(500);
+        });
+    </script>
+
+<!-- <script src="{% static 'JS/jquery-3.3.1.slim.min.js' %}"></script> -->
+{% endblock %}

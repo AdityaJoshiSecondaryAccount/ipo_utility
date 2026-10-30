@@ -1,0 +1,1317 @@
+{% extends "basic.html" %}
+{% load static %}
+{% block css %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'DataTables/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'DataTables/css/dataTables.bootstrap5.min.css' %}">
+<link rel="stylesheet" href="{% static 'DataTables/css/buttons.bootstrap5.min.css' %}">
+<style>
+    .card.shadow {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+        background: #fff;
+    }
+    .card-header {
+        background: linear-gradient(135deg, #1ab7b7, #0d9a9a);
+        color: #fff;
+        padding: 1rem 1.5rem;
+        border-radius: 20px 20px 0 0;
+        font-weight: bold;
+        font-size: 1.5rem;
+        box-shadow: 0 0 5px rgba(26, 183, 183, 0.5);
+    }
+    .card-body {
+        background-color: #f9f9f9;
+        border-radius: 0 0 20px 20px;
+        padding: 2rem;
+        box-shadow: 0 0 5px rgba(26, 183, 183, 0.5);
+    }
+    .form-label {
+        font-weight: 300;
+        color: #333;
+    }
+    .form-control {
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        transition: all 0.3s ease-in-out;
+    }
+    .form-control:focus {
+        border-color: #1ab7b7;
+        box-shadow: 0 0 5px rgba(26, 183, 183, 0.5);
+    }
+    .input-group .btn-outline-secondary {
+        border-radius: 0 10px 10px 0;
+        border-color: #ccc;
+        background-color: #f1f1f1;
+    }
+    .input-group .btn-outline-secondary:hover {
+        background-color: #1ab7b7;
+        color: white;
+    }
+    .btn-primary1{
+        background-color: #6c757d;
+        {% comment %} color: white;
+        border-radius: 10px;
+        border: none;
+        font-weight: 600; {% endcomment %}
+    }
+    
+    .btn-warning, .btn-success, .btn-secondary, .btn-primary {
+        font-weight: 600;
+        border-radius: 8px;
+        width: 100%;
+    }
+    .email-config-section {
+        padding: 0.5rem;
+    }
+    .user-config-header {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .user-config-header h5 {
+        margin: 0;
+        color: #464949ff;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+    }
+    .user-config-content {
+        display: none;
+    }
+    .user-config-content.show {
+        display: block;
+    }
+    .toggle-icon {
+        transition: transform 0.3s ease;
+    }
+    .toggle-icon.rotated {
+        transform: rotate(180deg);
+    }
+    /* 2FA Stepper and Modal Styles */
+    .stepper-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        position: relative;
+        margin: 0 auto 20px auto;
+        max-width: 440px;
+    }
+    .stepper-step {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        z-index: 2;
+    }
+    .stepper-step::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 3px;
+        background-color: #e2e8f0;
+        top: 19px;
+        left: 50%;
+        z-index: -1;
+        transition: background-color 0.3s ease;
+    }
+    .stepper-step:last-child::after {
+        content: none;
+    }
+    .stepper-step.completed::after {
+        background-color: #1ab7b7;
+    }
+    .stepper-circle {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background-color: #ffffff;
+        border: 2px solid #cbd5e1;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        margin-bottom: 6px;
+    }
+    .stepper-step.active .stepper-circle {
+        background: linear-gradient(135deg, #1ab7b7, #0d9a9a);
+        border-color: #1ab7b7;
+        color: #ffffff;
+        box-shadow: 0 0 0 4px rgba(26, 183, 183, 0.2);
+    }
+    .stepper-step.completed .stepper-circle {
+        background: #1ab7b7;
+        border-color: #1ab7b7;
+        color: #ffffff;
+    }
+    .stepper-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #94a3b8;
+        transition: color 0.3s ease;
+    }
+    .stepper-step.active .stepper-title {
+        color: #0f172a;
+        font-weight: 700;
+    }
+    .stepper-step.completed .stepper-title {
+        color: #1ab7b7;
+        font-weight: 700;
+    }
+
+    /* Modal Navigation Buttons */
+    .modal-footer-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid #eef2f6;
+    }
+    .modal-nav-btn {
+        width: auto !important;
+        min-width: 140px;
+        padding: 10px 24px !important;
+        font-size: 14px;
+        font-weight: 600;
+        border-radius: 10px !important;
+        transition: all 0.2s ease-in-out;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .btn-step-next {
+        background: linear-gradient(135deg, #1ab7b7, #0d9a9a) !important;
+        border: none !important;
+        color: #fff !important;
+        box-shadow: 0 4px 12px rgba(26, 183, 183, 0.25);
+    }
+    .btn-step-next:hover:not(:disabled) {
+        background: linear-gradient(135deg, #17a2a2, #0c8787) !important;
+        color: #fff !important;
+        box-shadow: 0 6px 16px rgba(26, 183, 183, 0.35);
+        transform: translateY(-1px);
+    }
+    .btn-step-next:disabled {
+        background: #e2e8f0 !important;
+        color: #94a3b8 !important;
+        box-shadow: none !important;
+        cursor: not-allowed;
+    }
+    .btn-step-cancel, .btn-step-back {
+        background: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #475569 !important;
+    }
+    .btn-step-cancel:hover, .btn-step-back:hover {
+        background: #e2e8f0 !important;
+        color: #0f172a !important;
+        border-color: #94a3b8 !important;
+    }
+    .btn-step-submit {
+        background: linear-gradient(135deg, #10b981, #059669) !important;
+        border: none !important;
+        color: #fff !important;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    }
+    .btn-step-submit:hover {
+        background: linear-gradient(135deg, #059669, #047857) !important;
+        color: #fff !important;
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+        transform: translateY(-1px);
+    }
+    .btn-download-codes {
+        width: auto !important;
+        padding: 9px 24px !important;
+        border-radius: 10px !important;
+        font-weight: 600;
+    }
+</style>
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert {{ message.tags }} alert-dismissible fade show fixed-top"
+             role="alert"
+             style="position:fixed; z-index:1050;">
+            {{ message }}
+            <button type="button" class="btn-close alert-close-btn" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="container-fluid mt-5">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="card shadow w-100" style="border-radius: 20px;">
+                <div class="card-header text-center" style="background: whitesmoke; color: black; border-radius: 20px 20px 0 0;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div></div>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-user"></i>
+                            <h3 class="mb-0">User Profile</h3>
+                        </div>
+                        <div>
+                            <a href="{% url 'home' %}" class="btn btn-outline-light btn-sm">
+                                <i class="fa fa-times"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body" style="background: whitesmoke; border-radius: 0 0 20px 20px;">
+                    
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <i class="fas fa-user"></i>
+                                <label class="form-label"><b>Username</b></label>
+                                <input type="text" class="form-control w-100" value="{{ user.username }}" readonly>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <i class="fas fa-calendar-alt field-icon"></i>
+                                <label class="form-label"><b>Expiry Date</b></label>
+                                <input type="text" class="form-control w-100" value="{{expiry_date|date:'j F, Y'}}" readonly>
+                            </div>
+                        </div>
+
+                        <!-- Change Password Section -->
+                        <div class="email-config-section">
+                            <div class="user-config-header" onclick="togglePasswordConfig()">
+                                <h5>
+                                    <i class="fas fa-lock"></i>&nbsp
+                                    Change Password
+                                </h5>
+                                <i class="fas fa-chevron-down toggle-icon" id="passwordConfigToggle"></i>
+                            </div>
+                            <div class="user-config-content" id="passwordConfigContent">
+                                <form method="post" action="/ChangeUserpassword">
+                                    {% csrf_token %}
+                                    <div class="mb-3"><br>
+                                        <i class="fas fa-lock field-icon"></i>
+                                        <label class="form-label"><b>New Password</b></label>
+                                        <div class="input-group">
+                                            {% comment %} <input type="password" class="form-control w-90" name="OldPassword" id="oldPassword" placeholder="Enter Old Password" required> {% endcomment %}
+                                            {% comment %} <input type="password" class="form-control w-90" id="oldPassword" name="NewPassword"
+                                                placeholder="New Password" required> {% endcomment %}
+                                            <input type="password" class="form-control w-90" id="inputPassword_up" name="NewPassword"
+                                                placeholder="New Password" required>    
+                                            <button class="btn btn-outline-secondary" type="button" id="toggleOldPassword">
+                                                <i class="fa fa-eye" id="oldPasswordIcon"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <i class="fas fa-lock field-icon"></i>
+                                        <label class="form-label"><b>Confirm Password</b></label>
+                                        <div class="input-group">
+                                            {% comment %} <input type="password" class="form-control w-90" name="NewPassword" id="newPassword" placeholder="Enter New Password" required> {% endcomment %}
+                                            {% comment %} <input type="password" class="form-control w-90" name="NewPassword" id="newPassword" placeholder="Enter New Password"  required> {% endcomment %}
+                                            <input type="password" class="form-control w-90" id="inputPassword_up1" name="ConfirmPassword"
+                                                    placeholder="Confirm Password" required>
+                                            <button class="btn btn-outline-secondary" type="button" id="toggleNewPassword">
+                                                <i class="fa fa-eye" id="newPasswordIcon"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 text-center">
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="fas fa-key"></i> Change Password
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Telegram Configuration Section -->
+                        <div class="email-config-section">
+                            <div class="user-config-header" onclick="toggleTelegramConfig()">
+                                <h5>
+                                    <i class="fab fa-telegram-plane"></i>&nbsp
+                                    Telegram Configuration
+                                </h5>
+                                
+                                <i class="fas fa-chevron-down toggle-icon" id="telegramConfigToggle"></i>
+                            </div>
+                            <div class="user-config-content" id="telegramConfigContent">
+                                <form id="telegramForm">
+                                    {% csrf_token %}
+                                    <div class="mb-3"><br>
+                                        <i class="fab fa-telegram-plane field-icon"></i>
+                                        <label class="form-label"><b>Telegram API Id</b></label>
+                                        <input type="text" class="form-control w-90" name="telegram_api" value="{{ user_detail.TelegramApi_id|default:'' }}" placeholder="Enter Telegram API">
+                                    </div>
+                                    <div class="mb-3">
+                                        <i class="fas fa-key"></i>
+                                        <label class="form-label"><b>Telegram API Key</b></label>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control w-90" name="telegram_api_key" id="telegram_api_key" value="{{ user_detail.TelegramApi_key|default:'' }}" placeholder="Enter Telegram API Key">
+                                            <button class="btn btn-outline-secondary" type="button" id="toggleTelegramKey">
+                                                <i class="fa fa-eye" id="telegramKeyIcon"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <i class="fas fa-mobile-alt"></i>
+                                        <label class="form-label"><b>Mobile Number</b></label>
+                                        <input type="text" class="form-control w-90" name="mobile_number" value="{{ user_detail.Mobileno|default:'+91' }}" placeholder="Enter Mobile Number">
+                                    </div>
+                                    <div class="mb-3 text-center">
+                                        <div class="mb-3 d-flex justify-content-between gap-2">
+                                            <!-- Update Button -->
+                                            {% comment %} <button type="submit" class="btn btn-primary w-50">
+                                                <i class="fas fa-save"></i> Update Telegram
+                                            </button> {% endcomment %}
+
+                                            <!-- Create Session Button -->
+                                            <button type="button" class="btn btn-primary w-100" onclick="createSessionAndSendOTP()">
+                                                <i class="fas fa-key"></i> Create Session
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        
+
+                        <!-- Email Configuration Section (at the end) -->
+                        <div class="email-config-section">
+                            <div class="user-config-header" onclick="toggleEmailConfig()">
+                                <h5>
+                                    <i class="fas fa-envelope"></i>&nbsp
+                                    Email Configuration
+                                </h5>
+                                <i class="fas fa-chevron-down toggle-icon" id="emailConfigToggle"></i>
+                            </div>
+                            <div class="user-config-content" id="emailConfigContent">
+                                <form method="POST" action="/update-user-profile/">
+                                    {% csrf_token %}
+                                    <div class="mb-3"><br>
+                                        <i class="fas fa-envelope field-icon"></i>
+                                        <label class="form-label"><b>Email</b></label>
+                                        <input type="email" class="form-control w-90" name="email" value="{{ user_detail.email }}" placeholder="Enter Email Id" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <i class="fas fa-lock field-icon"></i>
+                                        <label class="form-label"><b>App Password</b></label>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control w-90" name="app_password" id="app_password" value="{{ user_detail.AppPassword|default:'' }}" placeholder="Enter App Password" required>
+                                            <button class="btn btn-outline-secondary" type="button" id="toggleAppPassword">
+                                                <i class="fa fa-eye" id="appPasswordIcon"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 text-center">
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="fas fa-save"></i> Update Email
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Two-Factor Authentication Section -->
+                        <div class="email-config-section">
+                            <div class="user-config-header" onclick="toggleTwoFactorConfig()">
+                                <h5>
+                                    <i class="fas fa-shield-alt"></i>&nbsp;
+                                    Two-Factor Authentication (2FA)
+                                    {% if request.user.two_factor_enabled %}
+                                        <span class="badge bg-success ms-2" style="font-size: 0.75rem;">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary ms-2" style="font-size: 0.75rem;">Disabled</span>
+                                    {% endif %}
+                                </h5>
+                                <i class="fas fa-chevron-down toggle-icon" id="twoFactorConfigToggle"></i>
+                            </div>
+                            <div class="user-config-content" id="twoFactorConfigContent">
+                                <div class="p-3">
+                                    {% if request.user.two_factor_enabled %}
+                                        <div class="alert alert-success d-flex align-items-center mb-3">
+                                            <i class="fas fa-check-circle fa-2x me-3 text-success"></i>
+                                            <div>
+                                                <h6 class="mb-1 fw-bold">Two-Factor Authentication is Enabled</h6>
+                                                <p class="mb-0 small text-muted">
+                                                    Your account is secured with Google Authenticator.
+                                                    You currently have <strong>{{ request.user.backup_codes|length }}</strong> backup code(s) remaining.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex justify-content-end">
+                                            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#disable2faModal">
+                                                <i class="fas fa-ban me-1"></i> Disable 2FA
+                                            </button>
+                                        </div>
+                                    {% else %}
+                                        <div class="alert alert-warning d-flex align-items-center mb-3">
+                                            <i class="fas fa-exclamation-triangle fa-2x me-3 text-warning"></i>
+                                            <div>
+                                                <h6 class="mb-1 fw-bold">Two-Factor Authentication is Disabled</h6>
+                                                <p class="mb-0 small text-muted">
+                                                    Add an extra layer of protection to your account with Google Authenticator.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex justify-content-end">
+                                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmPassword2faModal" style="width: auto;">
+                                                <i class="fas fa-shield-alt me-1"></i> Setup 2FA Now
+                                            </button>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Confirm Password Modal for 2FA Setup -->
+                        <div class="modal fade" id="confirmPassword2faModal" tabindex="-1" aria-labelledby="confirmPassword2faModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content" style="border-radius: 18px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.15);">
+                                    <div class="modal-header" style="background: linear-gradient(135deg, #1ab7b7, #0d9a9a); color: white; border-radius: 18px 18px 0 0; padding: 1.2rem 1.5rem;">
+                                        <h5 class="modal-title fw-bold" id="confirmPassword2faModalLabel">
+                                            <i class="fas fa-lock me-2"></i> Confirm Your Password
+                                        </h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body p-4 text-start">
+                                        <p class="text-muted small mb-3">
+                                            For your security, please enter the password you logged in with to begin setting up Two-Factor Authentication.
+                                        </p>
+                                        <div class="mb-3">
+                                            <label class="form-label"><b>Account Password</b></label>
+                                            <div class="input-group">
+                                                <input type="password" class="form-control" id="confirm2faPasswordInput" 
+                                                       placeholder="Enter your login password" autocomplete="current-password">
+                                                <button class="btn btn-outline-secondary" type="button" id="toggleConfirm2faPassword">
+                                                    <i class="fa fa-eye" id="confirm2faEyeIcon"></i>
+                                                </button>
+                                            </div>
+                                            <div id="confirm2faPasswordError" class="text-danger small mt-2" style="display: none;"></div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer" style="border-top: 1px solid #eef2f6; padding: 1rem 1.5rem;">
+                                        <button type="button" class="btn btn-secondary" style="width: auto;" data-bs-dismiss="modal" data-dismiss="modal">Cancel</button>
+                                        <button type="button" class="btn btn-primary" id="btnConfirm2faPassword" style="width: auto;">
+                                            <span id="confirmPasswordBtnText"><i class="fas fa-arrow-right me-1"></i> Continue</span>
+                                            <span id="confirmPasswordBtnSpinner" class="spinner-border spinner-border-sm ms-1" style="display: none;" role="status"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Disable 2FA Modal -->
+                        <div class="modal fade" id="disable2faModal" tabindex="-1" aria-labelledby="disable2faModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content" style="border-radius: 15px;">
+                                    <div class="modal-header bg-danger text-white" style="border-radius: 15px 15px 0 0;">
+                                        <h5 class="modal-title" id="disable2faModalLabel">
+                                            <i class="fas fa-exclamation-triangle me-2"></i> Disable 2FA
+                                        </h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form method="POST" action="{% url 'disable_2fa' %}">
+                                        {% csrf_token %}
+                                        <div class="modal-body p-4 text-start">
+                                            <p class="text-muted mb-3">
+                                                To disable Two-Factor Authentication, please enter either your current <strong>6-digit Authenticator code</strong> or one of your <strong>backup codes</strong>:
+                                            </p>
+                                            <div class="mb-3">
+                                                <label class="form-label"><b>Verification Code / Backup Code</b></label>
+                                                <input type="text" name="verification_code" class="form-control text-center fs-5" 
+                                                       placeholder="e.g. 123456 or ABCD-EF01" required autocomplete="off">
+                                                <small class="text-muted d-block mt-2">
+                                                    Disabling 2FA makes your account less secure. You can re-enable it anytime from your Profile.
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" style="width: auto;" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-danger" style="width: auto;">
+                                                <i class="fas fa-check me-1"></i> Verify & Disable
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Setup 2FA Modal -->
+                        <div class="modal fade" id="setup2faModal" tabindex="-1" aria-labelledby="setup2faModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-lg">
+                                <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.15);">
+                                    <div class="modal-header" style="background: linear-gradient(135deg, #1ab7b7, #0d9a9a); color: white; border-radius: 20px 20px 0 0; padding: 1.2rem 1.5rem;">
+                                        <h5 class="modal-title fw-bold" id="setup2faModalLabel">
+                                            <i class="fas fa-shield-alt me-2"></i> Setup Two-Factor Authentication
+                                        </h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body p-4 text-center">
+
+                                        <!-- Stepper Navigation Header -->
+                                        <div class="stepper-nav">
+                                            <div class="stepper-step active" id="stepperStep1">
+                                                <div class="stepper-circle" id="stepCircle1">1</div>
+                                                <div class="stepper-title" id="stepLabel1">Scan QR</div>
+                                            </div>
+                                            <div class="stepper-step" id="stepperStep2">
+                                                <div class="stepper-circle" id="stepCircle2">2</div>
+                                                <div class="stepper-title" id="stepLabel2">Backup Codes</div>
+                                            </div>
+                                            <div class="stepper-step" id="stepperStep3">
+                                                <div class="stepper-circle" id="stepCircle3">3</div>
+                                                <div class="stepper-title" id="stepLabel3">Verify Code</div>
+                                            </div>
+                                        </div>
+
+                                        <hr class="my-3 opacity-25">
+
+                                        <!-- STEP 1: SCAN QR CODE -->
+                                        <div id="step1Pane" class="py-2">
+                                            <h5 class="fw-bold mb-1 text-dark">Step 1: Scan QR Code with Authenticator</h5>
+                                            <p class="text-muted small mb-3">Open Google Authenticator on your mobile device and scan this code:</p>
+                                            
+                                            {% if two_factor_qr %}
+                                                <div class="d-flex justify-content-center my-3">
+                                                    <img src="data:image/png;base64,{{ two_factor_qr }}" alt="QR Code" 
+                                                         style="max-width: 200px; border: 2px solid #e2e8f0; border-radius: 14px; padding: 10px; background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                                                </div>
+                                                <div class="d-inline-flex align-items-center gap-2 px-3 py-2 bg-light border rounded-pill mt-2">
+                                                    <span class="text-muted small">Secret:</span>
+                                                    <code class="fw-bold text-dark fs-6" id="manualSecretText">{{ two_factor_secret }}</code>
+                                                    <button type="button" class="btn btn-sm btn-link text-secondary p-0" onclick="copyManualSecret()" title="Copy key" style="width: auto !important;">
+                                                        <i class="far fa-copy" id="copySecretIcon"></i>
+                                                    </button>
+                                                </div>
+                                            {% endif %}
+
+                                            <div class="modal-footer-nav">
+                                                <button type="button" class="btn modal-nav-btn btn-step-cancel" data-bs-dismiss="modal" data-dismiss="modal">Cancel</button>
+                                                <button type="button" class="btn modal-nav-btn btn-step-next" onclick="goTo2faStep(2)">
+                                                    Next: Backup Codes <i class="fas fa-arrow-right ms-2"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- STEP 2: DOWNLOAD BACKUP CODES (MANDATORY) -->
+                                        <div id="step2Pane" class="py-2" style="display: none;">
+                                            <h5 class="fw-bold mb-1 text-dark">Step 2: Save Emergency Backup Codes</h5>
+                                            <p class="text-muted small mb-3">
+                                                Save these one-time codes safely. You will need them if you lose access to your authenticator device.
+                                            </p>
+                                            
+                                            <div class="bg-light p-3 rounded-3 border mb-3" style="font-family: monospace;">
+                                                <div class="row g-2 justify-content-center">
+                                                    {% for code in two_factor_backup_codes %}
+                                                        <div class="col-6 col-sm-4">
+                                                            <div class="bg-white border rounded py-2 px-3 text-center fw-bold text-dark shadow-sm" style="letter-spacing: 1px;">
+                                                                {{ code }}
+                                                            </div>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+
+                                            <button type="button" class="btn btn-primary modal-nav-btn btn-download-codes" id="btnDownloadProfileBackupCodes" onclick="downloadProfileBackupCodes()">
+                                                <i class="fas fa-download me-2"></i> Download Backup Codes (.txt)
+                                            </button>
+                                            
+                                            <div id="profileBackupNotice" class="alert alert-warning py-2 small mt-3 mb-0">
+                                                <i class="fas fa-exclamation-triangle me-1"></i> You must download your backup codes to proceed to Step 3.
+                                            </div>
+
+                                            <div class="modal-footer-nav">
+                                                <button type="button" class="btn modal-nav-btn btn-step-back" onclick="goTo2faStep(1)">
+                                                    <i class="fas fa-arrow-left me-2"></i> Back
+                                                </button>
+                                                <button type="button" id="btnToStep3" class="btn modal-nav-btn btn-step-next" onclick="goTo2faStep(3)" disabled>
+                                                    Next: Verify Code <i class="fas fa-arrow-right ms-2"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- STEP 3: VERIFY & ACTIVATE -->
+                                        <div id="step3Pane" class="py-2" style="display: none;">
+                                            <h5 class="fw-bold mb-1 text-dark">Step 3: Enter 6-Digit Authenticator Code</h5>
+                                            <p class="text-muted small mb-3">Enter the 6-digit verification code currently shown in your Authenticator app:</p>
+
+                                            <form method="POST" action="{% url 'setup_2fa' %}" onsubmit="return validateProfileSetupForm();">
+                                                {% csrf_token %}
+                                                <div class="d-flex justify-content-center my-4">
+                                                    <input type="text" name="totp_token" id="profileTotpInput" 
+                                                           class="form-control text-center fw-bold py-2 shadow-sm" 
+                                                           style="max-width: 250px; font-size: 26px; letter-spacing: 8px; border: 2px solid #1ab7b7; border-radius: 12px;" 
+                                                           placeholder="000000" pattern="[0-9]*" inputmode="numeric" maxlength="6" 
+                                                           required autocomplete="off">
+                                                </div>
+
+                                                <div class="modal-footer-nav">
+                                                    <button type="button" class="btn modal-nav-btn btn-step-back" onclick="goTo2faStep(2)">
+                                                        <i class="fas fa-arrow-left me-2"></i> Back
+                                                    </button>
+                                                    <button type="submit" id="btnProfileSubmit2fa" class="btn modal-nav-btn btn-step-submit">
+                                                        <i class="fas fa-check-circle me-2"></i> Verify & Enable 2FA
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- OTP Modal -->
+                        <div class="modal fade" id="otpModal" tabindex="-1" role="dialog" aria-labelledby="otpModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content" style="border-radius: 15px;">
+                                    <div class="modal-header bg-info text-white">
+                                        <h5 class="modal-title" id="otpModalLabel">
+                                            <i class="fas fa-key"></i> Enter OTP
+                                        </h5>
+                                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <input type="text" id="otpInput" class="form-control" placeholder="Enter OTP here" required>
+                                        <div class="mt-2 text-danger" id="otpError" style="display:none;">Please enter a valid OTP.</div>
+
+                                        <input type="hidden" id="telegramPhone">
+                                        <input type="hidden" id="telegramApiId">
+                                        <input type="hidden" id="telegramApiHash">
+                                        <input type="hidden" id="telegramSession">
+                                        <input type="hidden" id="telegramPhoneCodeHash">
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-primary"  onclick="submitTelegramForm()">Submit</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="mb-3 d-flex justify-content-between">
+                            <a href="{% url 'home' %}" class="btn btn-secondary w-100 me-2">
+                                <i class="fa fa-arrow-left"></i> Back
+                            </a>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{% static 'JS/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'DataTables\js\jquery-3.7.0.js' %}"></script>
+
+<script>
+    // Hide only the close button after 5 seconds
+    setTimeout(function() {
+        document.querySelectorAll('.alert').forEach(function(btn) {
+            btn.style.display = 'none';
+        });
+    }, 5000); // 5 seconds
+</script>
+<script>
+    function createSessionAndSendOTP() {
+        const form = document.getElementById("telegramForm");
+        const formData = new FormData(form);
+
+        // STEP 1: Save Telegram details to DB
+        fetch("/update-user-profile/", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                 "X-Requested-With": "XMLHttpRequest"
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                // STEP 2: After saving, send OTP
+                sendTelegramOTP();
+            } else {
+                window.location.reload();
+                //alert("Error saving Telegram details: " + data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            window.location.reload();
+            //alert("Something went wrong while saving details.");
+        });
+    }
+    function sendTelegramOTP() {
+        const form = document.getElementById("telegramForm");
+        const formData = new FormData(form);
+        fetch("/send-telegram-otp/", {
+            method: "POST",
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: formData 
+        }).then(response => response.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                document.getElementById('telegramPhone').value = data.phone;
+                document.getElementById('telegramApiId').value = data.api_id;
+                document.getElementById('telegramApiHash').value = data.api_hash;
+                document.getElementById('telegramSession').value = data.session_string;
+                document.getElementById('telegramPhoneCodeHash').value = data.phone_code_hash;
+                const otpModal = new bootstrap.Modal(document.getElementById('otpModal'));
+                otpModal.show();
+            } else if (data.status === 'already') {
+                window.location.reload();
+                //alert("Telegram already authorized.");
+            } else {
+                window.location.reload();
+                //alert("Error: " + data.message);
+            }
+        });
+    }
+
+    
+</script>
+<script>
+    function submitTelegramForm() {
+        const otp = document.getElementById("otpInput").value;
+        const otpError = document.getElementById("otpError");
+
+        if (!otp) {
+            otpError.style.display = 'block';
+            return;
+        } else {
+            otpError.style.display = 'none';
+        }
+
+        const phone = document.getElementById("telegramPhone").value;
+        const api_id = document.getElementById("telegramApiId").value;
+        const api_hash = document.getElementById("telegramApiHash").value;
+        const session_string = document.getElementById("telegramSession").value;
+        const phone_code_hash = document.getElementById("telegramPhoneCodeHash").value;
+
+        const formData = new FormData();
+        formData.append("otp", otp);
+        formData.append("phone", phone);
+        formData.append("api_id", api_id);
+        formData.append("api_hash", api_hash);
+        formData.append("session_string", session_string);
+        formData.append("phone_code_hash", phone_code_hash);
+
+        fetch("/verify-telegram-otp/", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+            },
+            body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Response from backend:", data);
+            // const modalEl = document.getElementById("otpModal");
+            // const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            $('#otpModal').modal('hide');// Always close the modal on submit
+            if (data.status === "success") {
+                setTimeout(() => window.location.reload(), 300);
+                document.body.focus();
+            } else {
+                // Optionally, show a toast or alert here for error
+                // alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Error occurred:", error);
+            const modalEl = document.getElementById("otpModal");
+            const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            $('#otpModal').modal('hide'); // Always close the modal on error
+            // Optionally, show a toast or alert for network errors
+        });
+    }
+    function clearOtpModalFields() {
+        // Reset modal input
+        document.getElementById('otpInput').value = "";
+        document.getElementById('otpError').style.display = "none";
+        // Show Bootstrap modal
+        //var otpModal = new bootstrap.Modal(document.getElementById('otpModal'));
+        //otpModal.show();
+    }
+</script>
+<script>
+    document.getElementById('otpModal').addEventListener('hidden.bs.modal', function () {
+        clearOtpModalFields();
+    });
+</script>
+
+
+<script>
+        $(".toggle-password1").click(function () {
+    
+            $(this).toggleClass("fa-eye fa-eye-slash");
+            var input = $($(this).attr("toggle"));
+            if (input.attr("type") == "password") {
+                input.attr("type", "text");
+            } else {
+                input.attr("type", "password");
+            }
+        });
+    </script>
+    <script>
+        $(".toggle-password2").click(function () {
+    
+            $(this).toggleClass("fa-eye fa-eye-slash");
+            var input = $($(this).attr("toggle"));
+            if (input.attr("type") == "password") {
+                input.attr("type", "text");
+            } else {
+                input.attr("type", "password");
+            }
+        });
+    </script>
+<script>
+    
+    // Toggle App Password visibility
+    document.getElementById('toggleAppPassword').onclick = function() {
+        var input = document.getElementById('app_password');
+        var icon = document.getElementById('appPasswordIcon');
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = "password";
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    };
+    // Toggle Telegram API Key visibility
+    document.getElementById('toggleTelegramKey').onclick = function() {
+        var input = document.getElementById('telegram_api_key');
+        var icon = document.getElementById('telegramKeyIcon');
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = "password";
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    };
+    // Toggle Old Password visibility
+    document.getElementById('toggleOldPassword').onclick = function() {
+        var input = document.getElementById('inputPassword_up');
+        var icon = document.getElementById('oldPasswordIcon');
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = "password";
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    };
+    // Toggle New Password visibility
+    document.getElementById('toggleNewPassword').onclick = function() {
+        var input = document.getElementById('inputPassword_up1');
+        var icon = document.getElementById('newPasswordIcon');
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = "password";
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    };
+    // Helper to close all profile accordion sections
+    function closeAllConfigSections() {
+        var sections = ['email', 'telegram', 'password', 'twoFactor'];
+        sections.forEach(function(sec) {
+            var content = document.getElementById(sec + 'ConfigContent');
+            var icon = document.getElementById(sec + 'ConfigToggle');
+            if (content) content.classList.remove('show');
+            if (icon) icon.classList.remove('rotated');
+        });
+    }
+
+    // Toggle 2FA Config Section
+    function toggleTwoFactorConfig() {
+        var content = document.getElementById('twoFactorConfigContent');
+        var icon = document.getElementById('twoFactorConfigToggle');
+        var isOpen = content && content.classList.contains('show');
+        closeAllConfigSections();
+        if (!isOpen && content) {
+            content.classList.add('show');
+            if (icon) icon.classList.add('rotated');
+        }
+    }
+
+    // Toggle Email Config Section
+    function toggleEmailConfig() {
+        var content = document.getElementById('emailConfigContent');
+        var icon = document.getElementById('emailConfigToggle');
+        var isOpen = content && content.classList.contains('show');
+        closeAllConfigSections();
+        if (!isOpen && content) {
+            content.classList.add('show');
+            if (icon) icon.classList.add('rotated');
+        }
+    }
+
+    // Toggle Telegram Config Section
+    function toggleTelegramConfig() {
+        var content = document.getElementById('telegramConfigContent');
+        var icon = document.getElementById('telegramConfigToggle');
+        var isOpen = content && content.classList.contains('show');
+        closeAllConfigSections();
+        if (!isOpen && content) {
+            content.classList.add('show');
+            if (icon) icon.classList.add('rotated');
+        }
+    }
+
+    // Toggle Password Config Section
+    function togglePasswordConfig() {
+        var content = document.getElementById('passwordConfigContent');
+        var icon = document.getElementById('passwordConfigToggle');
+        var isOpen = content && content.classList.contains('show');
+        closeAllConfigSections();
+        if (!isOpen && content) {
+            content.classList.add('show');
+            if (icon) icon.classList.add('rotated');
+        }
+    }
+
+    // 2FA Backup Code Download and Validation
+    const profileBackupCodes = [
+        {% for code in two_factor_backup_codes %}
+            "{{ code }}"{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    let profileCodesDownloaded = false;
+
+    function downloadProfileBackupCodes() {
+        const textContent = 
+`==================================================
+IPO UTILITY - 2FA EMERGENCY BACKUP CODES
+==================================================
+Username     : {{ request.user.username }}
+Generated On : ${new Date().toLocaleString()}
+
+IMPORTANT SECURITY INSTRUCTIONS:
+1. Store this file in a secure, confidential place.
+2. Each backup code can only be used once.
+3. If you ever lose your authenticator device, use one of these codes to log in.
+4. If you run out of all backup codes, 2FA will automatically be disabled to prevent account lockout.
+
+YOUR BACKUP CODES:
+` + profileBackupCodes.map((code, index) => `   [${index + 1}]  ${code}`).join('\n') + `
+
+==================================================`;
+
+        const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `IPO_Utility_2FA_Backup_Codes_{{ request.user.username }}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        profileCodesDownloaded = true;
+
+        const downloadBtn = document.getElementById('btnDownloadProfileBackupCodes');
+        if (downloadBtn) {
+            downloadBtn.className = 'btn btn-outline-success px-4 py-2';
+            downloadBtn.innerHTML = '<i class="fas fa-check-circle me-1"></i> Backup Codes Downloaded';
+        }
+
+        const notice = document.getElementById('profileBackupNotice');
+        if (notice) {
+            notice.className = 'alert alert-success py-2 small mt-3 mb-0';
+            notice.innerHTML = '<i class="fas fa-check-circle me-1"></i> Backup codes downloaded! You can now proceed to Step 3.';
+        }
+
+        // Enable the Next button to Step 3
+        const btnToStep3 = document.getElementById('btnToStep3');
+        if (btnToStep3) {
+            btnToStep3.disabled = false;
+        }
+    }
+
+    let current2faStep = 1;
+
+    function goTo2faStep(step) {
+        if (step === 3 && !profileCodesDownloaded) {
+            alert('Please download your backup codes first before proceeding to verification.');
+            return;
+        }
+
+        current2faStep = step;
+
+        // Panes visibility
+        const pane1 = document.getElementById('step1Pane');
+        const pane2 = document.getElementById('step2Pane');
+        const pane3 = document.getElementById('step3Pane');
+        if (pane1) pane1.style.display = (step === 1) ? 'block' : 'none';
+        if (pane2) pane2.style.display = (step === 2) ? 'block' : 'none';
+        if (pane3) pane3.style.display = (step === 3) ? 'block' : 'none';
+
+        // Stepper UI
+        for (let i = 1; i <= 3; i++) {
+            const stepEl = document.getElementById('stepperStep' + i);
+            const circle = document.getElementById('stepCircle' + i);
+            if (!stepEl || !circle) continue;
+
+            if (i < step) {
+                stepEl.className = 'stepper-step completed';
+                circle.innerHTML = '<i class="fas fa-check"></i>';
+            } else if (i === step) {
+                stepEl.className = 'stepper-step active';
+                circle.innerHTML = i;
+            } else {
+                stepEl.className = 'stepper-step';
+                circle.innerHTML = i;
+            }
+        }
+
+        if (step === 3) {
+            const input = document.getElementById('profileTotpInput');
+            if (input) {
+                setTimeout(() => input.focus(), 150);
+            }
+        }
+    }
+
+    function copyManualSecret() {
+        const text = document.getElementById('manualSecretText');
+        if (!text) return;
+        navigator.clipboard.writeText(text.innerText.trim()).then(() => {
+            const icon = document.getElementById('copySecretIcon');
+            if (icon) {
+                icon.className = 'fas fa-check text-success';
+                setTimeout(() => { icon.className = 'far fa-copy'; }, 2000);
+            }
+        });
+    }
+
+    function validateProfileSetupForm() {
+        if (!profileCodesDownloaded) {
+            alert('Please download your backup codes first before enabling 2FA.');
+            return false;
+        }
+        return true;
+    }
+
+    // Reset to Step 1 whenever setup modal is shown
+    const setup2faModalEl = document.getElementById('setup2faModal');
+    if (setup2faModalEl) {
+        setup2faModalEl.addEventListener('show.bs.modal', function () {
+            goTo2faStep(1);
+        });
+    }
+
+    // Password Confirmation for 2FA Setup
+    const toggleConfirm2faPasswordBtn = document.getElementById('toggleConfirm2faPassword');
+    if (toggleConfirm2faPasswordBtn) {
+        toggleConfirm2faPasswordBtn.addEventListener('click', function() {
+            const input = document.getElementById('confirm2faPasswordInput');
+            const icon = document.getElementById('confirm2faEyeIcon');
+            if (input && icon) {
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.className = 'fa fa-eye-slash';
+                } else {
+                    input.type = 'password';
+                    icon.className = 'fa fa-eye';
+                }
+            }
+        });
+    }
+
+    function closeProfileModal(id) {
+        if (typeof $ !== 'undefined' && $.fn && typeof $.fn.modal === 'function') {
+            $('#' + id).modal('hide');
+        } else if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const el = document.getElementById(id);
+            if (el) {
+                const inst = bootstrap.Modal.getInstance ? (bootstrap.Modal.getInstance(el) || new bootstrap.Modal(el)) : new bootstrap.Modal(el);
+                inst.hide();
+            }
+        } else {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.remove('show');
+                el.style.display = 'none';
+                document.body.classList.remove('modal-open');
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) backdrop.remove();
+            }
+        }
+    }
+
+    function openProfileModal(id) {
+        if (typeof $ !== 'undefined' && $.fn && typeof $.fn.modal === 'function') {
+            $('#' + id).modal('show');
+        } else if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const el = document.getElementById(id);
+            if (el) {
+                const inst = (bootstrap.Modal.getOrCreateInstance) ? bootstrap.Modal.getOrCreateInstance(el) : new bootstrap.Modal(el);
+                inst.show();
+            }
+        } else {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.add('show');
+                el.style.display = 'block';
+                document.body.classList.add('modal-open');
+            }
+        }
+    }
+
+
+    function resetConfirmPasswordModal() {
+        const input = document.getElementById('confirm2faPasswordInput');
+        const icon = document.getElementById('confirm2faEyeIcon');
+        const error = document.getElementById('confirm2faPasswordError');
+        const btn = document.getElementById('btnConfirm2faPassword');
+        const spinner = document.getElementById('confirmPasswordBtnSpinner');
+
+        if (input) { input.value = ''; input.type = 'password'; }
+        if (icon) icon.className = 'fa fa-eye';
+        if (error) { error.style.display = 'none'; error.innerText = ''; }
+        if (btn) btn.disabled = false;
+        if (spinner) spinner.style.display = 'none';
+
+        setTimeout(() => {
+            if (input) input.focus();
+        }, 300);
+    }
+
+    const confirmPasswordModalEl = document.getElementById('confirmPassword2faModal');
+    if (confirmPasswordModalEl) {
+        confirmPasswordModalEl.addEventListener('show.bs.modal', resetConfirmPasswordModal);
+    }
+    if (typeof $ !== 'undefined') {
+        $('#confirmPassword2faModal').on('show.bs.modal', resetConfirmPasswordModal);
+    }
+
+    function submit2faPasswordVerification() {
+        const input = document.getElementById('confirm2faPasswordInput');
+        const error = document.getElementById('confirm2faPasswordError');
+        const btn = document.getElementById('btnConfirm2faPassword');
+        const spinner = document.getElementById('confirmPasswordBtnSpinner');
+
+        const password = input ? input.value.trim() : '';
+        if (!password) {
+            if (error) {
+                error.innerText = 'Please enter your password.';
+                error.style.display = 'block';
+            }
+            if (input) input.focus();
+            return;
+        }
+
+        if (error) error.style.display = 'none';
+        if (btn) btn.disabled = true;
+        if (spinner) spinner.style.display = 'inline-block';
+
+        const formData = new FormData();
+        formData.append('password', password);
+
+        fetch('{% url "verify_password_for_2fa" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(response => {
+            if (btn) btn.disabled = false;
+            if (spinner) spinner.style.display = 'none';
+
+            if (response.status === 'success') {
+                // When password modal completely finishes closing, open setup modal cleanly
+                let setupOpened = false;
+                const openSetup = () => {
+                    if (setupOpened) return;
+                    setupOpened = true;
+                    // Clean up any extra lingering backdrops
+                    if (typeof $ !== 'undefined') {
+                        $('.modal-backdrop').remove();
+                        $('body').removeClass('modal-open').css({ 'padding-right': '', 'overflow': '' });
+                    }
+                    goTo2faStep(1);
+                    openProfileModal('setup2faModal');
+                };
+
+                if (typeof $ !== 'undefined') {
+                    $('#confirmPassword2faModal').one('hidden.bs.modal', function() {
+                        setTimeout(openSetup, 50);
+                    });
+                }
+                closeProfileModal('confirmPassword2faModal');
+                // Fallback in case hidden.bs.modal doesn't fire
+                setTimeout(openSetup, 350);
+            } else {
+                if (error) {
+                    error.innerText = response.message || 'Incorrect password. Please try again.';
+                    error.style.display = 'block';
+                }
+                if (input) input.focus();
+            }
+        })
+        .catch(err => {
+            console.error("Password verification error:", err);
+            if (btn) btn.disabled = false;
+            if (spinner) spinner.style.display = 'none';
+            if (error) {
+                error.innerText = 'Failed to verify password. Please try again.';
+                error.style.display = 'block';
+            }
+            if (input) input.focus();
+        });
+    }
+
+    // Global backdrop cleanup to prevent lingering dark overlay
+    if (typeof $ !== 'undefined') {
+        $(document).on('hidden.bs.modal', function () {
+            setTimeout(function() {
+                if ($('.modal.show:visible, .modal.in:visible').length === 0) {
+                    $('.modal-backdrop').remove();
+                    $('body').removeClass('modal-open').css({
+                        'padding-right': '',
+                        'overflow': ''
+                    });
+                }
+            }, 100);
+        });
+    }
+
+    const btnConfirm2faPassword = document.getElementById('btnConfirm2faPassword');
+    if (btnConfirm2faPassword) {
+        btnConfirm2faPassword.addEventListener('click', submit2faPasswordVerification);
+    }
+
+    const confirm2faPasswordInput = document.getElementById('confirm2faPasswordInput');
+    if (confirm2faPasswordInput) {
+        confirm2faPasswordInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                submit2faPasswordVerification();
+            }
+        });
+    }
+</script>
+{% endblock %}
