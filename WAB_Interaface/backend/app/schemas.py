@@ -3,7 +3,7 @@ from typing import Optional, List, Any
 from pydantic import BaseModel, Field, field_serializer
 
 
-# schema
+# confirming the commit
 
 def serialize_datetime(dt: Optional[datetime]) -> Optional[str]:
     if dt is None:
