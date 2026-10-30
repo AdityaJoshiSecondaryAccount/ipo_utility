@@ -32,7 +32,7 @@ def get_groups_by_phone(raw_phone):
         Q(MobileNo=clean_phone) |
         Q(MobileNo=last_10) |
         Q(MobileNo__endswith=last_10)
-    )
+    ).order_by('-id')
     return groups
 
 
@@ -307,8 +307,77 @@ def build_order_summary_context(group, orders=None, ipo=None):
         "PUT":  {"count": grand_put_count, "avg": grand_total["put_avg"]},
     }
 
+    # Format date & time in IST (e.g. "30 Oct 2026, 10:46:46 am")
+    try:
+        import pytz
+        from datetime import datetime
+        ist = pytz.timezone('Asia/Kolkata')
+        now_ist = datetime.now(ist)
+    except Exception:
+        from datetime import datetime
+        now_ist = datetime.now()
+
+    report_datetime = now_ist.strftime("%d %b %Y, %I:%M:%S %p")
+    if report_datetime.endswith(" AM") or report_datetime.endswith(" PM"):
+        report_datetime = report_datetime[:-3] + " " + report_datetime[-2:].lower()
+
+    ipo_title = getattr(IPO, 'IPOName', str(IPO or '')).strip()
+    group_title = getattr(group, 'GroupName', str(group or 'All')).strip()
+    if not group_title or group_title.lower() in ('none', 'null'):
+        group_title = 'All'
+
+    # Dynamic visibility calculation (Hide zero investor columns, matching Order.html status modal)
+    has_kostak_retail = bool(dict_count.get("KostakRETAILBUYCount", 0) or dict_count.get("KostakRETAILSELLCount", 0) or net_count.get("KostakRETAILNetCount", 0))
+    has_kostak_shni = bool(dict_count.get("KostakSHNIBUYCount", 0) or dict_count.get("KostakSHNISELLCount", 0) or net_count.get("KostakSHNINetCount", 0))
+    has_kostak_bhni = bool(dict_count.get("KostakBHNIBUYCount", 0) or dict_count.get("KostakBHNISELLCount", 0) or net_count.get("KostakBHNINetCount", 0))
+
+    has_subjectto_retail = bool(dict_count.get("SubjectToRETAILBUYCount", 0) or dict_count.get("SubjectToRETAILSELLCount", 0) or net_count.get("SubjectToRETAILNetCount", 0))
+    has_subjectto_shni = bool(dict_count.get("SubjectToSHNIBUYCount", 0) or dict_count.get("SubjectToSHNISELLCount", 0) or net_count.get("SubjectToSHNINetCount", 0))
+    has_subjectto_bhni = bool(dict_count.get("SubjectToBHNIBUYCount", 0) or dict_count.get("SubjectToBHNISELLCount", 0) or net_count.get("SubjectToBHNINetCount", 0))
+
+    try:
+        prem_buy_val = float(PremiumBuyCount or 0)
+        prem_sell_val = float(PremiumSellCount or 0)
+        prem_net_val = float(PremiumNetCount or 0)
+    except (ValueError, TypeError):
+        prem_buy_val = prem_sell_val = prem_net_val = 0
+    has_premium = bool(prem_buy_val or prem_sell_val or prem_net_val)
+
+    has_options = bool(any((sp.get('call_total_count') or 0) != 0 or (sp.get('put_total_count') or 0) != 0 for sp in strike_prices))
+
+    show_kostak = has_kostak_retail or has_kostak_shni or has_kostak_bhni
+    show_subjectto = has_subjectto_retail or has_subjectto_shni or has_subjectto_bhni
+    show_premium = has_premium
+    show_options = has_options
+
+    # Safety: If all categories are empty/zero, keep Kostak Retail visible so an empty table shows instead of blank space
+    if not (show_kostak or show_subjectto or show_premium or show_options):
+        show_kostak = True
+        has_kostak_retail = True
+
+    kostak_investors = sum([1 for x in [has_kostak_retail, has_kostak_shni, has_kostak_bhni] if x])
+    kostak_colspan = 1 + (kostak_investors * 3)
+
+    subjectto_investors = sum([1 for x in [has_subjectto_retail, has_subjectto_shni, has_subjectto_bhni] if x])
+    subjectto_colspan = 1 + (subjectto_investors * 3)
+
     context = {
         'IPOName': IPO,
+        'ipo_title': ipo_title,
+        'group_title': group_title,
+        'report_datetime': report_datetime,
+        'has_kostak_retail': has_kostak_retail,
+        'has_kostak_shni': has_kostak_shni,
+        'has_kostak_bhni': has_kostak_bhni,
+        'show_kostak': show_kostak,
+        'kostak_colspan': kostak_colspan,
+        'has_subjectto_retail': has_subjectto_retail,
+        'has_subjectto_shni': has_subjectto_shni,
+        'has_subjectto_bhni': has_subjectto_bhni,
+        'show_subjectto': show_subjectto,
+        'subjectto_colspan': subjectto_colspan,
+        'show_premium': show_premium,
+        'show_options': show_options,
         'strike_prices': strike_prices,
         'grand_total': grand_total,
         'category_totals': category_totals,
@@ -405,12 +474,12 @@ def generate_order_summary_image(context):
         if raw_img.mode in ("RGBA", "P"):
             raw_img = raw_img.convert("RGB")
         out_buf = io.BytesIO()
-        raw_img.save(out_buf, format="WEBP", quality=85, optimize=True)
+        raw_img.save(out_buf, format="JPEG", quality=75, optimize=True)
         out_buf.seek(0)
-        out_buf.name = "status_report.webp"
+        out_buf.name = "status_report.jpg"
         return out_buf
     except Exception as conv_err:
-        logger.warning(f"Could not convert status image to WebP: {conv_err}")
+        logger.warning(f"Could not convert status image to JPEG: {conv_err}")
         buf = io.BytesIO(img_bytes)
         buf.name = 'status_report.png'
         return buf
@@ -426,7 +495,15 @@ def _generate_fallback_image(context):
 
     # Header
     draw.rectangle([(0, 0), (img_width, 50)], fill=(40, 60, 80))
-    draw.text((img_width // 2 - 80, 15), "ORDERS SUMMARY", fill=(255, 255, 255))
+    ipo_title = context.get('ipo_title') or (getattr(context.get('IPOName'), 'IPOName', '') or str(context.get('IPOName') or '')).strip()
+    group_title = context.get('group_title', 'All')
+    report_datetime = context.get('report_datetime', '')
+
+    header_text = f"{ipo_title} IPO Status - {group_title}".strip(" -")
+    draw.text((25, 16), header_text, fill=(255, 255, 255))
+    # Timestamp commented out:
+    # if report_datetime:
+    #     draw.text((img_width - 240, 16), report_datetime, fill=(210, 225, 245))
 
     # Categories Summary
     y = 70
@@ -443,6 +520,10 @@ def _generate_fallback_image(context):
         ("Subject To BHNI", dict_count.get("SubjectToBHNIBUYCount", 0), dict_count.get("SubjectToBHNISELLCount", 0), net_count.get("SubjectToBHNINetCount", 0)),
         ("Premium", context.get("PremiumBuyCount", 0), context.get("PremiumSellCount", 0), context.get("PremiumNetCount", 0)),
     ]
+    # Filter out zero rows (matching Order.html status modal)
+    categories = [c for c in categories if c[1] != 0 or c[2] != 0 or c[3] != 0]
+    if not categories:
+        categories = [("Kostak Retail", 0, 0, 0)]
 
     # Table headers
     draw.rectangle([(30, y), (820, y + 25)], fill=(230, 235, 245))
@@ -479,7 +560,7 @@ def _generate_fallback_image(context):
             y += 24
 
     buf = io.BytesIO()
-    image.save(buf, format="WEBP", quality=85, optimize=True)
+    image.save(buf, format="JPEG", quality=75, optimize=True)
     buf.seek(0)
-    buf.name = "orders_summary.webp"
+    buf.name = "orders_summary.jpg"
     return buf

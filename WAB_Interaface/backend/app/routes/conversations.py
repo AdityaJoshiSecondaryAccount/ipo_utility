@@ -510,7 +510,8 @@ async def _log_outbound(log_in: OutboundLogCreate, db: AsyncSession):
             clean_digits = clean_phone[-10:]
             group_stmt = text(
                 "SELECT GroupName FROM home_groupdetail "
-                "WHERE REPLACE(REPLACE(MobileNo, ' ', ''), '-', '') LIKE :phone_pat LIMIT 1"
+                "WHERE REPLACE(REPLACE(MobileNo, ' ', ''), '-', '') LIKE :phone_pat AND Active = 1 "
+                "ORDER BY id DESC LIMIT 1"
             )
             g_res = await db.execute(group_stmt, {"phone_pat": f"%{clean_digits}%"})
             g_name = g_res.scalar_one_or_none()

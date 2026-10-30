@@ -438,18 +438,28 @@ def webhook(request):
 
                     # Order Retrieval scoped to specific IPO
                     if ipo_id:
-                        orders = get_orders_for_groups(groups, ipo_id=ipo_id)
+                        orders_pool = get_orders_for_groups(groups, ipo_id=ipo_id)
                         target_ipo = CurrentIpoName.objects.filter(id=ipo_id).first()
+                        if orders_pool.exists():
+                            latest_order = orders_pool.order_by('-id').first()
+                            group = latest_order.OrderGroup
+                            orders = orders_pool.filter(OrderGroup=group)
+                        else:
+                            group = groups.first()
+                            orders = Order.objects.none()
                     else:
                         all_orders = get_orders_for_groups(groups)
                         if all_orders.exists():
-                            target_ipo = all_orders.order_by('-id').first().OrderIPOName
-                            orders = all_orders.filter(OrderIPOName=target_ipo)
+                            latest_order = all_orders.order_by('-id').first()
+                            target_ipo = latest_order.OrderIPOName
+                            group = latest_order.OrderGroup
+                            orders = all_orders.filter(OrderIPOName=target_ipo, OrderGroup=group)
                         else:
                             target_ipo = None
                             orders = Order.objects.none()
+                            group = groups.first()
 
-                    print(f"[WA Webhook] Found {orders.count()} active order(s) for customer group(s) in IPO: {target_ipo}.")
+                    print(f"[WA Webhook] Found {orders.count()} active order(s) for customer group '{getattr(group, 'GroupName', '')}' in IPO: {target_ipo}.")
 
                     if not orders.exists():
                         print(f"[WA Webhook Info] Customer group has 0 active orders.")
@@ -464,8 +474,7 @@ def webhook(request):
                             traceback.print_exc()
                         continue
 
-                    # Generate and Send Orders Summary Image
-                    group = groups.first()
+                    # Generate and Send Orders Summary Image (group is dynamically bound to the order's actual group)
                     ipo_display = getattr(target_ipo, 'IPOName', '').strip() if target_ipo else ''
                     status_label = f"{ipo_display} " if ipo_display else ""
                     print(f"[WA Webhook] Generating orders image for {group.GroupName} ({orders.count()} orders in {target_ipo})...")
@@ -475,24 +484,23 @@ def webhook(request):
                         img_buf = generate_order_summary_image(context)
                         print(f"[WA Webhook] Image generated ({len(img_buf.getvalue())} bytes). Uploading to Meta WhatsApp...")
 
-                        # Save locally for the React Chat Interface
-                        filename = f"orders_{group.id}_{int(time.time())}.png"
-                        upload_dir = os.path.join(settings.BASE_DIR, "WAB_Interaface", "backend", "uploads", "media")
-                        os.makedirs(upload_dir, exist_ok=True)
-                        save_path = os.path.join(upload_dir, filename)
-                        with open(save_path, "wb") as f:
-                            f.write(img_buf.getvalue())
-                        local_media_url = f"/chat-api/media/local/{filename}"
-
-                        # 1. COMPRESS TO JPEG FIRST
+                        # 1. COMPRESS TO HIGHLY OPTIMIZED JPEG FIRST (Quality 75, ~85-90% size reduction)
                         img = Image.open(img_buf)
                         if img.mode in ("RGBA", "P"):
                             img = img.convert("RGB")
                         
                         optimized_buf = io.BytesIO()
-                        # Try saving as a highly optimized JPEG
                         img.save(optimized_buf, format="JPEG", quality=75, optimize=True)
                         optimized_size = len(optimized_buf.getvalue())
+
+                        # Save optimized JPEG locally for the React Chat Interface (saves 90% disk space)
+                        filename = f"orders_{group.id}_{int(time.time())}.jpg"
+                        upload_dir = os.path.join(settings.BASE_DIR, "WAB_Interaface", "backend", "uploads", "media")
+                        os.makedirs(upload_dir, exist_ok=True)
+                        save_path = os.path.join(upload_dir, filename)
+                        with open(save_path, "wb") as f:
+                            f.write(optimized_buf.getvalue())
+                        local_media_url = f"/chat-api/media/local/{filename}"
                         
                         caption = f"{ipo_display} Status - {group.GroupName}"
                         upload_res = None

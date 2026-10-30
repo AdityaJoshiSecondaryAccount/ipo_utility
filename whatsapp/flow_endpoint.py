@@ -258,7 +258,7 @@ def process_order_placement(data: dict, customer_phone: str = None) -> dict:
                             img_buf = generate_order_summary_image(img_context)
 
                             if img_buf:
-                                upload_res = upload_media(img_buf, mime_type="image/png", filename="status_report.png")
+                                upload_res = upload_media(img_buf, mime_type="image/jpeg", filename="status_report.jpg")
                                 if upload_res.ok:
                                     media_id = upload_res.json().get('id')
                                     send_image_message(phone, media_id=media_id, caption=f"{ipo_obj.IPOName} Status - {group_obj.GroupName}")
